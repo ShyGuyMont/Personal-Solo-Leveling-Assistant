@@ -1,7 +1,7 @@
 import { db, TABLE_NAMES } from '@/db/database';
 import type { BackupSnapshot, Profile, SaveFile, Settings, AccountProgression } from '@/types/game';
 
-const SAVE_VERSION = 3;
+const SAVE_VERSION = 6;
 const MAX_IMPORT_BYTES = 8 * 1024 * 1024;
 const MAX_SNAPSHOTS = 5;
 const FORBIDDEN_KEYS = new Set(['__proto__', 'prototype', 'constructor']);
@@ -71,17 +71,39 @@ function migrateData(
     data.reports ??= [];
     data.progressionEvents ??= [];
   }
-  data.settings = data.settings.map((row) =>
-    isObject(row)
-      ? {
-          privacyScreenEnabled: false,
-          sensitiveMissionAlias: 'Integrity Protocol',
-          firstDayGuideCompleted: false,
-          soundVolume: 0.55,
-          ...row,
-        }
-      : row,
-  );
+  if (version <= 3) {
+    data.dailyEvents ??= [];
+    data.inventory ??= [];
+    data.companionReactions ??= [];
+  }
+  if (version <= 4) {
+    data.partyCheckIns ??= [];
+  }
+  if (version <= 5) {
+    data.supportConversations ??= [];
+    data.favoriteMessages ??= [];
+    data.partyBanters ??= [];
+  }
+  data.settings = data.settings.map((row) => {
+    if (isObject(row)) {
+      const companionIds = Array.isArray(row.enabledCompanionIds)
+        ? row.enabledCompanionIds.filter((id): id is string => typeof id === 'string')
+        : ['rook', 'selah', 'cipher', 'haven'];
+      return {
+        privacyScreenEnabled: false,
+        sensitiveMissionAlias: 'Integrity Protocol',
+        firstDayGuideCompleted: false,
+        soundVolume: 0.55,
+        interfaceStyle: 'system',
+        colorTheme: 'abyss',
+        dailyEventsEnabled: true,
+        companionMode: 'balanced',
+        ...row,
+        enabledCompanionIds: ['snow', ...companionIds.filter((id) => id !== 'snow')],
+      };
+    }
+    return row;
+  });
   data.missions = data.missions.map((row) =>
     isObject(row) ? { optional: false, archived: false, ...row } : row,
   );

@@ -33,6 +33,53 @@ export type ChallengeCategory = MissionCategory | 'balanced' | 'recovery' | 'ran
 export type DifficultyTier = 'I' | 'II' | 'III' | 'IV' | 'V';
 export type Rarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'ascendant';
 export type RecoveryReason = 'illness' | 'injury' | 'travel' | 'emergency' | 'overload' | 'other';
+export type InterfaceStyle = 'clean' | 'system';
+export type ColorTheme = 'abyss' | 'daybreak';
+export type CompanionId = 'snow' | 'rook' | 'selah' | 'cipher' | 'haven';
+export type CompanionMode = 'off' | 'quiet' | 'balanced' | 'talkative';
+export type MoodId =
+  | 'energized'
+  | 'proud'
+  | 'good'
+  | 'okay'
+  | 'tired'
+  | 'stressed'
+  | 'frustrated'
+  | 'discouraged'
+  | 'lonely'
+  | 'unsure';
+export type SupportTopicId =
+  | 'motivation'
+  | 'make-a-plan'
+  | 'faith-perspective'
+  | 'calm-down'
+  | 'recover'
+  | 'celebrate';
+export type SupportAudience = 'party' | CompanionId;
+export type FavoriteMessageSource =
+  | 'check-in'
+  | 'support'
+  | 'banter'
+  | 'reaction'
+  | 'milestone';
+export type DailyEventKind = 'none' | 'emergency-quest' | 'mission-pass';
+export type DailyEventStatus =
+  | 'none'
+  | 'unrevealed'
+  | 'active'
+  | 'completed'
+  | 'claimed'
+  | 'declined'
+  | 'expired';
+export type CompanionTrigger =
+  | 'daily-briefing'
+  | 'mission'
+  | 'stat-level'
+  | 'rank-up'
+  | 'rare-event'
+  | 'mission-pass'
+  | 'comeback'
+  | 'achievement';
 
 export interface Profile {
   id: 'primary';
@@ -62,6 +109,11 @@ export interface Settings {
     disabledMissionIds: string[];
   };
   themeIntensity: 'subtle' | 'standard' | 'intense';
+  interfaceStyle: InterfaceStyle;
+  colorTheme: ColorTheme;
+  dailyEventsEnabled: boolean;
+  companionMode: CompanionMode;
+  enabledCompanionIds: CompanionId[];
   notificationsEnabled: boolean;
   advancedBalanceUnlocked: boolean;
   privacyScreenEnabled: boolean;
@@ -126,6 +178,7 @@ export interface DailyMissionRecord {
   rewardTransactionId?: string;
   reversedTransactionId?: string;
   protectedException: boolean;
+  protectionSource?: 'monthly-exception' | 'mission-pass';
 }
 
 export interface DailyReview {
@@ -186,7 +239,14 @@ export interface StatProgress {
 
 export interface XpTransaction {
   id: string;
-  kind: 'mission' | 'perfect-day' | 'challenge' | 'recovery' | 'reversal' | 'penalty';
+  kind:
+    | 'mission'
+    | 'perfect-day'
+    | 'challenge'
+    | 'daily-event'
+    | 'recovery'
+    | 'reversal'
+    | 'penalty';
   amount: number;
   date: LocalDateKey;
   timestamp: string;
@@ -197,7 +257,14 @@ export interface XpTransaction {
 export interface StatTransaction {
   id: string;
   stat: StatName;
-  kind: 'mission' | 'perfect-day' | 'challenge' | 'recovery' | 'reversal' | 'decay';
+  kind:
+    | 'mission'
+    | 'perfect-day'
+    | 'challenge'
+    | 'daily-event'
+    | 'recovery'
+    | 'reversal'
+    | 'decay';
   amount: number;
   momentumDelta: number;
   date: LocalDateKey;
@@ -383,6 +450,89 @@ export interface ProgressionEvent {
   acknowledged: boolean;
 }
 
+export interface DailyEventRecord {
+  id: LocalDateKey;
+  date: LocalDateKey;
+  kind: DailyEventKind;
+  status: DailyEventStatus;
+  templateId?: string;
+  title: string;
+  description: string;
+  category?: ChallengeCategory;
+  accountXp: number;
+  statRewards: StatReward[];
+  rolledAt: string;
+  revealedAt?: string;
+  completedAt?: string;
+  claimedAt?: string;
+  declinedAt?: string;
+  transactionIds: string[];
+}
+
+export interface InventoryItem {
+  id: 'mission-pass';
+  name: string;
+  description: string;
+  quantity: number;
+  updatedAt: string;
+}
+
+export interface CompanionReaction {
+  id: string;
+  companionId: CompanionId;
+  trigger: CompanionTrigger;
+  sourceId: string;
+  message: string;
+  createdAt: string;
+  acknowledged: boolean;
+}
+
+export interface PartyChatMessage {
+  id: string;
+  messageId: string;
+  companionId: CompanionId;
+  role: 'opener' | 'response' | 'closing';
+  message: string;
+  order: number;
+}
+
+export interface PartyCheckIn {
+  id: string;
+  date: LocalDateKey;
+  mood: MoodId;
+  createdAt: string;
+  messages: PartyChatMessage[];
+}
+
+export interface SupportConversation {
+  id: string;
+  date: LocalDateKey;
+  topic: SupportTopicId;
+  audience: SupportAudience;
+  createdAt: string;
+  messages: PartyChatMessage[];
+}
+
+export interface FavoriteMessage {
+  id: string;
+  sourceType: FavoriteMessageSource;
+  sourceId: string;
+  messageId: string;
+  companionId: CompanionId;
+  message: string;
+  createdAt: string;
+}
+
+export interface PartyBanter {
+  id: string;
+  date: LocalDateKey;
+  sourceId: string;
+  category: MissionCategory;
+  createdAt: string;
+  messages: PartyChatMessage[];
+  acknowledged: boolean;
+}
+
 export interface AppMetadata {
   id: string;
   value: string | number | boolean | Record<string, unknown>;
@@ -400,6 +550,10 @@ export interface GameSnapshot {
   challenges: ChallengeProgress[];
   titles: UnlockedTitle[];
   streaks: StreakRecord[];
+  dailyEvent?: DailyEventRecord;
+  inventory: InventoryItem[];
+  companionReaction?: CompanionReaction;
+  partyBanter?: PartyBanter;
   systemDate: LocalDateKey;
 }
 

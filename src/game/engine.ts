@@ -130,7 +130,7 @@ export async function initializeSystemCycle(now = new Date()) {
   return systemDate;
 }
 
-async function putLevelHistory(
+export async function putLevelHistory(
   progression: AccountProgression,
   previousLevel: number,
   date: LocalDateKey,
@@ -215,7 +215,7 @@ async function evaluateAutomaticTitles() {
   }
 }
 
-async function unlockAchievement(id: string, sourceId: string, timestamp: string) {
+export async function unlockAchievement(id: string, sourceId: string, timestamp: string) {
   const achievement = await db.achievements.get(id);
   if (!achievement || achievement.unlockedAt) return;
   await db.achievements.put({ ...achievement, unlockedAt: timestamp });

@@ -7,6 +7,7 @@ import {
   RotateCcw,
   ShieldCheck,
   Sparkles,
+  Ticket,
   X,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -33,7 +34,7 @@ export function MissionCard({
   date: LocalDateKey;
   compact?: boolean;
 }) {
-  const { complete, undo, excuse, saveDetails, updateStatus, settings, streaks } = useGameStore();
+  const { complete, undo, excuse, saveDetails, updateStatus, applyMissionPass, inventory, settings, streaks } = useGameStore();
   const [expanded, setExpanded] = useState(false);
   const [details, setDetails] = useState<MissionDetails>(record.details);
   const [working, setWorking] = useState(false);
@@ -43,6 +44,7 @@ export function MissionCard({
   const done = record.status === 'completed';
   const displayName = getMissionDisplayName(mission, settings?.sensitiveMissionAlias);
   const streak = streaks.find((item) => item.id === `mission:${mission.id}`)?.current ?? 0;
+  const missionPasses = inventory.find((item) => item.id === 'mission-pass')?.quantity ?? 0;
   const unavailableToday =
     mission.method === 'day-boundary' && date === useGameStore.getState().systemDate;
   const requiresConfirmation = ['numeric', 'duration', 'checklist', 'choice'].includes(
@@ -397,6 +399,23 @@ export function MissionCard({
           )}
           {!done && record.status === 'pending' && (
             <div className="mission-card__exception-row">
+              {missionPasses > 0 && (
+                <button
+                  className="text-button text-button--pass"
+                  onClick={async () => {
+                    if (
+                      window.confirm(
+                        `Use a Mission Pass on ${displayName}? It grants no XP but protects the day.`,
+                      )
+                    ) {
+                      await applyMissionPass(mission.id, date);
+                    }
+                  }}
+                >
+                  <Ticket size={15} />
+                  Use pass · {missionPasses}
+                </button>
+              )}
               <button
                 className="text-button"
                 onClick={async () => {

@@ -4,13 +4,20 @@ import {
   ChevronRight,
   Filter,
   Flame,
+  Heart,
   LineChart,
+  MessageCircle,
+  MessagesSquare,
+  Radio,
   Sparkles,
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { Modal } from '@/components/Modal';
 import { ProgressBar } from '@/components/ProgressBar';
 import { CATEGORY_LABELS } from '@/config/missions';
+import { getCompanion, getCompanionImage } from '@/config/companions';
+import { getMoodDefinition } from '@/config/partyChat';
+import { getSupportTopic } from '@/config/support';
 import { getArchiveData } from '@/db/repositories';
 import {
   dateRange,
@@ -23,18 +30,25 @@ import {
 import { formatPercent, STAT_LABELS } from '@/utils/format';
 import { getMissionDisplayName } from '@/utils/privacy';
 import { useGameStore } from '@/store/useGameStore';
+import { Link } from '@/router';
 import type {
   ChallengeProgress,
+  CompanionReaction,
+  DailyEventRecord,
   DailyMissionRecord,
   DailyReview,
   LevelHistory,
   LocalDateKey,
   RankHistory,
   PeriodicReport,
+  PartyCheckIn,
+  PartyBanter,
+  FavoriteMessage,
+  SupportConversation,
   StatTransaction,
 } from '@/types/game';
 
-type ArchiveTab = 'calendar' | 'reports' | 'missions' | 'stats' | 'progression';
+type ArchiveTab = 'calendar' | 'reports' | 'missions' | 'stats' | 'progression' | 'system';
 
 function shiftMonth(key: LocalDateKey, amount: number): LocalDateKey {
   const date = parseDateKey(key);
@@ -53,6 +67,12 @@ export function ArchivePage() {
   const [levelHistory, setLevelHistory] = useState<LevelHistory[]>([]);
   const [rankHistory, setRankHistory] = useState<RankHistory[]>([]);
   const [savedReports, setSavedReports] = useState<PeriodicReport[]>([]);
+  const [dailyEvents, setDailyEvents] = useState<DailyEventRecord[]>([]);
+  const [companionReactions, setCompanionReactions] = useState<CompanionReaction[]>([]);
+  const [partyCheckIns, setPartyCheckIns] = useState<PartyCheckIn[]>([]);
+  const [supportConversations, setSupportConversations] = useState<SupportConversation[]>([]);
+  const [favoriteMessages, setFavoriteMessages] = useState<FavoriteMessage[]>([]);
+  const [partyBanters, setPartyBanters] = useState<PartyBanter[]>([]);
   const [selectedReview, setSelectedReview] = useState<DailyReview>();
   const [missionFilter, setMissionFilter] = useState('all');
 
@@ -65,6 +85,12 @@ export function ArchivePage() {
       setLevelHistory(data.levelHistory);
       setRankHistory(data.rankHistory);
       setSavedReports(data.reports);
+      setDailyEvents(data.dailyEvents);
+      setCompanionReactions(data.companionReactions);
+      setPartyCheckIns(data.partyCheckIns);
+      setSupportConversations(data.supportConversations);
+      setFavoriteMessages(data.favoriteMessages);
+      setPartyBanters(data.partyBanters);
     });
   }, []);
 
@@ -155,6 +181,7 @@ export function ArchivePage() {
             ['missions', 'Missions'],
             ['stats', 'Stats'],
             ['progression', 'Progression'],
+            ['system', 'System Log'],
           ] as [ArchiveTab, string][]
         ).map(([id, label]) => (
           <button key={id} className={tab === id ? 'is-active' : ''} onClick={() => setTab(id)}>
@@ -475,6 +502,188 @@ export function ArchivePage() {
                 <div className="empty-state">
                   <span>Rank advancement will appear here.</span>
                 </div>
+              )}
+            </div>
+          </section>
+        </div>
+      )}
+
+      {tab === 'system' && (
+        <div className="report-layout">
+          <section className="panel archive-list-panel">
+            <header className="section-header">
+              <div>
+                <p className="eyebrow">RARE SIGNAL HISTORY</p>
+                <h2>Daily events encountered</h2>
+              </div>
+              <Radio size={20} />
+            </header>
+            <div className="archive-list">
+              {dailyEvents
+                .filter((event) => event.kind !== 'none')
+                .map((event) => (
+                  <div key={event.id} className="archive-row">
+                    <span className={`status-chip status-chip--${event.status}`}>{event.kind.replaceAll('-', ' ')}</span>
+                    <div>
+                      <strong>{event.title}</strong>
+                      <small>{event.date} · {event.status}</small>
+                    </div>
+                    {event.accountXp > 0 && <span className="positive">+{event.accountXp} XP</span>}
+                  </div>
+                ))}
+              {!dailyEvents.some((event) => event.kind !== 'none') && (
+                <div className="empty-state">Rare daily events will be recorded here.</div>
+              )}
+            </div>
+          </section>
+          <section className="panel archive-list-panel party-checkin-archive">
+            <header className="section-header">
+              <div>
+                <p className="eyebrow">PARTY CHECK-INS</p>
+                <h2>How the party met you</h2>
+              </div>
+              <Link to="/party-chat" className="text-link">
+                New check-in <MessageCircle size={16} />
+              </Link>
+            </header>
+            <div className="party-checkin-archive__list">
+              {partyCheckIns.slice(0, 60).map((checkIn) => {
+                const mood = getMoodDefinition(checkIn.mood);
+                return (
+                  <details key={checkIn.id} className="party-checkin-archive__item">
+                    <summary>
+                      <span className="party-checkin-archive__mood" style={{ background: mood.accent }} />
+                      <div>
+                        <strong>{mood.label}</strong>
+                        <small>{formatLongDate(checkIn.date)}</small>
+                      </div>
+                      <ChevronRight size={17} />
+                    </summary>
+                    <div className="party-checkin-archive__messages">
+                      {checkIn.messages
+                        .slice()
+                        .sort((a, b) => a.order - b.order)
+                        .map((message) => {
+                          const companion = getCompanion(message.companionId);
+                          return (
+                            <div key={message.id}>
+                              <img src={getCompanionImage(companion.image)} alt="" />
+                              <p><strong>{companion.name}</strong> “{message.message}”</p>
+                            </div>
+                          );
+                        })}
+                    </div>
+                  </details>
+                );
+              })}
+              {!partyCheckIns.length && (
+                <div className="empty-state">
+                  <span>Your first emotional check-in will be saved here.</span>
+                  <Link to="/party-chat" className="button button--ghost button--small">Open Party Channel</Link>
+                </div>
+              )}
+            </div>
+          </section>
+          <section className="panel archive-list-panel party-checkin-archive">
+            <header className="section-header">
+              <div>
+                <p className="eyebrow">DIRECT SUPPORT CHANNELS</p>
+                <h2>Support requested on purpose</h2>
+              </div>
+              <Link to="/party-chat" className="text-link">
+                Ask the party <MessagesSquare size={16} />
+              </Link>
+            </header>
+            <div className="party-checkin-archive__list">
+              {supportConversations.slice(0, 60).map((conversation) => {
+                const topic = getSupportTopic(conversation.topic);
+                return (
+                  <details key={conversation.id} className="party-checkin-archive__item">
+                    <summary>
+                      <span className="party-checkin-archive__mood" style={{ background: topic.accent }} />
+                      <div>
+                        <strong>{topic.label}</strong>
+                        <small>{formatLongDate(conversation.date)} · {conversation.audience === 'party' ? 'Whole Party' : getCompanion(conversation.audience).name}</small>
+                      </div>
+                      <ChevronRight size={17} />
+                    </summary>
+                    <div className="party-checkin-archive__messages">
+                      {conversation.messages
+                        .slice()
+                        .sort((a, b) => a.order - b.order)
+                        .map((message) => {
+                          const companion = getCompanion(message.companionId);
+                          return (
+                            <div key={message.id}>
+                              <img src={getCompanionImage(companion.image)} alt="" />
+                              <p><strong>{companion.name}</strong> “{message.message}”</p>
+                            </div>
+                          );
+                        })}
+                    </div>
+                  </details>
+                );
+              })}
+              {!supportConversations.length && (
+                <div className="empty-state">Direct Support conversations will be saved here.</div>
+              )}
+            </div>
+          </section>
+          <section className="panel archive-list-panel">
+            <header className="section-header">
+              <div><p className="eyebrow">WORDS TO CARRY</p><h2>Messages you chose to keep</h2></div>
+              <Heart size={20} />
+            </header>
+            <div className="archive-list">
+              {favoriteMessages.slice(0, 60).map((favorite) => {
+                const companion = getCompanion(favorite.companionId);
+                return (
+                  <div key={favorite.id} className="archive-row archive-row--companion">
+                    <img src={getCompanionImage(companion.image)} alt="" />
+                    <div><strong>{companion.name}</strong><small>“{favorite.message}”</small></div>
+                    <span className="status-chip">{favorite.sourceType.replaceAll('-', ' ')}</span>
+                  </div>
+                );
+              })}
+              {!favoriteMessages.length && <div className="empty-state">Favorite companion messages will wait here.</div>}
+            </div>
+          </section>
+          <section className="panel archive-list-panel">
+            <header className="section-header">
+              <div>
+                <p className="eyebrow">PARTY TRANSMISSIONS</p>
+                <h2>Words carried with you</h2>
+              </div>
+              <MessageCircle size={20} />
+            </header>
+            <div className="archive-list">
+              {partyBanters.slice(0, 60).flatMap((banter) =>
+                banter.messages.map((message) => {
+                  const companion = getCompanion(message.companionId);
+                  return (
+                    <div key={message.id} className="archive-row archive-row--companion">
+                      <img src={getCompanionImage(companion.image)} alt="" />
+                      <div><strong>{companion.name} · Party Banter</strong><small>“{message.message}”</small></div>
+                      <span className="status-chip">banter</span>
+                    </div>
+                  );
+                }),
+              )}
+              {companionReactions.slice(0, 100).map((reaction) => {
+                const companion = getCompanion(reaction.companionId);
+                return (
+                  <div key={reaction.id} className="archive-row archive-row--companion">
+                    <img src={getCompanionImage(companion.image)} alt="" />
+                    <div>
+                      <strong>{companion.name} · {companion.title}</strong>
+                      <small>“{reaction.message}”</small>
+                    </div>
+                    <span className="status-chip">{reaction.trigger.replaceAll('-', ' ')}</span>
+                  </div>
+                );
+              })}
+              {!companionReactions.length && !partyBanters.length && (
+                <div className="empty-state">Companion messages will remain available here.</div>
               )}
             </div>
           </section>

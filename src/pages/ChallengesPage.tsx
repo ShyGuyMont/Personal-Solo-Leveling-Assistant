@@ -45,7 +45,7 @@ export function ChallengesPage() {
             <Sparkles size={19} />
             <span>
               <strong>Active operations</strong>
-              <small>Weekly, monthly, recovery, and optional campaigns</small>
+              <small>Weekly dungeons, monthly operations, recovery, and optional campaigns</small>
             </span>
           </div>
         </header>

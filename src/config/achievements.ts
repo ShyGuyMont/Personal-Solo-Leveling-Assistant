@@ -222,6 +222,27 @@ const DEFINITIONS = [
     'shield',
   ],
   ['first-backup', 'Archive Secured', 'Create a manual save backup.', 'Export a save', 'archive'],
+  [
+    'rare-signal',
+    'Rare Signal Answered',
+    'Complete an Emergency Quest.',
+    'Complete 1 Emergency Quest',
+    'spark',
+  ],
+  [
+    'grace-token',
+    'Grace Received',
+    'Claim a rare Mission Pass.',
+    'Claim 1 Mission Pass',
+    'shield',
+  ],
+  [
+    'pass-wisely-used',
+    'Wisdom Over Shame',
+    'Use a Mission Pass to protect a difficult day.',
+    'Use 1 Mission Pass',
+    'recovery',
+  ],
   ['customized', 'System Architect', 'Customize a mission.', 'Customize a mission', 'settings'],
   [
     'all-categories',

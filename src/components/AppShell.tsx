@@ -1,4 +1,4 @@
-import { Archive, CircleGauge, Diamond, ListChecks, Shield } from 'lucide-react';
+import { Archive, CircleGauge, CircleHelp, Diamond, ListChecks, Shield } from 'lucide-react';
 import { useEffect, useState, type ReactNode } from 'react';
 import { SystemMark } from '@/components/SystemMark';
 import { NavLink } from '@/router';
@@ -40,9 +40,19 @@ export function AppShell({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  useEffect(() => {
+    const root = document.documentElement;
+    root.dataset.theme = settings?.colorTheme ?? 'abyss';
+    root.dataset.interface = settings?.interfaceStyle ?? 'system';
+    root.dataset.intensity = settings?.themeIntensity ?? 'standard';
+  }, [settings?.colorTheme, settings?.interfaceStyle, settings?.themeIntensity]);
+
   return (
     <div
       className={`app-shell ${settings?.privacyScreenEnabled && privacyActive ? 'privacy-screen-active' : ''}`}
+      data-theme={settings?.colorTheme ?? 'abyss'}
+      data-interface={settings?.interfaceStyle ?? 'system'}
+      data-intensity={settings?.themeIntensity ?? 'standard'}
     >
       <div className="ambient-grid" />
       <div className="ambient-orb ambient-orb--mint" />
@@ -55,10 +65,16 @@ export function AppShell({ children }: { children: ReactNode }) {
             <span className="brand__tag">PERSONAL ASCENSION INTERFACE</span>
           </span>
         </NavLink>
-        <span className={`connection-state ${!online ? 'is-offline' : ''}`}>
-          <span className="connection-state__dot" />
-          {online ? 'LOCAL LINK' : 'OFFLINE'}
-        </span>
+        <div className="app-header__actions">
+          <NavLink to="/about" className="header-help" aria-label="About and help">
+            <CircleHelp size={20} />
+            <span>HELP</span>
+          </NavLink>
+          <span className={`connection-state ${!online ? 'is-offline' : ''}`}>
+            <span className="connection-state__dot" />
+            {online ? 'LOCAL LINK' : 'OFFLINE'}
+          </span>
+        </div>
       </header>
       <main className="page-container" key={path}>
         {children}

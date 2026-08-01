@@ -10,6 +10,8 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { ChallengeCard } from '@/components/ChallengeCard';
+import { CompanionRoster } from '@/components/CompanionRoster';
+import { DailyEventCard } from '@/components/DailyEventCard';
 import { InstallCard } from '@/components/InstallCard';
 import { MissionCard } from '@/components/MissionCard';
 import { ProgressBar } from '@/components/ProgressBar';
@@ -142,6 +144,7 @@ export function DashboardPage() {
       </section>
 
       <InstallCard />
+      <DailyEventCard />
 
       {recovery && (
         <section className="recovery-banner">
@@ -205,7 +208,7 @@ export function DashboardPage() {
           <header className="section-header">
             <div>
               <p className="eyebrow eyebrow--purple">ACTIVE CHALLENGE</p>
-              <h2>Weekly operation</h2>
+              <h2>Weekly dungeon</h2>
             </div>
             <Link to="/challenges" className="text-link text-link--purple">
               Challenges <ChevronRight size={16} />
@@ -252,6 +255,7 @@ export function DashboardPage() {
             )}
           </div>
         </section>
+        <CompanionRoster />
       </div>
     </div>
   );

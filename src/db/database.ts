@@ -10,11 +10,18 @@ import type {
   CosmeticDefinition,
   CosmeticUnlock,
   DailyMissionRecord,
+  DailyEventRecord,
   DailyReview,
   LevelHistory,
   MissionDefinition,
+  InventoryItem,
   Profile,
   ProgressionEvent,
+  CompanionReaction,
+  FavoriteMessage,
+  PartyCheckIn,
+  PartyBanter,
+  SupportConversation,
   PeriodicReport,
   RankHistory,
   Settings,
@@ -48,6 +55,13 @@ export class SystemDatabase extends Dexie {
   auditEntries!: EntityTable<AuditEntry, 'id'>;
   reports!: EntityTable<PeriodicReport, 'id'>;
   progressionEvents!: EntityTable<ProgressionEvent, 'id'>;
+  dailyEvents!: EntityTable<DailyEventRecord, 'id'>;
+  inventory!: EntityTable<InventoryItem, 'id'>;
+  companionReactions!: EntityTable<CompanionReaction, 'id'>;
+  partyCheckIns!: EntityTable<PartyCheckIn, 'id'>;
+  supportConversations!: EntityTable<SupportConversation, 'id'>;
+  favoriteMessages!: EntityTable<FavoriteMessage, 'id'>;
+  partyBanters!: EntityTable<PartyBanter, 'id'>;
   appMetadata!: EntityTable<AppMetadata, 'id'>;
 
   constructor(name = 'the-system-db') {
@@ -140,6 +154,76 @@ export class SystemDatabase extends Dexie {
         await metadata.put({ id: 'schema-seeded', value: 3, updatedAt: now });
         await metadata.put({ id: 'app-version', value: '1.0.0', updatedAt: now });
       });
+    this.version(4)
+      .stores({
+        profiles: 'id',
+        settings: 'id',
+        missions: 'id,category,enabled,isCore,optional,archived',
+        dailyMissions: 'id,date,missionId,status,[date+missionId],[date+status]',
+        dailyReviews: 'id,date,status,perfectDay',
+        progression: 'id,level,rank',
+        stats: 'id,level,momentum,trend',
+        statTransactions: 'id,stat,date,sourceId,kind,[stat+date]',
+        xpTransactions: 'id,date,sourceId,kind',
+        streaks: 'id,kind',
+        challenges: 'id,kind,category,difficulty',
+        challengeProgress: 'id,templateId,kind,status,startedAt,endsAt,[kind+status]',
+        rankHistory: 'id,date,to',
+        levelHistory: 'id,date,level',
+        titles: 'id,titleId,unlockedAt',
+        achievements: 'id,unlockedAt,rarity',
+        cosmetics: 'id,kind,rarity',
+        cosmeticUnlocks: 'id,cosmeticId,unlockedAt',
+        backupSnapshots: 'id,createdAt,reason',
+        auditEntries: 'id,timestamp,action,targetId',
+        reports: 'id,kind,periodStart,periodEnd',
+        progressionEvents: 'id,kind,createdAt,acknowledged',
+        dailyEvents: 'id,date,kind,status',
+        inventory: 'id,quantity,updatedAt',
+        companionReactions: 'id,companionId,trigger,createdAt,acknowledged,sourceId',
+        appMetadata: 'id',
+      })
+      .upgrade(async (transaction) => {
+        const settings = transaction.table<Settings, string>('settings');
+        const current = await settings.get('primary');
+        if (current) {
+          await settings.update('primary', {
+            interfaceStyle: current.interfaceStyle ?? 'system',
+            colorTheme: current.colorTheme ?? 'abyss',
+            dailyEventsEnabled: current.dailyEventsEnabled ?? true,
+            companionMode: current.companionMode ?? 'balanced',
+            enabledCompanionIds: current.enabledCompanionIds
+              ? Array.from(new Set(['snow', ...current.enabledCompanionIds]))
+              : ['snow', 'rook', 'selah', 'cipher', 'haven'],
+          });
+        }
+        const metadata = transaction.table<AppMetadata, string>('appMetadata');
+        const now = new Date().toISOString();
+        await metadata.put({ id: 'schema-seeded', value: 4, updatedAt: now });
+        await metadata.put({ id: 'app-version', value: '2.0.0', updatedAt: now });
+      });
+    this.version(5)
+      .stores({
+        partyCheckIns: 'id,date,mood,createdAt',
+      })
+      .upgrade(async (transaction) => {
+        const metadata = transaction.table<AppMetadata, string>('appMetadata');
+        const now = new Date().toISOString();
+        await metadata.put({ id: 'schema-seeded', value: 5, updatedAt: now });
+        await metadata.put({ id: 'app-version', value: '2.0.0', updatedAt: now });
+      });
+    this.version(6)
+      .stores({
+        supportConversations: 'id,date,topic,audience,createdAt',
+        favoriteMessages: 'id,sourceType,sourceId,companionId,createdAt',
+        partyBanters: 'id,date,sourceId,category,createdAt,acknowledged',
+      })
+      .upgrade(async (transaction) => {
+        const metadata = transaction.table<AppMetadata, string>('appMetadata');
+        const now = new Date().toISOString();
+        await metadata.put({ id: 'schema-seeded', value: 6, updatedAt: now });
+        await metadata.put({ id: 'app-version', value: '2.0.0', updatedAt: now });
+      });
   }
 }
 
@@ -167,6 +251,13 @@ export const TABLE_NAMES = [
   'auditEntries',
   'reports',
   'progressionEvents',
+  'dailyEvents',
+  'inventory',
+  'companionReactions',
+  'partyCheckIns',
+  'supportConversations',
+  'favoriteMessages',
+  'partyBanters',
   'appMetadata',
 ] as const;
 

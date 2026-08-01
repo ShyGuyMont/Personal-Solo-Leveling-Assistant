@@ -2,14 +2,17 @@ import {
   Bell,
   Download,
   Info,
+  Palette,
   RotateCcw,
   Save,
   Settings as SettingsIcon,
   ShieldCheck,
   SlidersHorizontal,
   Upload,
+  Users,
+  Zap,
 } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import {
   commitPreparedImport,
   downloadSave,
@@ -22,9 +25,16 @@ import {
 } from '@/db/backup';
 import { equipTitle, saveConfiguration } from '@/db/repositories';
 import { DEFAULT_MISSIONS, OPTIONAL_MISSION_TEMPLATES } from '@/config/missions';
+import { COMPANIONS, getCompanionImage } from '@/config/companions';
 import { Modal } from '@/components/Modal';
 import { useGameStore } from '@/store/useGameStore';
-import type { BackupSnapshot, MissionDefinition, RecoveryReason, Settings } from '@/types/game';
+import type {
+  BackupSnapshot,
+  CompanionId,
+  MissionDefinition,
+  RecoveryReason,
+  Settings,
+} from '@/types/game';
 
 export function SettingsPage() {
   const { profile, settings, missions, titles, refresh, load } = useGameStore();
@@ -46,6 +56,19 @@ export function SettingsPage() {
     setMissionDrafts(missions);
   }, [settings, missions]);
 
+  useEffect(() => {
+    if (!draft) return;
+    const root = document.documentElement;
+    root.dataset.theme = draft.colorTheme;
+    root.dataset.interface = draft.interfaceStyle;
+    root.dataset.intensity = draft.themeIntensity;
+    return () => {
+      root.dataset.theme = settings?.colorTheme ?? 'abyss';
+      root.dataset.interface = settings?.interfaceStyle ?? 'system';
+      root.dataset.intensity = settings?.themeIntensity ?? 'standard';
+    };
+  }, [draft, settings]);
+
   const refreshLocalData = async () => {
     const [nextSnapshots, nextStorage] = await Promise.all([
       listLocalSnapshots(),
@@ -64,6 +87,13 @@ export function SettingsPage() {
 
   const patchSetting = <K extends keyof Settings>(key: K, value: Settings[K]) =>
     setDraft((current) => (current ? { ...current, [key]: value } : current));
+
+  const toggleCompanion = (id: CompanionId, enabled: boolean) => {
+    const next = enabled
+      ? Array.from(new Set([...draft.enabledCompanionIds, id]))
+      : draft.enabledCompanionIds.filter((companionId) => companionId !== id);
+    patchSetting('enabledCompanionIds', next);
+  };
 
   const saveAll = async () => {
     await saveConfiguration({
@@ -180,6 +210,61 @@ export function SettingsPage() {
             </div>
           </header>
           <div className="settings-toggles">
+            <div className="appearance-config">
+              <div className="appearance-config__heading">
+                <Palette size={18} />
+                <span>
+                  <strong>Interface style</strong>
+                  <small>Change the presentation without changing your campaign data.</small>
+                </span>
+              </div>
+              <div className="appearance-choice-grid">
+                <button
+                  type="button"
+                  className={draft.interfaceStyle === 'system' ? 'is-active' : ''}
+                  onClick={() => patchSetting('interfaceStyle', 'system')}
+                >
+                  <span className="appearance-preview appearance-preview--system">SYS_01</span>
+                  <strong>System</strong>
+                  <small>Digital HUD, scan effects, and game-style typography</small>
+                </button>
+                <button
+                  type="button"
+                  className={draft.interfaceStyle === 'clean' ? 'is-active' : ''}
+                  onClick={() => patchSetting('interfaceStyle', 'clean')}
+                >
+                  <span className="appearance-preview appearance-preview--clean">Aa</span>
+                  <strong>Clean</strong>
+                  <small>The original restrained interface with fewer effects</small>
+                </button>
+              </div>
+            </div>
+            <div className="appearance-config">
+              <div className="appearance-config__heading">
+                <span>
+                  <strong>Color protocol</strong>
+                  <small>Choose the atmosphere independently from interface style.</small>
+                </span>
+              </div>
+              <div className="theme-choice-grid">
+                <button
+                  type="button"
+                  className={draft.colorTheme === 'abyss' ? 'is-active' : ''}
+                  onClick={() => patchSetting('colorTheme', 'abyss')}
+                >
+                  <span className="theme-swatch theme-swatch--abyss" />
+                  <span><strong>Abyss</strong><small>Black · mint · violet</small></span>
+                </button>
+                <button
+                  type="button"
+                  className={draft.colorTheme === 'daybreak' ? 'is-active' : ''}
+                  onClick={() => patchSetting('colorTheme', 'daybreak')}
+                >
+                  <span className="theme-swatch theme-swatch--daybreak" />
+                  <span><strong>Daybreak</strong><small>Light gray · navy · sun yellow</small></span>
+                </button>
+              </div>
+            </div>
             {(
               [
                 ['soundEnabled', 'System tones', 'Brief original interface tones'],
@@ -255,6 +340,93 @@ export function SettingsPage() {
               </div>
               <span>PLANNED</span>
             </div>
+          </div>
+        </section>
+
+        <section className="panel settings-section settings-section--wide companion-settings">
+          <header>
+            <div>
+              <p className="eyebrow">PARTY & RARE EVENTS</p>
+              <h2>Make the journey feel inhabited</h2>
+              <p>Companion reactions and rare events are generated locally and work offline.</p>
+            </div>
+            <Users size={22} />
+          </header>
+          <div className="settings-toggles">
+            <label className="switch-row">
+              <span>
+                <strong>Rare daily events</strong>
+                <small>7% Emergency Quest · 5% Mission Pass · one saved roll per System day</small>
+              </span>
+              <input
+                type="checkbox"
+                checked={draft.dailyEventsEnabled}
+                onChange={(event) => patchSetting('dailyEventsEnabled', event.target.checked)}
+              />
+              <span className="switch" />
+            </label>
+            <label className="field">
+              <span>Companion frequency</span>
+              <select
+                value={draft.companionMode}
+                onChange={(event) =>
+                  patchSetting('companionMode', event.target.value as Settings['companionMode'])
+                }
+              >
+                <option value="off">Off</option>
+                <option value="quiet">Quiet · level-ups and major events only</option>
+                <option value="balanced">Balanced · occasional mission reactions</option>
+                <option value="talkative">Talkative · frequent encouragement</option>
+              </select>
+            </label>
+          </div>
+          <div className="party-settings-grid">
+            {COMPANIONS.map((companion) => {
+              const enabled = draft.enabledCompanionIds.includes(companion.id);
+              return (
+                <article
+                  key={companion.id}
+                  className={`party-setting-card ${companion.primary ? 'party-setting-card--primary' : ''} ${enabled ? 'is-enabled' : 'is-disabled'}`}
+                  style={{ '--companion-accent': companion.accent } as CSSProperties}
+                >
+                  <img src={getCompanionImage(companion.image)} alt={`${companion.name}, ${companion.title}`} />
+                  <div>
+                    <span className="eyebrow">
+                      {companion.primary ? `PRIMARY SUPPORT · ${companion.title}` : companion.title}
+                    </span>
+                    <h3>{companion.name}</h3>
+                    <strong>{companion.shortRole}</strong>
+                    <p>{companion.description}</p>
+                    <small><b>Personality:</b> {companion.personality}</small>
+                    <small><b>Appearance:</b> {companion.appearance}</small>
+                  </div>
+                  <label className="companion-enable">
+                    <input
+                      type="checkbox"
+                      checked={enabled}
+                      onChange={(event) => toggleCompanion(companion.id, event.target.checked)}
+                    />
+                    <span>
+                      {companion.primary
+                        ? enabled
+                          ? 'Primary link'
+                          : 'Snow muted'
+                        : enabled
+                          ? 'Linked'
+                          : 'Muted'}
+                    </span>
+                  </label>
+                </article>
+              );
+            })}
+          </div>
+          <div className="info-callout">
+            <Zap size={17} />
+            <span>
+              Snow is your primary support and checks in once per System day. Stat level-ups still
+              call the specialist responsible for that stat, while ordinary mission messages
+              follow the frequency selected above.
+            </span>
           </div>
         </section>
 
@@ -805,7 +977,7 @@ export function SettingsPage() {
           <Info size={21} />
           <div>
             <p className="eyebrow">ABOUT</p>
-            <h2>The System · Version 1.0.0</h2>
+            <h2>The System · Version 2.0.0</h2>
             <p>
               An original, offline-first personal progression RPG. It uses no login, backend,
               external API, analytics, advertising, tracking, paid service, or copied franchise

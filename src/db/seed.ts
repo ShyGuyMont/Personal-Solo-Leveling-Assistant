@@ -30,6 +30,11 @@ export function createDefaultSettings(): Settings {
       disabledMissionIds: ['workout'],
     },
     themeIntensity: 'standard',
+    interfaceStyle: 'system',
+    colorTheme: 'abyss',
+    dailyEventsEnabled: true,
+    companionMode: 'balanced',
+    enabledCompanionIds: ['snow', 'rook', 'selah', 'cipher', 'haven'],
     notificationsEnabled: false,
     advancedBalanceUnlocked: false,
     privacyScreenEnabled: false,
@@ -153,9 +158,9 @@ export async function initializeProfile(input: {
         },
       ]);
       await db.appMetadata.bulkPut([
-        { id: 'schema-seeded', value: 3, updatedAt: now },
+        { id: 'schema-seeded', value: 6, updatedAt: now },
         { id: 'last-system-day', value: systemDate, updatedAt: now },
-        { id: 'app-version', value: '1.0.0', updatedAt: now },
+        { id: 'app-version', value: '2.0.0', updatedAt: now },
       ]);
       await ensureRotatingChallenges(systemDate, settings.weekStartsOn);
     },

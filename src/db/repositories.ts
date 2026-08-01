@@ -8,7 +8,9 @@ export async function getDailyMissionRecords(date: string) {
 export async function getDashboardHistory() {
   const [lastReview, recentStats] = await Promise.all([
     db.dailyReviews.where('status').equals('finalized').last(),
-    db.statTransactions.orderBy('timestamp').reverse().limit(3).toArray(),
+    db.statTransactions.toArray().then((items) =>
+      items.sort((a, b) => b.timestamp.localeCompare(a.timestamp)).slice(0, 3),
+    ),
   ]);
   return { lastReview, recentStats };
 }
@@ -18,15 +20,40 @@ export async function getStatHistory(stat: StatName) {
 }
 
 export async function getArchiveData() {
-  const [reviews, records, statTransactions, challengeHistory, levelHistory, rankHistory, reports] =
-    await Promise.all([
+  const [
+    reviews,
+    records,
+    statTransactions,
+    challengeHistory,
+    levelHistory,
+    rankHistory,
+    reports,
+    dailyEvents,
+    companionReactions,
+    partyCheckIns,
+    supportConversations,
+    favoriteMessages,
+    partyBanters,
+  ] = await Promise.all([
       db.dailyReviews.where('status').equals('finalized').sortBy('date'),
       db.dailyMissions.toArray(),
-      db.statTransactions.orderBy('timestamp').reverse().toArray(),
+      db.statTransactions.toArray().then((items) =>
+        items.sort((a, b) => b.timestamp.localeCompare(a.timestamp)),
+      ),
       db.challengeProgress.orderBy('startedAt').reverse().toArray(),
-      db.levelHistory.orderBy('timestamp').reverse().toArray(),
-      db.rankHistory.orderBy('timestamp').reverse().toArray(),
+      db.levelHistory.toArray().then((items) =>
+        items.sort((a, b) => b.timestamp.localeCompare(a.timestamp)),
+      ),
+      db.rankHistory.toArray().then((items) =>
+        items.sort((a, b) => b.timestamp.localeCompare(a.timestamp)),
+      ),
       db.reports.orderBy('periodStart').reverse().toArray(),
+      db.dailyEvents.orderBy('date').reverse().toArray(),
+      db.companionReactions.orderBy('createdAt').reverse().toArray(),
+      db.partyCheckIns.orderBy('createdAt').reverse().toArray(),
+      db.supportConversations.orderBy('createdAt').reverse().toArray(),
+      db.favoriteMessages.orderBy('createdAt').reverse().toArray(),
+      db.partyBanters.orderBy('createdAt').reverse().toArray(),
     ]);
   return {
     reviews,
@@ -36,6 +63,12 @@ export async function getArchiveData() {
     levelHistory,
     rankHistory,
     reports,
+    dailyEvents,
+    companionReactions,
+    partyCheckIns,
+    supportConversations,
+    favoriteMessages,
+    partyBanters,
   };
 }
 
