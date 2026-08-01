@@ -296,11 +296,27 @@ export function AboutPage() {
         <details>
           <summary>What is Snow’s Daily Command Briefing?</summary>
           <p>
-            Once per System day, Snow can ask whether your capacity is low, steady, or high. She
-            then recommends a Main Quest, Support Quest, and—when appropriate—an optional Bonus
-            Quest from missions already on today’s list. This is only a priority map: it creates no
-            new requirement, XP, penalty, streak rule, or hidden judgment. You can edit, skip, or
-            disable it in Settings.
+            Once per System day, Snow asks whether your real capacity is Low, Steady, or High. Main
+            is the first priority, Support is the second, and Bonus is High Capacity’s third
+            priority. These are existing scheduled missions—not extra tasks—and completing only the
+            priority slots does not automatically clear a Steady or High command.
+          </p>
+          <p>
+            <strong>Low</strong> has no completion quota and keeps normal 1× mission XP.{' '}
+            <strong>Steady</strong> requires Main, Support, and at least 65% of the full scheduled
+            list for 1.5× mission XP; clearing the entire list raises it to 1.75×.{' '}
+            <strong>High</strong> requires Main, Support, Bonus, and at least 80% for 2×; clearing
+            the entire list raises it to 2.5×.
+          </p>
+          <p>
+            Snow locks the scheduled count and chosen command when you confirm it. The multiplier is
+            verified and awarded during the next Daily Review to account and stat XP earned from
+            completed scheduled missions. Perfect Day rewards still apply separately. Rare events,
+            companion quests, Treasury rewards, and other special XP are never multiplied. Missing a
+            target removes nothing: you keep every normal reward and simply do not receive the
+            command bonus. A protected exception counts as resolved for the command, but creates no
+            mission XP to multiply. You can skip the briefing before confirming it or disable future
+            briefings in Settings.
           </p>
         </details>
         <details>

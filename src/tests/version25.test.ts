@@ -4,6 +4,7 @@ import { db } from '@/db/database';
 import { saveConfiguration } from '@/db/repositories';
 import { initializeProfile, seedReferenceData } from '@/db/seed';
 import { createSuggestedDailyBriefing } from '@/game/briefing';
+import { ensureDailyRecords } from '@/game/engine';
 import { createCampaignArc, getCampaignArcs, toggleArcMilestone } from '@/game/campaigns';
 import { ensureMonthlyCouncil } from '@/game/council';
 import { createPartyCheckIn } from '@/game/partyChat';
@@ -100,6 +101,7 @@ describe('Campaign systems through Version 3.0', () => {
 
   it('creates low-capacity briefings without bonus pressure or score changes', async () => {
     const before = await db.progression.get('primary');
+    await ensureDailyRecords('2026-08-01');
     const briefing = await createSuggestedDailyBriefing('2026-08-01', 'low');
     expect(briefing.status).toBe('planned');
     expect(briefing.bonusMissionId).toBeUndefined();

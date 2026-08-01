@@ -209,6 +209,42 @@ function validateData(data: Record<string, unknown[]>) {
     }
   }
 
+  const commandCapacities = new Set(['low', 'steady', 'high']);
+  const commandOutcomes = new Set([
+    'pending',
+    'standard-clear',
+    'full-clear',
+    'missed',
+    'not-applicable',
+  ]);
+  for (const row of data.dailyBriefings) {
+    if (!isObject(row) || row.rulesVersion !== 1) continue;
+    const missionIds = row.scheduledMissionIds;
+    if (
+      !commandCapacities.has(String(row.capacity)) ||
+      !Array.isArray(missionIds) ||
+      missionIds.length < 1 ||
+      missionIds.length > 500 ||
+      missionIds.some((id) => typeof id !== 'string' || !id.trim()) ||
+      new Set(missionIds).size !== missionIds.length ||
+      !Number.isFinite(row.targetCompletionRate) ||
+      Number(row.targetCompletionRate) < 0 ||
+      Number(row.targetCompletionRate) > 1 ||
+      !Number.isInteger(row.targetMissionCount) ||
+      Number(row.targetMissionCount) < 0 ||
+      Number(row.targetMissionCount) > missionIds.length ||
+      !Number.isFinite(row.standardMultiplier) ||
+      Number(row.standardMultiplier) < 1 ||
+      Number(row.standardMultiplier) > 3 ||
+      !Number.isFinite(row.fullClearMultiplier) ||
+      Number(row.fullClearMultiplier) < 1 ||
+      Number(row.fullClearMultiplier) > 3 ||
+      (row.outcome !== undefined && !commandOutcomes.has(String(row.outcome)))
+    ) {
+      throw new Error('A Daily Command record contains an impossible value.');
+    }
+  }
+
   const treasurySettings = requiredSingleton<Record<string, unknown>>(data, 'treasurySettings');
   if (
     treasurySettings.currency !== 'USD' ||

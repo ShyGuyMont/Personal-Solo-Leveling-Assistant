@@ -658,7 +658,10 @@ export function ArchivePage() {
                   <div>
                     <strong>Snow’s Daily Command · {briefing.capacity}</strong>
                     <small>
-                      {briefing.date} · {briefing.status}
+                      {briefing.date} · {briefing.outcome ?? briefing.status}
+                      {briefing.awardedMultiplier && briefing.awardedMultiplier > 1
+                        ? ` · ${briefing.awardedMultiplier}×`
+                        : ''}
                     </small>
                   </div>
                   <span className="status-chip">briefing</span>
@@ -922,6 +925,20 @@ export function ArchivePage() {
                 <span>Bonus XP</span>
                 <strong>+{selectedReview.accountXpAwarded}</strong>
               </div>
+              {selectedReview.dailyCommandCapacity && (
+                <div>
+                  <span>Daily Command</span>
+                  <strong>
+                    {selectedReview.dailyCommandOutcome === 'full-clear'
+                      ? `Full Clear · ${selectedReview.dailyCommandMultiplier}×`
+                      : selectedReview.dailyCommandOutcome === 'standard-clear'
+                        ? `Clear · ${selectedReview.dailyCommandMultiplier}×`
+                        : selectedReview.dailyCommandCapacity === 'low'
+                          ? 'Low · 1×'
+                          : 'Missed · 1×'}
+                  </strong>
+                </div>
+              )}
               <div>
                 <span>System state</span>
                 <strong>{selectedReview.systemState}</strong>

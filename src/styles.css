@@ -8664,6 +8664,35 @@ html[data-theme='daybreak'] .party-checkin-archive__item {
   color: var(--muted);
   line-height: 1.5;
 }
+.briefing-help-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 14px;
+  padding: 7px 0;
+  color: #86cfff;
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+.briefing-explainer {
+  display: grid;
+  gap: 8px;
+  margin-top: 5px;
+  padding: 12px;
+  color: var(--muted);
+  font-size: 0.76rem;
+  line-height: 1.55;
+  background: rgba(134, 207, 255, 0.06);
+  border: 1px solid rgba(134, 207, 255, 0.2);
+  border-radius: 10px;
+}
+.briefing-explainer strong {
+  color: var(--text);
+}
 .briefing-capacity {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -8694,6 +8723,11 @@ html[data-theme='daybreak'] .party-checkin-archive__item {
   font-size: 0.75rem;
   line-height: 1.4;
 }
+.briefing-capacity small {
+  color: #86cfff;
+  font-size: 0.67rem;
+  line-height: 1.35;
+}
 .briefing-plan {
   display: grid;
   gap: 10px;
@@ -8722,6 +8756,29 @@ html[data-theme='daybreak'] .party-checkin-archive__item {
 .briefing-plan__capacity button.is-active {
   color: var(--mint);
   border-color: rgba(67, 230, 194, 0.35);
+}
+.briefing-target {
+  display: grid;
+  gap: 4px;
+  padding: 11px 12px;
+  background: rgba(134, 207, 255, 0.06);
+  border: 1px solid rgba(134, 207, 255, 0.22);
+  border-radius: 10px;
+}
+.briefing-target strong {
+  color: #b9e2ff;
+  font-size: 0.82rem;
+}
+.briefing-target span {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+.briefing-target--high {
+  background: rgba(159, 126, 255, 0.07);
+  border-color: rgba(159, 126, 255, 0.25);
+}
+.briefing-target--high strong {
+  color: var(--purple-bright);
 }
 .briefing-slot {
   display: grid;
@@ -8758,6 +8815,10 @@ html[data-theme='daybreak'] .party-checkin-archive__item {
   gap: 8px;
   margin-top: 4px;
 }
+.briefing-validation {
+  color: var(--warning);
+  font-size: 0.72rem;
+}
 .briefing-panel > footer {
   display: flex;
   align-items: center;
@@ -8780,7 +8841,7 @@ html[data-theme='daybreak'] .party-checkin-archive__item {
   align-items: center;
   gap: 10px;
 }
-.daily-briefing-card > header > span {
+.daily-briefing-card > header > span:first-child {
   display: grid;
   width: 40px;
   height: 40px;
@@ -8789,6 +8850,13 @@ html[data-theme='daybreak'] .party-checkin-archive__item {
   background: rgba(134, 207, 255, 0.08);
   border: 1px solid rgba(134, 207, 255, 0.22);
   border-radius: 11px;
+}
+.daily-command-lock {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--muted-2);
+  font-size: 0.66rem;
 }
 .daily-briefing-card__slots {
   display: grid;
@@ -8823,11 +8891,60 @@ html[data-theme='daybreak'] .party-checkin-archive__item {
   line-height: 1.5;
   border-left: 2px solid #86cfff;
 }
+.daily-command-progress {
+  display: grid;
+  gap: 8px;
+  padding: 11px 12px;
+  background: rgba(134, 207, 255, 0.04);
+  border: 1px solid rgba(134, 207, 255, 0.15);
+  border-radius: 10px;
+}
+.daily-command-progress__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.daily-command-progress__facts span {
+  padding: 4px 7px;
+  color: var(--muted);
+  font-size: 0.67rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+}
+.daily-command-progress__facts strong {
+  color: var(--text);
+}
 .daily-briefing-card > small {
   display: flex;
   align-items: center;
   gap: 5px;
   color: var(--muted-2);
+}
+.review-command-result {
+  display: grid;
+  gap: 4px;
+  width: min(100%, 390px);
+  margin-top: 12px;
+  padding: 12px;
+  text-align: left;
+  background: rgba(134, 207, 255, 0.06);
+  border: 1px solid rgba(134, 207, 255, 0.2);
+  border-radius: 10px;
+}
+.review-command-result > span {
+  color: #86cfff;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+.review-command-result > small {
+  color: var(--muted);
+  line-height: 1.45;
+}
+.review-command-result--full-clear,
+.review-command-result--standard-clear {
+  border-color: rgba(67, 230, 194, 0.25);
 }
 
 /* Monthly Councils */
@@ -9233,9 +9350,14 @@ html[data-theme='daybreak'] .arc-milestones > button {
   .briefing-capacity button span {
     grid-column: 2;
   }
+  .briefing-capacity button small {
+    grid-column: 2;
+    text-align: left;
+  }
   .daily-briefing-card > header {
     grid-template-columns: auto 1fr;
   }
+  .daily-command-lock,
   .daily-briefing-card > header .text-button {
     grid-column: 2;
     justify-self: start;

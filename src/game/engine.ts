@@ -8,6 +8,7 @@ import { BALANCE, PERFECT_DAY_STAT_REWARDS, RANK_ORDER } from '@/config/balance'
 import { db } from '@/db/database';
 import { createLocalSnapshot } from '@/db/backup';
 import { calculateChallengeCurrent, createChallengeProgress } from '@/game/challenges';
+import { getDailyCommandProgress } from '@/game/briefing';
 import { applyAccountXp, resolveLevelFromTotalXp } from '@/game/xp';
 import { applyStatChange, getDecayForNeglect } from '@/game/stats';
 import { refreshPeriodicReports } from '@/game/reports';
@@ -711,6 +712,7 @@ export async function finalizeDailyReview(date: LocalDateKey, systemDate: LocalD
       db.challengeProgress,
       db.challenges,
       db.progressionEvents,
+      db.dailyBriefings,
     ],
     async () => {
       const existing = await db.dailyReviews.get(date);
@@ -718,11 +720,12 @@ export async function finalizeDailyReview(date: LocalDateKey, systemDate: LocalD
         result = existing;
         return;
       }
-      const [records, missions, settings, progression] = await Promise.all([
+      const [records, missions, settings, progression, briefing] = await Promise.all([
         db.dailyMissions.where('date').equals(date).toArray(),
         db.missions.toArray(),
         db.settings.get('primary'),
         db.progression.get('primary'),
+        db.dailyBriefings.get(date),
       ]);
       if (!settings || !progression) throw new Error('System data is incomplete.');
       const coreIds = new Set(
@@ -770,6 +773,118 @@ export async function finalizeDailyReview(date: LocalDateKey, systemDate: LocalD
       const statChanges: Partial<Record<StatName, number>> = {};
       let accountXpAwarded = 0;
       let nextProgression = { ...progression };
+      const commandProgress =
+        briefing?.status === 'planned' ? getDailyCommandProgress(briefing, records) : undefined;
+      const dailyCommandOutcome = commandProgress
+        ? commandProgress.outcome === 'pending'
+          ? 'missed'
+          : commandProgress.outcome
+        : undefined;
+      const dailyCommandMultiplier =
+        dailyCommandOutcome === 'standard-clear' || dailyCommandOutcome === 'full-clear'
+          ? (commandProgress?.multiplier ?? 1)
+          : 1;
+      let dailyCommandBonusXp = 0;
+
+      if (briefing && commandProgress && dailyCommandMultiplier > 1) {
+        const scheduledIds = new Set(briefing.scheduledMissionIds ?? []);
+        const completedScheduledIds = new Set(
+          records
+            .filter((record) => record.status === 'completed' && scheduledIds.has(record.missionId))
+            .map((record) => record.missionId),
+        );
+        const missionXpTransactions = await db.xpTransactions
+          .where('date')
+          .equals(date)
+          .filter(
+            (transaction) =>
+              transaction.kind === 'mission' && completedScheduledIds.has(transaction.sourceId),
+          )
+          .toArray();
+        const baseAccountXp = missionXpTransactions.reduce(
+          (total, transaction) => total + Math.max(0, transaction.amount),
+          0,
+        );
+        const commandRewardId = stableId('daily-command', date, 'account-reward');
+        const commandBonus = Math.round(baseAccountXp * (dailyCommandMultiplier - 1));
+        if (commandBonus > 0 && !(await db.xpTransactions.get(commandRewardId))) {
+          const applied = applyAccountXp(nextProgression.totalXp, commandBonus);
+          const previousLevel = nextProgression.level;
+          nextProgression = {
+            ...nextProgression,
+            ...applied,
+            lastLevelUpAt: applied.levelsGained ? now : nextProgression.lastLevelUpAt,
+            recentLevelUp: nextProgression.recentLevelUp || applied.levelsGained > 0,
+          };
+          await db.xpTransactions.add({
+            id: commandRewardId,
+            kind: 'daily-command',
+            amount: commandBonus,
+            date,
+            timestamp: now,
+            sourceId: date,
+            note: `Snow's ${briefing.capacity} Daily Command ${dailyCommandMultiplier}× account XP bonus`,
+          });
+          await putLevelHistory(nextProgression, previousLevel, date, commandRewardId, now);
+          transactionIds.push(commandRewardId);
+          accountXpAwarded += commandBonus;
+          dailyCommandBonusXp = commandBonus;
+        }
+
+        const missionStatTransactions = await db.statTransactions
+          .where('date')
+          .equals(date)
+          .filter(
+            (transaction) =>
+              transaction.kind === 'mission' && completedScheduledIds.has(transaction.sourceId),
+          )
+          .toArray();
+        const statBaseXp = new Map<StatName, number>();
+        for (const transaction of missionStatTransactions) {
+          statBaseXp.set(
+            transaction.stat,
+            (statBaseXp.get(transaction.stat) ?? 0) + Math.max(0, transaction.amount),
+          );
+        }
+        for (const [statName, baseXp] of statBaseXp) {
+          const amount = Math.round(baseXp * (dailyCommandMultiplier - 1));
+          const transactionId = stableId('daily-command', date, 'stat-reward', statName);
+          if (amount <= 0 || (await db.statTransactions.get(transactionId))) continue;
+          const stat = await db.stats.get(statName);
+          if (!stat) continue;
+          await db.stats.put(applyStatChange(stat, amount, 0, now));
+          await db.statTransactions.add({
+            id: transactionId,
+            stat: statName,
+            kind: 'daily-command',
+            amount,
+            momentumDelta: 0,
+            date,
+            timestamp: now,
+            sourceId: date,
+            note: `Snow's ${briefing.capacity} Daily Command ${dailyCommandMultiplier}× stat XP bonus`,
+          });
+          statChanges[statName] = (statChanges[statName] ?? 0) + amount;
+          transactionIds.push(transactionId);
+        }
+
+        await db.dailyBriefings.update(briefing.id, {
+          outcome: dailyCommandOutcome,
+          awardedMultiplier: dailyCommandMultiplier,
+          awardedBonusXp: dailyCommandBonusXp,
+          rewardTransactionId: commandRewardId,
+          finalizedAt: now,
+          updatedAt: now,
+        });
+      } else if (briefing && commandProgress) {
+        await db.dailyBriefings.update(briefing.id, {
+          outcome: dailyCommandOutcome,
+          awardedMultiplier: 1,
+          awardedBonusXp: 0,
+          finalizedAt: now,
+          updatedAt: now,
+        });
+      }
 
       if (perfectDay || protectedPerfectDay) {
         const amount = perfectDay
@@ -783,7 +898,7 @@ export async function finalizeDailyReview(date: LocalDateKey, systemDate: LocalD
             ...nextProgression,
             ...applied,
             lastLevelUpAt: applied.levelsGained ? now : nextProgression.lastLevelUpAt,
-            recentLevelUp: applied.levelsGained > 0,
+            recentLevelUp: nextProgression.recentLevelUp || applied.levelsGained > 0,
           };
           await db.xpTransactions.add({
             id: transactionId,
@@ -922,6 +1037,10 @@ export async function finalizeDailyReview(date: LocalDateKey, systemDate: LocalD
         perfectDay,
         protectedPerfectDay,
         accountXpAwarded,
+        dailyCommandCapacity: briefing?.rulesVersion === 1 ? briefing.capacity : undefined,
+        dailyCommandOutcome,
+        dailyCommandMultiplier,
+        dailyCommandBonusXp,
         statChanges,
         verdict: reviewVerdict(perfectDay, protectedPerfectDay, completionRate, systemState),
         systemState,

@@ -71,6 +71,13 @@ describe('save validation and recovery', () => {
       status: 'planned',
       mainMissionId: 'prayer',
       supportMissionId: 'movement',
+      rulesVersion: 1,
+      scheduledMissionIds: ['prayer', 'movement'],
+      targetCompletionRate: 0.65,
+      targetMissionCount: 2,
+      standardMultiplier: 1.5,
+      fullClearMultiplier: 1.75,
+      outcome: 'pending',
       snowMessage: 'Protected briefing record.',
       createdAt: now,
       updatedAt: now,
@@ -191,6 +198,10 @@ describe('save validation and recovery', () => {
     );
     await commitPreparedImport(prepared);
     expect((await db.dailyBriefings.get('2026-08-01'))?.mainMissionId).toBe('prayer');
+    expect((await db.dailyBriefings.get('2026-08-01'))?.scheduledMissionIds).toEqual([
+      'prayer',
+      'movement',
+    ]);
     expect((await db.campaignArcs.get('arc:backup'))?.purpose).toBe('Verify complete portability.');
     expect((await db.arcMilestones.get('arc-mark:backup'))?.status).toBe('completed');
     expect(

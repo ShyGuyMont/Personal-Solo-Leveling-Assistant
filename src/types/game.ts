@@ -64,6 +64,8 @@ export type FavoriteMessageSource =
   | 'treasury';
 export type DailyEventKind = 'none' | 'emergency-quest' | 'mission-pass';
 export type DailyCapacity = 'low' | 'steady' | 'high';
+export type DailyCommandOutcome =
+  'pending' | 'standard-clear' | 'full-clear' | 'missed' | 'not-applicable';
 export type CampaignArcStatus = 'active' | 'paused' | 'completed' | 'archived';
 export type ArcMilestoneStatus = 'pending' | 'completed';
 export type CompanionQuestStatus = 'active' | 'paused' | 'completed';
@@ -194,6 +196,10 @@ export interface DailyReview {
   perfectDay: boolean;
   protectedPerfectDay: boolean;
   accountXpAwarded: number;
+  dailyCommandCapacity?: DailyCapacity;
+  dailyCommandOutcome?: DailyCommandOutcome;
+  dailyCommandMultiplier?: number;
+  dailyCommandBonusXp?: number;
   statChanges: Partial<Record<StatName, number>>;
   verdict: string;
   systemState: SystemState;
@@ -247,6 +253,7 @@ export interface XpTransaction {
     | 'companion-quest'
     | 'treasury'
     | 'daily-event'
+    | 'daily-command'
     | 'recovery'
     | 'reversal'
     | 'penalty';
@@ -266,6 +273,7 @@ export interface StatTransaction {
     | 'challenge'
     | 'treasury'
     | 'daily-event'
+    | 'daily-command'
     | 'recovery'
     | 'reversal'
     | 'decay';
@@ -572,6 +580,17 @@ export interface DailyCommandBriefing {
   mainMissionId?: string;
   supportMissionId?: string;
   bonusMissionId?: string;
+  rulesVersion?: 1;
+  scheduledMissionIds?: string[];
+  targetCompletionRate?: number;
+  targetMissionCount?: number;
+  standardMultiplier?: number;
+  fullClearMultiplier?: number;
+  outcome?: DailyCommandOutcome;
+  awardedMultiplier?: number;
+  awardedBonusXp?: number;
+  rewardTransactionId?: string;
+  finalizedAt?: string;
   snowMessage: string;
   createdAt: string;
   updatedAt: string;

@@ -33,7 +33,7 @@ export const RELEASE_SECTIONS: ReleaseSection[] = [
     detail: 'Long-range goals now have structure without becoming another punishment system.',
     points: [
       'Campaign Arcs with purpose, companion guidance, target dates, milestones, pause, completion, and archive states.',
-      'Snow’s optional Daily Command Briefing adapts priorities to low, steady, or high capacity.',
+      'Snow’s Daily Command now locks a fair morning target: Low protects continuity, Steady rewards 65% completion, High rewards 80%, and Full Clears earn the strongest multipliers.',
       'A dedicated Update Center shows the installed version, checks for releases, and keeps backup controls close.',
     ],
   },

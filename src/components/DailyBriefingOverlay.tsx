@@ -3,13 +3,19 @@ import {
   BatteryMedium,
   BatteryFull,
   Check,
+  CircleHelp,
   ShieldCheck,
   Sparkles,
   X,
 } from 'lucide-react';
 import { useState } from 'react';
 import { getCompanion, getCompanionImage } from '@/config/companions';
-import { saveDailyBriefing, skipDailyBriefing, suggestDailyBriefing } from '@/game/briefing';
+import {
+  DAILY_COMMAND_RULES,
+  saveDailyBriefing,
+  skipDailyBriefing,
+  suggestDailyBriefing,
+} from '@/game/briefing';
 import { useGameStore } from '@/store/useGameStore';
 import type { DailyCapacity } from '@/types/game';
 
@@ -17,24 +23,28 @@ const CAPACITIES: Array<{
   id: DailyCapacity;
   label: string;
   description: string;
+  reward: string;
   icon: typeof BatteryMedium;
 }> = [
   {
     id: 'low',
     label: 'Low',
-    description: 'Protect continuity with a smaller plan.',
+    description: 'Choose one Main priority. Protect continuity without a quota.',
+    reward: 'Normal 1× XP · regular Perfect Day bonus still applies',
     icon: BatteryLow,
   },
   {
     id: 'steady',
     label: 'Steady',
-    description: 'One priority, one support, one optional bonus.',
+    description: 'Clear Main + Support and at least 65% of the full daily list.',
+    reward: '1.5× mission XP · 1.75× for a Full Clear',
     icon: BatteryMedium,
   },
   {
     id: 'high',
     label: 'High',
-    description: 'Use extra room without borrowing from tomorrow.',
+    description: 'Clear Main + Support + Bonus and at least 80% of the full daily list.',
+    reward: '2× mission XP · 2.5× for a Full Clear',
     icon: BatteryFull,
   },
 ];
@@ -58,11 +68,17 @@ export function DailyBriefingOverlay() {
     bonusMissionId?: string;
   }>({});
   const [busy, setBusy] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
+  const [error, setError] = useState<string>();
   const snow = getCompanion('snow');
   const pendingIds = new Set(
     todayRecords.filter((record) => record.status === 'pending').map((record) => record.missionId),
   );
-  const options = missions.filter((mission) => pendingIds.has(mission.id));
+  const options = missions.filter((mission) => !mission.optional && pendingIds.has(mission.id));
+  const missionMap = new Map(missions.map((mission) => [mission.id, mission]));
+  const scheduledCount = todayRecords.filter(
+    (record) => !missionMap.get(record.missionId)?.optional,
+  ).length;
 
   if (
     !settings?.dailyBriefingEnabled ||
@@ -75,9 +91,26 @@ export function DailyBriefingOverlay() {
     return null;
 
   async function choose(next: DailyCapacity) {
+    setError(undefined);
     setCapacity(next);
     setSelection(await suggestDailyBriefing(systemDate, next));
   }
+
+  const rule = capacity ? DAILY_COMMAND_RULES[capacity] : undefined;
+  const targetCount = rule ? Math.ceil(scheduledCount * rule.targetCompletionRate) : 0;
+  const selectedIds = capacity
+    ? [
+        selection.mainMissionId,
+        capacity === 'low' ? undefined : selection.supportMissionId,
+        capacity === 'high' ? selection.bonusMissionId : undefined,
+      ].filter((id): id is string => Boolean(id))
+    : [];
+  const requiredPriorityCount = rule ? Math.min(rule.priorityCount, scheduledCount) : 0;
+  const canConfirm =
+    Boolean(capacity) &&
+    scheduledCount > 0 &&
+    selectedIds.length >= requiredPriorityCount &&
+    new Set(selectedIds).size === selectedIds.length;
 
   return (
     <div
@@ -97,8 +130,8 @@ export function DailyBriefingOverlay() {
             <h2>{capacity ? 'Today’s command map' : 'What capacity are we working with?'}</h2>
             <p>
               {capacity
-                ? 'You can change any recommendation. These are priorities only—mission XP and rules stay exactly the same.'
-                : 'No judgment and no hidden score. Your answer only changes how many priorities Snow recommends.'}
+                ? 'Your priorities lead the day, but Steady and High rewards depend on the full scheduled mission list.'
+                : 'Choose honestly. Low protects consistency; Steady and High offer stronger rewards for broader completion.'}
             </p>
           </div>
           <button
@@ -110,13 +143,38 @@ export function DailyBriefingOverlay() {
           </button>
         </header>
 
+        <button className="briefing-help-toggle" onClick={() => setShowHelp(!showHelp)}>
+          <CircleHelp size={16} /> What do Main, Support, Bonus, and Full Clear mean?
+        </button>
+        {showHelp && (
+          <div className="briefing-explainer">
+            <p>
+              <strong>Main</strong> is your highest priority. <strong>Support</strong> is the second
+              objective that keeps the day balanced. <strong>Bonus</strong> is High Capacity’s third
+              priority—not the end of the command.
+            </p>
+            <p>
+              Steady still requires at least 65% of every scheduled daily mission; High requires at
+              least 80%. A <strong>Full Clear</strong> means clearing the entire scheduled list.
+              Multipliers apply to account and stat XP earned by those completed missions during the
+              next Daily Review. Special events and companion rewards are not multiplied.
+            </p>
+            <p>
+              Missing a target never removes XP. You keep every normal reward—you simply do not
+              receive that command’s multiplier. A protected exception counts as resolved, but it
+              creates no mission XP to multiply.
+            </p>
+          </div>
+        )}
+
         {!capacity ? (
           <div className="briefing-capacity">
-            {CAPACITIES.map(({ id, label, description, icon: Icon }) => (
+            {CAPACITIES.map(({ id, label, description, reward, icon: Icon }) => (
               <button key={id} onClick={() => void choose(id)}>
                 <Icon size={24} />
                 <strong>{label}</strong>
                 <span>{description}</span>
+                <small>{reward}</small>
               </button>
             ))}
           </div>
@@ -134,9 +192,23 @@ export function DailyBriefingOverlay() {
                 </button>
               ))}
             </div>
+
+            <div className={`briefing-target briefing-target--${capacity}`}>
+              <strong>
+                {capacity === 'low'
+                  ? 'Continuity plan · no completion quota'
+                  : `${targetCount} of ${scheduledCount} missions required`}
+              </strong>
+              <span>
+                {capacity === 'low'
+                  ? 'Normal mission XP · regular Perfect Day rewards remain available'
+                  : `${rule!.standardMultiplier}× at target · ${rule!.fullClearMultiplier}× when all ${scheduledCount} are cleared`}
+              </span>
+            </div>
+
             <label className="briefing-slot briefing-slot--main">
               <span>
-                <Sparkles size={15} /> MAIN QUEST
+                <Sparkles size={15} /> MAIN MISSION
               </span>
               <select
                 value={selection.mainMissionId ?? ''}
@@ -144,40 +216,49 @@ export function DailyBriefingOverlay() {
                   setSelection({ ...selection, mainMissionId: event.target.value || undefined })
                 }
               >
-                <option value="">Leave open</option>
+                <option value="">Choose Main</option>
                 {options.map((mission) => (
                   <option key={mission.id} value={mission.id}>
                     {mission.name}
                   </option>
                 ))}
               </select>
-              <small>
-                Your clearest priority. Completing it grants only its normal mission rewards.
-              </small>
+              <small>Your highest priority and the first objective Snow wants protected.</small>
             </label>
-            <label className="briefing-slot">
-              <span>
-                <ShieldCheck size={15} /> SUPPORT QUEST
-              </span>
-              <select
-                value={selection.supportMissionId ?? ''}
-                onChange={(event) =>
-                  setSelection({ ...selection, supportMissionId: event.target.value || undefined })
-                }
-              >
-                <option value="">Leave open</option>
-                {options.map((mission) => (
-                  <option key={mission.id} value={mission.id}>
-                    {mission.name}
-                  </option>
-                ))}
-              </select>
-              <small>A second path that keeps the day balanced.</small>
-            </label>
+
             {capacity !== 'low' && (
+              <label className="briefing-slot">
+                <span>
+                  <ShieldCheck size={15} /> SUPPORT MISSION
+                </span>
+                <select
+                  value={selection.supportMissionId ?? ''}
+                  onChange={(event) =>
+                    setSelection({
+                      ...selection,
+                      supportMissionId: event.target.value || undefined,
+                    })
+                  }
+                >
+                  <option value="">Choose Support</option>
+                  {options.map((mission) => (
+                    <option
+                      key={mission.id}
+                      value={mission.id}
+                      disabled={mission.id === selection.mainMissionId}
+                    >
+                      {mission.name}
+                    </option>
+                  ))}
+                </select>
+                <small>Your second priority. Both Main and Support are required.</small>
+              </label>
+            )}
+
+            {capacity === 'high' && (
               <label className="briefing-slot briefing-slot--bonus">
                 <span>
-                  <Sparkles size={15} /> BONUS QUEST · OPTIONAL
+                  <Sparkles size={15} /> BONUS MISSION
                 </span>
                 <select
                   value={selection.bonusMissionId ?? ''}
@@ -185,15 +266,27 @@ export function DailyBriefingOverlay() {
                     setSelection({ ...selection, bonusMissionId: event.target.value || undefined })
                   }
                 >
-                  <option value="">No bonus</option>
+                  <option value="">Choose Bonus</option>
                   {options.map((mission) => (
-                    <option key={mission.id} value={mission.id}>
+                    <option
+                      key={mission.id}
+                      value={mission.id}
+                      disabled={
+                        mission.id === selection.mainMissionId ||
+                        mission.id === selection.supportMissionId
+                      }
+                    >
                       {mission.name}
                     </option>
                   ))}
                 </select>
-                <small>Always optional. Leaving it incomplete has no consequence.</small>
+                <small>The third High Capacity priority. High still requires 80% overall.</small>
               </label>
+            )}
+
+            {error && <p className="form-error">{error}</p>}
+            {!canConfirm && selectedIds.length > 0 && (
+              <p className="briefing-validation">Choose each required priority only once.</p>
             )}
             <div className="briefing-plan__actions">
               <button className="button button--ghost" onClick={() => setCapacity(undefined)}>
@@ -201,24 +294,29 @@ export function DailyBriefingOverlay() {
               </button>
               <button
                 className="button button--primary"
-                disabled={busy}
+                disabled={busy || !canConfirm}
                 onClick={async () => {
                   setBusy(true);
+                  setError(undefined);
                   try {
                     await saveDailyBriefing({ date: systemDate, capacity, ...selection });
                     await refresh();
+                  } catch (caught) {
+                    setError(
+                      caught instanceof Error ? caught.message : 'The command could not be saved.',
+                    );
                   } finally {
                     setBusy(false);
                   }
                 }}
               >
-                <Check size={16} /> {busy ? 'Saving…' : 'Confirm briefing'}
+                <Check size={16} /> {busy ? 'Locking…' : 'Lock today’s command'}
               </button>
             </div>
           </div>
         )}
         <footer>
-          <ShieldCheck size={14} /> Stored only on this device · Edit or skip anytime · No penalties
+          <ShieldCheck size={14} /> Command locks when confirmed · no XP is ever removed for a miss
         </footer>
       </section>
     </div>

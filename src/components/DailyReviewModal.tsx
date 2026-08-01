@@ -6,7 +6,7 @@ import { ProgressBar } from '@/components/ProgressBar';
 import { useGameStore } from '@/store/useGameStore';
 import { formatLongDate } from '@/utils/date';
 import { getMissionDisplayName } from '@/utils/privacy';
-import type { DailyMissionRecord, MissionDefinition } from '@/types/game';
+import type { DailyMissionRecord, DailyReview, MissionDefinition } from '@/types/game';
 
 export function DailyReviewModal() {
   const {
@@ -21,7 +21,7 @@ export function DailyReviewModal() {
   } = useGameStore();
   const [records, setRecords] = useState<DailyMissionRecord[]>([]);
   const [finalizing, setFinalizing] = useState(false);
-  const [result, setResult] = useState<string>();
+  const [result, setResult] = useState<DailyReview>();
   const pendingDate = pendingReview?.date;
 
   const reload = async () => {
@@ -62,7 +62,30 @@ export function DailyReviewModal() {
             <Check size={28} />
           </span>
           <p className="eyebrow">CYCLE FINALIZED</p>
-          <h3>{result}</h3>
+          <h3>{result.verdict}</h3>
+          {result.dailyCommandCapacity && (
+            <div
+              className={`review-command-result review-command-result--${result.dailyCommandOutcome}`}
+            >
+              <span>SNOW · DAILY COMMAND</span>
+              <strong>
+                {result.dailyCommandOutcome === 'full-clear'
+                  ? `Full Clear · ${result.dailyCommandMultiplier}×`
+                  : result.dailyCommandOutcome === 'standard-clear'
+                    ? `Command Clear · ${result.dailyCommandMultiplier}×`
+                    : result.dailyCommandCapacity === 'low'
+                      ? 'Low Capacity continuity protected'
+                      : 'Command target not reached'}
+              </strong>
+              <small>
+                {result.dailyCommandBonusXp
+                  ? `+${result.dailyCommandBonusXp} account XP plus matching mission stat XP bonuses`
+                  : result.dailyCommandOutcome === 'missed'
+                    ? 'No XP removed. Every normal mission reward remains yours.'
+                    : 'Normal mission and Perfect Day rewards were preserved.'}
+              </small>
+            </div>
+          )}
           <p>Yesterday is sealed. Today’s objectives are now fully active.</p>
         </div>
       ) : (
@@ -143,7 +166,7 @@ export function DailyReviewModal() {
               setFinalizing(true);
               try {
                 const review = await finalizeReview(pendingReview.date);
-                setResult(review.verdict);
+                setResult(review);
                 window.setTimeout(() => void useGameStore.getState().refresh(), 1800);
               } finally {
                 setFinalizing(false);

@@ -384,7 +384,7 @@ export function SettingsPage() {
               <span>
                 <strong>Snow’s Daily Command Briefing</strong>
                 <small>
-                  Optional low / steady / high capacity planning · no bonus XP or penalties
+                  Low 1× · Steady 65% for 1.5× · High 80% for 2× · larger Full Clear rewards
                 </small>
               </span>
               <input
