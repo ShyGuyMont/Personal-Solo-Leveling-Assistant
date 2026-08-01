@@ -8,6 +8,7 @@ import { stableId } from '@/utils/id';
 import type {
   LocalDateKey,
   TreasuryBill,
+  TreasuryChallengeOutcome,
   TreasuryDailyChallenge,
   TreasuryDebt,
   TreasuryExpenseCategory,
@@ -552,7 +553,7 @@ export async function ensureTreasuryChallenge(
         db.treasuryChallenges.update(challenge.id, {
           status: 'expired',
           resolvedAt: now,
-          stabilityPenalty: 5,
+          stabilityPenalty: challenge.revealedAt ? 5 : 0,
         }),
       ),
   );
@@ -580,11 +581,25 @@ export async function revealTreasuryChallenge(date: LocalDateKey) {
   return db.treasuryChallenges.get(date);
 }
 
-export async function resolveTreasuryChallenge(date: LocalDateKey, status: 'passed' | 'failed') {
+export async function resolveTreasuryChallenge(
+  date: LocalDateKey,
+  status: TreasuryChallengeOutcome,
+) {
   const challenge = await db.treasuryChallenges.get(date);
   if (!challenge) throw new Error('Today’s Cassian challenge is not available.');
   if (challenge.status !== 'active') return challenge;
   const now = new Date().toISOString();
+  if (status === 'declined') {
+    await db.treasuryChallenges.update(date, {
+      status,
+      resolvedAt: now,
+      stabilityPenalty: 0,
+    });
+    return {
+      challenge: await db.treasuryChallenges.get(date),
+      outcome: status,
+    } as const;
+  }
   if (status === 'failed') {
     await db.treasuryChallenges.update(date, {
       status,
@@ -593,7 +608,10 @@ export async function resolveTreasuryChallenge(date: LocalDateKey, status: 'pass
       recoveryPlan:
         'Name what made ordering out easier than the plan, then choose one prepared alternative for the next challenge.',
     });
-    return db.treasuryChallenges.get(date);
+    return {
+      challenge: await db.treasuryChallenges.get(date),
+      outcome: status,
+    } as const;
   }
   const rewardId = stableId('treasury', 'no-eating-out', date);
   const reward = await applyTreasuryReward({
@@ -610,7 +628,7 @@ export async function resolveTreasuryChallenge(date: LocalDateKey, status: 'pass
     stabilityPenalty: 0,
     rewardTransactionId: rewardId,
   });
-  return { challenge: await db.treasuryChallenges.get(date), reward };
+  return { challenge: await db.treasuryChallenges.get(date), outcome: status, reward } as const;
 }
 
 export async function completeTreasuryRecovery(date: LocalDateKey, plan: string) {

@@ -800,7 +800,8 @@ export interface TreasuryWeek {
   reviewedAt?: string;
 }
 
-export type TreasuryChallengeStatus = 'active' | 'passed' | 'failed' | 'expired';
+export type TreasuryChallengeStatus = 'active' | 'passed' | 'failed' | 'declined' | 'expired';
+export type TreasuryChallengeOutcome = Exclude<TreasuryChallengeStatus, 'active' | 'expired'>;
 
 export interface TreasuryDailyChallenge {
   id: LocalDateKey;

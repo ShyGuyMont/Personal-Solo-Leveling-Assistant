@@ -288,7 +288,7 @@ function validateData(data: Record<string, unknown[]>) {
     if (
       !isObject(row) ||
       !validDate(row.date) ||
-      !['active', 'passed', 'failed', 'expired'].includes(String(row.status)) ||
+      !['active', 'passed', 'failed', 'declined', 'expired'].includes(String(row.status)) ||
       !Number.isFinite(row.roll) ||
       Number(row.roll) < 0 ||
       Number(row.roll) > 1 ||

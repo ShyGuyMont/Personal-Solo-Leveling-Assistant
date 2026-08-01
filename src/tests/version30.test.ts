@@ -18,6 +18,7 @@ import {
   recordBillPayment,
   recordDebtPayment,
   recordSavingsContribution,
+  revealTreasuryChallenge,
   resolveTreasuryChallenge,
   saveTreasuryWeekPlan,
 } from '@/game/treasury';
@@ -107,6 +108,24 @@ describe('Version 3.0 Steward systems', () => {
     expect((await db.progression.get('primary'))!.totalXp).toBe(before);
     expect(failed.stabilityScore).toBe(90);
     expect(recovered.stabilityScore).toBe(95);
+  });
+
+  it('allows a directive to be declined before or after acceptance without reward or penalty', async () => {
+    const week = await ensureTreasuryWeek('2026-08-01', 1);
+    const beforeXp = (await db.progression.get('primary'))!.totalXp;
+
+    await ensureTreasuryChallenge('2026-08-01', () => 0);
+    await resolveTreasuryChallenge('2026-08-01', 'declined');
+    expect((await db.treasuryChallenges.get('2026-08-01'))?.status).toBe('declined');
+
+    await ensureTreasuryChallenge('2026-08-02', () => 0);
+    await revealTreasuryChallenge('2026-08-02');
+    await resolveTreasuryChallenge('2026-08-02', 'declined');
+    expect((await db.treasuryChallenges.get('2026-08-02'))?.status).toBe('declined');
+
+    expect((await db.progression.get('primary'))!.totalXp).toBe(beforeXp);
+    expect(await db.xpTransactions.where('kind').equals('treasury').count()).toBe(0);
+    expect((await getTreasuryWeekSummary(week)).stabilityScore).toBe(100);
   });
 
   it('tracks a complete weekly money workflow and rewards review once', async () => {

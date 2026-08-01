@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
+import { CASSIAN_TREASURY_REACTIONS } from '@/config/companions';
 import { db } from '@/db/database';
 import { initializeProfile, seedReferenceData } from '@/db/seed';
 import {
@@ -102,5 +103,17 @@ describe('System companions', () => {
     expect(reaction?.companionId).toBe('ember');
     expect(reaction?.trigger).toBe('lock-in');
     expect(reaction?.message.length).toBeGreaterThan(40);
+  });
+
+  it('keeps Cassian challenge reactions inside the correct outcome dialogue pool', async () => {
+    for (const outcome of ['passed', 'failed', 'declined'] as const) {
+      const reaction = await queueCompanionReaction({
+        trigger: 'treasury',
+        sourceId: `no-eating-out:2026-08-01:${outcome}`,
+        companionId: 'cassian',
+        messagePool: CASSIAN_TREASURY_REACTIONS[outcome],
+      });
+      expect(CASSIAN_TREASURY_REACTIONS[outcome]).toContain(reaction?.message);
+    }
   });
 });

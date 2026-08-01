@@ -32,9 +32,12 @@ function chooseMessage(
   trigger: CompanionTrigger,
   sourceId: string,
   values?: { stat?: string; level?: number },
+  messagePool?: readonly string[],
 ) {
   const companion = getCompanion(companionId);
-  const pool = companion.messages[trigger] ?? companion.messages.mission ?? ['Progress recorded.'];
+  const pool = messagePool?.length
+    ? messagePool
+    : (companion.messages[trigger] ?? companion.messages.mission ?? ['Progress recorded.']);
   const template = pool[hashSource(`${sourceId}:${companionId}:${trigger}`) % pool.length];
   return template
     .replaceAll('{stat}', values?.stat ?? 'stat')
@@ -49,6 +52,7 @@ export async function queueCompanionReaction(input: {
   stat?: StatName;
   statLabel?: string;
   level?: number;
+  messagePool?: readonly string[];
 }) {
   const settings = await db.settings.get('primary');
   if (!settings || settings.companionMode === 'off') return undefined;
@@ -68,10 +72,16 @@ export async function queueCompanionReaction(input: {
     companionId: companion.id,
     trigger: input.trigger,
     sourceId: input.sourceId,
-    message: chooseMessage(companion.id, input.trigger, input.sourceId, {
-      stat: input.statLabel,
-      level: input.level,
-    }),
+    message: chooseMessage(
+      companion.id,
+      input.trigger,
+      input.sourceId,
+      {
+        stat: input.statLabel,
+        level: input.level,
+      },
+      input.messagePool,
+    ),
     createdAt: new Date().toISOString(),
     acknowledged: false,
   } as const;

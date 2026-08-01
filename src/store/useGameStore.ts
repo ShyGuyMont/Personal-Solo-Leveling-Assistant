@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { db } from '@/db/database';
 import { ensureCoreData, initializeProfile as seedProfile } from '@/db/seed';
 import { getEmergencyQuest } from '@/config/dailyEvents';
+import { CASSIAN_TREASURY_REACTIONS } from '@/config/companions';
 import {
   acknowledgeCompanionReaction,
   getNextCompanionReaction,
@@ -102,6 +103,7 @@ interface GameStore extends GameSnapshot {
   acknowledgeTreasuryChallenge: () => Promise<void>;
   passTreasuryChallenge: () => Promise<void>;
   failTreasuryChallenge: () => Promise<void>;
+  declineTreasuryChallenge: () => Promise<void>;
   clearRewardNotice: () => void;
   clearError: () => void;
 }
@@ -493,7 +495,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const challenge = get().treasuryChallenge;
       if (!challenge) return;
       const result = await resolveTreasuryChallenge(get().systemDate, 'passed');
-      if (!result || !('reward' in result)) {
+      if (!result || !('reward' in result) || !result.reward) {
         set({ ...(await readSnapshot()), error: undefined });
         return;
       }
@@ -501,6 +503,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         trigger: 'treasury',
         sourceId: `no-eating-out:${get().systemDate}:passed`,
         companionId: 'cassian',
+        messagePool: CASSIAN_TREASURY_REACTIONS.passed,
       });
       set({
         ...(await readSnapshot()),
@@ -520,16 +523,42 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
   async failTreasuryChallenge() {
     try {
-      await resolveTreasuryChallenge(get().systemDate, 'failed');
+      const result = await resolveTreasuryChallenge(get().systemDate, 'failed');
+      if (!result || !('outcome' in result)) {
+        set({ ...(await readSnapshot()), error: undefined });
+        return;
+      }
       await queueCompanionReaction({
         trigger: 'treasury',
         sourceId: `no-eating-out:${get().systemDate}:failed`,
         companionId: 'cassian',
+        messagePool: CASSIAN_TREASURY_REACTIONS.failed,
       });
       set({ ...(await readSnapshot()), error: undefined });
     } catch (error) {
       set({
         error: error instanceof Error ? error.message : 'The challenge could not be recorded.',
+      });
+      throw error;
+    }
+  },
+  async declineTreasuryChallenge() {
+    try {
+      const result = await resolveTreasuryChallenge(get().systemDate, 'declined');
+      if (!result || !('outcome' in result)) {
+        set({ ...(await readSnapshot()), error: undefined });
+        return;
+      }
+      await queueCompanionReaction({
+        trigger: 'treasury',
+        sourceId: `no-eating-out:${get().systemDate}:declined`,
+        companionId: 'cassian',
+        messagePool: CASSIAN_TREASURY_REACTIONS.declined,
+      });
+      set({ ...(await readSnapshot()), error: undefined });
+    } catch (error) {
+      set({
+        error: error instanceof Error ? error.message : 'The challenge could not be declined.',
       });
       throw error;
     }

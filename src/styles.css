@@ -5940,6 +5940,11 @@ html[data-theme='daybreak'] .bottom-nav {
   border-color: rgba(67, 230, 194, 0.45);
 }
 
+.treasury-challenge-card.is-declined {
+  border-color: rgba(78, 229, 138, 0.28);
+  background: linear-gradient(135deg, rgba(78, 229, 138, 0.05), rgba(15, 20, 24, 0.95));
+}
+
 .treasury-challenge-card.is-failed,
 .treasury-challenge-card.is-expired {
   border-color: rgba(255, 121, 95, 0.34);

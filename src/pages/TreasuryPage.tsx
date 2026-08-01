@@ -123,6 +123,7 @@ export function TreasuryPage() {
     treasuryChallenge,
     passTreasuryChallenge,
     failTreasuryChallenge,
+    declineTreasuryChallenge,
     refresh,
   } = useGameStore();
   const [tab, setTab] = useState<Tab>('command');
@@ -228,6 +229,7 @@ export function TreasuryPage() {
           act={act}
           pass={passTreasuryChallenge}
           fail={failTreasuryChallenge}
+          decline={declineTreasuryChallenge}
         />
       )}
       {tab === 'ledger' && (
@@ -284,6 +286,7 @@ function CommandTab({
   act,
   pass,
   fail,
+  decline,
 }: {
   data: DashboardData;
   hidden: boolean;
@@ -292,6 +295,7 @@ function CommandTab({
   act: (action: () => Promise<unknown>) => Promise<void>;
   pass: () => Promise<void>;
   fail: () => Promise<void>;
+  decline: () => Promise<void>;
 }) {
   const { summary } = data;
   const totalDebt = data.debts
@@ -328,7 +332,14 @@ function CommandTab({
         </article>
       </section>
 
-      <ChallengeCard challenge={challenge} busy={busy} act={act} pass={pass} fail={fail} />
+      <ChallengeCard
+        challenge={challenge}
+        busy={busy}
+        act={act}
+        pass={pass}
+        fail={fail}
+        decline={decline}
+      />
 
       <section className="panel treasury-command-map">
         <div className="treasury-section-heading">
@@ -387,12 +398,14 @@ function ChallengeCard({
   act,
   pass,
   fail,
+  decline,
 }: {
   challenge?: DashboardData['challenges'][number];
   busy: boolean;
   act: (action: () => Promise<unknown>) => Promise<void>;
   pass: () => Promise<void>;
   fail: () => Promise<void>;
+  decline: () => Promise<void>;
 }) {
   const [recovery, setRecovery] = useState(challenge?.recoveryPlan ?? '');
   if (!challenge)
@@ -421,7 +434,9 @@ function ChallengeCard({
               ? 'Directive cleared.'
               : challenge.status === 'failed'
                 ? 'Honest result recorded.'
-                : 'Directive expired.'}
+                : challenge.status === 'declined'
+                  ? 'Directive declined.'
+                  : 'Directive expired.'}
         </h2>
         <p>
           {challenge.status === 'active'
@@ -430,7 +445,9 @@ function ChallengeCard({
               ? `You protected the plan and earned +${challenge.rewardXp} XP.`
               : challenge.status === 'failed'
                 ? 'No account XP was removed. Complete a short recovery plan to rebuild half of the Budget Stability penalty.'
-                : 'No account XP was removed. Return to the next clear choice.'}
+                : challenge.status === 'declined'
+                  ? 'No reward and no penalty. Optional means optional; another day can carry another opportunity.'
+                  : 'No account XP was removed. Return to the next clear choice.'}
         </p>
         {challenge.status === 'active' && (
           <div className="treasury-inline-actions">
@@ -443,6 +460,13 @@ function ChallengeCard({
             </button>
             <button className="button button--ghost" disabled={busy} onClick={() => void act(fail)}>
               I ordered out
+            </button>
+            <button
+              className="button button--ghost"
+              disabled={busy}
+              onClick={() => void act(decline)}
+            >
+              Decline challenge
             </button>
           </div>
         )}

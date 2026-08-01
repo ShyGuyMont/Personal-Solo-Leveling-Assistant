@@ -1,4 +1,5 @@
-import { ShieldCheck, UtensilsCrossed } from 'lucide-react';
+import { ShieldCheck, UtensilsCrossed, X } from 'lucide-react';
+import { useState } from 'react';
 import { getCompanion, getCompanionImage } from '@/config/companions';
 import { useGameStore } from '@/store/useGameStore';
 
@@ -11,8 +12,19 @@ export function TreasuryChallengeOverlay() {
     monthlyCouncil,
     treasuryChallenge,
     acknowledgeTreasuryChallenge,
+    declineTreasuryChallenge,
   } = useGameStore();
   const cassian = getCompanion('cassian');
+  const [busy, setBusy] = useState(false);
+
+  async function run(action: () => Promise<void>) {
+    setBusy(true);
+    try {
+      await action();
+    } finally {
+      setBusy(false);
+    }
+  }
 
   if (
     !settings?.firstDayGuideCompleted ||
@@ -56,14 +68,25 @@ export function TreasuryChallengeOverlay() {
             “Do not rely on a heroic evening. Decide what you will eat before hunger begins
             negotiating.”
           </blockquote>
-          <button
-            className="button button--primary"
-            onClick={() => void acknowledgeTreasuryChallenge()}
-          >
-            <ShieldCheck size={17} /> Accept today’s command
-          </button>
+          <div className="treasury-inline-actions">
+            <button
+              className="button button--primary"
+              disabled={busy}
+              onClick={() => void run(acknowledgeTreasuryChallenge)}
+            >
+              <ShieldCheck size={17} /> Accept today’s command
+            </button>
+            <button
+              className="button button--ghost"
+              disabled={busy}
+              onClick={() => void run(declineTreasuryChallenge)}
+            >
+              <X size={17} /> Decline today
+            </button>
+          </div>
           <small className="treasury-fine-print">
-            Rolled independently each day at a 75% chance · You can change this in the Treasury
+            Declining has no penalty · Rolled independently each day at a 75% chance · You can
+            change this in the Treasury
           </small>
         </div>
       </section>

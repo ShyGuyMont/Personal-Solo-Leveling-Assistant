@@ -327,11 +327,12 @@ export function AboutPage() {
         <details>
           <summary>How does Cassian’s No Eating Out challenge work?</summary>
           <p>
-            Each System day has an independent 75% chance to receive the optional directive. Passing
-            grants the displayed account XP plus Stewardship progress. If you order out, record the
-            result honestly: no core XP is removed. Budget Stability falls temporarily, and a short
-            recovery debrief can restore half of that signal penalty. The challenge can be turned
-            off in the Treasury Weekly tab.
+            Each System day has an independent 75% chance to receive the optional directive. You can
+            decline before or after accepting with no reward, penalty, or congratulatory message.
+            Passing grants the displayed account XP plus Stewardship progress. If you accept and
+            then order out, record the result honestly: no core XP is removed. Budget Stability
+            falls temporarily, and a short recovery debrief can restore half of that signal penalty.
+            The challenge can be turned off in the Treasury Weekly tab.
           </p>
         </details>
         <details>

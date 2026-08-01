@@ -1,4 +1,10 @@
-import type { CompanionId, CompanionTrigger, MissionCategory, StatName } from '@/types/game';
+import type {
+  CompanionId,
+  CompanionTrigger,
+  MissionCategory,
+  StatName,
+  TreasuryChallengeOutcome,
+} from '@/types/game';
 
 export interface CompanionDefinition {
   id: CompanionId;
@@ -15,6 +21,27 @@ export interface CompanionDefinition {
   stats: StatName[];
   messages: Partial<Record<CompanionTrigger, string[]>>;
 }
+
+export const CASSIAN_TREASURY_REACTIONS: Record<TreasuryChallengeOutcome, readonly string[]> = {
+  passed: [
+    'Challenge cleared. You did not merely avoid a purchase—you proved convenience does not command you.',
+    'The kitchen line held. Today’s savings are small on paper and powerful as evidence.',
+    'Directive complete. You prepared, paused, and protected tomorrow from paying for today.',
+    'No eating out confirmed. That is one more vote for the future you are financing on purpose.',
+  ],
+  failed: [
+    'The dining challenge failed, and the entry is honest. We recover with a prepared alternative, not punishment.',
+    'Order recorded. No account XP was taken. Let us identify what made convenience win and prepare for the next round.',
+    'Today’s line did not hold. That is information, not a verdict—record the trigger and make the next meal easier.',
+    'Failure acknowledged without shame. The recovery plan matters more than pretending the order did not happen.',
+  ],
+  declined: [
+    'Directive declined. Optional means optional; there is no penalty, reward, or judgment attached.',
+    'Today did not fit the challenge. The ledger remains honest, and we will wait for another clean opportunity.',
+    'Decline recorded. We do not manufacture a victory after the day has already made the challenge impossible.',
+    'No challenge today. Keep the information, skip the shame, and return when the next directive fits honestly.',
+  ],
+};
 
 export const COMPANIONS: CompanionDefinition[] = [
   {
