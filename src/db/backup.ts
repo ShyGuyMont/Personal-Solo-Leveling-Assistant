@@ -1,8 +1,8 @@
 import { db, TABLE_NAMES } from '@/db/database';
 import type { BackupSnapshot, Profile, SaveFile, Settings, AccountProgression } from '@/types/game';
 
-const SAVE_VERSION = 7;
-const MAX_IMPORT_BYTES = 8 * 1024 * 1024;
+export const SAVE_VERSION = 9;
+export const MAX_IMPORT_BYTES = 32 * 1024 * 1024;
 const MAX_SNAPSHOTS = 5;
 const FORBIDDEN_KEYS = new Set(['__proto__', 'prototype', 'constructor']);
 
@@ -87,14 +87,63 @@ function migrateData(
   if (version <= 6) {
     data.campfireRecaps ??= [];
   }
+  if (version <= 7) {
+    data.dailyBriefings ??= [];
+    data.campaignArcs ??= [];
+    data.arcMilestones ??= [];
+    data.companionQuestProgress ??= [];
+    data.monthlyCouncils ??= [];
+  }
+  if (version <= 8) {
+    data.treasurySettings ??= [];
+    data.treasuryTransactions ??= [];
+    data.treasuryBills ??= [];
+    data.treasuryDebts ??= [];
+    data.treasurySavingsGoals ??= [];
+    data.treasuryWeeks ??= [];
+    data.treasuryChallenges ??= [];
+  }
+  const migrationTime = new Date().toISOString();
+  if (!data.treasurySettings.some((row) => isObject(row) && row.id === 'primary')) {
+    data.treasurySettings.push({
+      id: 'primary',
+      currency: 'USD',
+      weeklyReviewDay: 0,
+      challengeEnabled: true,
+      challengeChance: 0.75,
+      challengeRewardXp: 60,
+      createdAt: migrationTime,
+      updatedAt: migrationTime,
+    });
+  }
+  if (!data.stats.some((row) => isObject(row) && row.id === 'stewardship')) {
+    data.stats.push({
+      id: 'stewardship',
+      name: 'stewardship',
+      level: 1,
+      totalXp: 0,
+      currentLevelXp: 0,
+      xpToNextLevel: 223,
+      lifetimeXpGained: 0,
+      momentum: 50,
+      trend: 'stable',
+      neglectedDays: 0,
+      protectedFloorXp: 0,
+    });
+  }
   data.settings = data.settings.map((row) => {
     if (isObject(row)) {
       const companionIds = Array.isArray(row.enabledCompanionIds)
         ? row.enabledCompanionIds.filter((id): id is string => typeof id === 'string')
         : ['rook', 'selah', 'cipher', 'haven'];
-      const migratedCompanionIds = version <= 6 && !companionIds.includes('ember')
-        ? [...companionIds, 'ember']
-        : companionIds;
+      const withEmber =
+        version <= 6 && !companionIds.includes('ember') ? [...companionIds, 'ember'] : companionIds;
+      const migratedCompanionIds =
+        version <= 7 && !withEmber.includes('amara') ? [...withEmber, 'amara'] : withEmber;
+      const withCassian =
+        version <= 8 && !migratedCompanionIds.includes('cassian')
+          ? [...migratedCompanionIds, 'cassian']
+          : migratedCompanionIds;
       return {
         privacyScreenEnabled: false,
         sensitiveMissionAlias: 'Integrity Protocol',
@@ -104,8 +153,9 @@ function migrateData(
         colorTheme: 'abyss',
         dailyEventsEnabled: true,
         companionMode: 'balanced',
+        dailyBriefingEnabled: true,
         ...row,
-        enabledCompanionIds: ['snow', ...migratedCompanionIds.filter((id) => id !== 'snow')],
+        enabledCompanionIds: ['snow', ...withCassian.filter((id) => id !== 'snow')],
       };
     }
     return row;
@@ -156,6 +206,96 @@ function validateData(data: Record<string, unknown[]>) {
   for (const row of data.stats) {
     if (!isObject(row) || Number(row.level) < 1 || Number(row.totalXp) < 0) {
       throw new Error('A stat contains an impossible value.');
+    }
+  }
+
+  const treasurySettings = requiredSingleton<Record<string, unknown>>(data, 'treasurySettings');
+  if (
+    treasurySettings.currency !== 'USD' ||
+    typeof treasurySettings.challengeEnabled !== 'boolean' ||
+    !Number.isFinite(treasurySettings.challengeChance) ||
+    Number(treasurySettings.challengeChance) < 0 ||
+    Number(treasurySettings.challengeChance) > 1
+  ) {
+    throw new Error('Treasury challenge settings are not valid.');
+  }
+  const validDate = (value: unknown) =>
+    typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value);
+  const validCents = (value: unknown, allowZero = false) =>
+    Number.isInteger(value) &&
+    Number(value) >= (allowZero ? 0 : 1) &&
+    Number(value) <= 1_000_000_000;
+  const transactionKinds = new Set([
+    'income',
+    'expense',
+    'bill-payment',
+    'debt-payment',
+    'savings',
+    'adjustment',
+  ]);
+  for (const row of data.treasuryTransactions) {
+    if (
+      !isObject(row) ||
+      !validDate(row.date) ||
+      !transactionKinds.has(String(row.kind)) ||
+      !validCents(row.amountCents) ||
+      typeof row.label !== 'string' ||
+      !row.label.trim()
+    ) {
+      throw new Error('A Treasury ledger entry contains an impossible value.');
+    }
+  }
+  for (const row of data.treasuryBills) {
+    if (
+      !isObject(row) ||
+      !validCents(row.amountCents) ||
+      !Number.isInteger(row.dueDay) ||
+      Number(row.dueDay) < 1 ||
+      Number(row.dueDay) > 31
+    ) {
+      throw new Error('A Treasury bill contains an impossible value.');
+    }
+  }
+  for (const row of data.treasuryDebts) {
+    if (
+      !isObject(row) ||
+      !validCents(row.balanceCents, true) ||
+      (row.aprBasisPoints !== undefined &&
+        (!validCents(row.aprBasisPoints, true) || Number(row.aprBasisPoints) > 10000))
+    ) {
+      throw new Error('A Treasury debt account contains an impossible value.');
+    }
+  }
+  for (const row of data.treasurySavingsGoals) {
+    if (!isObject(row) || !validCents(row.targetCents) || !validCents(row.currentCents, true)) {
+      throw new Error('A Treasury savings goal contains an impossible value.');
+    }
+  }
+  for (const row of data.treasuryWeeks) {
+    if (
+      !isObject(row) ||
+      !validDate(row.weekStart) ||
+      !validDate(row.weekEnd) ||
+      !['planned', 'reviewed'].includes(String(row.status)) ||
+      !['spendingLimitCents', 'diningLimitCents', 'savingsTargetCents', 'debtTargetCents'].every(
+        (key) => validCents(row[key], true),
+      )
+    ) {
+      throw new Error('A Treasury weekly plan contains an impossible value.');
+    }
+  }
+  for (const row of data.treasuryChallenges) {
+    if (
+      !isObject(row) ||
+      !validDate(row.date) ||
+      !['active', 'passed', 'failed', 'expired'].includes(String(row.status)) ||
+      !Number.isFinite(row.roll) ||
+      Number(row.roll) < 0 ||
+      Number(row.roll) > 1 ||
+      !validCents(row.rewardXp, true) ||
+      !validCents(row.stabilityPenalty, true)
+    ) {
+      throw new Error('A Treasury challenge contains an impossible value.');
     }
   }
 }
@@ -240,6 +380,8 @@ export async function downloadSave() {
   link.download = `the-system-save-${save.exportedAt.slice(0, 10)}.json`;
   link.click();
   URL.revokeObjectURL(url);
+  const exportTime = new Date().toISOString();
+  await db.appMetadata.put({ id: 'last-manual-export', value: exportTime, updatedAt: exportTime });
   const achievement = await db.achievements.get('first-backup');
   if (achievement && !achievement.unlockedAt) {
     const now = new Date().toISOString();
@@ -266,7 +408,7 @@ export async function downloadSave() {
 
 export async function prepareSaveImport(file: File): Promise<PreparedImport> {
   if (file.size > MAX_IMPORT_BYTES) {
-    throw new Error('That file is too large. The import limit is 8 MB.');
+    throw new Error('That file is too large. The import limit is 32 MB.');
   }
   const text = await readFileText(file);
   const parsed = safeParse(text);

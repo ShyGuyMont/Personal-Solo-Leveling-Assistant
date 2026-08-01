@@ -12,7 +12,14 @@ import { createChallengeProgress, chooseRotatingChallenge } from '@/game/challen
 import { accountXpForLevel } from '@/game/xp';
 import { ALL_STATS, createInitialStat } from '@/game/stats';
 import { getSystemDateKey, startOfMonth, startOfWeek } from '@/utils/date';
-import type { AccountProgression, Focus, LocalDateKey, Profile, Settings } from '@/types/game';
+import type {
+  AccountProgression,
+  Focus,
+  LocalDateKey,
+  Profile,
+  Settings,
+  TreasurySettings,
+} from '@/types/game';
 
 export function createDefaultSettings(): Settings {
   return {
@@ -34,13 +41,27 @@ export function createDefaultSettings(): Settings {
     colorTheme: 'abyss',
     dailyEventsEnabled: true,
     companionMode: 'balanced',
-    enabledCompanionIds: ['snow', 'rook', 'selah', 'cipher', 'haven', 'ember'],
+    enabledCompanionIds: ['snow', 'rook', 'selah', 'cipher', 'haven', 'ember', 'amara', 'cassian'],
     notificationsEnabled: false,
     advancedBalanceUnlocked: false,
     privacyScreenEnabled: false,
     sensitiveMissionAlias: 'Integrity Protocol',
     firstDayGuideCompleted: false,
     soundVolume: 0.55,
+    dailyBriefingEnabled: true,
+  };
+}
+
+export function createDefaultTreasurySettings(now = new Date().toISOString()): TreasurySettings {
+  return {
+    id: 'primary',
+    currency: 'USD',
+    weeklyReviewDay: 0,
+    challengeEnabled: true,
+    challengeChance: 0.75,
+    challengeRewardXp: 60,
+    createdAt: now,
+    updatedAt: now,
   };
 }
 
@@ -131,12 +152,14 @@ export async function initializeProfile(input: {
       db.challengeProgress,
       db.dailyReviews,
       db.cosmeticUnlocks,
+      db.treasurySettings,
     ],
     async () => {
       await db.profiles.put(profile);
       await db.settings.put(settings);
       await db.progression.put(createDefaultProgression());
       await db.stats.bulkPut(ALL_STATS.map(createInitialStat));
+      await db.treasurySettings.put(createDefaultTreasurySettings(now));
       await db.titles.put({
         id: 'newly-awakened',
         titleId: 'newly-awakened',
@@ -158,9 +181,9 @@ export async function initializeProfile(input: {
         },
       ]);
       await db.appMetadata.bulkPut([
-        { id: 'schema-seeded', value: 7, updatedAt: now },
+        { id: 'schema-seeded', value: 9, updatedAt: now },
         { id: 'last-system-day', value: systemDate, updatedAt: now },
-        { id: 'app-version', value: '2.1.0', updatedAt: now },
+        { id: 'app-version', value: '3.0.0', updatedAt: now },
       ]);
       await ensureRotatingChallenges(systemDate, settings.weekStartsOn);
     },
@@ -174,12 +197,24 @@ export async function ensureCoreData() {
   if (!profile) return;
   const settings = (await db.settings.get('primary')) ?? createDefaultSettings();
   const progression = await db.progression.get('primary');
-  const stats = await db.stats.count();
-  await db.transaction('rw', db.settings, db.progression, db.stats, async () => {
-    if (!(await db.settings.get('primary'))) await db.settings.put(settings);
-    if (!progression) await db.progression.put(createDefaultProgression());
-    if (!stats) await db.stats.bulkPut(ALL_STATS.map(createInitialStat));
-  });
+  const treasurySettings = await db.treasurySettings.get('primary');
+  await db.transaction(
+    'rw',
+    db.settings,
+    db.progression,
+    db.stats,
+    db.treasurySettings,
+    async () => {
+      if (!(await db.settings.get('primary'))) await db.settings.put(settings);
+      if (!progression) await db.progression.put(createDefaultProgression());
+      const existingStats = new Set((await db.stats.toArray()).map((stat) => stat.id));
+      const missingStats = ALL_STATS.filter((stat) => !existingStats.has(stat));
+      if (missingStats.length) await db.stats.bulkPut(missingStats.map(createInitialStat));
+      if (!treasurySettings) {
+        await db.treasurySettings.put(createDefaultTreasurySettings());
+      }
+    },
+  );
   const systemDate = getSystemDateKey(new Date(), settings.resetTime, settings.timeZone);
   await ensureRotatingChallenges(systemDate, settings.weekStartsOn);
 }

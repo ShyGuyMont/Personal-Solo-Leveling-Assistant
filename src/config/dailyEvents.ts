@@ -93,6 +93,20 @@ export const EMERGENCY_QUESTS: EmergencyQuestTemplate[] = [
     ],
     companionId: 'haven',
   },
+  {
+    id: 'open-heart-signal',
+    title: 'Open Heart Signal',
+    description:
+      'Choose one safe act of relationship courage beyond the normal mission: sincere appreciation, an honest request, attentive time, repair, or a healthy boundary.',
+    category: 'character',
+    accountXp: 115,
+    statRewards: [
+      { stat: 'empathy', xp: 32 },
+      { stat: 'character', xp: 22 },
+      { stat: 'willpower', xp: 12 },
+    ],
+    companionId: 'amara',
+  },
 ];
 
 export const DAILY_EVENT_ODDS = {
@@ -103,4 +117,3 @@ export const DAILY_EVENT_ODDS = {
 export function getEmergencyQuest(id?: string) {
   return EMERGENCY_QUESTS.find((quest) => quest.id === id);
 }
-

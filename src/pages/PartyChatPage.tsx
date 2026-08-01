@@ -116,9 +116,10 @@ export function PartyChatPage() {
       ? getMoodDefinition(activeCheckIn.mood).accent
       : getSupportTopic(activeSupport!.topic).accent;
     const isWholeParty = activeCheckIn || activeSupport?.audience === 'party';
-    const audienceCompanion = activeSupport && activeSupport.audience !== 'party'
-      ? getCompanion(activeSupport.audience)
-      : undefined;
+    const audienceCompanion =
+      activeSupport && activeSupport.audience !== 'party'
+        ? getCompanion(activeSupport.audience)
+        : undefined;
     return (
       <div className="page party-chat-page">
         <div className="party-chat__topbar">
@@ -131,15 +132,20 @@ export function PartyChatPage() {
           >
             <ArrowLeft size={17} /> Party Channel
           </button>
-          <span className="party-chat__saved"><ShieldCheck size={15} /> Saved locally</span>
+          <span className="party-chat__saved">
+            <ShieldCheck size={15} /> Saved locally
+          </span>
         </div>
 
         <section className="party-conversation" aria-live="polite">
           <header className="party-conversation__header">
             <p className="eyebrow">
-              {activeCheckIn ? 'PARTY CHECK-IN' : 'DIRECT SUPPORT'} · {formatLongDate(conversation.date)}
+              {activeCheckIn ? 'PARTY CHECK-IN' : 'DIRECT SUPPORT'} ·{' '}
+              {formatLongDate(conversation.date)}
             </p>
-            <h1><span style={{ color: accent }}>{title}</span></h1>
+            <h1>
+              <span style={{ color: accent }}>{title}</span>
+            </h1>
             <p>
               {isWholeParty
                 ? 'Everyone is here. No points, no judgment—just your party meeting you where you are.'
@@ -158,10 +164,12 @@ export function PartyChatPage() {
                   <article
                     key={message.id}
                     className={`party-message party-message--${message.role} ${companion.primary ? 'party-message--snow' : ''}`}
-                    style={{
-                      '--companion-accent': companion.accent,
-                      '--message-delay': `${message.order * 90}ms`,
-                    } as CSSProperties}
+                    style={
+                      {
+                        '--companion-accent': companion.accent,
+                        '--message-delay': `${message.order * 90}ms`,
+                      } as CSSProperties
+                    }
                   >
                     <div className="party-message__portrait">
                       <img src={getCompanionImage(companion.image)} alt="" />
@@ -203,7 +211,9 @@ export function PartyChatPage() {
             >
               <RotateCcw size={17} /> Start another
             </button>
-            <Link className="button button--primary" to="/">Return to System</Link>
+            <Link className="button button--primary" to="/">
+              Return to System
+            </Link>
           </footer>
         </section>
       </div>
@@ -215,8 +225,12 @@ export function PartyChatPage() {
   return (
     <div className="page party-chat-page">
       <div className="party-chat__topbar">
-        <Link className="text-link" to="/headquarters"><ArrowLeft size={17} /> Headquarters</Link>
-        <span className="party-chat__saved"><LockKeyhole size={15} /> Private & offline</span>
+        <Link className="text-link" to="/headquarters">
+          <ArrowLeft size={17} /> Headquarters
+        </Link>
+        <span className="party-chat__saved">
+          <LockKeyhole size={15} /> Private & offline
+        </span>
       </div>
 
       <section className="party-chat-hero panel">
@@ -227,12 +241,18 @@ export function PartyChatPage() {
         <div className="party-chat-hero__copy">
           <p className="eyebrow">SNOW OPENED THE PARTY CHANNEL</p>
           <h1>What do you need, {firstName}?</h1>
-          <p>“Check in, ask for support, or return to words you wanted to keep. The channel is yours.”</p>
+          <p>
+            “Check in, ask for support, or return to words you wanted to keep. The channel is
+            yours.”
+          </p>
         </div>
       </section>
 
       <nav className="party-channel-tabs" aria-label="Party Channel views">
-        <button className={tab === 'check-in' ? 'is-active' : ''} onClick={() => setTab('check-in')}>
+        <button
+          className={tab === 'check-in' ? 'is-active' : ''}
+          onClick={() => setTab('check-in')}
+        >
           <Radio size={17} /> Check-in
         </button>
         <button className={tab === 'support' ? 'is-active' : ''} onClick={() => setTab('support')}>
@@ -247,7 +267,10 @@ export function PartyChatPage() {
         <>
           <section className="panel mood-selector">
             <header className="section-header">
-              <div><p className="eyebrow">EMOTIONAL CHECK-IN</p><h2>How are you feeling?</h2></div>
+              <div>
+                <p className="eyebrow">EMOTIONAL CHECK-IN</p>
+                <h2>How are you feeling?</h2>
+              </div>
               <MessageCircle size={21} />
             </header>
             <div className="mood-grid">
@@ -261,7 +284,9 @@ export function PartyChatPage() {
                     onClick={() => void chooseMood(mood.id)}
                     disabled={creating}
                   >
-                    <span><Icon size={20} /></span>
+                    <span>
+                      <Icon size={20} />
+                    </span>
                     <strong>{mood.label}</strong>
                     <small>{mood.description}</small>
                   </button>
@@ -270,13 +295,18 @@ export function PartyChatPage() {
             </div>
             <div className="party-chat__privacy-note">
               <ShieldCheck size={17} />
-              <span>This is support, not a score. Your answer changes no XP, streak, mission, or reward.</span>
+              <span>
+                This is support, not a score. Your answer changes no XP, streak, mission, or reward.
+              </span>
             </div>
           </section>
           {recentCheckIns.length > 0 && (
             <section className="party-chat-history panel">
               <header className="section-header">
-                <div><p className="eyebrow">RECENT CHECK-INS</p><h2>Your party remembers</h2></div>
+                <div>
+                  <p className="eyebrow">RECENT CHECK-INS</p>
+                  <h2>Your party remembers</h2>
+                </div>
                 <Sparkles size={20} />
               </header>
               <div className="party-chat-history__list">
@@ -285,12 +315,17 @@ export function PartyChatPage() {
                   return (
                     <div key={checkIn.id}>
                       <span style={{ background: mood.accent }} />
-                      <div><strong>{mood.label}</strong><small>{formatLongDate(checkIn.date)}</small></div>
+                      <div>
+                        <strong>{mood.label}</strong>
+                        <small>{formatLongDate(checkIn.date)}</small>
+                      </div>
                     </div>
                   );
                 })}
               </div>
-              <Link to="/archive" className="text-link">Open full Archive</Link>
+              <Link to="/archive" className="text-link">
+                Open full Archive
+              </Link>
             </section>
           )}
         </>
@@ -301,7 +336,9 @@ export function PartyChatPage() {
           <header className="section-header">
             <div>
               <p className="eyebrow">DIRECT SUPPORT</p>
-              <h2>{supportTopic ? 'Who do you want to hear from?' : 'What would help right now?'}</h2>
+              <h2>
+                {supportTopic ? 'Who do you want to hear from?' : 'What would help right now?'}
+              </h2>
             </div>
             <MessagesSquare size={21} />
           </header>
@@ -321,7 +358,10 @@ export function PartyChatPage() {
             </div>
           ) : (
             <>
-              <button className="text-link direct-support__back" onClick={() => setSupportTopic(undefined)}>
+              <button
+                className="text-link direct-support__back"
+                onClick={() => setSupportTopic(undefined)}
+              >
                 <ArrowLeft size={16} /> Choose a different need
               </button>
               <div className="direct-support__prompt">
@@ -329,14 +369,31 @@ export function PartyChatPage() {
                 <p>“{getSupportTopic(supportTopic).prompt}”</p>
               </div>
               <div className="support-audience-grid">
-                <button className="support-audience support-audience--party" onClick={() => void openSupport('party')} disabled={creating}>
-                  <span><Users size={23} /></span>
-                  <div><strong>Whole Party</strong><small>Everyone responds; Snow opens and closes.</small></div>
+                <button
+                  className="support-audience support-audience--party"
+                  onClick={() => void openSupport('party')}
+                  disabled={creating}
+                >
+                  <span>
+                    <Users size={23} />
+                  </span>
+                  <div>
+                    <strong>Whole Party</strong>
+                    <small>Everyone responds; Snow opens and closes.</small>
+                  </div>
                 </button>
                 {COMPANIONS.map((companion) => (
-                  <button key={companion.id} className="support-audience" onClick={() => void openSupport(companion.id)} disabled={creating}>
+                  <button
+                    key={companion.id}
+                    className="support-audience"
+                    onClick={() => void openSupport(companion.id)}
+                    disabled={creating}
+                  >
                     <img src={getCompanionImage(companion.image)} alt="" />
-                    <div><strong>{companion.name}</strong><small>{companion.title}</small></div>
+                    <div>
+                      <strong>{companion.name}</strong>
+                      <small>{companion.title}</small>
+                    </div>
                   </button>
                 ))}
               </div>
@@ -344,13 +401,17 @@ export function PartyChatPage() {
           )}
           <div className="party-chat__privacy-note">
             <ShieldCheck size={17} />
-            <span>Direct Support is selection-based, private, offline, and never changes progression.</span>
+            <span>
+              Direct Support is selection-based, private, offline, and never changes progression.
+            </span>
           </div>
           {recentSupport.length > 0 && !supportTopic && (
             <div className="direct-support__recent">
               <p className="eyebrow">RECENT SUPPORT CHANNELS</p>
               {recentSupport.slice(0, 3).map((item) => (
-                <span key={item.id}>{getSupportTopic(item.topic).label} · {formatLongDate(item.date)}</span>
+                <span key={item.id}>
+                  {getSupportTopic(item.topic).label} · {formatLongDate(item.date)}
+                </span>
               ))}
             </div>
           )}
@@ -360,17 +421,30 @@ export function PartyChatPage() {
       {tab === 'saved' && (
         <section className="panel words-to-carry">
           <header className="section-header">
-            <div><p className="eyebrow">WORDS TO CARRY</p><h2>Messages you kept</h2></div>
+            <div>
+              <p className="eyebrow">WORDS TO CARRY</p>
+              <h2>Messages you kept</h2>
+            </div>
             <Heart size={21} />
           </header>
-          <p className="words-to-carry__intro">Tap the heart beside any Party message, banter line, milestone celebration, or companion pop-up to keep it here.</p>
+          <p className="words-to-carry__intro">
+            Tap the heart beside any Party message, banter line, milestone celebration, or companion
+            pop-up to keep it here.
+          </p>
           <div className="words-to-carry__list">
             {favorites.map((favorite) => {
               const companion = getCompanion(favorite.companionId);
               return (
-                <article key={favorite.id} style={{ '--companion-accent': companion.accent } as CSSProperties}>
+                <article
+                  key={favorite.id}
+                  style={{ '--companion-accent': companion.accent } as CSSProperties}
+                >
                   <img src={getCompanionImage(companion.image)} alt="" />
-                  <div><strong>{companion.name}</strong><p>“{favorite.message}”</p><small>{favorite.sourceType.replace('-', ' ')}</small></div>
+                  <div>
+                    <strong>{companion.name}</strong>
+                    <p>“{favorite.message}”</p>
+                    <small>{favorite.sourceType.replace('-', ' ')}</small>
+                  </div>
                   <FavoriteMessageButton
                     active
                     onToggle={async () => {
@@ -388,7 +462,10 @@ export function PartyChatPage() {
               );
             })}
             {!favorites.length && (
-              <div className="empty-state"><Heart size={22} /><span>Messages you favorite will wait for you here.</span></div>
+              <div className="empty-state">
+                <Heart size={22} />
+                <span>Messages you favorite will wait for you here.</span>
+              </div>
             )}
           </div>
         </section>

@@ -27,7 +27,8 @@ export type StatName =
   | 'focus'
   | 'vitality'
   | 'character'
-  | 'empathy';
+  | 'empathy'
+  | 'stewardship';
 export type ChallengeKind = 'weekly' | 'monthly' | 'boss' | 'rank-trial' | 'recovery';
 export type ChallengeCategory = MissionCategory | 'balanced' | 'recovery' | 'rank';
 export type DifficultyTier = 'I' | 'II' | 'III' | 'IV' | 'V';
@@ -35,7 +36,8 @@ export type Rarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'as
 export type RecoveryReason = 'illness' | 'injury' | 'travel' | 'emergency' | 'overload' | 'other';
 export type InterfaceStyle = 'clean' | 'system';
 export type ColorTheme = 'abyss' | 'daybreak';
-export type CompanionId = 'snow' | 'rook' | 'selah' | 'cipher' | 'haven' | 'ember';
+export type CompanionId =
+  'snow' | 'rook' | 'selah' | 'cipher' | 'haven' | 'ember' | 'amara' | 'cassian';
 export type CompanionMode = 'off' | 'quiet' | 'balanced' | 'talkative';
 export type MoodId =
   | 'energized'
@@ -49,12 +51,7 @@ export type MoodId =
   | 'lonely'
   | 'unsure';
 export type SupportTopicId =
-  | 'motivation'
-  | 'make-a-plan'
-  | 'faith-perspective'
-  | 'calm-down'
-  | 'recover'
-  | 'celebrate';
+  'motivation' | 'make-a-plan' | 'faith-perspective' | 'calm-down' | 'recover' | 'celebrate';
 export type SupportAudience = 'party' | CompanionId;
 export type FavoriteMessageSource =
   | 'check-in'
@@ -62,16 +59,16 @@ export type FavoriteMessageSource =
   | 'banter'
   | 'reaction'
   | 'campfire'
-  | 'milestone';
+  | 'council'
+  | 'milestone'
+  | 'treasury';
 export type DailyEventKind = 'none' | 'emergency-quest' | 'mission-pass';
+export type DailyCapacity = 'low' | 'steady' | 'high';
+export type CampaignArcStatus = 'active' | 'paused' | 'completed' | 'archived';
+export type ArcMilestoneStatus = 'pending' | 'completed';
+export type CompanionQuestStatus = 'active' | 'paused' | 'completed';
 export type DailyEventStatus =
-  | 'none'
-  | 'unrevealed'
-  | 'active'
-  | 'completed'
-  | 'claimed'
-  | 'declined'
-  | 'expired';
+  'none' | 'unrevealed' | 'active' | 'completed' | 'claimed' | 'declined' | 'expired';
 export type CompanionTrigger =
   | 'daily-briefing'
   | 'mission'
@@ -81,6 +78,7 @@ export type CompanionTrigger =
   | 'mission-pass'
   | 'comeback'
   | 'lock-in'
+  | 'treasury'
   | 'achievement';
 
 export interface Profile {
@@ -122,6 +120,7 @@ export interface Settings {
   sensitiveMissionAlias: string;
   firstDayGuideCompleted: boolean;
   soundVolume: number;
+  dailyBriefingEnabled: boolean;
 }
 
 export interface StatReward {
@@ -245,6 +244,8 @@ export interface XpTransaction {
     | 'mission'
     | 'perfect-day'
     | 'challenge'
+    | 'companion-quest'
+    | 'treasury'
     | 'daily-event'
     | 'recovery'
     | 'reversal'
@@ -263,6 +264,7 @@ export interface StatTransaction {
     | 'mission'
     | 'perfect-day'
     | 'challenge'
+    | 'treasury'
     | 'daily-event'
     | 'recovery'
     | 'reversal'
@@ -414,7 +416,7 @@ export interface CosmeticUnlock {
 export interface BackupSnapshot {
   id: string;
   createdAt: string;
-  reason: 'daily-finalization' | 'before-import' | 'before-reset' | 'manual';
+  reason: 'daily-finalization' | 'before-import' | 'before-reset' | 'manual' | 'archive-shield';
   byteSize: number;
   data: Record<string, unknown[]>;
 }
@@ -445,7 +447,7 @@ export interface PeriodicReport {
 
 export interface ProgressionEvent {
   id: string;
-  kind: 'level-up' | 'level-milestone' | 'rank-up' | 'achievement' | 'cosmetic';
+  kind: 'level-up' | 'level-milestone' | 'rank-up' | 'achievement' | 'cosmetic' | 'questline';
   createdAt: string;
   headline: string;
   detail: string;
@@ -545,6 +547,11 @@ export interface CampfireMetrics {
   categoryAvailable: Partial<Record<MissionCategory, number>>;
   strongestCategory?: MissionCategory;
   focusCategory?: MissionCategory;
+  relationshipActions?: number;
+  treasuryReviews?: number;
+  noEatingOutWins?: number;
+  savingsContributedCents?: number;
+  debtPaidCents?: number;
 }
 
 export interface CampfireRecap {
@@ -555,6 +562,272 @@ export interface CampfireRecap {
   acknowledged: boolean;
   metrics: CampfireMetrics;
   messages: PartyChatMessage[];
+}
+
+export interface DailyCommandBriefing {
+  id: LocalDateKey;
+  date: LocalDateKey;
+  capacity: DailyCapacity;
+  status: 'planned' | 'skipped';
+  mainMissionId?: string;
+  supportMissionId?: string;
+  bonusMissionId?: string;
+  snowMessage: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CampaignArc {
+  id: string;
+  name: string;
+  purpose: string;
+  category: MissionCategory | 'balanced' | 'treasury';
+  companionId: CompanionId;
+  status: CampaignArcStatus;
+  createdAt: string;
+  updatedAt: string;
+  targetDate?: LocalDateKey;
+  completedAt?: string;
+}
+
+export interface ArcMilestone {
+  id: string;
+  arcId: string;
+  title: string;
+  description: string;
+  order: number;
+  status: ArcMilestoneStatus;
+  createdAt: string;
+  completedAt?: string;
+  note?: string;
+}
+
+export type QuestObjectiveMetric =
+  | 'manual'
+  | 'mission-count'
+  | 'category-count'
+  | 'completed-days'
+  | 'perfect-days'
+  | 'daily-reviews'
+  | 'party-check-ins'
+  | 'arc-milestones'
+  | 'treasury-income'
+  | 'treasury-expenses'
+  | 'treasury-bills-paid'
+  | 'treasury-debt-payments'
+  | 'treasury-savings'
+  | 'treasury-weekly-reviews'
+  | 'no-eating-out-wins';
+
+export interface QuestObjectiveDefinition {
+  id: string;
+  title: string;
+  description: string;
+  metric: QuestObjectiveMetric;
+  target: number;
+  category?: MissionCategory;
+  missionIds?: string[];
+  reflectionPrompt?: string;
+}
+
+export interface QuestChapterDefinition {
+  id: string;
+  number: number;
+  title: string;
+  intro: string;
+  completionMessage: string;
+  objectives: QuestObjectiveDefinition[];
+  rewardXp: number;
+}
+
+export interface CompanionQuestlineDefinition {
+  id: string;
+  companionId: CompanionId;
+  title: string;
+  subtitle: string;
+  premise: string;
+  completionTitleId: string;
+  chapters: QuestChapterDefinition[];
+}
+
+export interface QuestObjectiveRecord {
+  objectiveId: string;
+  completedAt: string;
+  note?: string;
+}
+
+export interface CompanionQuestProgress {
+  id: string;
+  questlineId: string;
+  companionId: CompanionId;
+  status: CompanionQuestStatus;
+  currentChapterIndex: number;
+  startedAt: string;
+  chapterStartedAt: string;
+  completedAt?: string;
+  pausedAt?: string;
+  objectiveRecords: QuestObjectiveRecord[];
+  completedChapterIds: string[];
+  objectiveProgress?: Record<string, number>;
+}
+
+export interface MonthlyCouncilMetrics {
+  recordedDays: number;
+  completedMissions: number;
+  availableMissions: number;
+  completionRate: number;
+  perfectDays: number;
+  categoryCompleted: Partial<Record<MissionCategory, number>>;
+  strongestCategory?: MissionCategory;
+  focusCategory?: MissionCategory;
+  relationshipActions: number;
+  arcMilestones: number;
+  questChapters: number;
+  levelsGained: number;
+  rankChanges: number;
+  titlesGained: number;
+  treasuryReviews: number;
+  noEatingOutWins: number;
+  savingsContributedCents: number;
+  debtPaidCents: number;
+}
+
+export interface MonthlyCouncil {
+  id: string;
+  monthStart: LocalDateKey;
+  monthEnd: LocalDateKey;
+  createdAt: string;
+  acknowledged: boolean;
+  metrics: MonthlyCouncilMetrics;
+  messages: PartyChatMessage[];
+  intention?: string;
+}
+
+export type TreasuryTransactionKind =
+  'income' | 'expense' | 'bill-payment' | 'debt-payment' | 'savings';
+
+export type TreasuryExpenseCategory =
+  | 'dining'
+  | 'groceries'
+  | 'housing'
+  | 'utilities'
+  | 'transportation'
+  | 'health'
+  | 'personal'
+  | 'entertainment'
+  | 'giving'
+  | 'other';
+
+export interface TreasurySettings {
+  id: 'primary';
+  currency: 'USD';
+  weeklyReviewDay: number;
+  challengeEnabled: boolean;
+  challengeChance: number;
+  challengeRewardXp: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TreasuryTransaction {
+  id: string;
+  date: LocalDateKey;
+  kind: TreasuryTransactionKind;
+  amountCents: number;
+  label: string;
+  category?: TreasuryExpenseCategory;
+  relatedId?: string;
+  periodKey?: string;
+  isEatingOut?: boolean;
+  note?: string;
+  createdAt: string;
+}
+
+export interface TreasuryBill {
+  id: string;
+  name: string;
+  amountCents: number;
+  dueDay: number;
+  cadence: 'weekly' | 'monthly' | 'one-time';
+  nextDueDate?: LocalDateKey;
+  autopay: boolean;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TreasuryDebt {
+  id: string;
+  name: string;
+  kind: 'credit-card' | 'personal-loan' | 'student-loan' | 'medical' | 'other';
+  balanceCents: number;
+  aprBasisPoints?: number;
+  minimumPaymentCents?: number;
+  dueDay?: number;
+  creditLimitCents?: number;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TreasurySavingsGoal {
+  id: string;
+  name: string;
+  targetCents: number;
+  currentCents: number;
+  targetDate?: LocalDateKey;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TreasuryWeek {
+  id: LocalDateKey;
+  weekStart: LocalDateKey;
+  weekEnd: LocalDateKey;
+  status: 'planned' | 'reviewed';
+  spendingLimitCents: number;
+  diningLimitCents: number;
+  savingsTargetCents: number;
+  debtTargetCents: number;
+  intention?: string;
+  reflection?: string;
+  cassianMessage?: string;
+  createdAt: string;
+  updatedAt: string;
+  reviewedAt?: string;
+}
+
+export type TreasuryChallengeStatus = 'active' | 'passed' | 'failed' | 'expired';
+
+export interface TreasuryDailyChallenge {
+  id: LocalDateKey;
+  date: LocalDateKey;
+  status: TreasuryChallengeStatus;
+  roll: number;
+  rewardXp: number;
+  stabilityPenalty: number;
+  createdAt: string;
+  revealedAt?: string;
+  resolvedAt?: string;
+  rewardTransactionId?: string;
+  recoveryPlan?: string;
+  recoveryCompletedAt?: string;
+}
+
+export interface TreasuryWeekSummary {
+  week: TreasuryWeek;
+  incomeCents: number;
+  expenseCents: number;
+  diningCents: number;
+  billPaidCents: number;
+  debtPaidCents: number;
+  savingsCents: number;
+  billsDue: number;
+  billsPaid: number;
+  noEatingOutWins: number;
+  challengeFailures: number;
+  stabilityScore: number;
 }
 
 export interface AppMetadata {
@@ -579,6 +852,10 @@ export interface GameSnapshot {
   companionReaction?: CompanionReaction;
   partyBanter?: PartyBanter;
   campfireRecap?: CampfireRecap;
+  dailyBriefing?: DailyCommandBriefing;
+  monthlyCouncil?: MonthlyCouncil;
+  treasuryChallenge?: TreasuryDailyChallenge;
+  treasuryWeek?: TreasuryWeek;
   systemDate: LocalDateKey;
 }
 

@@ -20,6 +20,8 @@ const PARTY_ORDER: Array<{
   { slot: 'cipher', companionId: 'cipher', role: 'response' },
   { slot: 'haven', companionId: 'haven', role: 'response' },
   { slot: 'ember', companionId: 'ember', role: 'response' },
+  { slot: 'amara', companionId: 'amara', role: 'response' },
+  { slot: 'cassian', companionId: 'cassian', role: 'response' },
   { slot: 'snow-close', companionId: 'snow', role: 'closing' },
 ];
 
@@ -77,15 +79,15 @@ export function buildPartyMessages(
   });
 }
 
-export async function createPartyCheckIn(
-  mood: MoodId,
-  date: LocalDateKey,
-): Promise<PartyCheckIn> {
+export async function createPartyCheckIn(mood: MoodId, date: LocalDateKey): Promise<PartyCheckIn> {
   const id = createId('party-check-in');
   const createdAt = new Date().toISOString();
   const history = await db.partyCheckIns.orderBy('createdAt').reverse().limit(120).toArray();
   const recentMessageIds = history.flatMap((checkIn) =>
-    checkIn.messages.slice().sort((a, b) => a.order - b.order).map((message) => message.messageId),
+    checkIn.messages
+      .slice()
+      .sort((a, b) => a.order - b.order)
+      .map((message) => message.messageId),
   );
   const checkIn: PartyCheckIn = {
     id,

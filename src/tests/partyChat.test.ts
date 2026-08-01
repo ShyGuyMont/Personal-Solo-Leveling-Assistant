@@ -24,7 +24,7 @@ describe('Party Check-In', () => {
     expect(PARTY_MOODS).toHaveLength(10);
     for (const mood of PARTY_MOODS) {
       const pools = PARTY_DIALOGUE[mood.id];
-      expect(Object.values(pools)).toHaveLength(7);
+      expect(Object.values(pools)).toHaveLength(9);
       for (const pool of Object.values(pools)) {
         expect(pool.length).toBeGreaterThanOrEqual(4);
         expect(pool.every((line: string) => line.length > 30)).toBe(true);
@@ -34,7 +34,7 @@ describe('Party Check-In', () => {
 
   it('builds the full party response with Snow opening and closing', () => {
     const messages = buildPartyMessages('good', [], 'test-check-in');
-    expect(messages).toHaveLength(7);
+    expect(messages).toHaveLength(9);
     expect(messages.map((message) => message.companionId)).toEqual([
       'snow',
       'rook',
@@ -42,6 +42,8 @@ describe('Party Check-In', () => {
       'cipher',
       'haven',
       'ember',
+      'amara',
+      'cassian',
       'snow',
     ]);
     expect(messages[0].role).toBe('opener');
@@ -53,11 +55,11 @@ describe('Party Check-In', () => {
     for (let index = 0; index < 4; index += 1) {
       checkIns.push(await createPartyCheckIn('tired', '2026-08-01'));
     }
-    for (let order = 0; order < 7; order += 1) {
+    for (let order = 0; order < 9; order += 1) {
       expect(new Set(checkIns.map((checkIn) => checkIn.messages[order].messageId)).size).toBe(4);
     }
     const fifth = await createPartyCheckIn('tired', '2026-08-01');
-    for (let order = 0; order < 7; order += 1) {
+    for (let order = 0; order < 9; order += 1) {
       expect(fifth.messages[order].messageId).not.toBe(checkIns[3].messages[order].messageId);
     }
   });

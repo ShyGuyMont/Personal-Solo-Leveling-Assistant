@@ -27,6 +27,7 @@ import { equipTitle, saveConfiguration } from '@/db/repositories';
 import { DEFAULT_MISSIONS, OPTIONAL_MISSION_TEMPLATES } from '@/config/missions';
 import { COMPANIONS, getCompanionImage } from '@/config/companions';
 import { Modal } from '@/components/Modal';
+import { Link } from '@/router';
 import { useGameStore } from '@/store/useGameStore';
 import type {
   BackupSnapshot,
@@ -376,6 +377,20 @@ export function SettingsPage() {
                 type="checkbox"
                 checked={draft.dailyEventsEnabled}
                 onChange={(event) => patchSetting('dailyEventsEnabled', event.target.checked)}
+              />
+              <span className="switch" />
+            </label>
+            <label className="switch-row">
+              <span>
+                <strong>Snow’s Daily Command Briefing</strong>
+                <small>
+                  Optional low / steady / high capacity planning · no bonus XP or penalties
+                </small>
+              </span>
+              <input
+                type="checkbox"
+                checked={draft.dailyBriefingEnabled}
+                onChange={(event) => patchSetting('dailyBriefingEnabled', event.target.checked)}
               />
               <span className="switch" />
             </label>
@@ -802,6 +817,7 @@ export function SettingsPage() {
                           'vitality',
                           'character',
                           'empathy',
+                          'stewardship',
                         ].map((stat) => (
                           <option key={stat} value={stat}>
                             {stat[0].toUpperCase() + stat.slice(1)}
@@ -889,11 +905,12 @@ export function SettingsPage() {
         <section className="panel settings-section settings-section--wide">
           <header>
             <div>
-              <p className="eyebrow">LOCAL DATA</p>
-              <h2>Save backup</h2>
+              <p className="eyebrow">ARCHIVE SHIELD · LOCAL DATA</p>
+              <h2>Full-campaign backup</h2>
               <p>
-                Everything is stored in IndexedDB on this device. Export regularly before clearing
-                browser data or changing phones.
+                Everything—including Version 3.0 Treasury records, Campaign Arcs, questlines,
+                briefings, Councils, chats, Amara, and Cassian—is stored on this device. Export
+                regularly before clearing browser data or changing phones.
               </p>
             </div>
           </header>
@@ -911,6 +928,9 @@ export function SettingsPage() {
               <Upload size={17} />
               Import save
             </button>
+            <Link to="/update-center" className="button button--ghost">
+              Open Update Center
+            </Link>
             <input
               ref={importRef}
               type="file"
@@ -943,7 +963,8 @@ export function SettingsPage() {
             <span>Recovery snapshots: {formatBytes(storage?.backupBytes)}</span>
             <small>
               Automatic snapshots are created before a daily finalization, import, or reset. The
-              newest five are kept on this phone.
+              newest five are kept on this phone. Portable imports are integrity-checked up to 32
+              MB.
             </small>
           </div>
           <div className="snapshot-list">
@@ -998,7 +1019,7 @@ export function SettingsPage() {
           <Info size={21} />
           <div>
             <p className="eyebrow">ABOUT</p>
-            <h2>The System · Version 2.1.0</h2>
+            <h2>The System · Version 3.0.0</h2>
             <p>
               An original, offline-first personal progression RPG. It uses no login, backend,
               external API, analytics, advertising, tracking, paid service, or copied franchise

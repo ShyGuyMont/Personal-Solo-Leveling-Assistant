@@ -74,4 +74,3 @@ describe('rare daily events', () => {
     expect((await db.progression.get('primary'))?.totalXp).toBe(120);
   });
 });
-

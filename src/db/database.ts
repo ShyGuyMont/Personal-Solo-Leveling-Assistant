@@ -2,15 +2,18 @@ import Dexie, { type EntityTable } from 'dexie';
 import type {
   AccountProgression,
   Achievement,
+  ArcMilestone,
   AuditEntry,
   AppMetadata,
   BackupSnapshot,
   CampfireRecap,
+  CampaignArc,
   ChallengeProgress,
   ChallengeTemplate,
   CosmeticDefinition,
   CosmeticUnlock,
   DailyMissionRecord,
+  DailyCommandBriefing,
   DailyEventRecord,
   DailyReview,
   LevelHistory,
@@ -22,6 +25,8 @@ import type {
   FavoriteMessage,
   PartyCheckIn,
   PartyBanter,
+  CompanionQuestProgress,
+  MonthlyCouncil,
   SupportConversation,
   PeriodicReport,
   RankHistory,
@@ -29,6 +34,13 @@ import type {
   StatProgress,
   StatTransaction,
   StreakRecord,
+  TreasuryBill,
+  TreasuryDailyChallenge,
+  TreasuryDebt,
+  TreasurySavingsGoal,
+  TreasurySettings,
+  TreasuryTransaction,
+  TreasuryWeek,
   UnlockedTitle,
   XpTransaction,
 } from '@/types/game';
@@ -64,6 +76,18 @@ export class SystemDatabase extends Dexie {
   favoriteMessages!: EntityTable<FavoriteMessage, 'id'>;
   partyBanters!: EntityTable<PartyBanter, 'id'>;
   campfireRecaps!: EntityTable<CampfireRecap, 'id'>;
+  dailyBriefings!: EntityTable<DailyCommandBriefing, 'id'>;
+  campaignArcs!: EntityTable<CampaignArc, 'id'>;
+  arcMilestones!: EntityTable<ArcMilestone, 'id'>;
+  companionQuestProgress!: EntityTable<CompanionQuestProgress, 'id'>;
+  monthlyCouncils!: EntityTable<MonthlyCouncil, 'id'>;
+  treasurySettings!: EntityTable<TreasurySettings, 'id'>;
+  treasuryTransactions!: EntityTable<TreasuryTransaction, 'id'>;
+  treasuryBills!: EntityTable<TreasuryBill, 'id'>;
+  treasuryDebts!: EntityTable<TreasuryDebt, 'id'>;
+  treasurySavingsGoals!: EntityTable<TreasurySavingsGoal, 'id'>;
+  treasuryWeeks!: EntityTable<TreasuryWeek, 'id'>;
+  treasuryChallenges!: EntityTable<TreasuryDailyChallenge, 'id'>;
   appMetadata!: EntityTable<AppMetadata, 'id'>;
 
   constructor(name = 'the-system-db') {
@@ -236,7 +260,10 @@ export class SystemDatabase extends Dexie {
         if (current) {
           await settings.update('primary', {
             enabledCompanionIds: Array.from(
-              new Set([...(current.enabledCompanionIds ?? ['snow', 'rook', 'selah', 'cipher', 'haven']), 'ember']),
+              new Set([
+                ...(current.enabledCompanionIds ?? ['snow', 'rook', 'selah', 'cipher', 'haven']),
+                'ember',
+              ]),
             ),
           });
         }
@@ -244,6 +271,103 @@ export class SystemDatabase extends Dexie {
         const now = new Date().toISOString();
         await metadata.put({ id: 'schema-seeded', value: 7, updatedAt: now });
         await metadata.put({ id: 'app-version', value: '2.1.0', updatedAt: now });
+      });
+    this.version(8)
+      .stores({
+        dailyBriefings: 'id,date,status',
+        campaignArcs: 'id,status,companionId,category,createdAt',
+        arcMilestones: 'id,arcId,status,[arcId+status],order',
+        companionQuestProgress: 'id,questlineId,companionId,status',
+        monthlyCouncils: 'id,monthStart,monthEnd,createdAt,acknowledged',
+      })
+      .upgrade(async (transaction) => {
+        const settings = transaction.table<Settings, string>('settings');
+        const current = await settings.get('primary');
+        if (current) {
+          await settings.update('primary', {
+            dailyBriefingEnabled: current.dailyBriefingEnabled ?? true,
+            enabledCompanionIds: Array.from(
+              new Set([
+                ...(current.enabledCompanionIds ?? [
+                  'snow',
+                  'rook',
+                  'selah',
+                  'cipher',
+                  'haven',
+                  'ember',
+                ]),
+                'amara',
+              ]),
+            ),
+          });
+        }
+        const metadata = transaction.table<AppMetadata, string>('appMetadata');
+        const now = new Date().toISOString();
+        await metadata.put({ id: 'schema-seeded', value: 8, updatedAt: now });
+        await metadata.put({ id: 'app-version', value: '2.5.0', updatedAt: now });
+      });
+    this.version(9)
+      .stores({
+        treasurySettings: 'id',
+        treasuryTransactions: 'id,date,kind,category,relatedId,[date+kind]',
+        treasuryBills: 'id,active,dueDay,nextDueDate',
+        treasuryDebts: 'id,active,kind',
+        treasurySavingsGoals: 'id,active,targetDate',
+        treasuryWeeks: 'id,weekStart,weekEnd,status',
+        treasuryChallenges: 'id,date,status',
+      })
+      .upgrade(async (transaction) => {
+        const now = new Date().toISOString();
+        const settings = transaction.table<Settings, string>('settings');
+        const current = await settings.get('primary');
+        if (current) {
+          await settings.update('primary', {
+            enabledCompanionIds: Array.from(
+              new Set([
+                ...(current.enabledCompanionIds ?? [
+                  'snow',
+                  'rook',
+                  'selah',
+                  'cipher',
+                  'haven',
+                  'ember',
+                  'amara',
+                ]),
+                'cassian',
+              ]),
+            ),
+          });
+        }
+        const treasurySettings = transaction.table<TreasurySettings, string>('treasurySettings');
+        await treasurySettings.put({
+          id: 'primary',
+          currency: 'USD',
+          weeklyReviewDay: 0,
+          challengeEnabled: true,
+          challengeChance: 0.75,
+          challengeRewardXp: 60,
+          createdAt: now,
+          updatedAt: now,
+        });
+        const stats = transaction.table<StatProgress, string>('stats');
+        if (!(await stats.get('stewardship'))) {
+          await stats.put({
+            id: 'stewardship',
+            name: 'stewardship',
+            level: 1,
+            totalXp: 0,
+            currentLevelXp: 0,
+            xpToNextLevel: 223,
+            lifetimeXpGained: 0,
+            momentum: 50,
+            trend: 'stable',
+            neglectedDays: 0,
+            protectedFloorXp: 0,
+          });
+        }
+        const metadata = transaction.table<AppMetadata, string>('appMetadata');
+        await metadata.put({ id: 'schema-seeded', value: 9, updatedAt: now });
+        await metadata.put({ id: 'app-version', value: '3.0.0', updatedAt: now });
       });
   }
 }
@@ -280,6 +404,18 @@ export const TABLE_NAMES = [
   'favoriteMessages',
   'partyBanters',
   'campfireRecaps',
+  'dailyBriefings',
+  'campaignArcs',
+  'arcMilestones',
+  'companionQuestProgress',
+  'monthlyCouncils',
+  'treasurySettings',
+  'treasuryTransactions',
+  'treasuryBills',
+  'treasuryDebts',
+  'treasurySavingsGoals',
+  'treasuryWeeks',
+  'treasuryChallenges',
   'appMetadata',
 ] as const;
 

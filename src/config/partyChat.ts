@@ -9,16 +9,76 @@ export interface MoodDefinition {
 }
 
 export const PARTY_MOODS: MoodDefinition[] = [
-  { id: 'energized', label: 'Energized', shortLabel: 'Energized', description: 'Ready to move', accent: '#67e8c5' },
-  { id: 'proud', label: 'Proud', shortLabel: 'Proud', description: 'I did something meaningful', accent: '#f4c95d' },
-  { id: 'good', label: 'Good', shortLabel: 'Good', description: 'Steady and positive', accent: '#86cfff' },
-  { id: 'okay', label: 'Okay', shortLabel: 'Okay', description: 'Getting through the day', accent: '#a7b4c9' },
-  { id: 'tired', label: 'Tired', shortLabel: 'Tired', description: 'Running low on energy', accent: '#8fa8d8' },
-  { id: 'stressed', label: 'Stressed', shortLabel: 'Stressed', description: 'Too much is pressing in', accent: '#f2a65a' },
-  { id: 'frustrated', label: 'Frustrated', shortLabel: 'Frustrated', description: 'Something is not working', accent: '#ff8b7b' },
-  { id: 'discouraged', label: 'Discouraged', shortLabel: 'Discouraged', description: 'It is hard to see progress', accent: '#9b7bff' },
-  { id: 'lonely', label: 'Lonely', shortLabel: 'Lonely', description: 'I could use some company', accent: '#55cbb7' },
-  { id: 'unsure', label: 'Not sure', shortLabel: 'Not sure', description: 'I cannot quite name it', accent: '#c6b7e8' },
+  {
+    id: 'energized',
+    label: 'Energized',
+    shortLabel: 'Energized',
+    description: 'Ready to move',
+    accent: '#67e8c5',
+  },
+  {
+    id: 'proud',
+    label: 'Proud',
+    shortLabel: 'Proud',
+    description: 'I did something meaningful',
+    accent: '#f4c95d',
+  },
+  {
+    id: 'good',
+    label: 'Good',
+    shortLabel: 'Good',
+    description: 'Steady and positive',
+    accent: '#86cfff',
+  },
+  {
+    id: 'okay',
+    label: 'Okay',
+    shortLabel: 'Okay',
+    description: 'Getting through the day',
+    accent: '#a7b4c9',
+  },
+  {
+    id: 'tired',
+    label: 'Tired',
+    shortLabel: 'Tired',
+    description: 'Running low on energy',
+    accent: '#8fa8d8',
+  },
+  {
+    id: 'stressed',
+    label: 'Stressed',
+    shortLabel: 'Stressed',
+    description: 'Too much is pressing in',
+    accent: '#f2a65a',
+  },
+  {
+    id: 'frustrated',
+    label: 'Frustrated',
+    shortLabel: 'Frustrated',
+    description: 'Something is not working',
+    accent: '#ff8b7b',
+  },
+  {
+    id: 'discouraged',
+    label: 'Discouraged',
+    shortLabel: 'Discouraged',
+    description: 'It is hard to see progress',
+    accent: '#9b7bff',
+  },
+  {
+    id: 'lonely',
+    label: 'Lonely',
+    shortLabel: 'Lonely',
+    description: 'I could use some company',
+    accent: '#55cbb7',
+  },
+  {
+    id: 'unsure',
+    label: 'Not sure',
+    shortLabel: 'Not sure',
+    description: 'I cannot quite name it',
+    accent: '#c6b7e8',
+  },
 ];
 
 export type PartySpeakerSlot = CompanionId | 'snow-close';
@@ -30,10 +90,12 @@ export interface MoodDialogue {
   cipher: string[];
   haven: string[];
   ember: string[];
+  amara: string[];
+  cassian: string[];
   'snow-close': string[];
 }
 
-export const PARTY_DIALOGUE: Record<MoodId, MoodDialogue> = {
+const BASE_PARTY_DIALOGUE: Record<MoodId, Omit<MoodDialogue, 'cassian'>> = {
   energized: {
     snow: [
       'I can feel that energy from here. I am glad you brought it to us—let’s point it somewhere that matters.',
@@ -70,6 +132,12 @@ export const PARTY_DIALOGUE: Record<MoodId, MoodDialogue> = {
       'I like this energy. Give it a finish line, hit it hard, and keep enough fire to enjoy the win afterward.',
       'Good—power is online. No twenty-target rampage; choose the mission that matters and burn clean through it.',
       'You came in blazing. Aim it with purpose, finish something real, and let the proof glow for a while.',
+    ],
+    amara: [
+      'That glow reaches people. Spend a little of it on someone you love, and keep enough to enjoy your own company too.',
+      'You feel open today—I adore that. Choose one brave connection and let your enthusiasm become genuine presence.',
+      'Bright energy makes room for play. Send the message, share the idea, or plan something that gives a good bond new life.',
+      'Use the spark beautifully: one honest compliment, one warm invitation, or one conversation where you truly listen.',
     ],
     'snow-close': [
       'The party is with you. Pick one thing worthy of that spark, and come back proud of how you used it.',
@@ -115,6 +183,12 @@ export const PARTY_DIALOGUE: Record<MoodId, MoodDialogue> = {
       'Finally, an accurate reading. You fought for this result, so stop trying to hand the credit to luck.',
       'I saw the work underneath it. Celebrate loud enough that the version of you who struggled can hear it.',
     ],
+    amara: [
+      'Let the people who love you see this victory. You do not have to make yourself smaller to stay lovable.',
+      'Pride with an open heart is gorgeous. Name what you did, receive the celebration, and do not apologize for shining.',
+      'I hope someone safe gets to cheer for you—but even before they do, let your own heart say, “I did well.”',
+      'This is worth sharing. Not to prove your value, but because joy becomes warmer when it has somewhere honest to land.',
+    ],
     'snow-close': [
       'We are proud with you—not just of the outcome, but of the person who kept going long enough to reach it.',
       'Save this moment. You will need its truth someday: you can do difficult things, and you deserve to feel the win.',
@@ -158,6 +232,12 @@ export const PARTY_DIALOGUE: Record<MoodId, MoodDialogue> = {
       'Good days do not need chaos to feel important. Make one strong move, then actually enjoy being all right.',
       'System is stable and so are you. That is plenty of power for one honest win and a life outside the checklist.',
       'No emergency, no dramatic speech—just useful energy and a target worth completing. Beautiful.',
+    ],
+    amara: [
+      'A steady heart is a lovely place to meet someone from. Notice who makes today feel warmer and let them know.',
+      'Good days deserve connection too, not only rescue calls. Share a laugh, answer a message, or offer your full attention.',
+      'I love this calm on you. Leave room for one small moment of affection, appreciation, or uncomplicated company.',
+      'Let the ordinary goodness travel: tell someone what you value about them, then let the moment remain simple.',
     ],
     'snow-close': [
       'Nothing needs fixing right now. Choose a good next step, keep your shoulders loose, and let the day stay kind.',
@@ -203,6 +283,12 @@ export const PARTY_DIALOGUE: Record<MoodId, MoodDialogue> = {
       'Middle gear still moves the machine. Lower the target if needed, but keep one promise in play.',
       'We are not chasing fireworks today. One steady flame, one useful action, then we reassess.',
     ],
+    amara: [
+      'Okay is enough for connection. You can send a simple “thinking of you” without turning it into a performance.',
+      'You do not have to be fascinating to be worth company. Bring the honest middle of your day to someone safe.',
+      'Neutral days still hold tiny bonds: a reply, a smile, a shared meal, a boundary expressed kindly.',
+      'Let one relationship receive a little care today, even if that care is simply being present without fixing anything.',
+    ],
     'snow-close': [
       'We are not disappointed by ordinary. Take the next kind, useful step, and call that enough for now.',
       'No performance needed. I am with you in the middle of the scale, not only at the extremes.',
@@ -246,6 +332,12 @@ export const PARTY_DIALOGUE: Record<MoodId, MoodDialogue> = {
       'Do not spend the last ten percent attacking yourself for lacking ninety. Choose one clean move and shut down wisely.',
       'Tired is a condition, not a confession. Reduce the load, keep the mission honest, and get yourself to real rest.',
       'I will lock you in without burning you out: one priority, no extra guilt, and an earlier finish line.',
+    ],
+    amara: [
+      'Low energy is not a debt you owe anyone. Tell safe people what you can give, and let honest boundaries protect the bond.',
+      'You are still lovable when you are tired. A short reply, a rain check, or asking for help can all be acts of connection.',
+      'Please do not perform brightness for people who care about you. Let one trusted person meet the real capacity you have.',
+      'Rest can protect relationships from resentment. Say what you need gently, then allow yourself to receive care too.',
     ],
     'snow-close': [
       'I am setting the party objective to “protect you, not pressure you.” Choose the smallest honest next step.',
@@ -291,6 +383,12 @@ export const PARTY_DIALOGUE: Record<MoodId, MoodDialogue> = {
       'Lock in does not mean carry everything. It means refuse to waste strength fighting five battles at the same time.',
       'We are cutting the noise now. Name the next physical action and hit only that until the room gets quieter.',
     ],
+    amara: [
+      'Pressure can make every request feel personal. Pause before answering, and give yourself permission to say “not yet.”',
+      'If someone safe can share the weight, let them. Being supported does not make you a burden; it makes the bond mutual.',
+      'Choose one honest sentence: “I am overwhelmed,” “I need time,” or “Can you help?” Clarity is kindness under stress.',
+      'Protect your heart from snapping shut. A boundary can be warm, direct, and strong enough to give you breathing room.',
+    ],
     'snow-close': [
       'Here is the party plan: breathe, choose one real priority, and let the rest wait outside this minute.',
       'Nothing about this moment has to be carried perfectly. Take the next step, then check the map again.',
@@ -334,6 +432,12 @@ export const PARTY_DIALOGUE: Record<MoodId, MoodDialogue> = {
       'Stop headbutting the same wall. Step back, change the angle, and spend that fire on the next useful attempt.',
       'You are allowed to be mad. You are not allowed to turn one blocked result into evidence that you are broken.',
       'Reset your stance. The obstacle gets a new strategy; you get respect while you build it.',
+    ],
+    amara: [
+      'Before the frustration speaks for you, decide what you actually need the other person to understand.',
+      'You can be angry and still communicate with care. Take space first if that is what keeps the bond—and you—safe.',
+      'Do not confuse swallowing your feelings with kindness. Honest words delivered without cruelty are part of healthy love.',
+      'If this involves someone else, aim for repair rather than victory. And if contact is unsafe, distance is a valid boundary.',
     ],
     'snow-close': [
       'We are not calling you the problem. Reset, change one thing, and decide later whether this deserves another round.',
@@ -379,6 +483,12 @@ export const PARTY_DIALOGUE: Record<MoodId, MoodDialogue> = {
       'No fake hype. The road is hard and you are still here. Give me one clean move we can build the comeback around.',
       'Borrow my fire. Lower the objective, keep your self-respect, and finish one thing before the feeling votes again.',
     ],
+    amara: [
+      'Discouragement makes love feel conditional. It is not. You do not need a better week before you deserve tenderness.',
+      'Let someone safe know you could use encouragement. Asking directly gives real care a doorway to find you.',
+      'Your struggle does not make you difficult to love. Share one honest piece with a person who has earned your trust.',
+      'If reaching outward is too much, practice connection inward: speak to yourself like someone whose heart is worth protecting.',
+    ],
     'snow-close': [
       'Borrow our confidence for now. You do not have to feel the future clearly to take one step toward it.',
       'I remember versions of you who thought they would never reach places you now stand. This feeling is not the ending.',
@@ -422,6 +532,12 @@ export const PARTY_DIALOGUE: Record<MoodId, MoodDialogue> = {
       'I am in your corner, fiercely. And I want a real person in your world to get the chance to stand there too.',
       'No disappearing act. Open one door—a message, a call, a room with people—and let connection answer for itself.',
       'You matter too much to let isolation make every decision tonight. Choose one safe human bridge and cross one inch.',
+    ],
+    amara: [
+      'That ache means connection matters to you; it does not mean you are unwanted. Choose one safe person and offer a simple opening.',
+      'I am so glad you came. Please remember: a missed reply or busy person is not a verdict on your lovability.',
+      'You deserve reciprocal connection, not just any attention. Reach toward someone kind, or toward a space where belonging can grow safely.',
+      'No perfect message needed. “I have been feeling lonely—do you have room to talk?” is brave, clear, and enough.',
     ],
     'snow-close': [
       'You are not background noise to us. Stay a while, then consider sending one honest signal to someone safe in your world.',
@@ -467,6 +583,12 @@ export const PARTY_DIALOGUE: Record<MoodId, MoodDialogue> = {
       'You do not need perfect clarity to protect the next hour. Choose the most basic useful move and make it.',
       'No interrogation. Tend to one clear need, gather new information, and let the answer arrive after the pressure drops.',
     ],
+    amara: [
+      'Ask your heart gently: do I want closeness, space, reassurance, play, or to feel understood? Any answer is allowed.',
+      'You can delay a relationship decision until the feeling becomes clearer. Uncertainty deserves time, not pressure.',
+      'Notice whose presence makes you feel more like yourself. That can be useful information even before you have a label.',
+      'If you cannot name the emotion, name the need. A safe person can respond to “I could use company” without a full explanation.',
+    ],
     'snow-close': [
       'No verdict today. Choose one caring action, notice what follows, and come back whenever the words arrive.',
       'You do not have to name the weather to carry an umbrella. Tend to what you can feel, and let clarity come gently.',
@@ -475,6 +597,76 @@ export const PARTY_DIALOGUE: Record<MoodId, MoodDialogue> = {
     ],
   },
 };
+
+const CASSIAN_PARTY_DIALOGUE: Record<MoodId, string[]> = {
+  energized: [
+    'Excellent. Give the energy a budget as well as a target: one priority, one sensible limit, and enough reserve to enjoy the day.',
+    'Your reserves are high. Let us turn that into a prepared meal, one clear money action, and momentum you can still feel tonight.',
+    'The treasury likes days like this. Handle one task you have been avoiding, then use the remaining energy without spending it recklessly.',
+    'Power is available. Direct some toward tomorrow: check the ledger, prepare what prevents an impulse order, and then go live fully.',
+  ],
+  proud: [
+    'Put this in the record without discounting it. Responsible choices deserve to feel good, not merely disappear into the next obligation.',
+    'That pride is earned. You made a choice your future can stand on, and today you are allowed to notice the weight of it.',
+    'A sound decision is more than a number—it is evidence that you can trust yourself with what comes next.',
+    'Well managed. Celebrate the discipline and the life it protects; stewardship without humanity is only accounting.',
+  ],
+  good: [
+    'Steady is valuable. A calm day is an ideal time for one small review before urgency gets a vote.',
+    'Good. Keep the ledger light today: record what matters, prepare one meal, and leave room for a life beyond optimization.',
+    'Nothing needs rescuing. That means we can strengthen the reserve with one quiet, deliberate choice.',
+    'A stable day compounds. Protect it with a simple plan and enjoy the fact that not every chapter must be dramatic.',
+  ],
+  okay: [
+    'Okay is enough information. Protect the essentials, avoid a decision made from fatigue, and let today remain manageable.',
+    'We do not need an extraordinary result. One logged expense and one prepared option will keep the system honest.',
+    'Hold the middle. No punishment budget, no careless escape—just the next sensible choice.',
+    'A neutral day can still serve the future. Keep the plan small enough that you will actually follow it.',
+  ],
+  tired: [
+    'Fatigue makes convenience expensive. Lower the barrier now: choose the easiest food already available and postpone nonessential purchases.',
+    'No complex budget decisions tonight. Protect the basics, record what happened, and review with a rested mind.',
+    'Your energy is low, not your character. Use preparation instead of willpower and choose the gentlest affordable option.',
+    'A tired brain deserves a short protocol: eat what is ready, close the shopping apps, and get some rest.',
+  ],
+  stressed: [
+    'Stress wants immediate relief and sends tomorrow the invoice. Pause, breathe, and delay any purchase that is not truly urgent.',
+    'The numbers can wait ten minutes. Settle first, then separate the actual problem from the purchase promising to distract you.',
+    'We will not shame-spend or shame-save. Protect essentials, choose one controllable action, and leave the rest for the weekly table.',
+    'Pressure narrows the map. Open it again: what is due, what can wait, and what decision requires a calmer mind?',
+  ],
+  frustrated: [
+    'A broken plan is data, not betrayal. Name what failed, change the setup, and stop charging interest on the mistake with self-contempt.',
+    'Do not make an expensive decision just to feel powerful for five minutes. Take command by changing one condition instead.',
+    'Good—frustration has identified friction. Let us redesign the system so tomorrow requires less heroism.',
+    'The ledger does not argue. Record the truth, extract the lesson, and make the next choice cleaner.',
+  ],
+  discouraged: [
+    'Small balances still move. One home meal, one recorded expense, or five dollars protected is proof that the direction has changed.',
+    'Do not compare the first brick to the finished fortress. Margin is built in choices that look ordinary while they are happening.',
+    'The current number is a location, not an identity. We only need the next honest action from here.',
+    'I am not asking for a miracle payment. I am asking you not to abandon the person the plan is meant to protect.',
+  ],
+  lonely: [
+    'Loneliness can disguise itself as a delivery cart. Before ordering, choose contact: message someone safe, join the party, or eat with a familiar voice nearby.',
+    'You deserve comfort. Let us find one that does not leave tomorrow carrying both the loneliness and the receipt.',
+    'A purchase cannot keep you company. Reach toward a person, a place of belonging, or the party before reaching for checkout.',
+    'The treasury is not more important than your heart. We protect both by naming what you actually need.',
+  ],
+  unsure: [
+    'When the signal is unclear, delay the irreversible choice. Record what you know and let uncertainty remain inexpensive.',
+    'Use a simple test: is it needed now, planned for, and still right after a pause? If not, save the decision for later.',
+    'No verdict required. Protect the essentials, avoid impulse, and gather better information.',
+    'Ambiguity is not an emergency. A twenty-four-hour pause is often the most profitable action available.',
+  ],
+};
+
+export const PARTY_DIALOGUE = Object.fromEntries(
+  PARTY_MOODS.map(({ id }) => [
+    id,
+    { ...BASE_PARTY_DIALOGUE[id], cassian: CASSIAN_PARTY_DIALOGUE[id] },
+  ]),
+) as Record<MoodId, MoodDialogue>;
 
 export function getMoodDefinition(mood: MoodId) {
   return PARTY_MOODS.find((item) => item.id === mood)!;

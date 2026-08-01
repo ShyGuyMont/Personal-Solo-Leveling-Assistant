@@ -14,6 +14,7 @@ export const ALL_STATS: StatName[] = [
   'vitality',
   'character',
   'empathy',
+  'stewardship',
 ];
 
 export function createInitialStat(name: StatName): StatProgress {

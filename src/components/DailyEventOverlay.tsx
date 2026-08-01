@@ -22,7 +22,11 @@ export function DailyEventOverlay() {
   const Icon = isPass ? Ticket : AlertTriangle;
 
   return (
-    <div className={`daily-event-overlay daily-event-overlay--${dailyEvent.kind}`} role="dialog" aria-modal="true">
+    <div
+      className={`daily-event-overlay daily-event-overlay--${dailyEvent.kind}`}
+      role="dialog"
+      aria-modal="true"
+    >
       <div className="daily-event-overlay__scan" />
       <section>
         <span className="daily-event-overlay__icon">
@@ -40,12 +44,18 @@ export function DailyEventOverlay() {
         )}
         <div className="daily-event-overlay__actions">
           {isPass ? (
-            <button className="button button--primary button--large" onClick={() => void claimPass()}>
+            <button
+              className="button button--primary button--large"
+              onClick={() => void claimPass()}
+            >
               <Ticket size={18} /> Claim Mission Pass
             </button>
           ) : (
             <>
-              <button className="button button--primary button--large" onClick={() => void activateEvent()}>
+              <button
+                className="button button--primary button--large"
+                onClick={() => void activateEvent()}
+              >
                 <Sparkles size={18} /> Accept optional quest
               </button>
               <button className="text-button" onClick={() => void declineEvent()}>

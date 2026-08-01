@@ -325,7 +325,7 @@ async function evaluateAutomaticAchievements() {
     ['protected-day', progression.protectedPerfectDays >= 1],
     [
       'customized',
-      (await db.auditEntries.where('action').equals('configuration-updated').count()) > 0,
+      (await db.auditEntries.where('action').equals('mission-configuration-updated').count()) > 0,
     ],
     ['all-categories', categoryIds.size >= 5],
   ];

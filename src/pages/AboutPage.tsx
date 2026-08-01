@@ -4,14 +4,17 @@ import {
   BookOpenCheck,
   CircleGauge,
   CloudOff,
+  CloudDownload,
   Diamond,
   HeartHandshake,
   HelpCircle,
   ListChecks,
+  Map,
   Settings,
   Shield,
   Sparkles,
   Users,
+  WalletCards,
 } from 'lucide-react';
 import { RANK_REQUIREMENTS } from '@/config/balance';
 import { getCompanion, getCompanionImage } from '@/config/companions';
@@ -57,6 +60,18 @@ const DESTINATIONS = [
     text: 'Check in, request direct support, or revisit saved messages.',
   },
   {
+    to: '/campaigns',
+    icon: Map,
+    title: 'Campaign Command',
+    text: 'Create long-term Campaign Arcs or follow any companion’s five-chapter questline.',
+  },
+  {
+    to: '/treasury',
+    icon: WalletCards,
+    title: 'Treasury Command',
+    text: 'Plan and review paychecks, spending, bills, debt, savings, and Cassian directives.',
+  },
+  {
     to: '/archive',
     icon: Archive,
     title: 'Archive',
@@ -67,6 +82,12 @@ const DESTINATIONS = [
     icon: Settings,
     title: 'Settings',
     text: 'Change appearance, companions, missions, privacy, and backups.',
+  },
+  {
+    to: '/update-center',
+    icon: CloudDownload,
+    title: 'Update Center',
+    text: 'Check the installed version, export a protected save, and install waiting releases.',
   },
 ];
 
@@ -273,6 +294,58 @@ export function AboutPage() {
           </p>
         </details>
         <details>
+          <summary>What is Snow’s Daily Command Briefing?</summary>
+          <p>
+            Once per System day, Snow can ask whether your capacity is low, steady, or high. She
+            then recommends a Main Quest, Support Quest, and—when appropriate—an optional Bonus
+            Quest from missions already on today’s list. This is only a priority map: it creates no
+            new requirement, XP, penalty, streak rule, or hidden judgment. You can edit, skip, or
+            disable it in Settings.
+          </p>
+        </details>
+        <details>
+          <summary>What is the difference between Campaign Arcs and Companion Questlines?</summary>
+          <p>
+            <strong>Campaign Arcs</strong> are goals you define. Give one a purpose, path, companion
+            guide, optional target date, and as many milestones as useful; then pause, resume,
+            complete, or archive it. <strong>Companion Questlines</strong> are authored stories:
+            every companion has five chapters with three objectives each. Only one is active at a
+            time, but paused progress is permanent. Questlines have no failure timer or decay, and
+            completing all five chapters unlocks that companion’s unique legendary title.
+          </p>
+        </details>
+        <details>
+          <summary>How does Treasury Command work?</summary>
+          <p>
+            Treasury Command is a private manual money planner led by Cassian. Log income and
+            spending, track bills, debt, and savings, set realistic weekly targets, then finalize a
+            Weekly Review for its displayed one-time reward. Budget Stability is a coaching signal,
+            not a punishment: it never removes account XP or changes rank, streaks, or missions. No
+            bank is connected, and all Treasury records are included in Archive Shield exports.
+          </p>
+        </details>
+        <details>
+          <summary>How does Cassian’s No Eating Out challenge work?</summary>
+          <p>
+            Each System day has an independent 75% chance to receive the optional directive. Passing
+            grants the displayed account XP plus Stewardship progress. If you order out, record the
+            result honestly: no core XP is removed. Budget Stability falls temporarily, and a short
+            recovery debrief can restore half of that signal penalty. The challenge can be turned
+            off in the Treasury Weekly tab.
+          </p>
+        </details>
+        <details>
+          <summary>How do Weekly Campfires and Monthly Councils work?</summary>
+          <p>
+            Campfires summarize a completed week with at least one finalized Daily Review. Monthly
+            Councils assemble all eight companions after a completed calendar month and review
+            mission balance, Perfect Days, levels, ranks, titles, Campaign milestones, quest
+            chapters, and relationship actions that were actually recorded. Their commentary is
+            saved in Headquarters and the Archive, and never changes scoring. The Council also gives
+            you an optional place to write one next-month intention.
+          </p>
+        </details>
+        <details>
           <summary>What happens when I miss a day?</summary>
           <p>
             The Archive keeps an honest record, but the System is designed for returning. Recovery
@@ -283,10 +356,23 @@ export function AboutPage() {
         <details>
           <summary>What do the companions change?</summary>
           <p>
-            Snow, Rook, Selah, Cipher, Haven, and Ember provide context, encouragement, check-ins,
-            direct support, banter, milestone celebrations, accountability, and weekly Campfire
-            Recaps. Their words never secretly change XP, streaks, mission results, or rank
-            requirements.
+            Snow, Rook, Selah, Cipher, Haven, Ember, Amara, and Cassian provide context,
+            encouragement, check-ins, direct support, banter, milestone celebrations,
+            accountability, weekly Campfires, Monthly Councils, and personal questlines. Amara
+            specializes in empathy, relationships, belonging, communication, repair, and healthy
+            boundaries; she never requires unsafe contact. Cassian specializes in budgeting, saving,
+            debt reduction, spending awareness, and shame-free financial recovery. Companion words
+            never secretly change XP, streaks, mission results, or rank requirements.
+          </p>
+        </details>
+        <details>
+          <summary>How do updates and the Archive Shield work on my phone?</summary>
+          <p>
+            Open the Update Center to check GitHub Pages for a new release. When one is waiting,
+            export a full save if you want an extra portable copy, then tap Install; the web app
+            reloads once and keeps the home-screen installation. Archive Shield exports use a
+            checksum and include every current record type. Imports are previewed and validated, and
+            the app creates an on-device recovery snapshot before replacing current data.
           </p>
         </details>
       </section>
@@ -315,6 +401,9 @@ export function AboutPage() {
           </p>
           <Link to="/settings" className="button button--ghost">
             Open Settings & Backups
+          </Link>
+          <Link to="/update-center" className="button button--ghost">
+            Open Update Center
           </Link>
         </section>
       </div>

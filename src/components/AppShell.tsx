@@ -1,4 +1,12 @@
-import { Archive, CircleGauge, CircleHelp, Diamond, ListChecks, Shield } from 'lucide-react';
+import {
+  Archive,
+  CircleGauge,
+  CircleHelp,
+  Diamond,
+  ListChecks,
+  Shield,
+  WalletCards,
+} from 'lucide-react';
 import { useEffect, useState, type ReactNode } from 'react';
 import { SystemMark } from '@/components/SystemMark';
 import { NavLink } from '@/router';
@@ -10,6 +18,7 @@ const NAV = [
   { to: '/missions', label: 'Missions', icon: ListChecks },
   { to: '/status', label: 'Status', icon: Shield },
   { to: '/challenges', label: 'Challenges', icon: Diamond },
+  { to: '/treasury', label: 'Treasury', icon: WalletCards },
   { to: '/archive', label: 'Archive', icon: Archive },
 ];
 

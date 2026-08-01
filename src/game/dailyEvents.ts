@@ -6,11 +6,7 @@ import { applyStatChange } from '@/game/stats';
 import { applyAccountXp } from '@/game/xp';
 import { compareDateKeys } from '@/utils/date';
 import { stableId } from '@/utils/id';
-import type {
-  DailyEventKind,
-  DailyEventRecord,
-  LocalDateKey,
-} from '@/types/game';
+import type { DailyEventKind, DailyEventRecord, LocalDateKey } from '@/types/game';
 
 function secureRandom() {
   if (typeof crypto !== 'undefined' && 'getRandomValues' in crypto) {
@@ -32,10 +28,7 @@ export function rollDailyEventKind(value: number): DailyEventKind {
   return 'none';
 }
 
-export async function ensureDailyEvent(
-  date: LocalDateKey,
-  random: () => number = secureRandom,
-) {
+export async function ensureDailyEvent(date: LocalDateKey, random: () => number = secureRandom) {
   const settings = await db.settings.get('primary');
   if (!settings?.dailyEventsEnabled) return undefined;
   const existing = await db.dailyEvents.get(date);
@@ -226,13 +219,7 @@ export async function completeEmergencyQuest(date: LocalDateKey) {
         sourceId: event.templateId ?? date,
         note: `${event.title} completed`,
       });
-      await putLevelHistory(
-        { ...progression, ...next },
-        progression.level,
-        date,
-        rewardId,
-        now,
-      );
+      await putLevelHistory({ ...progression, ...next }, progression.level, date, rewardId, now);
       const transactionIds = [rewardId];
       for (const reward of event.statRewards) {
         const transactionId = stableId(rewardId, reward.stat);

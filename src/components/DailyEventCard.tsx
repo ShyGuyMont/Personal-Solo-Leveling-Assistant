@@ -13,7 +13,9 @@ export function DailyEventCard() {
   if (!showQuest && !passes) return null;
 
   return (
-    <section className={`daily-event-card ${dailyEvent?.status === 'completed' ? 'is-complete' : ''}`}>
+    <section
+      className={`daily-event-card ${dailyEvent?.status === 'completed' ? 'is-complete' : ''}`}
+    >
       {showQuest && dailyEvent ? (
         <>
           <span className="daily-event-card__sigil">
@@ -33,7 +35,8 @@ export function DailyEventCard() {
               className="button button--primary"
               disabled={working}
               onClick={async () => {
-                if (!window.confirm('Confirm that you completed this optional Emergency Quest?')) return;
+                if (!window.confirm('Confirm that you completed this optional Emergency Quest?'))
+                  return;
                 setWorking(true);
                 try {
                   await completeEvent();
@@ -50,15 +53,20 @@ export function DailyEventCard() {
         </>
       ) : (
         <>
-          <span className="daily-event-card__sigil"><Ticket size={20} /></span>
+          <span className="daily-event-card__sigil">
+            <Ticket size={20} />
+          </span>
           <div>
             <p className="eyebrow">INVENTORY</p>
-            <strong>{passes} Mission Pass{passes === 1 ? '' : 'es'} available</strong>
-            <p>Use one from a pending mission’s details to protect the day without earning its XP.</p>
+            <strong>
+              {passes} Mission Pass{passes === 1 ? '' : 'es'} available
+            </strong>
+            <p>
+              Use one from a pending mission’s details to protect the day without earning its XP.
+            </p>
           </div>
         </>
       )}
     </section>
   );
 }
-

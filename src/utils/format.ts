@@ -28,4 +28,5 @@ export const STAT_LABELS: Record<StatName, string> = {
   vitality: 'Vitality',
   character: 'Character',
   empathy: 'Empathy',
+  stewardship: 'Stewardship',
 };

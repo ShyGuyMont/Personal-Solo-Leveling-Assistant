@@ -55,9 +55,9 @@ export const SUPPORT_TOPICS: SupportTopicDefinition[] = [
 
 type SupportSpeaker = CompanionId | 'snow-close';
 
-export const SUPPORT_DIALOGUE: Record<
+const BASE_SUPPORT_DIALOGUE: Record<
   SupportTopicId,
-  Record<SupportSpeaker, readonly string[]>
+  Record<Exclude<SupportSpeaker, 'cassian'>, readonly string[]>
 > = {
   motivation: {
     snow: [
@@ -89,6 +89,11 @@ export const SUPPORT_DIALOGUE: Record<
       'Lock in on one target, not the whole mountain. Make it small enough to start now and meaningful enough to count.',
       'You do not need another speech. You need one visible action that tells hesitation the shift has already begun.',
       'No shame, no waiting for lightning. Pick the easiest honest win and put some heat behind the first minute.',
+    ],
+    amara: [
+      'Choose a first step you would encourage someone you love to take. You deserve that same warm confidence from yourself.',
+      'Let connection lend you momentum: tell someone safe what you are beginning, or picture the person your finished work may help.',
+      'You do not need to impress anyone. Begin because your future self—and the life you are building with others—deserves one honest move.',
     ],
     'snow-close': [
       'The party agrees: one small action is enough to change the direction of this moment. Pick it, and we will meet you on the other side.',
@@ -127,6 +132,11 @@ export const SUPPORT_DIALOGUE: Record<
       'A plan should tell your feet where to go, not just describe everything making you nervous. Name the first physical action.',
       'Make the next win obvious: exact task, exact start, exact finish. Then stop negotiating and light the fuse.',
     ],
+    amara: [
+      'Put people on the plan too: who needs an answer, where you need a boundary, and when you need genuine time to yourself.',
+      'A healthy plan protects relationships from leftover exhaustion. Leave room to listen, to communicate, and to be unavailable when needed.',
+      'If another person is involved, replace mind-reading with one clear conversation. Kind clarity will save more energy than guessing.',
+    ],
     'snow-close': [
       'Your plan only needs three lines: first, next, and later. Start with first; the party will not confuse simplicity with a lack of ambition.',
       'Choose one must-do and two meaningful may-dos. Anything beyond that is bonus territory, not evidence against you.',
@@ -163,6 +173,11 @@ export const SUPPORT_DIALOGUE: Record<
       'Your faith does not become fake because the week got messy. Return honestly, receive grace, and let the next faithful act burn clean.',
       'The scoreboard is a tool, not your name. Anchor in what is true, then choose one action that agrees with it.',
       'Grace is not permission to quit on yourself; it is freedom to rise without dragging shame behind you.',
+    ],
+    amara: [
+      'Love is not earned by flawless performance. Let grace reshape the way you receive care and the way you offer it to others.',
+      'Faith can make room for both truth and tenderness: honest boundaries, sincere repair, and compassion without self-erasure.',
+      'Remember that you were made for relationship—with God, with others, and with your own whole heart. None of those require a perfect mask.',
     ],
     'snow-close': [
       'Carry this with you: you are a person before you are a performer. Let faith shape the next step, not fear of the scoreboard.',
@@ -201,6 +216,11 @@ export const SUPPORT_DIALOGUE: Record<
       'I am not pushing you forward right now. I am guarding the pause until your body knows this moment can be handled.',
       'Drop the battle stance for sixty seconds. Calm first, choices second; that order is the lock-in protocol today.',
     ],
+    amara: [
+      'You do not owe anyone an immediate answer while your heart is racing. Take the pause; a caring bond can survive a thoughtful delay.',
+      'Put one hand over your heart and let the body hear a kinder voice. You are safe enough in this minute to slow down.',
+      'If a trusted person helps you feel grounded, send one simple request for company. If not, protect the quiet until you feel steadier.',
+    ],
     'snow-close': [
       'For now: breathe, reduce the noise, and postpone what does not need an immediate answer. You can return to the problem with more room inside you.',
       'We are not forcing calm; we are making conditions where it can find you. Stay with one small grounding action for a few minutes.',
@@ -237,6 +257,11 @@ export const SUPPORT_DIALOGUE: Record<
       'We are not building a comeback out of self-hatred. Keep the lesson, protect the person, and choose one reachable re-entry move.',
       'The setback gets facts, not a throne. Recover what matters tonight and set one clean target for tomorrow.',
       'You went down. You came here. That means the return is already active—small, fierce, and completely real.',
+    ],
+    amara: [
+      'If someone was hurt, repair begins with honest ownership—not self-destruction. If you were hurt, recovery may begin with a boundary.',
+      'A difficult moment does not make you unlovable. Reach for safe support, and let connection help carry what isolation would magnify.',
+      'You may apologize, forgive yourself, ask for space, or choose no contact where safety requires it. Recovery honors the whole truth.',
     ],
     'snow-close': [
       'Tonight does not need a redemption montage. Choose one act of care and one clear re-entry step for tomorrow. That is enough recovery for now.',
@@ -275,6 +300,11 @@ export const SUPPORT_DIALOGUE: Record<
       'Proof on the board. Smile first, celebrate properly, and only then may anyone mention the next objective.',
       'You fought for this moment. Stand in it without shrinking, apologizing, or moving the finish line.',
     ],
+    amara: [
+      'Tell someone who can be happy for you without making the moment about themselves. Joy deserves safe company.',
+      'Let yourself receive every kind word without deflecting it. Celebration is connection, and you are allowed to be held by it.',
+      'This victory belongs to you, but it does not have to be lonely. Share the sparkle—or savor it privately if that feels truer.',
+    ],
     'snow-close': [
       'Party record updated: something good happened, you let it matter, and we were here to celebrate it with you. Keep this one.',
       'Stay in the moment a little longer. Tomorrow can have its own objectives; this victory belongs to right now.',
@@ -282,6 +312,46 @@ export const SUPPORT_DIALOGUE: Record<
     ],
   },
 };
+
+const CASSIAN_SUPPORT_DIALOGUE: Record<SupportTopicId, readonly string[]> = {
+  motivation: [
+    'Choose one action with a visible return: log the number, prepare the meal, or move one dollar. Evidence creates momentum.',
+    'You do not need a total financial transformation today. You need one choice tomorrow will be glad you made.',
+    'Begin with clarity, not intensity. Open the ledger, face one number, and let command replace avoidance.',
+  ],
+  'make-a-plan': [
+    'We will sort this in order: essentials, obligations, future, then flexible wants. One category at a time.',
+    'Give every dollar a post before the week gives it one by accident. A simple workable plan is enough.',
+    'Name what is due, what is available, and the single target that matters most. The rest can wait its turn.',
+  ],
+  'faith-perspective': [
+    'Resources are tools, not a measure of your worth. Steward them honestly, hold them humbly, and refuse both fear and worship.',
+    'Provision deserves gratitude and direction. Ask what this resource is meant to protect, grow, or share.',
+    'A faithful plan can be modest. Care for today, prepare for tomorrow, and leave room for generosity without neglecting wisdom.',
+  ],
+  'calm-down': [
+    'Make no major money decision while the alarm is loud. Breathe, close the cart, and return when your body is steadier.',
+    'The balance is information, not danger in this exact second. We can look at one number without solving the entire future.',
+    'Pause spending and pause judgment. Protect the next hour first; the plan will still be here when you can think clearly.',
+  ],
+  recover: [
+    'Record what happened without hiding it. Then choose one recovery action—adjust the week, prepare tomorrow, and continue.',
+    'One order did not destroy the campaign. We will learn the trigger, close the leak, and refuse to pay shame on top of the receipt.',
+    'A budget that cannot survive a mistake is not a system. Tell the truth, rebalance, and return to command.',
+  ],
+  celebrate: [
+    'Mark the win. A payment made, a meal prepared, or savings protected deserves recognition because it expanded your options.',
+    'Well stewarded. Enjoy the proof that patience can become safety without turning celebration into another expense.',
+    'The ledger shows progress, but the real victory is trust: you made a promise to your future and kept it.',
+  ],
+};
+
+export const SUPPORT_DIALOGUE = Object.fromEntries(
+  SUPPORT_TOPICS.map(({ id }) => [
+    id,
+    { ...BASE_SUPPORT_DIALOGUE[id], cassian: CASSIAN_SUPPORT_DIALOGUE[id] },
+  ]),
+) as Record<SupportTopicId, Record<SupportSpeaker, readonly string[]>>;
 
 export function getSupportTopic(id: SupportTopicId) {
   return SUPPORT_TOPICS.find((topic) => topic.id === id)!;

@@ -28,8 +28,14 @@ function categoryLine(metrics: CampfireMetrics, category: MissionCategory) {
 }
 
 function categoryRate(metrics: CampfireMetrics, categories: MissionCategory[]) {
-  const completed = categories.reduce((sum, category) => sum + (metrics.categoryCompleted[category] ?? 0), 0);
-  const available = categories.reduce((sum, category) => sum + (metrics.categoryAvailable[category] ?? 0), 0);
+  const completed = categories.reduce(
+    (sum, category) => sum + (metrics.categoryCompleted[category] ?? 0),
+    0,
+  );
+  const available = categories.reduce(
+    (sum, category) => sum + (metrics.categoryAvailable[category] ?? 0),
+    0,
+  );
   return { completed, available };
 }
 
@@ -65,8 +71,10 @@ function specialistLines(
   if (!available) {
     const empty = {
       rook: 'No Physical mission reached the finalized record this week. Next cycle, even one walk, rep, or deliberate recovery choice can reopen that path.',
-      selah: 'No Faith mission reached the finalized record this week. The return can be quiet: one prayer, one passage, one faithful pause.',
-      haven: 'No Character mission reached the finalized record this week. One small act of care—for yourself or someone else—is enough to reopen the path.',
+      selah:
+        'No Faith mission reached the finalized record this week. The return can be quiet: one prayer, one passage, one faithful pause.',
+      haven:
+        'No Character mission reached the finalized record this week. One small act of care—for yourself or someone else—is enough to reopen the path.',
     } as const;
     return [empty[companionId]];
   }
@@ -93,7 +101,9 @@ function specialistLines(
 function cipherLines(metrics: CampfireMetrics) {
   const { completed, available } = categoryRate(metrics, ['discipline', 'creator']);
   if (!available) {
-    return ['No Discipline or Creator missions reached the finalized record. Recommendation: define one tiny output with a visible finish line and execute before optimization begins.'];
+    return [
+      'No Discipline or Creator missions reached the finalized record. Recommendation: define one tiny output with a visible finish line and execute before optimization begins.',
+    ];
   }
   return [
     `Discipline and Creator output closed at ${completed}/${available}. Keep the process that produced completion; redesign any step that repeatedly depended on perfect conditions.`,
@@ -108,7 +118,7 @@ function emberLines(metrics: CampfireMetrics) {
     return [
       `${metrics.completedMissions} missions down. That is locked-in work. Keep the fire, but do not turn a strong week into permission to burn yourself out.`,
       `You left only ${unfinished} recorded mission${unfinished === 1 ? '' : 's'} unfinished. Good. Celebrate the hit, recover, then choose next week’s first target before the noise returns.`,
-      `That week had teeth. So did you. Bank the proof and come back hungry—not frantic.` ,
+      `That week had teeth. So did you. Bank the proof and come back hungry—not frantic.`,
     ];
   }
   if (metrics.completionRate >= 0.5) {
@@ -125,8 +135,53 @@ function emberLines(metrics: CampfireMetrics) {
   ];
 }
 
+function amaraLines(metrics: CampfireMetrics) {
+  const actions = metrics.relationshipActions ?? metrics.categoryCompleted.character ?? 0;
+  if (actions >= 3) {
+    return [
+      `${actions} acts of connection, kindness, or character reached the record. That is not background work—that is how a life becomes warmer to live inside.`,
+      `The heart path recorded ${actions} completed actions. Keep the care reciprocal, the communication honest, and the boundaries strong enough to protect both.`,
+      `${actions} relationship-minded choices became real this week. I hope at least one of them reminded you that you belong in the love you keep offering.`,
+    ];
+  }
+  if (actions > 0) {
+    return [
+      `${actions} deliberate act${actions === 1 ? '' : 's'} of care reached the record. Small moments build trust more often than grand speeches do.`,
+      `The relationship path moved ${actions} time${actions === 1 ? '' : 's'} this week. Next cycle, one honest message or warm boundary is enough to keep weaving.`,
+      `${actions} act${actions === 1 ? '' : 's'} of connection counted. Notice who helps you feel more like yourself, and tend that bond without abandoning your own needs.`,
+    ];
+  }
+  return [
+    'No relationship-focused action reached the finalized record this week. No guilt—choose one safe, sincere connection or self-respecting boundary next cycle.',
+    'The heart path was quiet in the record. It can reopen gently: one thank-you, one honest check-in, or one kind no where a no is needed.',
+    'Connection did not appear in the logged missions this week, but your belonging was never revoked. Next week only needs one brave, healthy reach.',
+  ];
+}
+
+function cassianLines(metrics: CampfireMetrics) {
+  const reviews = metrics.treasuryReviews ?? 0;
+  const wins = metrics.noEatingOutWins ?? 0;
+  const savings = metrics.savingsContributedCents ?? 0;
+  const debt = metrics.debtPaidCents ?? 0;
+  const moneyMoved = savings + debt;
+  if (reviews || wins || moneyMoved) {
+    return [
+      `Treasury record: ${reviews} weekly review${reviews === 1 ? '' : 's'}, ${wins} No Eating Out win${wins === 1 ? '' : 's'}, and $${(moneyMoved / 100).toFixed(2)} directed toward savings or debt. Clarity is compounding.`,
+      `You held the line ${wins} time${wins === 1 ? '' : 's'} and moved $${(moneyMoved / 100).toFixed(2)} toward tomorrow. The numbers matter because of the options they are building.`,
+      `${reviews ? 'The weekly table was opened. ' : ''}${wins} prepared choice${wins === 1 ? '' : 's'} beat an impulse, and $${(moneyMoved / 100).toFixed(2)} strengthened the future. Keep the system humane enough to repeat.`,
+    ];
+  }
+  return [
+    'The Treasury was quiet this week. No judgment—next cycle begins with one honest number, one prepared meal, and a five-minute review.',
+    'No financial action reached the weekly record. We reopen gently: log what arrives, log what leaves, and choose one dollar to direct on purpose.',
+    'The ledger has no verdict. It is simply waiting for the next clear entry and a plan small enough to keep.',
+  ];
+}
+
 function closingLines(metrics: CampfireMetrics) {
-  const focus = metrics.focusCategory ? CATEGORY_LABELS[metrics.focusCategory] : 'one meaningful path';
+  const focus = metrics.focusCategory
+    ? CATEGORY_LABELS[metrics.focusCategory]
+    : 'one meaningful path';
   return [
     `The campfire is closing, not the story. Next week, let us give ${focus} one deliberately small early win and build from there together.`,
     `We keep the completed work, the honest lessons, and your place in this party. Tomorrow only needs the next real step.`,
@@ -134,7 +189,10 @@ function closingLines(metrics: CampfireMetrics) {
   ];
 }
 
-export function buildCampfireMessages(metrics: CampfireMetrics, weekStart: LocalDateKey): PartyChatMessage[] {
+export function buildCampfireMessages(
+  metrics: CampfireMetrics,
+  weekStart: LocalDateKey,
+): PartyChatMessage[] {
   const entries: Array<{
     companionId: CompanionId;
     role: PartyChatMessage['role'];
@@ -142,11 +200,28 @@ export function buildCampfireMessages(metrics: CampfireMetrics, weekStart: Local
     slot: string;
   }> = [
     { companionId: 'snow', role: 'opener', pool: snowLines(metrics), slot: 'snow' },
-    { companionId: 'rook', role: 'response', pool: specialistLines(metrics, 'physical', 'rook'), slot: 'rook' },
-    { companionId: 'selah', role: 'response', pool: specialistLines(metrics, 'faith', 'selah'), slot: 'selah' },
+    {
+      companionId: 'rook',
+      role: 'response',
+      pool: specialistLines(metrics, 'physical', 'rook'),
+      slot: 'rook',
+    },
+    {
+      companionId: 'selah',
+      role: 'response',
+      pool: specialistLines(metrics, 'faith', 'selah'),
+      slot: 'selah',
+    },
     { companionId: 'cipher', role: 'response', pool: cipherLines(metrics), slot: 'cipher' },
-    { companionId: 'haven', role: 'response', pool: specialistLines(metrics, 'character', 'haven'), slot: 'haven' },
+    {
+      companionId: 'haven',
+      role: 'response',
+      pool: specialistLines(metrics, 'character', 'haven'),
+      slot: 'haven',
+    },
     { companionId: 'ember', role: 'response', pool: emberLines(metrics), slot: 'ember' },
+    { companionId: 'amara', role: 'response', pool: amaraLines(metrics), slot: 'amara' },
+    { companionId: 'cassian', role: 'response', pool: cassianLines(metrics), slot: 'cassian' },
     { companionId: 'snow', role: 'closing', pool: closingLines(metrics), slot: 'snow-close' },
   ];
   return entries.map((entry, order) => {
@@ -178,25 +253,33 @@ export async function ensureWeeklyCampfireRecap(systemDate: LocalDateKey, weekSt
   if (!reviews.length) return undefined;
 
   const reviewedDates = new Set(reviews.map((review) => review.date));
-  const [allRecords, missions] = await Promise.all([
-    db.dailyMissions.where('date').between(weekStart, weekEnd, true, true).toArray(),
-    db.missions.toArray(),
-  ]);
+  const [allRecords, missions, treasuryWeeks, treasuryChallenges, treasuryTransactions] =
+    await Promise.all([
+      db.dailyMissions.where('date').between(weekStart, weekEnd, true, true).toArray(),
+      db.missions.toArray(),
+      db.treasuryWeeks.where('weekStart').between(weekStart, weekEnd, true, true).toArray(),
+      db.treasuryChallenges.where('date').between(weekStart, weekEnd, true, true).toArray(),
+      db.treasuryTransactions.where('date').between(weekStart, weekEnd, true, true).toArray(),
+    ]);
   const records = allRecords.filter((record) => reviewedDates.has(record.date));
   const categories = new Map(missions.map((mission) => [mission.id, mission.category]));
   const categoryCompleted: CampfireMetrics['categoryCompleted'] = {};
   const categoryAvailable: CampfireMetrics['categoryAvailable'] = {};
   for (const category of CATEGORIES) {
-    const categoryRecords = records.filter((record) => categories.get(record.missionId) === category);
+    const categoryRecords = records.filter(
+      (record) => categories.get(record.missionId) === category,
+    );
     categoryAvailable[category] = categoryRecords.length;
-    categoryCompleted[category] = categoryRecords.filter((record) => record.status === 'completed').length;
+    categoryCompleted[category] = categoryRecords.filter(
+      (record) => record.status === 'completed',
+    ).length;
   }
-  const rankedCategories = CATEGORIES
-    .filter((category) => (categoryAvailable[category] ?? 0) > 0)
-    .map((category) => ({
-      category,
-      rate: (categoryCompleted[category] ?? 0) / Math.max(1, categoryAvailable[category] ?? 0),
-    }));
+  const rankedCategories = CATEGORIES.filter(
+    (category) => (categoryAvailable[category] ?? 0) > 0,
+  ).map((category) => ({
+    category,
+    rate: (categoryCompleted[category] ?? 0) / Math.max(1, categoryAvailable[category] ?? 0),
+  }));
   const completedMissions = records.filter((record) => record.status === 'completed').length;
   const metrics: CampfireMetrics = {
     recordedDays: reviews.length,
@@ -208,6 +291,15 @@ export async function ensureWeeklyCampfireRecap(systemDate: LocalDateKey, weekSt
     categoryAvailable,
     strongestCategory: rankedCategories.slice().sort((a, b) => b.rate - a.rate)[0]?.category,
     focusCategory: rankedCategories.slice().sort((a, b) => a.rate - b.rate)[0]?.category,
+    relationshipActions: categoryCompleted.character ?? 0,
+    treasuryReviews: treasuryWeeks.filter((week) => week.status === 'reviewed').length,
+    noEatingOutWins: treasuryChallenges.filter((challenge) => challenge.status === 'passed').length,
+    savingsContributedCents: treasuryTransactions
+      .filter((transaction) => transaction.kind === 'savings')
+      .reduce((sum, transaction) => sum + transaction.amountCents, 0),
+    debtPaidCents: treasuryTransactions
+      .filter((transaction) => transaction.kind === 'debt-payment')
+      .reduce((sum, transaction) => sum + transaction.amountCents, 0),
   };
   const recap: CampfireRecap = {
     id,

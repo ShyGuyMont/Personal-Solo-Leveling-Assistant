@@ -34,7 +34,17 @@ export function MissionCard({
   date: LocalDateKey;
   compact?: boolean;
 }) {
-  const { complete, undo, excuse, saveDetails, updateStatus, applyMissionPass, inventory, settings, streaks } = useGameStore();
+  const {
+    complete,
+    undo,
+    excuse,
+    saveDetails,
+    updateStatus,
+    applyMissionPass,
+    inventory,
+    settings,
+    streaks,
+  } = useGameStore();
   const [expanded, setExpanded] = useState(false);
   const [details, setDetails] = useState<MissionDetails>(record.details);
   const [working, setWorking] = useState(false);

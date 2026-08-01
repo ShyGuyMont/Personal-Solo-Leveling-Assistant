@@ -5,6 +5,9 @@ import { DailyEventOverlay } from '@/components/DailyEventOverlay';
 import { CompanionToast } from '@/components/CompanionToast';
 import { PartyBanterToast } from '@/components/PartyBanterToast';
 import { CampfireRecapOverlay } from '@/components/CampfireRecapOverlay';
+import { DailyBriefingOverlay } from '@/components/DailyBriefingOverlay';
+import { MonthlyCouncilOverlay } from '@/components/MonthlyCouncilOverlay';
+import { TreasuryChallengeOverlay } from '@/components/TreasuryChallengeOverlay';
 import { FirstDayGuide } from '@/components/FirstDayGuide';
 import { ProgressionOverlay } from '@/components/ProgressionOverlay';
 import { ErrorToast, RewardToast } from '@/components/Toasts';
@@ -41,6 +44,15 @@ const HeadquartersPage = lazy(() =>
 const AboutPage = lazy(() =>
   import('@/pages/AboutPage').then((module) => ({ default: module.AboutPage })),
 );
+const CampaignsPage = lazy(() =>
+  import('@/pages/CampaignsPage').then((module) => ({ default: module.CampaignsPage })),
+);
+const UpdateCenterPage = lazy(() =>
+  import('@/pages/UpdateCenterPage').then((module) => ({ default: module.UpdateCenterPage })),
+);
+const TreasuryPage = lazy(() =>
+  import('@/pages/TreasuryPage').then((module) => ({ default: module.TreasuryPage })),
+);
 
 export function App() {
   const { loading, profile, load, refresh } = useGameStore();
@@ -75,6 +87,9 @@ export function App() {
       '/party-chat': PartyChatPage,
       '/headquarters': HeadquartersPage,
       '/about': AboutPage,
+      '/campaigns': CampaignsPage,
+      '/update-center': UpdateCenterPage,
+      '/treasury': TreasuryPage,
     }[path] ?? DashboardPage;
 
   return (
@@ -87,8 +102,11 @@ export function App() {
       <DailyReviewModal />
       <FirstDayGuide />
       <DailyEventOverlay />
+      <DailyBriefingOverlay />
+      <TreasuryChallengeOverlay />
       <ProgressionOverlay />
       <CampfireRecapOverlay />
+      <MonthlyCouncilOverlay />
       <UpdatePrompt />
       <RewardToast />
       <CompanionToast />

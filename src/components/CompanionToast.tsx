@@ -30,7 +30,8 @@ export function CompanionToast() {
     settings?.companionMode === 'off' ||
     path === '/party-chat' ||
     path === '/about'
-  ) return null;
+  )
+    return null;
   const companion = getCompanion(companionReaction.companionId);
 
   return (
@@ -43,7 +44,9 @@ export function CompanionToast() {
         <img src={getCompanionImage(companion.image)} alt="" />
       </div>
       <div className="companion-toast__copy">
-        <span>{companion.name} · {companion.title}</span>
+        <span>
+          {companion.name} · {companion.title}
+        </span>
         <p>“{companionReaction.message}”</p>
       </div>
       <div className="companion-toast__actions">
@@ -61,7 +64,10 @@ export function CompanionToast() {
             );
           }}
         />
-        <button onClick={() => void dismissCompanionReaction()} aria-label="Dismiss companion message">
+        <button
+          onClick={() => void dismissCompanionReaction()}
+          aria-label="Dismiss companion message"
+        >
           <X size={17} />
         </button>
       </div>

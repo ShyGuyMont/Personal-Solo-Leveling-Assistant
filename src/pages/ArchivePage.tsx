@@ -1,11 +1,15 @@
 import {
   Archive,
+  BatteryMedium,
+  BookOpen,
   ChevronLeft,
   ChevronRight,
   Filter,
   Flame,
+  Crown,
   Heart,
   LineChart,
+  Map as MapIcon,
   MessageCircle,
   MessagesSquare,
   Radio,
@@ -14,11 +18,13 @@ import {
 import { useEffect, useMemo, useState } from 'react';
 import { Modal } from '@/components/Modal';
 import { CampfireRecapView } from '@/components/CampfireRecapView';
+import { MonthlyCouncilView } from '@/components/MonthlyCouncilView';
 import { ProgressBar } from '@/components/ProgressBar';
 import { CATEGORY_LABELS } from '@/config/missions';
 import { getCompanion, getCompanionImage } from '@/config/companions';
 import { getMoodDefinition } from '@/config/partyChat';
 import { getSupportTopic } from '@/config/support';
+import { getQuestline } from '@/config/questlines';
 import { getArchiveData } from '@/db/repositories';
 import {
   dateRange,
@@ -34,19 +40,24 @@ import { useGameStore } from '@/store/useGameStore';
 import { Link } from '@/router';
 import type {
   CampfireRecap,
+  ArcMilestone,
+  CampaignArc,
   ChallengeProgress,
   CompanionReaction,
   DailyEventRecord,
   DailyMissionRecord,
   DailyReview,
+  DailyCommandBriefing,
   LevelHistory,
   LocalDateKey,
+  MonthlyCouncil,
   RankHistory,
   PeriodicReport,
   PartyCheckIn,
   PartyBanter,
   FavoriteMessage,
   SupportConversation,
+  CompanionQuestProgress,
   StatTransaction,
 } from '@/types/game';
 
@@ -76,6 +87,11 @@ export function ArchivePage() {
   const [favoriteMessages, setFavoriteMessages] = useState<FavoriteMessage[]>([]);
   const [partyBanters, setPartyBanters] = useState<PartyBanter[]>([]);
   const [campfireRecaps, setCampfireRecaps] = useState<CampfireRecap[]>([]);
+  const [dailyBriefings, setDailyBriefings] = useState<DailyCommandBriefing[]>([]);
+  const [campaignArcs, setCampaignArcs] = useState<CampaignArc[]>([]);
+  const [arcMilestones, setArcMilestones] = useState<ArcMilestone[]>([]);
+  const [questProgress, setQuestProgress] = useState<CompanionQuestProgress[]>([]);
+  const [monthlyCouncils, setMonthlyCouncils] = useState<MonthlyCouncil[]>([]);
   const [selectedReview, setSelectedReview] = useState<DailyReview>();
   const [missionFilter, setMissionFilter] = useState('all');
 
@@ -95,6 +111,11 @@ export function ArchivePage() {
       setFavoriteMessages(data.favoriteMessages);
       setPartyBanters(data.partyBanters);
       setCampfireRecaps(data.campfireRecaps);
+      setDailyBriefings(data.dailyBriefings);
+      setCampaignArcs(data.campaignArcs);
+      setArcMilestones(data.arcMilestones);
+      setQuestProgress(data.companionQuestProgress);
+      setMonthlyCouncils(data.monthlyCouncils);
     });
   }, []);
 
@@ -377,19 +398,72 @@ export function ArchivePage() {
                 <p className="eyebrow">WEEKLY CAMPFIRES</p>
                 <h2>The party remembers each week</h2>
               </div>
-              <Link to="/headquarters" className="text-link">Headquarters <Flame size={16} /></Link>
+              <Link to="/headquarters" className="text-link">
+                Headquarters <Flame size={16} />
+              </Link>
             </header>
             <div className="campfire-archive__list">
               {campfireRecaps.map((recap) => (
                 <details key={recap.id}>
                   <summary>
-                    <span><Flame size={16} /></span>
-                    <div><strong>{recap.weekStart} → {recap.weekEnd}</strong><small>{recap.metrics.completedMissions}/{recap.metrics.availableMissions} missions · {recap.metrics.perfectDays} Perfect Days</small></div>
+                    <span>
+                      <Flame size={16} />
+                    </span>
+                    <div>
+                      <strong>
+                        {recap.weekStart} → {recap.weekEnd}
+                      </strong>
+                      <small>
+                        {recap.metrics.completedMissions}/{recap.metrics.availableMissions} missions
+                        · {recap.metrics.perfectDays} Perfect Days
+                      </small>
+                    </div>
                   </summary>
                   <CampfireRecapView recap={recap} compact />
                 </details>
               ))}
-              {!campfireRecaps.length && <div className="empty-state">The first completed weekly Campfire will be archived here.</div>}
+              {!campfireRecaps.length && (
+                <div className="empty-state">
+                  The first completed weekly Campfire will be archived here.
+                </div>
+              )}
+            </div>
+          </section>
+          <section className="panel archive-list-panel campfire-archive council-archive">
+            <header className="section-header">
+              <div>
+                <p className="eyebrow">MONTHLY COUNCILS</p>
+                <h2>The party remembers each chapter</h2>
+              </div>
+              <Link to="/headquarters" className="text-link">
+                Headquarters <Crown size={16} />
+              </Link>
+            </header>
+            <div className="campfire-archive__list">
+              {monthlyCouncils.map((council) => (
+                <details key={council.id}>
+                  <summary>
+                    <span>
+                      <Crown size={16} />
+                    </span>
+                    <div>
+                      <strong>
+                        {council.monthStart} → {council.monthEnd}
+                      </strong>
+                      <small>
+                        {council.metrics.completedMissions}/{council.metrics.availableMissions}{' '}
+                        missions · {council.metrics.questChapters} quest chapters
+                      </small>
+                    </div>
+                  </summary>
+                  <MonthlyCouncilView council={council} compact />
+                </details>
+              ))}
+              {!monthlyCouncils.length && (
+                <div className="empty-state">
+                  The first completed Monthly Council will be archived here.
+                </div>
+              )}
             </div>
           </section>
         </div>
@@ -538,6 +612,68 @@ export function ArchivePage() {
           <section className="panel archive-list-panel">
             <header className="section-header">
               <div>
+                <p className="eyebrow">CAMPAIGN COMMAND HISTORY</p>
+                <h2>Arcs, chapters, and daily briefings</h2>
+              </div>
+              <Link to="/campaigns" className="text-link">
+                Open campaigns <MapIcon size={16} />
+              </Link>
+            </header>
+            <div className="archive-list">
+              {campaignArcs.map((arc) => {
+                const marks = arcMilestones.filter((item) => item.arcId === arc.id);
+                return (
+                  <div key={arc.id} className="archive-row">
+                    <MapIcon size={17} />
+                    <div>
+                      <strong>{arc.name}</strong>
+                      <small>
+                        {arc.status} · {marks.filter((item) => item.status === 'completed').length}/
+                        {marks.length} milestones · guided by {getCompanion(arc.companionId).name}
+                      </small>
+                    </div>
+                    <span className="status-chip">arc</span>
+                  </div>
+                );
+              })}
+              {questProgress.map((progressItem) => {
+                const quest = getQuestline(progressItem.questlineId);
+                return (
+                  <div key={progressItem.id} className="archive-row">
+                    <BookOpen size={17} />
+                    <div>
+                      <strong>{quest?.title ?? 'Companion Questline'}</strong>
+                      <small>
+                        {progressItem.status} · {progressItem.completedChapterIds.length}/5 chapters
+                        · {getCompanion(progressItem.companionId).name}
+                      </small>
+                    </div>
+                    <span className="status-chip">questline</span>
+                  </div>
+                );
+              })}
+              {dailyBriefings.slice(0, 31).map((briefing) => (
+                <div key={briefing.id} className="archive-row">
+                  <BatteryMedium size={17} />
+                  <div>
+                    <strong>Snow’s Daily Command · {briefing.capacity}</strong>
+                    <small>
+                      {briefing.date} · {briefing.status}
+                    </small>
+                  </div>
+                  <span className="status-chip">briefing</span>
+                </div>
+              ))}
+              {!campaignArcs.length && !questProgress.length && !dailyBriefings.length && (
+                <div className="empty-state">
+                  Campaign Arcs, companion chapters, and command briefings will be preserved here.
+                </div>
+              )}
+            </div>
+          </section>
+          <section className="panel archive-list-panel">
+            <header className="section-header">
+              <div>
                 <p className="eyebrow">RARE SIGNAL HISTORY</p>
                 <h2>Daily events encountered</h2>
               </div>
@@ -548,10 +684,14 @@ export function ArchivePage() {
                 .filter((event) => event.kind !== 'none')
                 .map((event) => (
                   <div key={event.id} className="archive-row">
-                    <span className={`status-chip status-chip--${event.status}`}>{event.kind.replaceAll('-', ' ')}</span>
+                    <span className={`status-chip status-chip--${event.status}`}>
+                      {event.kind.replaceAll('-', ' ')}
+                    </span>
                     <div>
                       <strong>{event.title}</strong>
-                      <small>{event.date} · {event.status}</small>
+                      <small>
+                        {event.date} · {event.status}
+                      </small>
                     </div>
                     {event.accountXp > 0 && <span className="positive">+{event.accountXp} XP</span>}
                   </div>
@@ -577,7 +717,10 @@ export function ArchivePage() {
                 return (
                   <details key={checkIn.id} className="party-checkin-archive__item">
                     <summary>
-                      <span className="party-checkin-archive__mood" style={{ background: mood.accent }} />
+                      <span
+                        className="party-checkin-archive__mood"
+                        style={{ background: mood.accent }}
+                      />
                       <div>
                         <strong>{mood.label}</strong>
                         <small>{formatLongDate(checkIn.date)}</small>
@@ -593,7 +736,9 @@ export function ArchivePage() {
                           return (
                             <div key={message.id}>
                               <img src={getCompanionImage(companion.image)} alt="" />
-                              <p><strong>{companion.name}</strong> “{message.message}”</p>
+                              <p>
+                                <strong>{companion.name}</strong> “{message.message}”
+                              </p>
                             </div>
                           );
                         })}
@@ -604,7 +749,9 @@ export function ArchivePage() {
               {!partyCheckIns.length && (
                 <div className="empty-state">
                   <span>Your first emotional check-in will be saved here.</span>
-                  <Link to="/party-chat" className="button button--ghost button--small">Open Party Channel</Link>
+                  <Link to="/party-chat" className="button button--ghost button--small">
+                    Open Party Channel
+                  </Link>
                 </div>
               )}
             </div>
@@ -625,10 +772,18 @@ export function ArchivePage() {
                 return (
                   <details key={conversation.id} className="party-checkin-archive__item">
                     <summary>
-                      <span className="party-checkin-archive__mood" style={{ background: topic.accent }} />
+                      <span
+                        className="party-checkin-archive__mood"
+                        style={{ background: topic.accent }}
+                      />
                       <div>
                         <strong>{topic.label}</strong>
-                        <small>{formatLongDate(conversation.date)} · {conversation.audience === 'party' ? 'Whole Party' : getCompanion(conversation.audience).name}</small>
+                        <small>
+                          {formatLongDate(conversation.date)} ·{' '}
+                          {conversation.audience === 'party'
+                            ? 'Whole Party'
+                            : getCompanion(conversation.audience).name}
+                        </small>
                       </div>
                       <ChevronRight size={17} />
                     </summary>
@@ -641,7 +796,9 @@ export function ArchivePage() {
                           return (
                             <div key={message.id}>
                               <img src={getCompanionImage(companion.image)} alt="" />
-                              <p><strong>{companion.name}</strong> “{message.message}”</p>
+                              <p>
+                                <strong>{companion.name}</strong> “{message.message}”
+                              </p>
                             </div>
                           );
                         })}
@@ -656,7 +813,10 @@ export function ArchivePage() {
           </section>
           <section className="panel archive-list-panel">
             <header className="section-header">
-              <div><p className="eyebrow">WORDS TO CARRY</p><h2>Messages you chose to keep</h2></div>
+              <div>
+                <p className="eyebrow">WORDS TO CARRY</p>
+                <h2>Messages you chose to keep</h2>
+              </div>
               <Heart size={20} />
             </header>
             <div className="archive-list">
@@ -665,12 +825,17 @@ export function ArchivePage() {
                 return (
                   <div key={favorite.id} className="archive-row archive-row--companion">
                     <img src={getCompanionImage(companion.image)} alt="" />
-                    <div><strong>{companion.name}</strong><small>“{favorite.message}”</small></div>
+                    <div>
+                      <strong>{companion.name}</strong>
+                      <small>“{favorite.message}”</small>
+                    </div>
                     <span className="status-chip">{favorite.sourceType.replaceAll('-', ' ')}</span>
                   </div>
                 );
               })}
-              {!favoriteMessages.length && <div className="empty-state">Favorite companion messages will wait here.</div>}
+              {!favoriteMessages.length && (
+                <div className="empty-state">Favorite companion messages will wait here.</div>
+              )}
             </div>
           </section>
           <section className="panel archive-list-panel">
@@ -688,7 +853,10 @@ export function ArchivePage() {
                   return (
                     <div key={message.id} className="archive-row archive-row--companion">
                       <img src={getCompanionImage(companion.image)} alt="" />
-                      <div><strong>{companion.name} · Party Banter</strong><small>“{message.message}”</small></div>
+                      <div>
+                        <strong>{companion.name} · Party Banter</strong>
+                        <small>“{message.message}”</small>
+                      </div>
                       <span className="status-chip">banter</span>
                     </div>
                   );
@@ -700,7 +868,9 @@ export function ArchivePage() {
                   <div key={reaction.id} className="archive-row archive-row--companion">
                     <img src={getCompanionImage(companion.image)} alt="" />
                     <div>
-                      <strong>{companion.name} · {companion.title}</strong>
+                      <strong>
+                        {companion.name} · {companion.title}
+                      </strong>
                       <small>“{reaction.message}”</small>
                     </div>
                     <span className="status-chip">{reaction.trigger.replaceAll('-', ' ')}</span>

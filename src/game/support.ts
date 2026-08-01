@@ -11,7 +11,16 @@ import type {
   SupportTopicId,
 } from '@/types/game';
 
-const PARTY_ORDER: CompanionId[] = ['snow', 'rook', 'selah', 'cipher', 'haven', 'ember'];
+const PARTY_ORDER: CompanionId[] = [
+  'snow',
+  'rook',
+  'selah',
+  'cipher',
+  'haven',
+  'ember',
+  'amara',
+  'cassian',
+];
 
 function chooseMessage(
   topic: SupportTopicId,
@@ -47,7 +56,13 @@ export function buildSupportMessages(
     speaker: CompanionId | 'snow-close',
     role: PartyChatMessage['role'],
   ) => {
-    const choice = chooseMessage(topic, speaker, recentMessageIds, selected, `${seed}:${messages.length}`);
+    const choice = chooseMessage(
+      topic,
+      speaker,
+      recentMessageIds,
+      selected,
+      `${seed}:${messages.length}`,
+    );
     selected.unshift(choice.messageId);
     messages.push({
       id: `${seed}:message:${messages.length}`,

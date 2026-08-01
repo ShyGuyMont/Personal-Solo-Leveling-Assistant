@@ -46,6 +46,18 @@ describe('System companions', () => {
     expect(reaction?.message.length).toBeGreaterThan(20);
   });
 
+  it('routes empathy growth and relationship missions to Amara', async () => {
+    const statReaction = await queueCompanionReaction({
+      trigger: 'stat-level',
+      sourceId: 'test:empathy:2',
+      stat: 'empathy',
+      statLabel: 'Empathy',
+      level: 2,
+    });
+    expect(statReaction?.companionId).toBe('amara');
+    expect((await db.settings.get('primary'))?.enabledCompanionIds).toContain('amara');
+  });
+
   it('deduplicates reactions and advances the saved queue', async () => {
     await queueCompanionReaction({
       trigger: 'stat-level',

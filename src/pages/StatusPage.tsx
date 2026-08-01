@@ -38,6 +38,7 @@ const STAT_RAISES: Record<string, string> = {
   vitality: 'Movement, workouts, and Perfect Days',
   character: 'Kind messages and Perfect Days',
   empathy: 'Kind messages and character challenges',
+  stewardship: 'Treasury reviews, savings, debt payments, and Cassian challenges',
 };
 
 export function StatusPage() {

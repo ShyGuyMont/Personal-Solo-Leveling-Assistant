@@ -1,8 +1,4 @@
-import {
-  getCompanion,
-  getCompanionForCategory,
-  getCompanionForStat,
-} from '@/config/companions';
+import { getCompanion, getCompanionForCategory, getCompanionForStat } from '@/config/companions';
 import { db } from '@/db/database';
 import { stableId } from '@/utils/id';
 import type {
@@ -86,10 +82,7 @@ export async function queueCompanionReaction(input: {
 export async function queueLockInIfNeeded(systemDate: string) {
   const settings = await db.settings.get('primary');
   if (!settings || settings.recoveryMode.active) return undefined;
-  const previousReview = await db.dailyReviews
-    .where('date')
-    .below(systemDate)
-    .last();
+  const previousReview = await db.dailyReviews.where('date').below(systemDate).last();
   if (!previousReview) return undefined;
   const needsReentry =
     previousReview.status === 'in-progress' || previousReview.completionRate < 0.5;

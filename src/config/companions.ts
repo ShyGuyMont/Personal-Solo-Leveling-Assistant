@@ -1,9 +1,4 @@
-import type {
-  CompanionId,
-  CompanionTrigger,
-  MissionCategory,
-  StatName,
-} from '@/types/game';
+import type { CompanionId, CompanionTrigger, MissionCategory, StatName } from '@/types/game';
 
 export interface CompanionDefinition {
   id: CompanionId;
@@ -193,17 +188,17 @@ export const COMPANIONS: CompanionDefinition[] = [
     id: 'haven',
     name: 'Haven',
     title: 'The Guardian',
-    shortRole: 'Character · Empathy · Recovery · Comebacks',
+    shortRole: 'Character · Recovery · Comebacks',
     description:
-      'Haven protects the whole journey: character, empathy, recovery, balance, and beginning again after hard days.',
+      'Haven protects the whole journey: character, recovery, balance, and beginning again after hard days.',
     appearance:
       'A calm Latino field guardian with silver-streaked hair, a deep teal coat, and a soft shield of green-blue light.',
     personality:
       'Patient, observant, quietly humorous, and more interested in lasting progress than punishment.',
     accent: '#55cbb7',
     image: 'companions/haven.webp',
-    categories: ['character'],
-    stats: ['character', 'empathy'],
+    categories: [],
+    stats: ['character'],
     messages: {
       mission: [
         'Strength that makes room for others is worth keeping.',
@@ -285,6 +280,129 @@ export const COMPANIONS: CompanionDefinition[] = [
       ],
     },
   },
+  {
+    id: 'amara',
+    name: 'Amara',
+    title: 'The Heartweaver',
+    shortRole: 'Empathy · Relationships · Belonging',
+    description:
+      'Amara tends the bonds around the journey: friendship, family, romance, communication, appreciation, repair, and the courage to let healthy connection matter.',
+    appearance:
+      'A warm olive-skinned Mediterranean woman with long wavy chestnut hair, luminous pink eyes, and rose, plum, ivory, and rose-gold battle attire beneath a radiant pink System halo.',
+    personality:
+      'Warm, perceptive, playfully romantic, and deeply respectful of boundaries. She celebrates brave honesty, never pressures unsafe contact, and treats self-respect as part of every healthy relationship.',
+    accent: '#ff79b8',
+    image: 'companions/amara.webp',
+    categories: ['character'],
+    stats: ['empathy'],
+    messages: {
+      'daily-briefing': [
+        'Before the day gets loud, remember that connection can be small: one honest message, one kind boundary, one moment of real presence.',
+        'Your goals matter, and so do the people walking near them. Let us leave room for both today.',
+        'Heart check: is there someone worth appreciating, listening to, or answering with a little more honesty today?',
+      ],
+      mission: [
+        'That choice strengthened more than a score. Someone felt the warmth of your attention.',
+        'Connection is built in small brave moments exactly like that one.',
+        'You chose care with intention. Never call that a minor victory.',
+        'Empathy became action. That is how trust learns it is safe to grow.',
+      ],
+      'stat-level': [
+        '{stat} reached level {level}. Your strength is becoming something other people can feel beside you.',
+        'Level {level} {stat}. You are learning that a soft heart and a steady spine belong together.',
+        'Your {stat} advanced to level {level}. Keep the tenderness; keep the boundaries too.',
+      ],
+      'rank-up': [
+        'A new rank—and you still remembered that no victory has to make you less human. I love that.',
+        'Classification advanced. Let the people who care about you celebrate the person behind the achievement.',
+        'Your power grew, but so did your capacity to connect. That is a beautiful kind of ascension.',
+      ],
+      'rare-event': [
+        'A rare opening appeared, and you met it with heart instead of hesitation.',
+        'Unexpected quest complete. Some of the best bonds begin with one unplanned act of courage.',
+      ],
+      'mission-pass': [
+        'Pass secured. Sometimes protecting your energy is how you preserve what you have to give.',
+        'Keep this without guilt. Healthy connection includes knowing when you need room to breathe.',
+      ],
+      comeback: [
+        'You returned. The people who truly care about you do not need a perfect version—just an honest one.',
+        'No shame, sweetheart. We reconnect with the journey the same way we reconnect with people: one sincere step.',
+        'The distance is not a verdict. You are here now, and that gives us something real to hold.',
+      ],
+      achievement: [
+        'Let yourself be celebrated. Receiving love for your effort is a kind of courage too.',
+        'Achievement confirmed. I hope you share this with someone safe enough to be genuinely happy for you.',
+      ],
+    },
+  },
+  {
+    id: 'cassian',
+    name: 'Cassian',
+    title: 'The Steward',
+    shortRole: 'Budgeting · Saving · Debt freedom',
+    description:
+      'Cassian guards the resources behind the campaign: paychecks, spending, bills, savings, debt reduction, and the freedom created by an honest plan.',
+    appearance:
+      'A slim white man with fair skin, tousled light-brown hair, hazel eyes behind round gold-rimmed glasses, and a pencil tucked behind one ear. He carries a dark ledger against a crisp white shirt, emerald tie, navy waistcoat, and tailored Steward coat traced with restrained gold glyphs.',
+    personality:
+      'Calm, exacting, pragmatic, and firmly protective. He confronts avoidance and overspending without humiliation, celebrates every honest entry, and treats money as a tool rather than a measure of worth.',
+    accent: '#d6a84b',
+    image: 'companions/cassian.webp',
+    categories: [],
+    stats: ['stewardship'],
+    messages: {
+      'daily-briefing': [
+        'Before the day starts spending for you, give every dollar a job and every temptation a pause.',
+        'The ledger is not a courtroom. Look at the numbers, choose today’s limits, and keep your future in the room.',
+        'Quick Treasury check: what is due, what is safe to spend, and what are we protecting today?',
+        'No shame and no vague promises. One honest number and one deliberate choice will do.',
+      ],
+      mission: [
+        'Recorded and accounted for. Financial stability is built from decisions exactly this ordinary.',
+        'That was stewardship in motion: clear, honest, and aimed at the future.',
+        'The plan held because you made a choice before impulse could make it for you.',
+        'One clean financial action completed. Small entries become large freedom when repeated.',
+      ],
+      'stat-level': [
+        '{stat} reached level {level}. Your money habits are becoming a system instead of a reaction.',
+        'Level {level} {stat}. Every honest review is making the future less expensive.',
+        'Your {stat} advanced to level {level}. Keep the clarity; wealth without command is only noise.',
+      ],
+      'rank-up': [
+        'Classification advanced. Strength is easier to sustain when the resources beneath it are under command.',
+        'New rank confirmed. Celebrate it without turning celebration into an unplanned charge.',
+        'Your rank rose. So must the quality of the plan protecting what you are building.',
+      ],
+      'rare-event': [
+        'Unexpected opportunity handled without abandoning the plan. That is controlled flexibility.',
+        'Rare signal cleared. Good—surprise did not become an excuse to lose the ledger.',
+      ],
+      'mission-pass': [
+        'A reserve exists to be used wisely. Keep the pass for a genuine need, not a convenient impulse.',
+        'Protection secured. A good plan includes margin; it does not pretend life will obey a spreadsheet.',
+      ],
+      comeback: [
+        'Open the ledger. We are not paying interest on shame—only identifying the next correct move.',
+        'You returned to the numbers. That is the hardest part of financial recovery, and it is already done.',
+        'No dramatic austerity oath. Log what happened, protect the next essential, and make one repair you can repeat.',
+      ],
+      treasury: [
+        'No eating out today. The kitchen is part of the strategy; make the easier choice ready before hunger negotiates.',
+        'Challenge cleared. You did not merely avoid a purchase—you proved convenience does not command you.',
+        'The dining challenge failed, and the entry is honest. Good. We recover with a prepared alternative, not punishment.',
+        'Paycheck logged. Before it disappears into the general fog, assign bills, future, and breathing room.',
+        'Savings moved first. That is how a goal stops receiving whatever happens to be left over.',
+        'Debt payment recorded. Interest has less territory than it did yesterday.',
+        'Weekly review complete. The numbers cannot protect you when hidden; today, they were brought under command.',
+        'Overspending detected. We will not moralize it, and we will not ignore it. Name the leak and change the next condition.',
+      ],
+      achievement: [
+        'Achievement secured. Mark the win without financing a celebration your future has to clean up.',
+        'The record confirms it: discipline became freedom in measurable form.',
+      ],
+    },
+  },
 ];
 
 export function getCompanion(id: CompanionId) {
@@ -301,7 +419,6 @@ export function getCompanionForStat(stat: StatName) {
 
 export function getCompanionForCategory(category: MissionCategory) {
   return (
-    COMPANIONS.find((companion) => companion.categories.includes(category)) ??
-    getCompanion('snow')
+    COMPANIONS.find((companion) => companion.categories.includes(category)) ?? getCompanion('snow')
   );
 }

@@ -15,9 +15,12 @@ export function CompanionRoster({ detailed = false }: { detailed?: boolean }) {
       <header className="section-header">
         <div>
           <p className="eyebrow">PARTY HEADQUARTERS</p>
-          <h2>Snow & your six System companions</h2>
+          <h2>Snow & your seven System companions</h2>
         </div>
-        <Link to="/headquarters" className="button button--ghost button--small companion-roster__check-in">
+        <Link
+          to="/headquarters"
+          className="button button--ghost button--small companion-roster__check-in"
+        >
           <Castle size={16} /> Headquarters
         </Link>
       </header>
@@ -46,8 +49,12 @@ export function CompanionRoster({ detailed = false }: { detailed?: boolean }) {
                 {detailed && (
                   <>
                     <p>{companion.description}</p>
-                    <p><b>Personality:</b> {companion.personality}</p>
-                    <p><b>Appearance:</b> {companion.appearance}</p>
+                    <p>
+                      <b>Personality:</b> {companion.personality}
+                    </p>
+                    <p>
+                      <b>Appearance:</b> {companion.appearance}
+                    </p>
                   </>
                 )}
               </div>

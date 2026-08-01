@@ -2,16 +2,20 @@ import {
   ArrowRight,
   CalendarDays,
   ChevronRight,
+  Map as MapIcon,
   Flame,
   Settings as SettingsIcon,
   Shield,
   Sparkles,
   TrendingUp,
+  UtensilsCrossed,
+  WalletCards,
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { ChallengeCard } from '@/components/ChallengeCard';
 import { CompanionRoster } from '@/components/CompanionRoster';
 import { DailyEventCard } from '@/components/DailyEventCard';
+import { DailyBriefingCard } from '@/components/DailyBriefingCard';
 import { InstallCard } from '@/components/InstallCard';
 import { MissionCard } from '@/components/MissionCard';
 import { ProgressBar } from '@/components/ProgressBar';
@@ -26,8 +30,17 @@ import { useGameStore } from '@/store/useGameStore';
 import type { DailyReview, StatTransaction, SystemState } from '@/types/game';
 
 export function DashboardPage() {
-  const { profile, progression, stats, settings, missions, todayRecords, challenges, systemDate } =
-    useGameStore();
+  const {
+    profile,
+    progression,
+    stats,
+    settings,
+    missions,
+    todayRecords,
+    challenges,
+    systemDate,
+    treasuryChallenge,
+  } = useGameStore();
   const [lastReview, setLastReview] = useState<DailyReview>();
   const [recentStats, setRecentStats] = useState<StatTransaction[]>([]);
 
@@ -145,6 +158,52 @@ export function DashboardPage() {
 
       <InstallCard />
       <DailyEventCard />
+      <DailyBriefingCard />
+
+      <Link
+        to="/treasury"
+        className={`treasury-dashboard-card panel is-${treasuryChallenge?.status ?? 'quiet'}`}
+      >
+        <span>
+          <WalletCards size={23} />
+        </span>
+        <div>
+          <p className="eyebrow">TREASURY COMMAND · CASSIAN</p>
+          <strong>
+            {treasuryChallenge?.status === 'active'
+              ? 'No Eating Out directive active'
+              : treasuryChallenge?.status === 'passed'
+                ? 'Kitchen line held today'
+                : treasuryChallenge?.status === 'failed'
+                  ? 'Recovery protocol available'
+                  : 'Open the private ledger'}
+          </strong>
+          <small>
+            {treasuryChallenge?.status === 'active'
+              ? `Optional · +${treasuryChallenge.rewardXp} XP · clear it before day reset`
+              : 'Paychecks, spending, bills, debt, savings, and the weekly review'}
+          </small>
+        </div>
+        {treasuryChallenge?.status === 'active' ? (
+          <UtensilsCrossed size={20} />
+        ) : (
+          <ChevronRight size={20} />
+        )}
+      </Link>
+
+      <Link to="/campaigns" className="campaign-command-card panel">
+        <span>
+          <MapIcon size={23} />
+        </span>
+        <div>
+          <p className="eyebrow">LONG-RANGE COMMAND</p>
+          <strong>Campaign Arcs & Companion Questlines</strong>
+          <small>
+            Build your own milestones or enter one of eight five-chapter party campaigns.
+          </small>
+        </div>
+        <ChevronRight size={20} />
+      </Link>
 
       {recovery && (
         <section className="recovery-banner">

@@ -12,10 +12,10 @@ export function PartyBanterToast() {
   const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
   const visible = Boolean(
     partyBanter &&
-      !companionReaction &&
-      settings?.companionMode !== 'off' &&
-      path !== '/party-chat' &&
-      path !== '/about',
+    !companionReaction &&
+    settings?.companionMode !== 'off' &&
+    path !== '/party-chat' &&
+    path !== '/about',
   );
 
   useEffect(() => {
@@ -36,7 +36,9 @@ export function PartyBanterToast() {
   return (
     <aside className="party-banter-toast" role="status">
       <header>
-        <span><MessageCircleMore size={16} /> PARTY BANTER</span>
+        <span>
+          <MessageCircleMore size={16} /> PARTY BANTER
+        </span>
         <button onClick={() => void dismissPartyBanter()} aria-label="Dismiss party banter">
           <X size={17} />
         </button>
@@ -51,7 +53,9 @@ export function PartyBanterToast() {
             style={{ '--companion-accent': companion.accent } as CSSProperties}
           >
             <img src={getCompanionImage(companion.image)} alt="" />
-            <p><strong>{companion.name}</strong> “{message.message}”</p>
+            <p>
+              <strong>{companion.name}</strong> “{message.message}”
+            </p>
             <FavoriteMessageButton
               active={favoriteIds.has(favoriteId)}
               onToggle={async () => {

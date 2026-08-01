@@ -13,6 +13,11 @@ import {
   ensureWeeklyCampfireRecap,
   getNextCampfireRecap,
 } from '@/game/campfire';
+import {
+  acknowledgeMonthlyCouncil,
+  ensureMonthlyCouncil,
+  getNextMonthlyCouncil,
+} from '@/game/council';
 import { acknowledgePartyBanter, getNextPartyBanter, queuePartyBanter } from '@/game/banter';
 import {
   activateDailyEvent,
@@ -36,6 +41,12 @@ import {
 } from '@/game/engine';
 import { getSystemDateKey } from '@/utils/date';
 import { STAT_LABELS } from '@/utils/format';
+import {
+  ensureTreasuryChallenge,
+  ensureTreasuryWeek,
+  resolveTreasuryChallenge,
+  revealTreasuryChallenge,
+} from '@/game/treasury';
 import type {
   DailyReview,
   Focus,
@@ -87,6 +98,10 @@ interface GameStore extends GameSnapshot {
   dismissCompanionReaction: () => Promise<void>;
   dismissPartyBanter: () => Promise<void>;
   dismissCampfireRecap: () => Promise<void>;
+  dismissMonthlyCouncil: () => Promise<void>;
+  acknowledgeTreasuryChallenge: () => Promise<void>;
+  passTreasuryChallenge: () => Promise<void>;
+  failTreasuryChallenge: () => Promise<void>;
   clearRewardNotice: () => void;
   clearError: () => void;
 }
@@ -122,6 +137,10 @@ async function readSnapshot(): Promise<GameSnapshot> {
     companionReaction,
     partyBanter,
     campfireRecap,
+    dailyBriefing,
+    monthlyCouncil,
+    treasuryChallenge,
+    treasuryWeek,
   ] = await Promise.all([
     db.profiles.get('primary'),
     db.missions.toArray(),
@@ -137,6 +156,10 @@ async function readSnapshot(): Promise<GameSnapshot> {
     getNextCompanionReaction(),
     getNextPartyBanter(),
     getNextCampfireRecap(),
+    db.dailyBriefings.get(systemDate),
+    getNextMonthlyCouncil(),
+    db.treasuryChallenges.get(systemDate),
+    settings ? ensureTreasuryWeek(systemDate, settings.weekStartsOn) : undefined,
   ]);
   return {
     profile,
@@ -154,6 +177,10 @@ async function readSnapshot(): Promise<GameSnapshot> {
     companionReaction,
     partyBanter,
     campfireRecap,
+    dailyBriefing,
+    monthlyCouncil,
+    treasuryChallenge,
+    treasuryWeek,
     systemDate,
   };
 }
@@ -162,8 +189,11 @@ async function prepareDailySystems(settings: Settings) {
   const date = getSystemDateKey(new Date(), settings.resetTime, settings.timeZone);
   await ensureDailyEvent(date);
   await ensureWeeklyCampfireRecap(date, settings.weekStartsOn);
+  await ensureMonthlyCouncil(date);
+  await ensureTreasuryWeek(date, settings.weekStartsOn);
+  await ensureTreasuryChallenge(date);
   await queueLockInIfNeeded(date);
-  if (settings.firstDayGuideCompleted) {
+  if (settings.firstDayGuideCompleted && !settings.dailyBriefingEnabled) {
     await queueCompanionReaction({
       trigger: 'daily-briefing',
       sourceId: `daily-briefing:${date}`,
@@ -373,7 +403,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
       });
       set({ ...(await readSnapshot()), error: undefined });
     } catch (error) {
-      set({ error: error instanceof Error ? error.message : 'The Mission Pass could not be claimed.' });
+      set({
+        error: error instanceof Error ? error.message : 'The Mission Pass could not be claimed.',
+      });
       throw error;
     }
   },
@@ -422,7 +454,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
       await consumeMissionPass(date ?? get().systemDate, missionId);
       set({ ...(await readSnapshot()), error: undefined });
     } catch (error) {
-      set({ error: error instanceof Error ? error.message : 'The Mission Pass could not be used.' });
+      set({
+        error: error instanceof Error ? error.message : 'The Mission Pass could not be used.',
+      });
       throw error;
     }
   },
@@ -443,6 +477,58 @@ export const useGameStore = create<GameStore>((set, get) => ({
     if (!recap) return;
     await acknowledgeCampfireRecap(recap.id);
     set({ ...(await readSnapshot()), error: undefined });
+  },
+  async dismissMonthlyCouncil() {
+    const council = get().monthlyCouncil;
+    if (!council) return;
+    await acknowledgeMonthlyCouncil(council.id);
+    set({ ...(await readSnapshot()), error: undefined });
+  },
+  async acknowledgeTreasuryChallenge() {
+    await revealTreasuryChallenge(get().systemDate);
+    set({ ...(await readSnapshot()), error: undefined });
+  },
+  async passTreasuryChallenge() {
+    try {
+      const challenge = get().treasuryChallenge;
+      if (!challenge) return;
+      const result = await resolveTreasuryChallenge(get().systemDate, 'passed');
+      await queueCompanionReaction({
+        trigger: 'treasury',
+        sourceId: `no-eating-out:${get().systemDate}:passed`,
+        companionId: 'cassian',
+      });
+      set({
+        ...(await readSnapshot()),
+        rewardNotice: {
+          missionName: 'No Eating Out',
+          accountXp: 'reward' in result ? result.reward.awardedXp : challenge.rewardXp,
+          levelsGained: 'reward' in result ? result.reward.levelsGained : 0,
+        },
+        error: undefined,
+      });
+    } catch (error) {
+      set({
+        error: error instanceof Error ? error.message : 'The challenge could not be cleared.',
+      });
+      throw error;
+    }
+  },
+  async failTreasuryChallenge() {
+    try {
+      await resolveTreasuryChallenge(get().systemDate, 'failed');
+      await queueCompanionReaction({
+        trigger: 'treasury',
+        sourceId: `no-eating-out:${get().systemDate}:failed`,
+        companionId: 'cassian',
+      });
+      set({ ...(await readSnapshot()), error: undefined });
+    } catch (error) {
+      set({
+        error: error instanceof Error ? error.message : 'The challenge could not be recorded.',
+      });
+      throw error;
+    }
   },
   clearRewardNotice() {
     set({ rewardNotice: undefined });

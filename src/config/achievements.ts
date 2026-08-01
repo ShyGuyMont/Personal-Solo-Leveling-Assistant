@@ -229,13 +229,7 @@ const DEFINITIONS = [
     'Complete 1 Emergency Quest',
     'spark',
   ],
-  [
-    'grace-token',
-    'Grace Received',
-    'Claim a rare Mission Pass.',
-    'Claim 1 Mission Pass',
-    'shield',
-  ],
+  ['grace-token', 'Grace Received', 'Claim a rare Mission Pass.', 'Claim 1 Mission Pass', 'shield'],
   [
     'pass-wisely-used',
     'Wisdom Over Shame',

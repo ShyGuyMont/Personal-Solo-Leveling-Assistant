@@ -8,7 +8,13 @@ import { formatPercent } from '@/utils/format';
 import { formatShortDate } from '@/utils/date';
 import type { CampfireRecap } from '@/types/game';
 
-export function CampfireRecapView({ recap, compact = false }: { recap: CampfireRecap; compact?: boolean }) {
+export function CampfireRecapView({
+  recap,
+  compact = false,
+}: {
+  recap: CampfireRecap;
+  compact?: boolean;
+}) {
   const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -23,19 +29,43 @@ export function CampfireRecapView({ recap, compact = false }: { recap: CampfireR
   return (
     <section className={`campfire-recap ${compact ? 'campfire-recap--compact' : ''}`}>
       <header className="campfire-recap__header">
-        <span className="campfire-recap__flame"><Flame size={24} /></span>
+        <span className="campfire-recap__flame">
+          <Flame size={24} />
+        </span>
         <div>
-          <p className="eyebrow">WEEKLY CAMPFIRE · {formatShortDate(recap.weekStart)}—{formatShortDate(recap.weekEnd)}</p>
+          <p className="eyebrow">
+            WEEKLY CAMPFIRE · {formatShortDate(recap.weekStart)}—{formatShortDate(recap.weekEnd)}
+          </p>
           <h2>The party reviews the week</h2>
-          <p>Built only from finalized mission records. No hidden scoring and no invented personal conclusions.</p>
+          <p>
+            Built only from finalized mission records. No hidden scoring and no invented personal
+            conclusions.
+          </p>
         </div>
       </header>
 
       <div className="campfire-metrics">
-        <div><Target size={17} /><span>Completed</span><strong>{recap.metrics.completedMissions}/{recap.metrics.availableMissions}</strong></div>
-        <div><Flame size={17} /><span>Completion</span><strong>{formatPercent(recap.metrics.completionRate)}</strong></div>
-        <div><Trophy size={17} /><span>Perfect Days</span><strong>{recap.metrics.perfectDays}</strong></div>
-        <div><span>Next focus</span><strong>{focus}</strong></div>
+        <div>
+          <Target size={17} />
+          <span>Completed</span>
+          <strong>
+            {recap.metrics.completedMissions}/{recap.metrics.availableMissions}
+          </strong>
+        </div>
+        <div>
+          <Flame size={17} />
+          <span>Completion</span>
+          <strong>{formatPercent(recap.metrics.completionRate)}</strong>
+        </div>
+        <div>
+          <Trophy size={17} />
+          <span>Perfect Days</span>
+          <strong>{recap.metrics.perfectDays}</strong>
+        </div>
+        <div>
+          <span>Next focus</span>
+          <strong>{focus}</strong>
+        </div>
       </div>
 
       <div className="campfire-message-list">
@@ -52,7 +82,11 @@ export function CampfireRecapView({ recap, compact = false }: { recap: CampfireR
                 style={{ '--companion-accent': companion.accent } as CSSProperties}
               >
                 <img src={getCompanionImage(companion.image)} alt="" />
-                <div><strong>{companion.name}</strong><span>{companion.title}</span><p>“{message.message}”</p></div>
+                <div>
+                  <strong>{companion.name}</strong>
+                  <span>{companion.title}</span>
+                  <p>“{message.message}”</p>
+                </div>
                 <FavoriteMessageButton
                   active={favoriteIds.has(favoriteId)}
                   onToggle={async () => {

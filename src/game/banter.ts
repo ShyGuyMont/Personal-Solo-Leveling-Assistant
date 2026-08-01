@@ -57,7 +57,10 @@ export async function queuePartyBanter(input: {
 }
 
 export async function getNextPartyBanter() {
-  return db.partyBanters.orderBy('createdAt').filter((banter) => !banter.acknowledged).first();
+  return db.partyBanters
+    .orderBy('createdAt')
+    .filter((banter) => !banter.acknowledged)
+    .first();
 }
 
 export async function acknowledgePartyBanter(id: string) {
