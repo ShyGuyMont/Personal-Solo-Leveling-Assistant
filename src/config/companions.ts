@@ -347,7 +347,7 @@ export const COMPANIONS: CompanionDefinition[] = [
       'A slim white man with fair skin, tousled light-brown hair, hazel eyes behind round gold-rimmed glasses, and a pencil tucked behind one ear. He carries a dark ledger against a crisp white shirt, emerald tie, navy waistcoat, and tailored Steward coat traced with restrained gold glyphs.',
     personality:
       'Calm, exacting, pragmatic, and firmly protective. He confronts avoidance and overspending without humiliation, celebrates every honest entry, and treats money as a tool rather than a measure of worth.',
-    accent: '#d6a84b',
+    accent: '#4ee58a',
     image: 'companions/cassian.webp',
     categories: [],
     stats: ['stewardship'],
