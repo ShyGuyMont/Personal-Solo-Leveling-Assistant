@@ -5,8 +5,14 @@ import { getEmergencyQuest } from '@/config/dailyEvents';
 import {
   acknowledgeCompanionReaction,
   getNextCompanionReaction,
+  queueLockInIfNeeded,
   queueCompanionReaction,
 } from '@/game/companions';
+import {
+  acknowledgeCampfireRecap,
+  ensureWeeklyCampfireRecap,
+  getNextCampfireRecap,
+} from '@/game/campfire';
 import { acknowledgePartyBanter, getNextPartyBanter, queuePartyBanter } from '@/game/banter';
 import {
   activateDailyEvent,
@@ -80,6 +86,7 @@ interface GameStore extends GameSnapshot {
   applyMissionPass: (missionId: string, date?: LocalDateKey) => Promise<void>;
   dismissCompanionReaction: () => Promise<void>;
   dismissPartyBanter: () => Promise<void>;
+  dismissCampfireRecap: () => Promise<void>;
   clearRewardNotice: () => void;
   clearError: () => void;
 }
@@ -114,6 +121,7 @@ async function readSnapshot(): Promise<GameSnapshot> {
     inventory,
     companionReaction,
     partyBanter,
+    campfireRecap,
   ] = await Promise.all([
     db.profiles.get('primary'),
     db.missions.toArray(),
@@ -128,6 +136,7 @@ async function readSnapshot(): Promise<GameSnapshot> {
     db.inventory.toArray(),
     getNextCompanionReaction(),
     getNextPartyBanter(),
+    getNextCampfireRecap(),
   ]);
   return {
     profile,
@@ -144,6 +153,7 @@ async function readSnapshot(): Promise<GameSnapshot> {
     inventory,
     companionReaction,
     partyBanter,
+    campfireRecap,
     systemDate,
   };
 }
@@ -151,6 +161,8 @@ async function readSnapshot(): Promise<GameSnapshot> {
 async function prepareDailySystems(settings: Settings) {
   const date = getSystemDateKey(new Date(), settings.resetTime, settings.timeZone);
   await ensureDailyEvent(date);
+  await ensureWeeklyCampfireRecap(date, settings.weekStartsOn);
+  await queueLockInIfNeeded(date);
   if (settings.firstDayGuideCompleted) {
     await queueCompanionReaction({
       trigger: 'daily-briefing',
@@ -425,6 +437,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
     if (!banter) return;
     await acknowledgePartyBanter(banter.id);
     set({ partyBanter: await getNextPartyBanter() });
+  },
+  async dismissCampfireRecap() {
+    const recap = get().campfireRecap;
+    if (!recap) return;
+    await acknowledgeCampfireRecap(recap.id);
+    set({ ...(await readSnapshot()), error: undefined });
   },
   clearRewardNotice() {
     set({ rewardNotice: undefined });

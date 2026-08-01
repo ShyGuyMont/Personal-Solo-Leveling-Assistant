@@ -58,7 +58,10 @@ type ChannelTab = 'check-in' | 'support' | 'saved';
 
 export function PartyChatPage() {
   const { profile, systemDate } = useGameStore();
-  const [tab, setTab] = useState<ChannelTab>('check-in');
+  const [tab, setTab] = useState<ChannelTab>(() => {
+    const requested = new URLSearchParams(window.location.hash.split('?')[1] ?? '').get('tab');
+    return requested === 'support' || requested === 'saved' ? requested : 'check-in';
+  });
   const [activeCheckIn, setActiveCheckIn] = useState<PartyCheckIn>();
   const [activeSupport, setActiveSupport] = useState<SupportConversation>();
   const [recentCheckIns, setRecentCheckIns] = useState<PartyCheckIn[]>([]);
@@ -212,7 +215,7 @@ export function PartyChatPage() {
   return (
     <div className="page party-chat-page">
       <div className="party-chat__topbar">
-        <Link className="text-link" to="/"><ArrowLeft size={17} /> Back to System</Link>
+        <Link className="text-link" to="/headquarters"><ArrowLeft size={17} /> Headquarters</Link>
         <span className="party-chat__saved"><LockKeyhole size={15} /> Private & offline</span>
       </div>
 

@@ -1,7 +1,7 @@
 import { db, TABLE_NAMES } from '@/db/database';
 import type { BackupSnapshot, Profile, SaveFile, Settings, AccountProgression } from '@/types/game';
 
-const SAVE_VERSION = 6;
+const SAVE_VERSION = 7;
 const MAX_IMPORT_BYTES = 8 * 1024 * 1024;
 const MAX_SNAPSHOTS = 5;
 const FORBIDDEN_KEYS = new Set(['__proto__', 'prototype', 'constructor']);
@@ -84,11 +84,17 @@ function migrateData(
     data.favoriteMessages ??= [];
     data.partyBanters ??= [];
   }
+  if (version <= 6) {
+    data.campfireRecaps ??= [];
+  }
   data.settings = data.settings.map((row) => {
     if (isObject(row)) {
       const companionIds = Array.isArray(row.enabledCompanionIds)
         ? row.enabledCompanionIds.filter((id): id is string => typeof id === 'string')
         : ['rook', 'selah', 'cipher', 'haven'];
+      const migratedCompanionIds = version <= 6 && !companionIds.includes('ember')
+        ? [...companionIds, 'ember']
+        : companionIds;
       return {
         privacyScreenEnabled: false,
         sensitiveMissionAlias: 'Integrity Protocol',
@@ -99,7 +105,7 @@ function migrateData(
         dailyEventsEnabled: true,
         companionMode: 'balanced',
         ...row,
-        enabledCompanionIds: ['snow', ...companionIds.filter((id) => id !== 'snow')],
+        enabledCompanionIds: ['snow', ...migratedCompanionIds.filter((id) => id !== 'snow')],
       };
     }
     return row;

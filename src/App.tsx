@@ -4,6 +4,7 @@ import { DailyReviewModal } from '@/components/DailyReviewModal';
 import { DailyEventOverlay } from '@/components/DailyEventOverlay';
 import { CompanionToast } from '@/components/CompanionToast';
 import { PartyBanterToast } from '@/components/PartyBanterToast';
+import { CampfireRecapOverlay } from '@/components/CampfireRecapOverlay';
 import { FirstDayGuide } from '@/components/FirstDayGuide';
 import { ProgressionOverlay } from '@/components/ProgressionOverlay';
 import { ErrorToast, RewardToast } from '@/components/Toasts';
@@ -33,6 +34,9 @@ const SettingsPage = lazy(() =>
 );
 const PartyChatPage = lazy(() =>
   import('@/pages/PartyChatPage').then((module) => ({ default: module.PartyChatPage })),
+);
+const HeadquartersPage = lazy(() =>
+  import('@/pages/HeadquartersPage').then((module) => ({ default: module.HeadquartersPage })),
 );
 const AboutPage = lazy(() =>
   import('@/pages/AboutPage').then((module) => ({ default: module.AboutPage })),
@@ -69,6 +73,7 @@ export function App() {
       '/archive': ArchivePage,
       '/settings': SettingsPage,
       '/party-chat': PartyChatPage,
+      '/headquarters': HeadquartersPage,
       '/about': AboutPage,
     }[path] ?? DashboardPage;
 
@@ -83,6 +88,7 @@ export function App() {
       <FirstDayGuide />
       <DailyEventOverlay />
       <ProgressionOverlay />
+      <CampfireRecapOverlay />
       <UpdatePrompt />
       <RewardToast />
       <CompanionToast />

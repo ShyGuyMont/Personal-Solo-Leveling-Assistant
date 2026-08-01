@@ -137,8 +137,16 @@ export function SettingsPage() {
               <input value={displayName} onChange={(event) => setDisplayName(event.target.value)} />
             </label>
             <label className="field">
-              <span>System title</span>
-              <input value={systemTitle} onChange={(event) => setSystemTitle(event.target.value)} />
+              <span>Custom System title</span>
+              <input
+                value={systemTitle}
+                onChange={(event) => setSystemTitle(event.target.value)}
+                placeholder="Candidate"
+                maxLength={50}
+              />
+              <small>
+                Cosmetic nickname only—it does not affect XP, stats, achievement titles, or rank.
+              </small>
             </label>
             <label className="field">
               <span>Equipped achievement title</span>
@@ -253,7 +261,10 @@ export function SettingsPage() {
                   onClick={() => patchSetting('colorTheme', 'abyss')}
                 >
                   <span className="theme-swatch theme-swatch--abyss" />
-                  <span><strong>Abyss</strong><small>Black · mint · violet</small></span>
+                  <span>
+                    <strong>Abyss</strong>
+                    <small>Black · mint · violet</small>
+                  </span>
                 </button>
                 <button
                   type="button"
@@ -261,7 +272,10 @@ export function SettingsPage() {
                   onClick={() => patchSetting('colorTheme', 'daybreak')}
                 >
                   <span className="theme-swatch theme-swatch--daybreak" />
-                  <span><strong>Daybreak</strong><small>Light gray · navy · sun yellow</small></span>
+                  <span>
+                    <strong>Daybreak</strong>
+                    <small>Light gray · navy · sun yellow</small>
+                  </span>
                 </button>
               </div>
             </div>
@@ -389,7 +403,10 @@ export function SettingsPage() {
                   className={`party-setting-card ${companion.primary ? 'party-setting-card--primary' : ''} ${enabled ? 'is-enabled' : 'is-disabled'}`}
                   style={{ '--companion-accent': companion.accent } as CSSProperties}
                 >
-                  <img src={getCompanionImage(companion.image)} alt={`${companion.name}, ${companion.title}`} />
+                  <img
+                    src={getCompanionImage(companion.image)}
+                    alt={`${companion.name}, ${companion.title}`}
+                  />
                   <div>
                     <span className="eyebrow">
                       {companion.primary ? `PRIMARY SUPPORT · ${companion.title}` : companion.title}
@@ -397,8 +414,12 @@ export function SettingsPage() {
                     <h3>{companion.name}</h3>
                     <strong>{companion.shortRole}</strong>
                     <p>{companion.description}</p>
-                    <small><b>Personality:</b> {companion.personality}</small>
-                    <small><b>Appearance:</b> {companion.appearance}</small>
+                    <small>
+                      <b>Personality:</b> {companion.personality}
+                    </small>
+                    <small>
+                      <b>Appearance:</b> {companion.appearance}
+                    </small>
                   </div>
                   <label className="companion-enable">
                     <input
@@ -424,8 +445,8 @@ export function SettingsPage() {
             <Zap size={17} />
             <span>
               Snow is your primary support and checks in once per System day. Stat level-ups still
-              call the specialist responsible for that stat, while ordinary mission messages
-              follow the frequency selected above.
+              call the specialist responsible for that stat, while ordinary mission messages follow
+              the frequency selected above.
             </span>
           </div>
         </section>
@@ -977,7 +998,7 @@ export function SettingsPage() {
           <Info size={21} />
           <div>
             <p className="eyebrow">ABOUT</p>
-            <h2>The System · Version 2.0.0</h2>
+            <h2>The System · Version 2.1.0</h2>
             <p>
               An original, offline-first personal progression RPG. It uses no login, backend,
               external API, analytics, advertising, tracking, paid service, or copied franchise

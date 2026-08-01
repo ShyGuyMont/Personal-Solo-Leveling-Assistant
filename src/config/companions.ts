@@ -233,6 +233,58 @@ export const COMPANIONS: CompanionDefinition[] = [
       ],
     },
   },
+  {
+    id: 'ember',
+    name: 'Ember',
+    title: 'The Ignition',
+    shortRole: 'Accountability · Re-entry · Lock-in',
+    description:
+      'Ember watches the moment momentum starts slipping. She does not shame a missed day; she cuts through the spiral, shrinks the target, and gets you back into motion.',
+    appearance:
+      'A fair-skinned white woman with subtle freckles, vivid copper-red hair in a high wild ponytail, amber-gold eyes, and a charcoal-and-crimson tactical jacket lit by an ember-orange System halo.',
+    personality:
+      'Fiery, blunt, fiercely protective, and aggressively convinced that a setback does not get to keep you. She challenges excuses without ever attacking your worth.',
+    accent: '#ff693f',
+    image: 'companions/ember.webp',
+    categories: [],
+    stats: [],
+    messages: {
+      'daily-briefing': [
+        'System is live. Pick a target, make it real, and give the day something to remember you by.',
+        'We are not waiting around for perfect energy. Name the first move and light it up.',
+      ],
+      mission: [
+        'There. Motion. Keep the flame; do not waste time arguing with proof.',
+        'Objective down. That is what happens when you stop negotiating with the first step.',
+        'Good hit. Lock that feeling in and carry it into the next honest move.',
+      ],
+      'rank-up': [
+        'New rank. Good. Now look at what happens when you refuse to stay down.',
+        'Classification advanced. That fire was never gone—you learned how to reach it again.',
+      ],
+      'rare-event': [
+        'Surprise objective handled. Pressure showed up and found you ready to answer.',
+        'Rare signal cleared. That is the kind of heat I want—focused, not wasted.',
+      ],
+      comeback: [
+        'There you are. No apology tour. Choose the next target and get back in the fight.',
+        'The gap is over because you returned. That is the only part we need to build from.',
+        'Missed time does not own today. Feet under you, eyes forward, one clean win.',
+      ],
+      'lock-in': [
+        'All right, lock in. Yesterday does not need a funeral—it needs one lesson and a smaller first target today.',
+        'We slipped. Fine. No shame spiral, no dramatic restart. Pick one mission you can finish and hit it clean.',
+        'I am not here to yell at you for being human. I am here to stop one rough day from recruiting the next one.',
+        'Eyes up. The record is honest, and so am I: you are capable of a better next move. Make it small and make it now.',
+        'Momentum dropped; your worth did not. We rebuild with one completed loop, not ten angry promises.',
+        'Enough staring at the gap. Choose the easiest meaningful objective, clear it, and let proof speak louder than guilt.',
+      ],
+      achievement: [
+        'Achievement confirmed. That is your fire made visible—own it.',
+        'History updated. You kept showing up until the result had nowhere left to hide.',
+      ],
+    },
+  },
 ];
 
 export function getCompanion(id: CompanionId) {

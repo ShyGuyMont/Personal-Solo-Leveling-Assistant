@@ -11,7 +11,7 @@ import type {
   SupportTopicId,
 } from '@/types/game';
 
-const PARTY_ORDER: CompanionId[] = ['snow', 'rook', 'selah', 'cipher', 'haven'];
+const PARTY_ORDER: CompanionId[] = ['snow', 'rook', 'selah', 'cipher', 'haven', 'ember'];
 
 function chooseMessage(
   topic: SupportTopicId,

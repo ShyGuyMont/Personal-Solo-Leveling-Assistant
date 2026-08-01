@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { Modal } from '@/components/Modal';
+import { CampfireRecapView } from '@/components/CampfireRecapView';
 import { ProgressBar } from '@/components/ProgressBar';
 import { CATEGORY_LABELS } from '@/config/missions';
 import { getCompanion, getCompanionImage } from '@/config/companions';
@@ -32,6 +33,7 @@ import { getMissionDisplayName } from '@/utils/privacy';
 import { useGameStore } from '@/store/useGameStore';
 import { Link } from '@/router';
 import type {
+  CampfireRecap,
   ChallengeProgress,
   CompanionReaction,
   DailyEventRecord,
@@ -73,6 +75,7 @@ export function ArchivePage() {
   const [supportConversations, setSupportConversations] = useState<SupportConversation[]>([]);
   const [favoriteMessages, setFavoriteMessages] = useState<FavoriteMessage[]>([]);
   const [partyBanters, setPartyBanters] = useState<PartyBanter[]>([]);
+  const [campfireRecaps, setCampfireRecaps] = useState<CampfireRecap[]>([]);
   const [selectedReview, setSelectedReview] = useState<DailyReview>();
   const [missionFilter, setMissionFilter] = useState('all');
 
@@ -91,6 +94,7 @@ export function ArchivePage() {
       setSupportConversations(data.supportConversations);
       setFavoriteMessages(data.favoriteMessages);
       setPartyBanters(data.partyBanters);
+      setCampfireRecaps(data.campfireRecaps);
     });
   }, []);
 
@@ -365,6 +369,27 @@ export function ArchivePage() {
                   Reports are archived after the first Daily Review.
                 </div>
               )}
+            </div>
+          </section>
+          <section className="panel archive-list-panel campfire-archive">
+            <header className="section-header">
+              <div>
+                <p className="eyebrow">WEEKLY CAMPFIRES</p>
+                <h2>The party remembers each week</h2>
+              </div>
+              <Link to="/headquarters" className="text-link">Headquarters <Flame size={16} /></Link>
+            </header>
+            <div className="campfire-archive__list">
+              {campfireRecaps.map((recap) => (
+                <details key={recap.id}>
+                  <summary>
+                    <span><Flame size={16} /></span>
+                    <div><strong>{recap.weekStart} → {recap.weekEnd}</strong><small>{recap.metrics.completedMissions}/{recap.metrics.availableMissions} missions · {recap.metrics.perfectDays} Perfect Days</small></div>
+                  </summary>
+                  <CampfireRecapView recap={recap} compact />
+                </details>
+              ))}
+              {!campfireRecaps.length && <div className="empty-state">The first completed weekly Campfire will be archived here.</div>}
             </div>
           </section>
         </div>

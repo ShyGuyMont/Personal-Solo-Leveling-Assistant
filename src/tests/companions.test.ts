@@ -5,6 +5,7 @@ import {
   acknowledgeCompanionReaction,
   getNextCompanionReaction,
   queueCompanionReaction,
+  queueLockInIfNeeded,
 } from '@/game/companions';
 
 describe('System companions', () => {
@@ -65,5 +66,29 @@ describe('System companions', () => {
     expect(pending?.companionId).toBe('selah');
     await acknowledgeCompanionReaction(pending!.id);
     expect(await getNextCompanionReaction()).toBeUndefined();
+  });
+
+  it('uses Ember for a shame-free re-entry signal after a rough finalized day', async () => {
+    await db.dailyReviews.put({
+      id: '2026-07-31',
+      date: '2026-07-31',
+      status: 'finalized',
+      startedAt: new Date().toISOString(),
+      finalizedAt: new Date().toISOString(),
+      completionCount: 1,
+      activeMissionCount: 4,
+      completionRate: 0.25,
+      perfectDay: false,
+      protectedPerfectDay: false,
+      accountXpAwarded: 0,
+      statChanges: {},
+      verdict: 'A difficult day.',
+      systemState: 'warning',
+      transactionIds: [],
+    });
+    const reaction = await queueLockInIfNeeded('2026-08-01');
+    expect(reaction?.companionId).toBe('ember');
+    expect(reaction?.trigger).toBe('lock-in');
+    expect(reaction?.message.length).toBeGreaterThan(40);
   });
 });

@@ -16,7 +16,7 @@ Your data stays in the browser on your device unless you export a backup. The ap
 2. Choose one objective that is realistic today.
 3. Complete it only when it is genuinely done.
 4. Return to **System** to see the recorded progress.
-5. Use the **Party Channel** whenever you want emotional or practical support.
+5. Open **Party Headquarters** whenever you want emotional support, practical help, or the weekly Campfire.
 
 You do not need to use every screen every day.
 
@@ -48,9 +48,20 @@ The companions' dedicated space. It contains:
 
 Check-Ins and Direct Support are private, work offline, and never change XP, missions, streaks, rewards, or penalties.
 
+### Party Headquarters
+
+The home of the full six-person party. Headquarters contains:
+
+- Shortcuts to Check-In, Direct Support, and Words to Carry.
+- The complete companion roster and each person's role.
+- **Ember's Lock-In Protocol**, which explains when her re-entry signal can appear.
+- The newest **Weekly Campfire Recap** and every earlier saved Campfire.
+
+A Campfire is created after a week ends when that week has at least one finalized Daily Review. It uses the actual finalized mission record to show completed missions, completion rate, Perfect Days, category strengths, and the next suggested focus. Every companion comments in character. A Campfire changes no XP, streak, rank, mission result, or reward.
+
 ### Archive
 
-Your permanent record. It contains daily reviews, mission history, stat transactions, level and rank history, reports, rare signals, Party Check-Ins, Direct Support channels, favorites, banter, and companion transmissions.
+Your permanent record. It contains daily reviews, mission history, stat transactions, level and rank history, reports, Weekly Campfires, rare signals, Party Check-Ins, Direct Support channels, favorites, banter, and companion transmissions.
 
 ### Settings
 
@@ -58,13 +69,34 @@ Appearance, companion frequency, individual companion controls, mission configur
 
 ### About & Help
 
-Tap **Help** in the top-right corner from any page. Snow explains the app, gives a three-step starting path, and links directly to every major destination.
+Tap **Help** in the top-right corner from any page. Snow explains the app, gives a three-step starting path, links directly to every major destination, distinguishes levels, ranks, custom and earned titles, and shows the complete rank ladder.
 
 ## XP, levels, stats, and ranks
 
 **Account XP** raises your overall level. **Stat XP** records which areas of life a mission strengthened. Each mission shows its rewards before completion.
 
-Ranks are separate from levels. A rank requires balanced long-term evidence such as account level, completed missions, recorded days, Discipline, balanced stats, challenge completions, and sometimes a Rank Trial.
+The four identity and progression labels have different purposes:
+
+- **Account Level:** Your overall XP level.
+- **Rank:** Your long-term classification, earned through balanced prerequisites and a Rank Trial.
+- **Custom System Title:** A cosmetic nickname you write yourself. It never affects progression.
+- **Achievement Title:** An earned distinction that unlocks from recorded accomplishments. Choose an unlocked title to equip in Settings.
+
+Ranks are separate from levels. You begin at F and advance through **F → E → D → C → B → A → S → World Class**. Each advancement requires every prerequisite below and then completion of the corresponding Rank Trial.
+
+| Target rank | Account level | Missions | Completed days | Discipline | Balanced stats | Challenges |
+| ----------- | ------------: | -------: | -------------: | ---------: | -------------- | ---------: |
+| E           |            12 |      150 |             25 |          5 | 4 at Level 3   |          1 |
+| D           |            25 |      650 |            100 |         11 | 5 at Level 7   |          4 |
+| C           |            40 |    1,500 |            220 |         20 | 6 at Level 13  |         10 |
+| B           |            58 |    3,800 |            520 |         32 | 7 at Level 23  |         24 |
+| A           |            74 |    6,800 |            900 |         45 | 8 at Level 34  |         42 |
+| S           |            96 |   12,000 |          1,650 |         62 | 9 at Level 49  |         75 |
+| World Class |           125 |   20,500 |          2,850 |         82 | 10 at Level 68 |        125 |
+
+Passing a trial advances exactly one rank. If a trial expires before completion, the earned rank and previous campaign progress remain intact; the trial enters a cooldown and can be attempted again later. World Class is the highest rank. Numerical account and stat levels can continue as high as Level 999.
+
+The System currently contains 42 achievement titles. They unlock automatically from objective saved facts such as mission totals, Perfect Days, streaks, finalized Daily Reviews, stat levels, challenges, Recovery and exception milestones, and rank advancement. Unlocks are permanent and never random, but the user decides which unlocked title to equip.
 
 XP is written through stable transaction IDs so repeated taps cannot award the same mission twice. Undo is available only during the active System day and writes an inverse transaction instead of deleting history.
 
@@ -75,8 +107,11 @@ XP is written through stable transaction IDs so repeated taps cannot award the s
 - **Selah, The Beacon:** Faith, Wisdom, and spiritual consistency.
 - **Cipher, The Strategist:** Discipline, Focus, Willpower, Creativity, YouTube, and ARC.
 - **Haven, The Guardian:** Character, Empathy, Recovery, and comebacks.
+- **Ember, The Ignition:** Accountability, re-entry, and locking back in without shame.
 
 Ordinary reactions follow the companion frequency selected in Settings. Party Banter is an occasional two-character exchange after a mission. Major ranks, level milestones, and achievements can trigger a full-party celebration.
+
+If the previous day is unfinished or finalized below 50%, Ember may send one Lock-In message. She is deliberately more aggressive than the rest of the party, but her job is to interrupt avoidance and make the next step smaller—not to punish, insult, or remove progress. Recovery Mode suppresses this signal.
 
 Tap the heart beside a companion message to place a copy in **Words to Carry**. Removing the heart deletes only the saved copy—not campaign history.
 
@@ -119,7 +154,7 @@ Before clearing browser data, changing phones, or installing a major release:
 3. Store the downloaded JSON file somewhere private and recoverable.
 4. On the new installation, choose **Import save** and review the preview before confirming.
 
-Backups include Party conversations, favorite messages, banter history, settings, progression, missions, and the rest of the campaign record.
+Backups include Party conversations, Weekly Campfires, favorite messages, banter history, settings, progression, missions, and the rest of the campaign record.
 
 ## Updating the installed app
 

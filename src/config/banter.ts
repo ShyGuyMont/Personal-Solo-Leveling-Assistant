@@ -28,6 +28,13 @@ export const PARTY_BANTER: Record<MissionCategory, BanterExchange[]> = {
         { companionId: 'rook', message: 'I am succeeding. Also: excellent work.' },
       ],
     },
+    {
+      id: 'physical-ignition',
+      messages: [
+        { companionId: 'ember', message: 'That is a clean hit. Tell me you felt the hesitation lose its grip.' },
+        { companionId: 'rook', message: 'It did. Now we recover properly and make the next answer just as strong.' },
+      ],
+    },
   ],
   faith: [
     {
@@ -49,6 +56,13 @@ export const PARTY_BANTER: Record<MissionCategory, BanterExchange[]> = {
       messages: [
         { companionId: 'haven', message: 'That choice made room inside the day instead of taking more from it.' },
         { companionId: 'selah', message: 'Yes. Some disciplines restore the person who practices them.' },
+      ],
+    },
+    {
+      id: 'faith-return',
+      messages: [
+        { companionId: 'selah', message: 'Every honest return is welcome, no matter how long the silence before it.' },
+        { companionId: 'ember', message: 'Good. Grace opened the door; you still chose to walk through it.' },
       ],
     },
   ],
@@ -74,6 +88,13 @@ export const PARTY_BANTER: Record<MissionCategory, BanterExchange[]> = {
         { companionId: 'haven', message: 'A breath. The answer is a breath, and then we can discuss what is next.' },
       ],
     },
+    {
+      id: 'discipline-lock-in',
+      messages: [
+        { companionId: 'ember', message: 'No speech, no spiral—target chosen and objective handled.' },
+        { companionId: 'cipher', message: 'A brutally concise process description. I have no corrections.' },
+      ],
+    },
   ],
   creator: [
     {
@@ -97,6 +118,13 @@ export const PARTY_BANTER: Record<MissionCategory, BanterExchange[]> = {
         { companionId: 'cipher', message: 'I have already updated the plan to account for your increasing competence.' },
       ],
     },
+    {
+      id: 'creator-finished',
+      messages: [
+        { companionId: 'ember', message: 'Something real exists now. Perfection can complain from outside the room.' },
+        { companionId: 'cipher', message: 'Agreed. Finished output remains statistically difficult to argue with.' },
+      ],
+    },
   ],
   character: [
     {
@@ -118,6 +146,13 @@ export const PARTY_BANTER: Record<MissionCategory, BanterExchange[]> = {
       messages: [
         { companionId: 'selah', message: 'Goodness offered freely tends to travel farther than we can see.' },
         { companionId: 'haven', message: 'And today, the first part of that journey began with you.' },
+      ],
+    },
+    {
+      id: 'character-fire',
+      messages: [
+        { companionId: 'haven', message: 'Strength is most trustworthy when it leaves someone safer.' },
+        { companionId: 'ember', message: 'Then that was strength. Fierce, useful, and aimed exactly where it belonged.' },
       ],
     },
   ],

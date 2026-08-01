@@ -47,6 +47,10 @@ export function AppShell({ children }: { children: ReactNode }) {
     root.dataset.intensity = settings?.themeIntensity ?? 'standard';
   }, [settings?.colorTheme, settings?.interfaceStyle, settings?.themeIntensity]);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }, [path]);
+
   return (
     <div
       className={`app-shell ${settings?.privacyScreenEnabled && privacyActive ? 'privacy-screen-active' : ''}`}

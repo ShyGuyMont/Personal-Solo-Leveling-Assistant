@@ -1,4 +1,4 @@
-import { MessageCircle } from 'lucide-react';
+import { Castle } from 'lucide-react';
 import type { CSSProperties } from 'react';
 import { COMPANIONS, getCompanionImage } from '@/config/companions';
 import { Link } from '@/router';
@@ -14,11 +14,11 @@ export function CompanionRoster({ detailed = false }: { detailed?: boolean }) {
     <section className={`panel companion-roster ${detailed ? 'companion-roster--detailed' : ''}`}>
       <header className="section-header">
         <div>
-          <p className="eyebrow">PARTY LINK</p>
-          <h2>Snow & your System companions</h2>
+          <p className="eyebrow">PARTY HEADQUARTERS</p>
+          <h2>Snow & your six System companions</h2>
         </div>
-        <Link to="/party-chat" className="button button--ghost button--small companion-roster__check-in">
-          <MessageCircle size={16} /> Check in
+        <Link to="/headquarters" className="button button--ghost button--small companion-roster__check-in">
+          <Castle size={16} /> Headquarters
         </Link>
       </header>
       <div className="companion-roster__grid">

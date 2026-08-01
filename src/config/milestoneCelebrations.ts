@@ -35,6 +35,11 @@ const MILESTONE_LINES: Record<CompanionId, Record<'rank' | 'level' | 'achievemen
     level: ['You grew, rested, returned, and grew again. This milestone includes every part.', 'A major level is not one perfect day. It is many imperfect days that did not get the last word.'],
     achievement: ['Keep this memory somewhere gentle. It may become shelter on a harder day.', 'You are allowed to feel proud without immediately asking what you must prove next.'],
   },
+  ember: {
+    rank: ['New rank. That is what refusing to stay down looks like when the record finally catches up.', 'Classification advanced. You brought the fire back every time it tried to fade.'],
+    level: ['Major threshold broken. Do not whisper the win—you built this with repeated returns.', 'Level milestone confirmed. The flame survived every imperfect day between here and the last one.'],
+    achievement: ['Proof on the board. Own it before your brain tries to move the target.', 'Achievement secured. You kept swinging until the outcome had to change.'],
+  },
 };
 
 function hash(value: string) {
@@ -51,7 +56,7 @@ export function isPartyMilestone(event: ProgressionEvent) {
 
 export function getMilestoneCelebration(event: ProgressionEvent) {
   const kind = event.kind === 'rank-up' ? 'rank' : event.kind === 'level-milestone' ? 'level' : 'achievement';
-  return (['snow', 'rook', 'selah', 'cipher', 'haven'] as CompanionId[]).map((companionId) => {
+  return (['snow', 'rook', 'selah', 'cipher', 'haven', 'ember'] as CompanionId[]).map((companionId) => {
     const pool = MILESTONE_LINES[companionId][kind];
     return {
       companionId,

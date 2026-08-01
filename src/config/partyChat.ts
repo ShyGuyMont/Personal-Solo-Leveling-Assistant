@@ -29,6 +29,7 @@ export interface MoodDialogue {
   selah: string[];
   cipher: string[];
   haven: string[];
+  ember: string[];
   'snow-close': string[];
 }
 
@@ -63,6 +64,12 @@ export const PARTY_DIALOGUE: Record<MoodId, MoodDialogue> = {
       'Let some of that energy become kindness, laughter, or recovery. Progress is bigger than productivity.',
       'A full cup can pour into good places. Just remember that pacing is how a strong morning becomes a good day.',
       'I am glad your spirit has room today. Build something, help someone, and keep a little brightness for yourself.',
+    ],
+    ember: [
+      'Yes. That is fuel. Pick one target before the spark scatters and make the first hit count.',
+      'I like this energy. Give it a finish line, hit it hard, and keep enough fire to enjoy the win afterward.',
+      'Good—power is online. No twenty-target rampage; choose the mission that matters and burn clean through it.',
+      'You came in blazing. Aim it with purpose, finish something real, and let the proof glow for a while.',
     ],
     'snow-close': [
       'The party is with you. Pick one thing worthy of that spark, and come back proud of how you used it.',
@@ -102,6 +109,12 @@ export const PARTY_DIALOGUE: Record<MoodId, MoodDialogue> = {
       'You are allowed to enjoy who you were in that moment: capable, persistent, and still fully human.',
       'Keep this feeling somewhere safe. On a harder day, it can remind you that progress has already been real.',
     ],
+    ember: [
+      'Good. Say it with your whole chest: you earned this. No shrinking the victory to make anyone comfortable.',
+      'That pride is backed by evidence. Hold your head up and let the win belong to you before we move again.',
+      'Finally, an accurate reading. You fought for this result, so stop trying to hand the credit to luck.',
+      'I saw the work underneath it. Celebrate loud enough that the version of you who struggled can hear it.',
+    ],
     'snow-close': [
       'We are proud with you—not just of the outcome, but of the person who kept going long enough to reach it.',
       'Save this moment. You will need its truth someday: you can do difficult things, and you deserve to feel the win.',
@@ -139,6 +152,12 @@ export const PARTY_DIALOGUE: Record<MoodId, MoodDialogue> = {
       'I hope you make room for something nourishing today—music, sunlight, a conversation, or an unhurried meal.',
       'Steady days help the nervous parts of us remember that not everything is an emergency. Take that in.',
       'Enjoy the ordinary kindness of feeling okay in your own skin. That is part of the journey too.',
+    ],
+    ember: [
+      'Steady flame. I respect it. Use the calm to finish one clean objective without manufacturing a crisis.',
+      'Good days do not need chaos to feel important. Make one strong move, then actually enjoy being all right.',
+      'System is stable and so are you. That is plenty of power for one honest win and a life outside the checklist.',
+      'No emergency, no dramatic speech—just useful energy and a target worth completing. Beautiful.',
     ],
     'snow-close': [
       'Nothing needs fixing right now. Choose a good next step, keep your shoulders loose, and let the day stay kind.',
@@ -178,6 +197,12 @@ export const PARTY_DIALOGUE: Record<MoodId, MoodDialogue> = {
       'Maybe today needs fewer sharp edges: water, food, a little air, and one kind decision toward yourself.',
       'We can honor the middle. Not every chapter is a breakthrough or a breakdown; some are simply lived.',
     ],
+    ember: [
+      'Okay is workable. Pick one thing small enough to finish and let completion pull the day forward.',
+      'No need to feel legendary. Give me one honest objective, one clean attempt, and no insults aimed at yourself.',
+      'Middle gear still moves the machine. Lower the target if needed, but keep one promise in play.',
+      'We are not chasing fireworks today. One steady flame, one useful action, then we reassess.',
+    ],
     'snow-close': [
       'We are not disappointed by ordinary. Take the next kind, useful step, and call that enough for now.',
       'No performance needed. I am with you in the middle of the scale, not only at the extremes.',
@@ -215,6 +240,12 @@ export const PARTY_DIALOGUE: Record<MoodId, MoodDialogue> = {
       'Rest does not need to be justified by collapse. If you can soften the day now, please do.',
       'Be gentle with the version of you carrying today. They deserve support, not a lecture.',
       'If all you can do is tend to the basics and make it safely to rest, that is a complete human day.',
+    ],
+    ember: [
+      'Low fuel means a smaller fire, not self-destruction. Handle one essential thing and protect the recovery window.',
+      'Do not spend the last ten percent attacking yourself for lacking ninety. Choose one clean move and shut down wisely.',
+      'Tired is a condition, not a confession. Reduce the load, keep the mission honest, and get yourself to real rest.',
+      'I will lock you in without burning you out: one priority, no extra guilt, and an earlier finish line.',
     ],
     'snow-close': [
       'I am setting the party objective to “protect you, not pressure you.” Choose the smallest honest next step.',
@@ -254,6 +285,12 @@ export const PARTY_DIALOGUE: Record<MoodId, MoodDialogue> = {
       'Give yourself the same calm voice you would offer someone you love. Stress does not need another harsh person in the room.',
       'Find one safe, simple comfort while you work through this. Support is not a reward reserved for after completion.',
     ],
+    ember: [
+      'Stop letting every alarm speak at once. Choose the actual fire, close the other doors, and handle one thing.',
+      'Pressure wants panic. Give it precision instead: one target, one timer, one decision about what can wait.',
+      'Lock in does not mean carry everything. It means refuse to waste strength fighting five battles at the same time.',
+      'We are cutting the noise now. Name the next physical action and hit only that until the room gets quieter.',
+    ],
     'snow-close': [
       'Here is the party plan: breathe, choose one real priority, and let the rest wait outside this minute.',
       'Nothing about this moment has to be carried perfectly. Take the next step, then check the map again.',
@@ -291,6 +328,12 @@ export const PARTY_DIALOGUE: Record<MoodId, MoodDialogue> = {
       'Take a real break, not a break spent rehearsing the problem. Your mind may need room before it can see another door.',
       'This obstacle is happening to you; it is not revealing something shameful about you.',
       'Name what hurts underneath the irritation. Sometimes frustration is disappointment asking to be acknowledged.',
+    ],
+    ember: [
+      'Good—there is energy in that frustration. Point it at a changed method, not at your own throat.',
+      'Stop headbutting the same wall. Step back, change the angle, and spend that fire on the next useful attempt.',
+      'You are allowed to be mad. You are not allowed to turn one blocked result into evidence that you are broken.',
+      'Reset your stance. The obstacle gets a new strategy; you get respect while you build it.',
     ],
     'snow-close': [
       'We are not calling you the problem. Reset, change one thing, and decide later whether this deserves another round.',
@@ -330,6 +373,12 @@ export const PARTY_DIALOGUE: Record<MoodId, MoodDialogue> = {
       'Your value is intact while motivation is missing. Nothing essential about you has been revoked.',
       'Maybe the brave thing today is to make life ten percent gentler and keep one small promise.',
     ],
+    ember: [
+      'I am not asking you to feel hopeful first. I am asking for one stubborn act that proves the story is still moving.',
+      'Discouragement can ride in the back seat. It does not get the wheel. Pick the smallest meaningful target and turn it over.',
+      'No fake hype. The road is hard and you are still here. Give me one clean move we can build the comeback around.',
+      'Borrow my fire. Lower the objective, keep your self-respect, and finish one thing before the feeling votes again.',
+    ],
     'snow-close': [
       'Borrow our confidence for now. You do not have to feel the future clearly to take one step toward it.',
       'I remember versions of you who thought they would never reach places you now stand. This feeling is not the ending.',
@@ -368,6 +417,12 @@ export const PARTY_DIALOGUE: Record<MoodId, MoodDialogue> = {
       'There is no shame in wanting company. If you can, let one trusted person know the day feels lonely.',
       'Do not punish loneliness with more isolation. Even quiet connection—sitting near life, hearing a familiar voice—can help.',
     ],
+    ember: [
+      'Loneliness does not get to convince you that reaching out is weakness. Send one honest signal to someone safe.',
+      'I am in your corner, fiercely. And I want a real person in your world to get the chance to stand there too.',
+      'No disappearing act. Open one door—a message, a call, a room with people—and let connection answer for itself.',
+      'You matter too much to let isolation make every decision tonight. Choose one safe human bridge and cross one inch.',
+    ],
     'snow-close': [
       'You are not background noise to us. Stay a while, then consider sending one honest signal to someone safe in your world.',
       'The party link is open, and I want more for you than a screen alone. Let this check-in be the first bridge, not the only one.',
@@ -405,6 +460,12 @@ export const PARTY_DIALOGUE: Record<MoodId, MoodDialogue> = {
       'Try asking what would feel supportive right now, even if you cannot explain why you need it.',
       'Maybe begin with comfort instead of analysis. A calmer body can make emotions easier to hear.',
       'Let uncertainty have soft edges. You can care for yourself before you understand yourself completely.',
+    ],
+    ember: [
+      'Fine, no label. We can still move: water, air, food, one small task, then check the signal again.',
+      'Unknown does not mean helpless. Run one gentle test, watch what changes, and refuse to invent a verdict.',
+      'You do not need perfect clarity to protect the next hour. Choose the most basic useful move and make it.',
+      'No interrogation. Tend to one clear need, gather new information, and let the answer arrive after the pressure drops.',
     ],
     'snow-close': [
       'No verdict today. Choose one caring action, notice what follows, and come back whenever the words arrive.',

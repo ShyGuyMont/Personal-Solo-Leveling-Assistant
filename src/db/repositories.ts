@@ -34,6 +34,7 @@ export async function getArchiveData() {
     supportConversations,
     favoriteMessages,
     partyBanters,
+    campfireRecaps,
   ] = await Promise.all([
       db.dailyReviews.where('status').equals('finalized').sortBy('date'),
       db.dailyMissions.toArray(),
@@ -54,6 +55,7 @@ export async function getArchiveData() {
       db.supportConversations.orderBy('createdAt').reverse().toArray(),
       db.favoriteMessages.orderBy('createdAt').reverse().toArray(),
       db.partyBanters.orderBy('createdAt').reverse().toArray(),
+      db.campfireRecaps.orderBy('weekStart').reverse().toArray(),
     ]);
   return {
     reviews,
@@ -69,6 +71,7 @@ export async function getArchiveData() {
     supportConversations,
     favoriteMessages,
     partyBanters,
+    campfireRecaps,
   };
 }
 

@@ -10,8 +10,10 @@ The design, writing, interface, icons, animations, and generated tones are origi
 - Custom and template missions, weekday schedules, optional completion types, notes, and stable history IDs
 - Daily Review, idempotent rewards, current-day undo, Perfect and Protected Perfect Days, humane momentum/decay, and Recovery Mode
 - System and Clean interface styles, plus Abyss and light Daybreak color themes with selectable visual intensity
-- Five original chibi companion characters with daily greetings, stat-specific encouragement, occasional two-character banter, cinematic milestone celebrations, adjustable frequency, and individual mute controls
+- Six original chibi companion characters with daily greetings, stat-specific encouragement, shame-free accountability, occasional two-character banter, cinematic milestone celebrations, adjustable frequency, and individual mute controls
 - A private Party Channel with ten-mood Check-Ins, six Direct Support topics, whole-party or one-to-one responses, history-aware dialogue rotation, and locally saved conversations that never affect XP or streaks
+- Full Party Headquarters with the complete roster, support shortcuts, saved-message counts, Ember's Lock-In Protocol, and permanent Weekly Campfire history
+- Weekly Campfire Recaps generated once per completed week from finalized mission data, with an in-character review from every companion and no hidden rewards or penalties
 - Words to Carry favorites for saving companion messages from Check-Ins, Direct Support, banter, milestones, and ordinary reactions
 - A Snow-guided About & Help screen available from every page, with plain-language navigation, rules, privacy guidance, and a three-step starting path
 - One saved rare-event roll per System day: optional Emergency Quests and claimable Mission Passes without refresh rerolls
@@ -26,23 +28,26 @@ The design, writing, interface, icons, animations, and generated tones are origi
 
 There is no login, backend, external API, analytics, advertising, tracking, or paid service.
 
-## Version 2 companion party
+## Version 2.1 companion party
 
 - **Snow, The Constant** is the primary whole-journey companion. She greets each new System day and supports major milestones, difficult seasons, and victories. She has long black hair, a pearl-white and navy support jacket, and an ice-blue System halo.
 - **Rook, The Vanguard** supports Strength, Endurance, and Vitality. He is bold, competitive, and protective, with graphite-and-gold armor and amber energy.
 - **Selah, The Beacon** supports Faith, Wisdom, and spiritual consistency. She is warm and grounded, with long braids, an ivory-and-navy mantle, and a sun-gold halo.
 - **Cipher, The Strategist** supports Discipline, Focus, Willpower, Creativity, YouTube, and ARC work. They are precise, dryly funny, and demanding, with a navy tech jacket and violet-cyan tactical glyphs.
 - **Haven, The Guardian** supports Character, Empathy, Recovery, and comebacks. He is patient and quietly humorous, with silver-streaked hair, a teal field coat, and a translucent shield glow.
+- **Ember, The Ignition** supports accountability, re-entry, and locking back in after momentum slips. She is fiery, blunt, and fiercely supportive, with copper-red hair, amber eyes, charcoal-and-crimson gear, and an ember-orange System halo.
 
-Companions never judge missed missions. Snow checks in once per System day, while stat level-ups notify the matching specialist. Ordinary mission reactions follow the selected Off, Quiet, Balanced, or Talkative setting. All five portraits use a cohesive premium chibi RPG style, are bundled locally, and require no network connection.
+Companions never judge missed missions. Snow checks in once per System day, while stat level-ups notify the matching specialist. Ember may open one Lock-In signal when the previous day is unfinished or finalized below 50%; her response is direct but never removes XP, changes a streak, or attacks the user's worth. Ordinary mission reactions follow the selected Off, Quiet, Balanced, or Talkative setting. All six portraits use a cohesive premium chibi RPG style, are bundled locally, and require no network connection.
 
-The Party Check-In lets the user choose Energized, Proud, Good, Okay, Tired, Stressed, Frustrated, Discouraged, Lonely, or Not sure. Snow opens and closes each conversation while Rook, Selah, Cipher, and Haven answer in character. Each companion has emotion-specific dialogue pools, and the app uses the least recently heard line only after every unused line in that pool has been heard. Check-ins are saved locally in the Archive and intentionally award no XP, alter no streak, and create no penalty.
+The Party Check-In lets the user choose Energized, Proud, Good, Okay, Tired, Stressed, Frustrated, Discouraged, Lonely, or Not sure. Snow opens and closes each conversation while Rook, Selah, Cipher, Haven, and Ember answer in character. Each companion has emotion-specific dialogue pools, and the app uses the least recently heard line only after every unused line in that pool has been heard. Check-ins are saved locally in the Archive and intentionally award no XP, alter no streak, and create no penalty.
 
-Direct Support offers Motivation, Make a plan, Faith & perspective, Calm down, Recover, and Celebrate. The user can hear from the full party or intentionally open a focused channel with Snow, Rook, Selah, Cipher, or Haven. Support uses separate topic-specific dialogue pools with history-aware rotation. It is selection-based, works offline, and changes no progression data.
+Direct Support offers Motivation, Make a plan, Faith & perspective, Calm down, Recover, and Celebrate. The user can hear from the full party or intentionally open a focused channel with Snow, Rook, Selah, Cipher, Haven, or Ember. Support uses separate topic-specific dialogue pools with history-aware rotation. It is selection-based, works offline, and changes no progression data.
+
+At the start of a new week, Headquarters can present a saved Campfire Recap for the previous completed week. It counts only finalized Daily Reviews and their mission records, shows completion and category totals, and gives Snow, Rook, Selah, Cipher, Haven, and Ember distinct commentary based on those facts. Snow closes the gathering. Campfires can be favorited, reopened in Headquarters, and reviewed in the Archive.
 
 Occasional Party Banter can follow a completed mission. Its chance follows the selected companion frequency and is never required for rewards. Major rank, account-level milestone, and achievement overlays become full-party celebrations. A heart control can preserve any meaningful line in Words to Carry; the copied message remains available even after the original toast is dismissed.
 
-The universal Help control opens Snow's About & Help briefing. It explains every destination, the difference between levels, stats, ranks, challenges, and events, what to do after a hard day, and where local data lives. A longer nontechnical guide is available at [`docs/USER_GUIDE.md`](docs/USER_GUIDE.md).
+The universal Help control opens Snow's About & Help briefing. It explains every destination; the difference between account levels, ranks, custom System titles, and earned achievement titles; the complete rank ladder and qualification requirements; challenges and events; what to do after a hard day; and where local data lives. A longer nontechnical guide is available at [`docs/USER_GUIDE.md`](docs/USER_GUIDE.md).
 
 Rare daily events are optional and persisted before display. Each new System day has a 7% chance of an Emergency Quest, a 5% chance of a Mission Pass, and an 88% chance of no rare event. Declining or missing an Emergency Quest has no penalty. A Mission Pass protects one pending required mission without spending a monthly protected exception, but it does not award that mission's XP.
 
@@ -99,7 +104,7 @@ After one successful online load, the app shell works offline. Campaign data sta
 
 If the workflow is unavailable, enable Actions under **Settings → Actions → General**. If the site is blank, confirm Pages uses GitHub Actions, confirm the workflow uploaded `dist/`, and hard-refresh once after deployment.
 
-When updating an existing installation, commit and push the changed project through GitHub Desktop, wait for the Pages workflow to succeed, then open the app online once. The service worker will offer the new release without replacing campaign progress. Earlier saves are migrated automatically to the version 6 database, but exporting a save before any major update is still recommended.
+When updating an existing installation, commit and push the changed project through GitHub Desktop, wait for the Pages workflow to succeed, then open the app online once. The service worker will offer the new release without replacing campaign progress. Earlier saves are migrated automatically to the version 7 database, but exporting a save before any major update is still recommended.
 
 ## Save, restore, and reset
 
@@ -143,12 +148,12 @@ Ranks are separate from levels. Qualification checks account level, completions,
 ```text
 src/
   assets/       Bundled local font and its license
-  components/   Shared interface, companion, banter, favorite, event, recovery, mission, and chart components
+  components/   Shared interface, companion, Campfire, banter, favorite, event, recovery, mission, and chart components
   config/       Missions, companions, support, banter, milestones, rare events, achievements, challenges, titles, and balance
   db/           Dexie schema, repositories, seed data, migrations, snapshots, and save import
   dev/          Development-only deterministic pacing simulator
-  game/         XP, stats, companions, Party Chat, support, favorites, banter, rare events, rank, report, and atomic transaction engines
-  pages/        Onboarding, System, Missions, Status, Challenges, Party Channel, About, Archive, and Settings
+  game/         XP, stats, companions, Campfires, Party Chat, support, favorites, banter, rare events, rank, report, and atomic transaction engines
+  pages/        Onboarding, System, Missions, Status, Challenges, Headquarters, Party Channel, About, Archive, and Settings
   services/     PWA update coordination
   store/        Zustand application state
   tests/        Date, XP, rank, content, pacing, and transaction behavior

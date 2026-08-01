@@ -85,6 +85,11 @@ export const SUPPORT_DIALOGUE: Record<
       'Low energy changes the size of the step, not your right to begin. Choose something gentle, specific, and finishable.',
       'You do not have to bully yourself into motion. Clear a little space, take one breath, and choose the next caring action.',
     ],
+    ember: [
+      'Lock in on one target, not the whole mountain. Make it small enough to start now and meaningful enough to count.',
+      'You do not need another speech. You need one visible action that tells hesitation the shift has already begun.',
+      'No shame, no waiting for lightning. Pick the easiest honest win and put some heat behind the first minute.',
+    ],
     'snow-close': [
       'The party agrees: one small action is enough to change the direction of this moment. Pick it, and we will meet you on the other side.',
       'No giant transformation required. Choose the next marker, reach it, and come back if you want us beside you for the one after that.',
@@ -116,6 +121,11 @@ export const SUPPORT_DIALOGUE: Record<
       'Build a plan that the tired version of you can still follow. A humane plan survives contact with a real day.',
       'Include recovery as an action, not a reward you must earn after depletion. Rest placed on purpose protects everything around it.',
       'If the list still feels crushing, remove one item without apology. Capacity is information, not a character flaw.',
+    ],
+    ember: [
+      'Cut it down to one must-hit target, one backup, and a stopping point. Everything else can wait outside the ring.',
+      'A plan should tell your feet where to go, not just describe everything making you nervous. Name the first physical action.',
+      'Make the next win obvious: exact task, exact start, exact finish. Then stop negotiating and light the fuse.',
     ],
     'snow-close': [
       'Your plan only needs three lines: first, next, and later. Start with first; the party will not confuse simplicity with a lack of ambition.',
@@ -149,6 +159,11 @@ export const SUPPORT_DIALOGUE: Record<
       'Grace is not a loophole in the journey. It is part of the ground you are walking on, especially when your footing feels weak.',
       'Return to what is gentle and true: you are allowed to need help, to pause, and to begin again without earning permission.',
     ],
+    ember: [
+      'Your faith does not become fake because the week got messy. Return honestly, receive grace, and let the next faithful act burn clean.',
+      'The scoreboard is a tool, not your name. Anchor in what is true, then choose one action that agrees with it.',
+      'Grace is not permission to quit on yourself; it is freedom to rise without dragging shame behind you.',
+    ],
     'snow-close': [
       'Carry this with you: you are a person before you are a performer. Let faith shape the next step, not fear of the scoreboard.',
       'The party can help with the plan, but your foundation runs deeper than us. Take a quiet moment with God, then move from what remains true.',
@@ -180,6 +195,11 @@ export const SUPPORT_DIALOGUE: Record<
       'Name five things you can see, then notice where your body is supported. We are reminding the present moment that you are here with it.',
       'You do not have to justify needing calm. Reduce the noise, soften the demand, and choose the safest gentle thing available.',
       'If someone trustworthy is nearby, consider telling them you could use a little company. Regulation does not always have to be solitary.',
+    ],
+    ember: [
+      'Nothing gets solved while every alarm is screaming. Put both feet down, breathe out slowly, and cancel every nonessential decision.',
+      'I am not pushing you forward right now. I am guarding the pause until your body knows this moment can be handled.',
+      'Drop the battle stance for sixty seconds. Calm first, choices second; that order is the lock-in protocol today.',
     ],
     'snow-close': [
       'For now: breathe, reduce the noise, and postpone what does not need an immediate answer. You can return to the problem with more room inside you.',
@@ -213,6 +233,11 @@ export const SUPPORT_DIALOGUE: Record<
       'Speak to yourself as you would to someone you love after the same day. Keep the accountability; remove the cruelty.',
       'Repair what you can, release what you cannot repair tonight, and let rest be part of the response rather than an escape from it.',
     ],
+    ember: [
+      'We are not building a comeback out of self-hatred. Keep the lesson, protect the person, and choose one reachable re-entry move.',
+      'The setback gets facts, not a throne. Recover what matters tonight and set one clean target for tomorrow.',
+      'You went down. You came here. That means the return is already active—small, fierce, and completely real.',
+    ],
     'snow-close': [
       'Tonight does not need a redemption montage. Choose one act of care and one clear re-entry step for tomorrow. That is enough recovery for now.',
       'We are keeping you, the lesson, and the next chance. The shame can stay behind; it has no useful assignment here.',
@@ -244,6 +269,11 @@ export const SUPPORT_DIALOGUE: Record<
       'Let the good feeling land in your body. You are allowed to be proud without turning the moment into pressure to perform again immediately.',
       'Notice who helped, what you learned, and what this says about your capacity. Joy can be part of recovery too.',
       'Save this memory carefully. On a hard day, it may remind you that your life contains more than the hardest chapter.',
+    ],
+    ember: [
+      'That is what I am talking about. Do not mumble the victory—name what you did and let yourself own the heat.',
+      'Proof on the board. Smile first, celebrate properly, and only then may anyone mention the next objective.',
+      'You fought for this moment. Stand in it without shrinking, apologizing, or moving the finish line.',
     ],
     'snow-close': [
       'Party record updated: something good happened, you let it matter, and we were here to celebrate it with you. Keep this one.',

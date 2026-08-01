@@ -5,6 +5,7 @@ import type {
   AuditEntry,
   AppMetadata,
   BackupSnapshot,
+  CampfireRecap,
   ChallengeProgress,
   ChallengeTemplate,
   CosmeticDefinition,
@@ -62,6 +63,7 @@ export class SystemDatabase extends Dexie {
   supportConversations!: EntityTable<SupportConversation, 'id'>;
   favoriteMessages!: EntityTable<FavoriteMessage, 'id'>;
   partyBanters!: EntityTable<PartyBanter, 'id'>;
+  campfireRecaps!: EntityTable<CampfireRecap, 'id'>;
   appMetadata!: EntityTable<AppMetadata, 'id'>;
 
   constructor(name = 'the-system-db') {
@@ -224,6 +226,25 @@ export class SystemDatabase extends Dexie {
         await metadata.put({ id: 'schema-seeded', value: 6, updatedAt: now });
         await metadata.put({ id: 'app-version', value: '2.0.0', updatedAt: now });
       });
+    this.version(7)
+      .stores({
+        campfireRecaps: 'id,weekStart,weekEnd,createdAt,acknowledged',
+      })
+      .upgrade(async (transaction) => {
+        const settings = transaction.table<Settings, string>('settings');
+        const current = await settings.get('primary');
+        if (current) {
+          await settings.update('primary', {
+            enabledCompanionIds: Array.from(
+              new Set([...(current.enabledCompanionIds ?? ['snow', 'rook', 'selah', 'cipher', 'haven']), 'ember']),
+            ),
+          });
+        }
+        const metadata = transaction.table<AppMetadata, string>('appMetadata');
+        const now = new Date().toISOString();
+        await metadata.put({ id: 'schema-seeded', value: 7, updatedAt: now });
+        await metadata.put({ id: 'app-version', value: '2.1.0', updatedAt: now });
+      });
   }
 }
 
@@ -258,6 +279,7 @@ export const TABLE_NAMES = [
   'supportConversations',
   'favoriteMessages',
   'partyBanters',
+  'campfireRecaps',
   'appMetadata',
 ] as const;
 

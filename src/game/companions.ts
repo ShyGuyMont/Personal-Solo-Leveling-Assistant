@@ -83,6 +83,24 @@ export async function queueCompanionReaction(input: {
   return reaction;
 }
 
+export async function queueLockInIfNeeded(systemDate: string) {
+  const settings = await db.settings.get('primary');
+  if (!settings || settings.recoveryMode.active) return undefined;
+  const previousReview = await db.dailyReviews
+    .where('date')
+    .below(systemDate)
+    .last();
+  if (!previousReview) return undefined;
+  const needsReentry =
+    previousReview.status === 'in-progress' || previousReview.completionRate < 0.5;
+  if (!needsReentry) return undefined;
+  return queueCompanionReaction({
+    trigger: 'lock-in',
+    sourceId: `lock-in:${previousReview.date}:${previousReview.status}:${previousReview.completionRate}`,
+    companionId: 'ember',
+  });
+}
+
 export async function getNextCompanionReaction() {
   const settings = await db.settings.get('primary');
   if (!settings || settings.companionMode === 'off') return undefined;

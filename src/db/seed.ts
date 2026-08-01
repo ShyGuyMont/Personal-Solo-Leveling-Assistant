@@ -34,7 +34,7 @@ export function createDefaultSettings(): Settings {
     colorTheme: 'abyss',
     dailyEventsEnabled: true,
     companionMode: 'balanced',
-    enabledCompanionIds: ['snow', 'rook', 'selah', 'cipher', 'haven'],
+    enabledCompanionIds: ['snow', 'rook', 'selah', 'cipher', 'haven', 'ember'],
     notificationsEnabled: false,
     advancedBalanceUnlocked: false,
     privacyScreenEnabled: false,
@@ -158,9 +158,9 @@ export async function initializeProfile(input: {
         },
       ]);
       await db.appMetadata.bulkPut([
-        { id: 'schema-seeded', value: 6, updatedAt: now },
+        { id: 'schema-seeded', value: 7, updatedAt: now },
         { id: 'last-system-day', value: systemDate, updatedAt: now },
-        { id: 'app-version', value: '2.0.0', updatedAt: now },
+        { id: 'app-version', value: '2.1.0', updatedAt: now },
       ]);
       await ensureRotatingChallenges(systemDate, settings.weekStartsOn);
     },

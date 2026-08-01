@@ -160,13 +160,16 @@ export function OnboardingPage() {
               />
             </label>
             <label className="field">
-              <span>System title · optional</span>
+              <span>Custom System title · optional</span>
               <input
                 value={title}
                 onChange={(event) => setTitle(event.target.value)}
                 placeholder="Candidate"
                 maxLength={50}
               />
+              <small>
+                Cosmetic nickname only—it does not affect XP, stats, achievement titles, or rank.
+              </small>
             </label>
             <label className="field">
               <span>Daily reset time</span>

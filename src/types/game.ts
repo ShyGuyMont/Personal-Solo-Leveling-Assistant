@@ -35,7 +35,7 @@ export type Rarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'as
 export type RecoveryReason = 'illness' | 'injury' | 'travel' | 'emergency' | 'overload' | 'other';
 export type InterfaceStyle = 'clean' | 'system';
 export type ColorTheme = 'abyss' | 'daybreak';
-export type CompanionId = 'snow' | 'rook' | 'selah' | 'cipher' | 'haven';
+export type CompanionId = 'snow' | 'rook' | 'selah' | 'cipher' | 'haven' | 'ember';
 export type CompanionMode = 'off' | 'quiet' | 'balanced' | 'talkative';
 export type MoodId =
   | 'energized'
@@ -61,6 +61,7 @@ export type FavoriteMessageSource =
   | 'support'
   | 'banter'
   | 'reaction'
+  | 'campfire'
   | 'milestone';
 export type DailyEventKind = 'none' | 'emergency-quest' | 'mission-pass';
 export type DailyEventStatus =
@@ -79,6 +80,7 @@ export type CompanionTrigger =
   | 'rare-event'
   | 'mission-pass'
   | 'comeback'
+  | 'lock-in'
   | 'achievement';
 
 export interface Profile {
@@ -533,6 +535,28 @@ export interface PartyBanter {
   acknowledged: boolean;
 }
 
+export interface CampfireMetrics {
+  recordedDays: number;
+  completedMissions: number;
+  availableMissions: number;
+  completionRate: number;
+  perfectDays: number;
+  categoryCompleted: Partial<Record<MissionCategory, number>>;
+  categoryAvailable: Partial<Record<MissionCategory, number>>;
+  strongestCategory?: MissionCategory;
+  focusCategory?: MissionCategory;
+}
+
+export interface CampfireRecap {
+  id: string;
+  weekStart: LocalDateKey;
+  weekEnd: LocalDateKey;
+  createdAt: string;
+  acknowledged: boolean;
+  metrics: CampfireMetrics;
+  messages: PartyChatMessage[];
+}
+
 export interface AppMetadata {
   id: string;
   value: string | number | boolean | Record<string, unknown>;
@@ -554,6 +578,7 @@ export interface GameSnapshot {
   inventory: InventoryItem[];
   companionReaction?: CompanionReaction;
   partyBanter?: PartyBanter;
+  campfireRecap?: CampfireRecap;
   systemDate: LocalDateKey;
 }
 
