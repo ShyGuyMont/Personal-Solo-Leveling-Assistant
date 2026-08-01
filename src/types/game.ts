@@ -714,7 +714,9 @@ export type TreasuryExpenseCategory =
   | 'transportation'
   | 'health'
   | 'personal'
+  | 'subscriptions'
   | 'entertainment'
+  | 'shopping'
   | 'giving'
   | 'other';
 

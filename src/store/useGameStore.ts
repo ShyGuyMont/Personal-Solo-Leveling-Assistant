@@ -493,6 +493,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const challenge = get().treasuryChallenge;
       if (!challenge) return;
       const result = await resolveTreasuryChallenge(get().systemDate, 'passed');
+      if (!result || !('reward' in result)) {
+        set({ ...(await readSnapshot()), error: undefined });
+        return;
+      }
       await queueCompanionReaction({
         trigger: 'treasury',
         sourceId: `no-eating-out:${get().systemDate}:passed`,
@@ -502,8 +506,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
         ...(await readSnapshot()),
         rewardNotice: {
           missionName: 'No Eating Out',
-          accountXp: 'reward' in result ? result.reward.awardedXp : challenge.rewardXp,
-          levelsGained: 'reward' in result ? result.reward.levelsGained : 0,
+          accountXp: result.reward.awardedXp,
+          levelsGained: result.reward.levelsGained,
         },
         error: undefined,
       });

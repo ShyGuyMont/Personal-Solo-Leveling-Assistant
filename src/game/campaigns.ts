@@ -5,13 +5,12 @@ import type {
   CampaignArc,
   CompanionId,
   LocalDateKey,
-  MissionCategory,
 } from '@/types/game';
 
 export interface CampaignArcDraft {
   name: string;
   purpose: string;
-  category: MissionCategory | 'balanced';
+  category: CampaignArc['category'];
   companionId: CompanionId;
   targetDate?: LocalDateKey;
 }

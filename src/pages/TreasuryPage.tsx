@@ -34,6 +34,7 @@ import {
 import { Link } from '@/router';
 import { useGameStore } from '@/store/useGameStore';
 import type {
+  LocalDateKey,
   TreasuryBill,
   TreasuryDebt,
   TreasuryExpenseCategory,
@@ -60,6 +61,7 @@ const EXPENSE_CATEGORIES: Array<{ id: TreasuryExpenseCategory; label: string }> 
   { id: 'dining', label: 'Dining out' },
   { id: 'transportation', label: 'Transportation' },
   { id: 'health', label: 'Health' },
+  { id: 'personal', label: 'Personal care' },
   { id: 'subscriptions', label: 'Subscriptions' },
   { id: 'entertainment', label: 'Entertainment' },
   { id: 'shopping', label: 'Shopping' },
@@ -483,7 +485,7 @@ function LedgerTab({
   busy,
   act,
 }: {
-  date: string;
+  date: LocalDateKey;
   transactions: TreasuryTransaction[];
   hidden: boolean;
   busy: boolean;
@@ -630,7 +632,7 @@ function BillsTab({
   busy,
   act,
 }: {
-  date: string;
+  date: LocalDateKey;
   bills: TreasuryBill[];
   hidden: boolean;
   busy: boolean;
@@ -749,7 +751,7 @@ function DebtTab({
   busy,
   act,
 }: {
-  date: string;
+  date: LocalDateKey;
   debts: TreasuryDebt[];
   hidden: boolean;
   busy: boolean;
@@ -895,7 +897,7 @@ function SavingsTab({
   busy,
   act,
 }: {
-  date: string;
+  date: LocalDateKey;
   goals: TreasurySavingsGoal[];
   hidden: boolean;
   busy: boolean;

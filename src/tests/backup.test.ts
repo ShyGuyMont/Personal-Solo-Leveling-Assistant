@@ -130,6 +130,10 @@ describe('save validation and recovery', () => {
         levelsGained: 2,
         rankChanges: 0,
         titlesGained: 1,
+        treasuryReviews: 0,
+        noEatingOutWins: 0,
+        savingsContributedCents: 0,
+        debtPaidCents: 0,
       },
       messages: [
         {

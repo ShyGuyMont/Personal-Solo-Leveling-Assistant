@@ -1,6 +1,7 @@
 import {
   ArrowLeft,
   BookOpenCheck,
+  ChevronRight,
   Crown,
   Flame,
   Heart,

@@ -43,7 +43,6 @@ import type {
   CampaignArc,
   CompanionId,
   CompanionQuestProgress,
-  MissionCategory,
 } from '@/types/game';
 
 type ArcBundle = { arc: CampaignArc; milestones: ArcMilestone[] };
@@ -53,6 +52,12 @@ const EMPTY_ARC: CampaignArcDraft = {
   purpose: '',
   category: 'balanced',
   companionId: 'snow',
+};
+
+const ARC_CATEGORY_LABELS: Record<CampaignArcDraft['category'], string> = {
+  balanced: 'Balanced',
+  ...CATEGORY_LABELS,
+  treasury: 'Treasury',
 };
 
 function metricLabel(view: QuestProgressView['objectives'][number]) {
@@ -211,12 +216,11 @@ export function CampaignsPage() {
                     onChange={(event) =>
                       setArcDraft({
                         ...arcDraft,
-                        category: event.target.value as MissionCategory | 'balanced',
+                        category: event.target.value as CampaignArcDraft['category'],
                       })
                     }
                   >
-                    <option value="balanced">Balanced</option>
-                    {Object.entries(CATEGORY_LABELS).map(([id, label]) => (
+                    {Object.entries(ARC_CATEGORY_LABELS).map(([id, label]) => (
                       <option key={id} value={id}>
                         {label}
                       </option>
@@ -312,7 +316,7 @@ export function CampaignsPage() {
                     <div>
                       <span>
                         {arc.status.toUpperCase()} ·{' '}
-                        {arc.category === 'balanced' ? 'Balanced' : CATEGORY_LABELS[arc.category]}
+                        {ARC_CATEGORY_LABELS[arc.category]}
                       </span>
                       <h2>{arc.name}</h2>
                       <p>{arc.purpose}</p>
