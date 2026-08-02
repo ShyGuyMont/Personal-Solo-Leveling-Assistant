@@ -102,7 +102,7 @@ export function ProgressionOverlay() {
           </div>
         )}
         <button
-          className="button button--primary button--large"
+          className={`button button--primary button--large ${celebration ? 'progression-overlay__continue' : ''}`}
           onClick={async () => {
             await acknowledgeProgressionEvent(event.id);
             await loadNext();

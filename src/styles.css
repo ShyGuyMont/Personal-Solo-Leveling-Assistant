@@ -1648,6 +1648,77 @@ html[data-theme='daybreak'] .headquarters-roster__grid article {
   }
 }
 
+/* Phone-safe full-party progression celebrations */
+.progression-overlay__rays {
+  pointer-events: none;
+}
+
+.progression-overlay.progression-overlay--party {
+  width: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  place-items: start center;
+  overscroll-behavior-y: contain;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+
+.progression-overlay.progression-overlay--party > section {
+  width: min(820px, 100%);
+  padding-top: 24px;
+  padding-bottom: calc(112px + env(safe-area-inset-bottom));
+}
+
+.progression-overlay--party .progression-overlay__continue {
+  position: fixed;
+  bottom: max(12px, env(safe-area-inset-bottom));
+  left: 50%;
+  z-index: 4;
+  width: min(360px, calc(100vw - 32px));
+  transform: translateX(-50%);
+  box-shadow:
+    0 12px 36px rgba(0, 0, 0, 0.7),
+    0 0 24px rgba(67, 230, 194, 0.2);
+}
+
+@media (max-width: 600px) {
+  .progression-overlay.progression-overlay--party {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .progression-overlay.progression-overlay--party > section {
+    padding-top: 8px;
+  }
+
+  .progression-overlay--party h2 {
+    font-size: clamp(2rem, 12vw, 3.4rem);
+  }
+
+  .progression-overlay--party .progression-overlay__icon {
+    width: 58px;
+    height: 58px;
+    margin-bottom: 12px;
+  }
+
+  .progression-overlay--party .milestone-party__messages {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .progression-overlay--party .milestone-party__messages article,
+  .progression-overlay--party .milestone-party__messages article.is-primary {
+    grid-column: 1;
+    grid-template-columns: 52px minmax(0, 1fr) auto;
+  }
+
+  .progression-overlay--party .milestone-party__messages img {
+    width: 52px;
+    height: 58px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .campfire-overlay__embers {
     animation: none;
