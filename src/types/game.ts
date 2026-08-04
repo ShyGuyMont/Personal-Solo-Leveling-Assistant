@@ -61,7 +61,8 @@ export type FavoriteMessageSource =
   | 'campfire'
   | 'council'
   | 'milestone'
-  | 'treasury';
+  | 'treasury'
+  | 'training';
 export type DailyEventKind = 'none' | 'emergency-quest' | 'mission-pass';
 export type DailyCapacity = 'low' | 'steady' | 'high';
 export type DailyCommandOutcome =
@@ -168,6 +169,41 @@ export interface MissionDetails {
   eveningStatus?: 'successful' | 'struggling' | 'failed';
   quantity?: number;
   checklist?: Record<string, boolean>;
+  trainingSessionId?: string;
+}
+
+export type TrainingLocation = 'home' | 'gym' | 'conditioning' | 'recovery';
+export type TrainingCircuitId =
+  'iron-foundation' | 'vanguard-frame' | 'shadow-engine' | 'guardian-citadel';
+export type TrainingSessionStatus = 'assigned' | 'active' | 'paused' | 'completed' | 'abandoned';
+
+export interface TrainingSession {
+  id: LocalDateKey;
+  date: LocalDateKey;
+  location: TrainingLocation;
+  status: TrainingSessionStatus;
+  circuitId?: TrainingCircuitId;
+  durationMinutes?: 15 | 20 | 25 | 30;
+  loggedDurationMinutes?: number;
+  briefingVariant: number;
+  debriefVariant: number;
+  rerollUsed: boolean;
+  bossExtensionUsed: boolean;
+  assignedAt: string;
+  startedAt?: string;
+  timerEndsAt?: string;
+  remainingSeconds?: number;
+  completedAt?: string;
+  roundsCompleted?: number;
+  partialReps?: number;
+  exerciseLoads?: Record<string, number>;
+  difficulty?: number;
+  gymFocus?: 'strength' | 'cardio' | 'mixed' | 'class' | 'other';
+  conditioningType?: 'walk' | 'run' | 'walk-run' | 'other';
+  distance?: number;
+  recoveryProtocol?: string;
+  note?: string;
+  updatedAt: string;
 }
 
 export interface DailyMissionRecord {

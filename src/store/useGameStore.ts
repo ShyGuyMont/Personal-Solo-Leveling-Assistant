@@ -48,6 +48,7 @@ import {
   resolveTreasuryChallenge,
   revealTreasuryChallenge,
 } from '@/game/treasury';
+import { reopenTrainingCompletion } from '@/game/training';
 import type {
   DailyReview,
   Focus,
@@ -253,6 +254,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   async complete(missionId, details, date) {
     try {
       const mission = get().missions.find((item) => item.id === missionId);
+      const trainingHallCompletion = missionId === 'workout' && Boolean(details?.trainingSessionId);
       const previousStats = get().stats;
       const previousRank = get().progression?.rank;
       const result = await completeMission({
@@ -266,34 +268,36 @@ export const useGameStore = create<GameStore>((set, get) => ({
         const before = previousStats.find((item) => item.id === stat.id);
         return before && stat.level > before.level;
       });
-      for (const stat of leveledStats) {
-        await queueCompanionReaction({
-          trigger: 'stat-level',
-          sourceId: `mission:${date ?? get().systemDate}:${missionId}:${stat.id}:${stat.level}`,
-          stat: stat.id,
-          statLabel: STAT_LABELS[stat.id],
-          level: stat.level,
-        });
-      }
-      if (snapshot.progression?.rank !== previousRank) {
-        await queueCompanionReaction({
-          trigger: 'rank-up',
-          sourceId: `rank:${snapshot.progression?.rank}:${snapshot.progression?.lastRankUpAt ?? ''}`,
-          companionId: 'snow',
-        });
-      } else if (!leveledStats.length && mission) {
-        await queueCompanionReaction({
-          trigger: 'mission',
-          sourceId: `mission:${date ?? get().systemDate}:${missionId}`,
-          category: mission.category,
-        });
-      }
-      if (mission) {
-        await queuePartyBanter({
-          date: date ?? get().systemDate,
-          sourceId: `mission:${date ?? get().systemDate}:${missionId}`,
-          category: mission.category,
-        });
+      if (!trainingHallCompletion) {
+        for (const stat of leveledStats) {
+          await queueCompanionReaction({
+            trigger: 'stat-level',
+            sourceId: `mission:${date ?? get().systemDate}:${missionId}:${stat.id}:${stat.level}`,
+            stat: stat.id,
+            statLabel: STAT_LABELS[stat.id],
+            level: stat.level,
+          });
+        }
+        if (snapshot.progression?.rank !== previousRank) {
+          await queueCompanionReaction({
+            trigger: 'rank-up',
+            sourceId: `rank:${snapshot.progression?.rank}:${snapshot.progression?.lastRankUpAt ?? ''}`,
+            companionId: 'snow',
+          });
+        } else if (!leveledStats.length && mission) {
+          await queueCompanionReaction({
+            trigger: 'mission',
+            sourceId: `mission:${date ?? get().systemDate}:${missionId}`,
+            category: mission.category,
+          });
+        }
+        if (mission) {
+          await queuePartyBanter({
+            date: date ?? get().systemDate,
+            sourceId: `mission:${date ?? get().systemDate}:${missionId}`,
+            category: mission.category,
+          });
+        }
       }
       snapshot = await readSnapshot();
       set({
@@ -348,6 +352,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
   async undo(missionId, date) {
     try {
       await undoMission(date ?? get().systemDate, missionId);
+      if (missionId === 'workout') {
+        await reopenTrainingCompletion(date ?? get().systemDate);
+      }
       set({ ...(await readSnapshot()), error: undefined });
     } catch (error) {
       set({ error: error instanceof Error ? error.message : 'Mission could not be undone.' });

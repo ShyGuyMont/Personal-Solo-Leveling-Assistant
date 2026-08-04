@@ -1,6 +1,6 @@
-export const APP_VERSION = '3.0.0';
-export const DATABASE_SCHEMA_VERSION = 9;
-export const SAVE_FORMAT_VERSION = 9;
+export const APP_VERSION = '3.5.0';
+export const DATABASE_SCHEMA_VERSION = 10;
+export const SAVE_FORMAT_VERSION = 10;
 
 export interface ReleaseSection {
   title: string;
@@ -10,68 +10,39 @@ export interface ReleaseSection {
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
   {
-    title: 'Treasury Command',
-    detail: 'Money management now has a private, phone-first command center of its own.',
+    title: 'The Training Hall',
+    detail: 'Rook and Ember now command a complete phone-first training system.',
     points: [
-      'Log paychecks, expenses, eating-out purchases, recurring bills, debt balances and payments, and savings goals without linking a bank.',
-      'Plan spending, dining, savings, and debt targets, then complete a fact-based Weekly Review for fixed XP and Stewardship progress.',
-      'Budget Stability is a visible coaching signal only; it never changes core XP, rank, streaks, or mission results.',
+      'Choose Home, Gym, Conditioning, or Recovery; every completed path clears the single Daily Workout mission exactly once.',
+      'Home training contains four full-body circuit protocols, a saved Rook assignment, Ember’s weighted 15–30 minute clock, one reassignment, and optional five-minute Boss overtime.',
+      'Timers survive leaving the screen, rounds and partial reps remain saved, adjustable-dumbbell loads can be recorded, and the entire party joins the post-training recovery scene.',
     ],
   },
   {
-    title: 'Cassian · The Steward',
-    detail:
-      'The eighth companion joins as a calm, exacting guide for clarity, margin, and recovery.',
+    title: 'Physical Mission Consolidation',
+    detail: 'Daily Movement has been retired without lowering the physical path’s value.',
     points: [
-      'Cassian has full dialogue across check-ins, Direct Support, milestones, mission banter, Campfires, Councils, and Treasury events.',
-      'His five-chapter questline contains 15 objectives and unlocks the legendary Keeper of Margin title.',
-      'A 75% daily roll can open No Eating Out for bonus XP; failure removes no account XP and opens a practical recovery debrief.',
+      'Daily Workout now contains the combined account and stat rewards that Movement and Workout previously awarded together.',
+      'Existing history remains intact, current briefing references migrate safely, and physical challenges now point to Training Hall deployments.',
+      'Gym, conditioning, recovery, and home circuits are alternate ways to clear one mission—not repeatable sources of extra XP.',
     ],
   },
   {
-    title: 'Campaign Command',
-    detail: 'Long-range goals now have structure without becoming another punishment system.',
+    title: 'Progression Rebalance',
+    detail: 'Rank pacing now respects the larger mission and companion ecosystem.',
     points: [
-      'Campaign Arcs with purpose, companion guidance, target dates, milestones, pause, completion, and archive states.',
-      'Snow’s Daily Command now locks a fair morning target: Low protects continuity, Steady rewards 65% completion, High rewards 80%, and Full Clears earn the strongest multipliers.',
-      'A dedicated Update Center shows the installed version, checks for releases, and keeps backup controls close.',
+      'Rank requirements and mandatory trial durations were rebuilt around an achievable 18–24 month World Class progression instead of a distant multi-year extreme.',
+      'Snow’s Daily Command remains the major consistency multiplier: Low is 1×, Steady is 1.5× or 1.75× on a Full Clear, and High is 2× or 2.5× on a Full Clear.',
+      'Mission, Perfect Day, challenge, questline, Treasury, and rare-event rewards retain separate one-time transaction protection.',
     ],
   },
   {
-    title: 'Companion Questlines',
-    detail: 'Every party member now has a complete personal five-chapter campaign.',
+    title: 'Archive Shield 10',
+    detail: 'Training records join the portable, update-safe campaign save.',
     points: [
-      'Eight questlines, 40 authored chapters, and 120 tracked or reflective objectives.',
-      'Only one questline is active at a time; pause and resume freely with no failure timer or decay.',
-      'Each completed questline unlocks a unique legendary title and deeper companion story.',
-    ],
-  },
-  {
-    title: 'Amara · The Heartweaver',
-    detail:
-      'The seventh companion joins the party as the guide for empathy, relationships, and belonging.',
-    points: [
-      'Amara appears across Party Chat, Direct Support, stat reactions, mission banter, Campfires, Councils, and Headquarters.',
-      'Her guidance covers friendship, family, romance, communication, appreciation, repair, and healthy boundaries.',
-      'No relationship objective requires unsafe contact; protected distance and self-respecting alternatives always count.',
-    ],
-  },
-  {
-    title: 'Monthly Councils',
-    detail: 'The full party now closes each completed month together.',
-    points: [
-      'Nine fact-aware messages review mission balance, growth, recovery, connection, Treasury progress, campaigns, and quest chapters.',
-      'Councils remain saved in Headquarters and the Archive, with space for one next-month intention.',
-      'Council commentary never changes XP, rank, streaks, or hidden scoring.',
-    ],
-  },
-  {
-    title: 'Archive Shield',
-    detail: 'The expanded campaign remains portable and update-safe.',
-    points: [
-      'Save format 9 preserves all Version 3.0 records—including the complete Treasury—and migrates older saves forward automatically.',
-      'Import capacity increased to 32 MB with checksum verification, previews, and automatic pre-import recovery snapshots.',
-      'Backup tests cover briefings, campaigns, milestones, quest progress, councils, both new companions, and Treasury records.',
+      'Save format 10 preserves Training Hall assignments, timers, completed sessions, rounds, loads, effort, and private notes.',
+      'Version 3.0 and older saves migrate forward automatically without replacing existing campaign, companion, Treasury, or mission history.',
+      'The Update Center continues to install new releases without deleting the home-screen app or its local progression data.',
     ],
   },
 ];

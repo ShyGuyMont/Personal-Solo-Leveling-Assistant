@@ -53,6 +53,9 @@ const UpdateCenterPage = lazy(() =>
 const TreasuryPage = lazy(() =>
   import('@/pages/TreasuryPage').then((module) => ({ default: module.TreasuryPage })),
 );
+const TrainingHallPage = lazy(() =>
+  import('@/pages/TrainingHallPage').then((module) => ({ default: module.TrainingHallPage })),
+);
 
 export function App() {
   const { loading, profile, load, refresh } = useGameStore();
@@ -90,6 +93,7 @@ export function App() {
       '/campaigns': CampaignsPage,
       '/update-center': UpdateCenterPage,
       '/treasury': TreasuryPage,
+      '/training-hall': TrainingHallPage,
     }[path] ?? DashboardPage;
 
   return (

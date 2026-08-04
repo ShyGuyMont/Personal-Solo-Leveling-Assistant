@@ -30,6 +30,21 @@ Your main dashboard. It shows today's completion, rank, account level, System st
 
 Your full objective list. Missions can use a simple completion button or request details such as time, quantity, checklist items, or a creator-work path. Optional missions award XP without deciding Perfect Day status.
 
+### Training Hall
+
+Daily Workout opens a dedicated physical section led by Rook and Ember. Choose one honest path:
+
+- **Home Circuit:** Rook assigns Iron Foundation, Vanguard Frame, Shadow Engine, or Guardian Citadel. Ember sets a saved 15, 20, 25, or 30-minute clock. Record rounds, partial reps, effort, dumbbell loads, and an optional private note.
+- **Gym Deployment:** Complete your own gym session, then record its minutes, focus, effort, and optional note.
+- **Conditioning Mission:** Record a completed walk, run, walk/run, or other conditioning session, with optional distance.
+- **Recovery Protocol:** Record deliberate stretching, plank work, mobility, or physical-therapy exercises.
+
+The Home assignment is drawn once per day and survives refreshes or leaving the app. A single reassignment is available before starting. The optional five-minute Boss Extension records extra work but creates no repeat XP. Every path clears the same Daily Workout mission once, then opens an exhausted in-character recovery debrief from all eight companions.
+
+Daily Movement was retired because it duplicated the new location choice. Daily Workout now preserves the two former physical missions’ combined reward: 75 account XP plus Strength, Endurance, Discipline, and Vitality stat XP. Existing Movement history remains in the Archive.
+
+The Training Hall is motivational recordkeeping, not medical care. Use loads and exercise variations you can control, stop for concerning symptoms, and follow your physical therapist’s instructions over the app.
+
 ### Status
 
 Your progression record: overall level, rank qualification, individual stats, titles, achievements, cosmetics, and collection progress.
@@ -90,11 +105,17 @@ The eight questlines are **The One Who Stayed**, **Tempered Foundation**, **Root
 
 ### Snow's Daily Command Briefing
 
-Once per System day, Snow can ask whether your capacity is **Low**, **Steady**, or **High**. She recommends a Main Quest, Support Quest, and—when appropriate—an optional Bonus Quest from missions already scheduled today. You can change every recommendation, edit the briefing later, skip it, or disable it in Settings. It creates no extra XP, requirement, penalty, or hidden judgment.
+Once per System day, Snow can ask whether your capacity is **Low**, **Steady**, or **High**. She recommends a Main Quest, Support Quest, and—when appropriate—a Bonus Quest from missions already scheduled today. These are priority slots, not extra missions. You can change the recommendations, edit the briefing later, skip it, or disable it in Settings.
+
+- **Low:** no completion quota; scheduled missions keep ordinary 1× XP.
+- **Steady:** complete Main, Support, and at least 65% of all scheduled missions for 1.5× mission XP; a Full Clear earns 1.75×.
+- **High:** complete Main, Support, Bonus, and at least 80% of all scheduled missions for 2× mission XP; a Full Clear earns 2.5×.
+
+The next Daily Review verifies the outcome and applies the bonus to account and stat XP from completed scheduled missions. Special rewards are never multiplied. Missing a target removes nothing—you keep every ordinary reward.
 
 ### Archive
 
-Your permanent record. It contains daily reviews, mission history, stat transactions, level and rank history, reports, Weekly Campfires, Monthly Councils, daily briefings, Campaign Arcs, Companion Quest progress, rare signals, Party Check-Ins, Direct Support channels, favorites, banter, and companion transmissions.
+Your permanent record. It contains daily reviews, mission history, Training Hall sessions, stat transactions, level and rank history, reports, Weekly Campfires, Monthly Councils, daily briefings, Campaign Arcs, Companion Quest progress, rare signals, Party Check-Ins, Direct Support channels, favorites, banter, and companion transmissions.
 
 ### Settings
 
@@ -102,7 +123,7 @@ Appearance, Snow's briefing toggle, companion frequency, individual companion co
 
 ### Update Center
 
-Shows the installed release, database and save versions, online status, last update check, current save size, last portable export, and all Version 3.0 release notes. **Check for update** contacts only the GitHub Pages release channel; it does not upload personal data. If a release is waiting, export first if desired and choose **Install update**. The home-screen app remains installed and reloads once.
+Shows the installed release, database and save versions, online status, last update check, current save size, last portable export, and all Version 3.5 release notes. **Check for update** contacts only the GitHub Pages release channel; it does not upload personal data. If a release is waiting, export first if desired and choose **Install update**. The home-screen app remains installed and reloads once.
 
 ### About & Help
 
@@ -123,19 +144,23 @@ Ranks are separate from levels. You begin at F and advance through **F → E →
 
 | Target rank | Account level | Missions | Completed days | Discipline | Balanced stats | Challenges |
 | ----------- | ------------: | -------: | -------------: | ---------: | -------------- | ---------: |
-| E           |            12 |      150 |             25 |          5 | 4 at Level 3   |          1 |
-| D           |            25 |      650 |            100 |         11 | 5 at Level 7   |          4 |
-| C           |            40 |    1,500 |            220 |         20 | 6 at Level 13  |         10 |
-| B           |            58 |    3,800 |            520 |         32 | 7 at Level 23  |         24 |
-| A           |            74 |    6,800 |            900 |         45 | 8 at Level 34  |         42 |
-| S           |            96 |   12,000 |          1,650 |         62 | 9 at Level 49  |         75 |
-| World Class |           125 |   20,500 |          2,850 |         82 | 10 at Level 68 |        125 |
+| E           |            10 |       50 |             12 |          3 | 4 at Level 2   |          1 |
+| D           |            20 |      180 |             40 |          6 | 5 at Level 3   |          4 |
+| C           |            32 |      420 |             90 |         10 | 6 at Level 5   |          8 |
+| B           |            40 |      750 |            150 |         13 | 7 at Level 7   |         15 |
+| A           |            50 |    1,300 |            240 |         18 | 8 at Level 9   |         26 |
+| S           |            58 |    2,050 |            360 |         22 | 9 at Level 12  |         38 |
+| World Class |            65 |    2,850 |            480 |         26 | 10 at Level 14 |         55 |
 
-Passing a trial advances exactly one rank. If a trial expires before completion, the earned rank and previous campaign progress remain intact; the trial enters a cooldown and can be attempted again later. World Class is the highest rank. Numerical account and stat levels can continue as high as Level 999.
+Passing a trial advances exactly one rank. If a trial expires before completion, the earned rank and previous campaign progress remain intact; the trial enters a cooldown and can be attempted again later. World Class is the highest rank. Its 480 Completed Days gate comes before a final 90-day Rank Trial, making the earliest modeled first-attempt path about 570 calendar days, or roughly nineteen months. At sustainable 75–90% long-term mission consistency, expect approximately twenty to twenty-four months when trials are passed on schedule; retries can extend that timeline. Actual timing depends on every visible gate, not XP alone. Numerical account and stat levels can continue as high as Level 999.
 
 The System contains 50 achievement and questline titles. They unlock automatically from objective saved facts such as mission totals, Perfect Days, streaks, finalized Daily Reviews, stat levels, challenges, Recovery and exception milestones, rank advancement, and completed Companion Questlines. Unlocks are permanent and never random, but the user decides which unlocked title to equip.
 
 XP is written through stable transaction IDs so repeated taps cannot award the same mission twice. Undo is available only during the active System day and writes an inverse transaction instead of deleting history.
+
+Normal daily missions award the XP printed on their cards. The current six default missions total **215 base account XP**: Prayer 20, Bible 25, Integrity 40, Kindness 20, Daily Workout 75, and Creator Work 35. In a Stable System state, completing all six yields **265 XP** with the 50-XP Perfect Day reward, **426 XP** with a Steady Full Clear, or **588 XP** with a High Full Clear. Optional and customized missions change those totals, so the mission cards remain authoritative.
+
+Perfect Days, completed challenges, Rank Trials, Companion Quest chapters, Treasury reviews, and accepted rare events award their own displayed one-time XP. Campaign Arc milestones, Party conversations, Campfires, Councils, Training Hall overtime, and logging more than one physical path do not create hidden or repeatable XP. Snow’s Daily Command is the only broad positive multiplier, and it applies only to scheduled mission account and stat XP after Daily Review. These examples assume a Stable state: Warning temporarily awards 90% of printed account mission XP and Stagnant awards 75% until completed days restore stability; stat mission XP remains as printed. The command bonus is calculated from XP actually recorded, preventing hidden stacking or duplicate rewards.
 
 ## The companion party
 
@@ -195,7 +220,7 @@ Before clearing browser data, changing phones, or installing a major release:
 3. Store the downloaded JSON file somewhere private and recoverable.
 4. On the new installation, choose **Import save** and review the preview before confirming.
 
-Backups include Party conversations, Weekly Campfires, Monthly Councils, briefings, Campaign Arcs, Companion Quest progress, Amara, favorite messages, banter history, settings, progression, missions, and the rest of the campaign record. Imports are checksum-verified, previewed, validated up to 32 MB, and protected by an automatic pre-import recovery snapshot.
+Backups include Training Hall assignments and completed sessions, Party conversations, Weekly Campfires, Monthly Councils, briefings, Campaign Arcs, Companion Quest progress, Amara, favorite messages, banter history, Treasury data, settings, progression, missions, and the rest of the campaign record. Imports are checksum-verified, previewed, validated up to 32 MB, and protected by an automatic pre-import recovery snapshot.
 
 ## Updating the installed app
 

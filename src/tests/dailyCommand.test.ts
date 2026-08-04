@@ -45,18 +45,18 @@ describe("Snow's rewarded Daily Command", () => {
     const prioritiesOnly = getDailyCommandProgress(briefing, threePriorityRecords);
     expect(prioritiesOnly.prioritiesComplete).toBe(true);
     expect(prioritiesOnly.clearedMissionCount).toBe(3);
-    expect(prioritiesOnly.targetMissionCount).toBe(6);
+    expect(prioritiesOnly.targetMissionCount).toBe(5);
     expect(prioritiesOnly.outcome).toBe('pending');
     expect(prioritiesOnly.multiplier).toBe(1);
 
     let added = 0;
-    const sixClears = threePriorityRecords.map((record) => {
-      if (record.status === 'completed' || added >= 3) return record;
+    const fiveClears = threePriorityRecords.map((record) => {
+      if (record.status === 'completed' || added >= 2) return record;
       added += 1;
       return { ...record, status: 'completed' as const };
     });
-    const highClear = getDailyCommandProgress(briefing, sixClears);
-    expect(highClear.clearedMissionCount).toBe(6);
+    const highClear = getDailyCommandProgress(briefing, fiveClears);
+    expect(highClear.clearedMissionCount).toBe(5);
     expect(highClear.outcome).toBe('standard-clear');
     expect(highClear.multiplier).toBe(2);
   });

@@ -40,17 +40,17 @@ describe('mission transaction engine', () => {
     const settings = await db.settings.get('primary');
     const today = getSystemDateKey(new Date(), settings!.resetTime, settings!.timeZone);
     await ensureDailyRecords(today);
-    await completeMission({ date: today, missionId: 'movement', systemDate: today });
-    await undoMission(today, 'movement');
+    await completeMission({ date: today, missionId: 'workout', systemDate: today });
+    await undoMission(today, 'workout');
     expect((await db.progression.get('primary'))?.totalXp).toBe(0);
-    expect((await db.dailyMissions.get(`${today}:movement`))?.status).toBe('pending');
-    expect(await db.xpTransactions.where('sourceId').equals('movement').count()).toBe(2);
+    expect((await db.dailyMissions.get(`${today}:workout`))?.status).toBe('pending');
+    expect(await db.xpTransactions.where('sourceId').equals('workout').count()).toBe(2);
   });
 
   it('blocks ordinary undo outside the active System day', async () => {
     const settings = await db.settings.get('primary');
     const today = getSystemDateKey(new Date(), settings!.resetTime, settings!.timeZone);
-    await expect(undoMission(addDays(today, -1), 'movement')).rejects.toThrow(/active System day/);
+    await expect(undoMission(addDays(today, -1), 'workout')).rejects.toThrow(/active System day/);
   });
 
   it('does not allow the full-day integrity mission to complete early', async () => {

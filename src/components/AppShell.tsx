@@ -2,7 +2,7 @@ import {
   Archive,
   CircleGauge,
   CircleHelp,
-  Diamond,
+  Dumbbell,
   ListChecks,
   Shield,
   WalletCards,
@@ -17,7 +17,7 @@ const NAV = [
   { to: '/', label: 'System', icon: CircleGauge },
   { to: '/missions', label: 'Missions', icon: ListChecks },
   { to: '/status', label: 'Status', icon: Shield },
-  { to: '/challenges', label: 'Challenges', icon: Diamond },
+  { to: '/training-hall', label: 'Training', icon: Dumbbell },
   { to: '/treasury', label: 'Treasury', icon: WalletCards },
   { to: '/archive', label: 'Archive', icon: Archive },
 ];

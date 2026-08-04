@@ -42,7 +42,9 @@ export function SettingsPage() {
   const [displayName, setDisplayName] = useState(profile?.displayName ?? '');
   const [systemTitle, setSystemTitle] = useState(profile?.systemTitle ?? '');
   const [draft, setDraft] = useState<Settings | undefined>(settings);
-  const [missionDrafts, setMissionDrafts] = useState<MissionDefinition[]>(missions);
+  const [missionDrafts, setMissionDrafts] = useState<MissionDefinition[]>(
+    missions.filter((mission) => !mission.archived),
+  );
   const [saved, setSaved] = useState(false);
   const [preparedImport, setPreparedImport] = useState<PreparedImport>();
   const [resetOpen, setResetOpen] = useState(false);
@@ -54,7 +56,7 @@ export function SettingsPage() {
 
   useEffect(() => {
     setDraft(settings);
-    setMissionDrafts(missions);
+    setMissionDrafts(missions.filter((mission) => !mission.archived));
   }, [settings, missions]);
 
   useEffect(() => {
@@ -908,9 +910,9 @@ export function SettingsPage() {
               <p className="eyebrow">ARCHIVE SHIELD · LOCAL DATA</p>
               <h2>Full-campaign backup</h2>
               <p>
-                Everything—including Version 3.0 Treasury records, Campaign Arcs, questlines,
-                briefings, Councils, chats, Amara, and Cassian—is stored on this device. Export
-                regularly before clearing browser data or changing phones.
+                Everything—including Version 3.5 Training Hall records, Treasury records, Campaign
+                Arcs, questlines, briefings, Councils, chats, Amara, and Cassian—is stored on this
+                device. Export regularly before clearing browser data or changing phones.
               </p>
             </div>
           </header>
@@ -1019,7 +1021,7 @@ export function SettingsPage() {
           <Info size={21} />
           <div>
             <p className="eyebrow">ABOUT</p>
-            <h2>The System · Version 3.0.0</h2>
+            <h2>The System · Version 3.5.0</h2>
             <p>
               An original, offline-first personal progression RPG. It uses no login, backend,
               external API, analytics, advertising, tracking, paid service, or copied franchise

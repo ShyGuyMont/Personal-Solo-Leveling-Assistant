@@ -14,7 +14,7 @@ import { TITLE_LIBRARY } from '@/config/titles';
 
 describe('required local content libraries', () => {
   it('contains every specified mission and campaign library size', () => {
-    expect(DEFAULT_MISSIONS).toHaveLength(7);
+    expect(DEFAULT_MISSIONS).toHaveLength(6);
     expect(WEEKLY_CHALLENGES.length).toBeGreaterThanOrEqual(30);
     expect(MONTHLY_CHALLENGES.length).toBeGreaterThanOrEqual(20);
     expect(BOSS_CHALLENGES).toHaveLength(6);

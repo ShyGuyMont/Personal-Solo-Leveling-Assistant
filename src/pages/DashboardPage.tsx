@@ -2,6 +2,7 @@ import {
   ArrowRight,
   CalendarDays,
   ChevronRight,
+  Dumbbell,
   Map as MapIcon,
   Flame,
   Settings as SettingsIcon,
@@ -58,6 +59,7 @@ export function DashboardPage() {
   const completeCount = todayRecords.filter((record) => record.status === 'completed').length;
   const pending = todayRecords.filter((record) => record.status === 'pending');
   const percentage = todayRecords.length ? completeCount / todayRecords.length : 0;
+  const workoutRecord = todayRecords.find((record) => record.missionId === 'workout');
   const activeWeekly = challenges.find(
     (challenge) => challenge.kind === 'weekly' && challenge.status === 'active',
   );
@@ -159,6 +161,28 @@ export function DashboardPage() {
       <InstallCard />
       <DailyEventCard />
       <DailyBriefingCard />
+
+      <Link
+        to="/training-hall"
+        className={`training-dashboard-card panel is-${workoutRecord?.status ?? 'available'}`}
+      >
+        <span>
+          <Dumbbell size={24} />
+        </span>
+        <div>
+          <p className="eyebrow">TRAINING HALL · ROOK & EMBER</p>
+          <strong>
+            {workoutRecord?.status === 'completed'
+              ? 'Today’s deployment is complete'
+              : 'Enter the Hall and receive today’s assignment'}
+          </strong>
+          <small>
+            Home circuits, gym deployments, conditioning, recovery, records, and the full-party
+            post-raid debrief.
+          </small>
+        </div>
+        <ChevronRight size={20} />
+      </Link>
 
       <Link
         to="/treasury"

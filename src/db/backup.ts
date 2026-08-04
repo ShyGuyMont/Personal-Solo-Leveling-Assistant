@@ -1,7 +1,7 @@
 import { db, TABLE_NAMES } from '@/db/database';
 import type { BackupSnapshot, Profile, SaveFile, Settings, AccountProgression } from '@/types/game';
 
-export const SAVE_VERSION = 9;
+export const SAVE_VERSION = 10;
 export const MAX_IMPORT_BYTES = 32 * 1024 * 1024;
 const MAX_SNAPSHOTS = 5;
 const FORBIDDEN_KEYS = new Set(['__proto__', 'prototype', 'constructor']);
@@ -102,6 +102,9 @@ function migrateData(
     data.treasurySavingsGoals ??= [];
     data.treasuryWeeks ??= [];
     data.treasuryChallenges ??= [];
+  }
+  if (version <= 9) {
+    data.trainingSessions ??= [];
   }
   const migrationTime = new Date().toISOString();
   if (!data.treasurySettings.some((row) => isObject(row) && row.id === 'primary')) {
@@ -332,6 +335,48 @@ function validateData(data: Record<string, unknown[]>) {
       !validCents(row.stabilityPenalty, true)
     ) {
       throw new Error('A Treasury challenge contains an impossible value.');
+    }
+  }
+  const trainingLocations = new Set(['home', 'gym', 'conditioning', 'recovery']);
+  const trainingStatuses = new Set(['assigned', 'active', 'paused', 'completed', 'abandoned']);
+  const trainingCircuits = new Set([
+    'iron-foundation',
+    'vanguard-frame',
+    'shadow-engine',
+    'guardian-citadel',
+  ]);
+  for (const row of data.trainingSessions) {
+    if (
+      !isObject(row) ||
+      !validDate(row.date) ||
+      row.id !== row.date ||
+      !trainingLocations.has(String(row.location)) ||
+      !trainingStatuses.has(String(row.status)) ||
+      (row.circuitId !== undefined && !trainingCircuits.has(String(row.circuitId))) ||
+      (row.durationMinutes !== undefined &&
+        ![15, 20, 25, 30].includes(Number(row.durationMinutes))) ||
+      (row.loggedDurationMinutes !== undefined &&
+        (!Number.isFinite(row.loggedDurationMinutes) ||
+          Number(row.loggedDurationMinutes) < 1 ||
+          Number(row.loggedDurationMinutes) > 1440)) ||
+      (row.roundsCompleted !== undefined &&
+        (!Number.isInteger(row.roundsCompleted) || Number(row.roundsCompleted) < 0)) ||
+      (row.partialReps !== undefined &&
+        (!Number.isInteger(row.partialReps) || Number(row.partialReps) < 0)) ||
+      typeof row.rerollUsed !== 'boolean' ||
+      typeof row.bossExtensionUsed !== 'boolean'
+    ) {
+      throw new Error('A Training Hall record contains an impossible value.');
+    }
+    if (row.exerciseLoads !== undefined) {
+      if (
+        !isObject(row.exerciseLoads) ||
+        Object.values(row.exerciseLoads).some(
+          (value) => !Number.isFinite(value) || Number(value) < 0 || Number(value) > 500,
+        )
+      ) {
+        throw new Error('A Training Hall load record contains an impossible value.');
+      }
     }
   }
 }

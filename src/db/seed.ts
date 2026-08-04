@@ -97,8 +97,9 @@ export async function seedReferenceData() {
     async () => {
       const existingMissions = await db.missions.count();
       if (!existingMissions) await db.missions.bulkPut(DEFAULT_MISSIONS);
-      const existingChallenges = await db.challenges.count();
-      if (!existingChallenges) await db.challenges.bulkPut(ALL_CHALLENGE_TEMPLATES);
+      // Challenge templates are reference data, not user-authored records. Upserting them keeps
+      // active and future challenges compatible when a retired mission is consolidated.
+      await db.challenges.bulkPut(ALL_CHALLENGE_TEMPLATES);
       const unlocked = new Map(
         (await db.achievements.toArray()).map((achievement) => [
           achievement.id,
@@ -181,9 +182,9 @@ export async function initializeProfile(input: {
         },
       ]);
       await db.appMetadata.bulkPut([
-        { id: 'schema-seeded', value: 9, updatedAt: now },
+        { id: 'schema-seeded', value: 10, updatedAt: now },
         { id: 'last-system-day', value: systemDate, updatedAt: now },
-        { id: 'app-version', value: '3.0.0', updatedAt: now },
+        { id: 'app-version', value: '3.5.0', updatedAt: now },
       ]);
       await ensureRotatingChallenges(systemDate, settings.weekStartsOn);
     },

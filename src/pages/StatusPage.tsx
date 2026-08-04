@@ -28,14 +28,14 @@ import type {
 
 const STAT_RAISES: Record<string, string> = {
   faith: 'Prayer, Bible study, and faith challenges',
-  strength: 'Workout missions and physical challenges',
-  endurance: 'Movement missions and sustained physical campaigns',
+  strength: 'Training Hall deployments and physical challenges',
+  endurance: 'Training Hall conditioning and sustained physical campaigns',
   discipline: 'Prayer, integrity, workouts, creator work, and Perfect Days',
   willpower: 'Daily integrity missions and discipline campaigns',
   wisdom: 'Bible study and faith challenges',
   creativity: 'YouTube / ARC work and creator campaigns',
   focus: 'Bible study, creator work, and focused campaigns',
-  vitality: 'Movement, workouts, and Perfect Days',
+  vitality: 'Training Hall deployments and Perfect Days',
   character: 'Kind messages and Perfect Days',
   empathy: 'Kind messages and character challenges',
   stewardship: 'Treasury reviews, savings, debt payments, and Cassian challenges',

@@ -155,7 +155,7 @@ export function HeadquartersPage() {
           <div>
             <strong>Update Center</strong>
             <p>Check releases and open the Archive Shield.</p>
-            <small>Version 3.0</small>
+            <small>Version 3.5</small>
           </div>
         </Link>
       </section>

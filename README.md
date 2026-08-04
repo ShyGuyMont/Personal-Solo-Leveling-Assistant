@@ -6,7 +6,7 @@ The design, writing, interface, icons, animations, and generated tones are origi
 
 ## Included
 
-- Seven default missions across Faith, Discipline, Physical, Creator, and Character
+- Six default missions across Faith, Discipline, Physical, Creator, and Character
 - Custom and template missions, weekday schedules, optional completion types, notes, and stable history IDs
 - Daily Review, idempotent rewards, current-day undo, Perfect and Protected Perfect Days, humane momentum/decay, and Recovery Mode
 - System and Clean interface styles, plus Abyss and light Daybreak color themes with selectable visual intensity
@@ -15,7 +15,8 @@ The design, writing, interface, icons, animations, and generated tones are origi
 - Full Party Headquarters with the complete roster, support shortcuts, saved-message counts, Ember's Lock-In Protocol, Amara's Heartweaver Protocol, permanent Weekly Campfires, and Monthly Councils
 - Weekly Campfire Recaps generated once per completed week from finalized mission data, with an in-character review from every companion and no hidden rewards or penalties
 - Monthly Councils generated after a completed month with nine fact-aware party messages, permanent history, and an optional next-month intention
-- Snow's optional Daily Command Briefing with low, steady, and high capacity planning; it prioritizes existing missions without adding XP, penalties, or requirements
+- Snow's optional Daily Command Briefing with Low, Steady, and High capacity planning, broad completion targets, and transparent 1×–2.5× scheduled-mission XP outcomes
+- Rook and Ember’s Training Hall with four home circuits, one saved weighted 15–30 minute assignment, persistent timer, load and round tracking, Gym / Conditioning / Recovery logs, and a full-party post-workout scene
 - User-authored Campaign Arcs with purpose, companion guidance, optional target dates, milestones, pause/resume, completion, and archive states
 - Eight extensive Companion Questlines: 40 authored chapters, 120 tracked or reflective objectives, no failure timers, fixed chapter rewards, and eight unique legendary completion titles
 - Treasury Command with paycheck and expense logging, bills, credit-card and other debt tracking, savings goals, amount masking, weekly plans and reviews, and Archive Shield protection
@@ -34,7 +35,15 @@ The design, writing, interface, icons, animations, and generated tones are origi
 
 There is no login, backend, external API, analytics, advertising, tracking, or paid service.
 
-## Version 3.0 · The Steward Update
+## Version 3.5 · The Training Hall Update
+
+Daily Workout now opens the Training Hall. Rook chooses one of **Iron Foundation**, **Vanguard Frame**, **Shadow Engine**, or **Guardian Citadel**; Ember naturally declares a weighted 15, 20, 25, or 30-minute clock. The saved assignment cannot be changed by refreshing, one pre-start reassignment is available, and an optional five-minute Boss Extension records overtime without creating extra XP.
+
+Home circuits support the user’s adjustable dumbbells, bodyweight work, planks, and Burn Machine. Gym, Conditioning, and Recovery are equal alternate paths for days trained elsewhere. Finishing any one path clears the Daily Workout once and opens an exhausted, in-character recovery scene with all eight companions.
+
+Daily Movement has been safely retired as a duplicate. Daily Workout now carries the combined 75 account XP and Strength, Endurance, Discipline, and Vitality rewards that both former physical missions awarded together. Existing history is preserved, old briefing references migrate forward, and Training Hall state is included in Archive Shield format 10.
+
+Rank gates and the development pacing simulator were also rebalanced for the expanded XP ecosystem. The simulator includes the duration and rewards of every mandatory Rank Trial instead of estimating from qualification gates alone. World Class now requires 480 Completed Days before its final 90-day trial, placing the earliest first-attempt path at roughly nineteen months and a sustainable path around twenty to twenty-four months.
 
 - **Snow, The Constant** is the primary whole-journey companion. She greets each new System day and supports major milestones, difficult seasons, and victories. She has long black hair, a pearl-white and navy support jacket, and an ice-blue System halo.
 - **Rook, The Vanguard** supports Strength, Endurance, and Vitality. He is bold, competitive, and protective, with graphite-and-gold armor and amber energy.
@@ -57,7 +66,7 @@ After a calendar month with at least one finalized Daily Review, a Monthly Counc
 
 ### Campaign Command
 
-Snow's Daily Command Briefing asks only how much capacity is available—low, steady, or high—then recommends a Main Quest, Support Quest, and optional Bonus Quest from the existing daily list. It can be edited, skipped, or disabled and creates no new reward or failure condition.
+Snow's Daily Command Briefing asks how much capacity is available—Low, Steady, or High—then recommends a Main Quest, Support Quest, and optional Bonus Quest from the existing daily list. Low preserves ordinary 1× mission XP. Steady requires its priorities and at least 65% of scheduled missions for 1.5×, rising to 1.75× on a Full Clear. High requires all three priorities and at least 80% for 2×, rising to 2.5× on a Full Clear. Missing the target removes nothing.
 
 Campaign Arcs are written by the user and carry no automatic XP. They support long-term purpose, category, companion guide, optional target date, unlimited milestones, pause/resume, completion, and archive states.
 
@@ -141,13 +150,13 @@ After one successful online load, the app shell works offline. Campaign data sta
 
 If the workflow is unavailable, enable Actions under **Settings → Actions → General**. If the site is blank, confirm Pages uses GitHub Actions, confirm the workflow uploaded `dist/`, and hard-refresh once after deployment.
 
-When updating an existing installation, commit and push the changed project through GitHub Desktop, wait for the Pages workflow to succeed, then open the app online once. Open **Update Center** and choose **Check for update** if the prompt does not appear automatically. The service worker installs the release without deleting or re-adding the home-screen app. Earlier saves are migrated automatically to the version 9 database, but exporting through Archive Shield before any major update is still recommended.
+When updating an existing installation, commit and push the changed project through GitHub Desktop, wait for the Pages workflow to succeed, then open the app online once. Open **Update Center** and choose **Check for update** if the prompt does not appear automatically. The service worker installs the release without deleting or re-adding the home-screen app. Earlier saves are migrated automatically to the version 10 database, but exporting through Archive Shield before any major update is still recommended.
 
 ## Save, restore, and reset
 
 Open **Update Center → Archive Shield** or **Settings → Archive Shield · Local Data**:
 
-- **Export full save** downloads a dated JSON file containing the entire campaign, including Treasury records, briefings, Campaign Arcs, quest progress, Councils, party history, settings, unlocks, cosmetics, reports, and app metadata.
+- **Export full save** downloads a dated JSON file containing the entire campaign, including Training Hall assignments and history, Treasury records, briefings, Campaign Arcs, quest progress, Councils, party history, settings, unlocks, cosmetics, reports, and app metadata.
 - **Import save** inspects the file first and shows candidate name, level, rank, and export date. It validates size, schema, required records, duplicate IDs, impossible values, unsafe object keys, supported version, and checksum before confirmation.
 - A local snapshot is made before each daily finalization, import, and reset. The newest five remain available in Settings. The newest valid snapshot is also offered from onboarding after reset.
 - **Reset app data** is isolated from ordinary controls, offers an export, requires typing `RESET`, and makes one final snapshot.
@@ -186,11 +195,11 @@ Ranks are separate from levels. Qualification checks account level, completions,
 src/
   assets/       Bundled local font and its license
   components/   Shared interface, companion, briefing, Campfire, Council, banter, favorite, event, recovery, mission, and chart components
-  config/       Missions, companions, questlines, releases, support, banter, milestones, rare events, achievements, challenges, titles, and balance
+  config/       Missions, Training Hall circuits, companions, questlines, releases, support, banter, milestones, rare events, achievements, challenges, titles, and balance
   db/           Dexie schema, repositories, seed data, migrations, snapshots, and save import
   dev/          Development-only deterministic pacing simulator
-  game/         XP, stats, companions, Campaigns, questlines, briefings, Councils, Campfires, Party Chat, support, favorites, banter, rare events, rank, report, and atomic transaction engines
-  pages/        Onboarding, System, Missions, Status, Challenges, Campaigns, Headquarters, Party Channel, Update Center, About, Archive, and Settings
+  game/         XP, stats, Training Hall, companions, Campaigns, questlines, briefings, Councils, Campfires, Party Chat, support, favorites, banter, rare events, rank, report, and atomic transaction engines
+  pages/        Onboarding, System, Missions, Training Hall, Status, Challenges, Campaigns, Headquarters, Party Channel, Update Center, About, Archive, and Settings
   services/     PWA update coordination
   store/        Zustand application state
   tests/        Date, XP, rank, content, pacing, and transaction behavior

@@ -6,6 +6,1153 @@
   font-display: swap;
 }
 
+/* Version 3.5 · Training Hall */
+.training-hall-page {
+  --training-gold: #f2bd57;
+  --training-blue: #71b6ff;
+  --training-ember: #ff6845;
+  --training-mint: #43e6c2;
+}
+
+.training-page-heading .page-heading__glyph {
+  color: var(--training-ember);
+  background: rgba(255, 104, 69, 0.08);
+  border-color: rgba(255, 104, 69, 0.22);
+}
+
+.training-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 220px;
+  color: var(--muted);
+}
+
+.training-loading svg {
+  color: var(--training-ember);
+  animation: trainingPulse 1.4s ease-in-out infinite;
+}
+
+.training-commanders {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(260px, 0.7fr) minmax(320px, 1.3fr);
+  align-items: center;
+  min-height: 238px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 13% 45%, rgba(242, 189, 87, 0.14), transparent 35%),
+    radial-gradient(circle at 35% 55%, rgba(255, 104, 69, 0.12), transparent 38%),
+    linear-gradient(115deg, rgba(12, 17, 22, 0.96), rgba(21, 14, 16, 0.92));
+  border-color: rgba(255, 104, 69, 0.2);
+}
+
+.training-commanders::after {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  content: '';
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0,
+    transparent 62px,
+    rgba(255, 255, 255, 0.014) 63px
+  );
+}
+
+.training-commanders__portraits {
+  position: relative;
+  z-index: 1;
+  height: 205px;
+}
+
+.training-commanders__portraits img {
+  position: absolute;
+  bottom: -12px;
+  width: 142px;
+  height: 190px;
+  object-fit: cover;
+  object-position: center top;
+  background: #080b0f;
+  border: 1px solid color-mix(in srgb, var(--companion-accent) 55%, transparent);
+  border-radius: 18px 42px 13px 30px;
+  box-shadow:
+    0 18px 34px rgba(0, 0, 0, 0.42),
+    0 0 24px color-mix(in srgb, var(--companion-accent) 20%, transparent);
+}
+
+.training-commanders__portraits img:first-child {
+  left: 14px;
+  z-index: 2;
+  transform: rotate(-3deg);
+}
+
+.training-commanders__portraits img:last-child {
+  right: 5px;
+  transform: rotate(4deg);
+}
+
+.training-commanders > div:last-child {
+  position: relative;
+  z-index: 1;
+  padding: 24px;
+}
+
+.training-commanders h2 {
+  margin: 6px 0 10px;
+  font-size: clamp(1.45rem, 4vw, 2.3rem);
+  line-height: 1.08;
+}
+
+.training-commanders p:last-child {
+  max-width: 610px;
+  line-height: 1.6;
+}
+
+.training-error {
+  margin: 12px 0;
+  padding: 12px 14px;
+  color: #ffd0c6;
+  font-size: 0.74rem;
+  line-height: 1.5;
+  background: rgba(231, 104, 104, 0.1);
+  border: 1px solid rgba(231, 104, 104, 0.28);
+  border-radius: 10px;
+}
+
+.training-location-gate,
+.training-briefing,
+.training-circuit,
+.training-log,
+.training-history,
+.training-party-debrief {
+  margin-top: 14px;
+}
+
+.training-location-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.training-location-grid > button {
+  display: grid;
+  grid-template-columns: 45px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 96px;
+  padding: 14px;
+  color: var(--white);
+  text-align: left;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease;
+}
+
+.training-location-grid > button:hover,
+.training-location-grid > button:focus-visible {
+  background: rgba(255, 104, 69, 0.055);
+  border-color: rgba(255, 104, 69, 0.32);
+  outline: none;
+  transform: translateY(-2px);
+}
+
+.training-location-grid > button > span {
+  display: grid;
+  width: 45px;
+  height: 45px;
+  place-items: center;
+  color: var(--training-ember);
+  background: rgba(255, 104, 69, 0.08);
+  border: 1px solid rgba(255, 104, 69, 0.2);
+  border-radius: 11px;
+}
+
+.training-location-grid strong,
+.training-location-grid small {
+  display: block;
+}
+
+.training-location-grid strong {
+  font-family: 'SystemDisplay', sans-serif;
+  letter-spacing: 0.02em;
+}
+
+.training-location-grid small {
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 0.65rem;
+  line-height: 1.42;
+}
+
+.training-location-grid > button > svg {
+  color: var(--muted-2);
+}
+
+.training-safety-note,
+.training-footer-note {
+  margin: 14px 0 0;
+  color: var(--muted-2);
+  font-size: 0.62rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.training-briefing {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 180px;
+  gap: 18px;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      circle at 92% 20%,
+      color-mix(in srgb, var(--training-accent) 15%, transparent),
+      transparent 36%
+    ),
+    var(--panel);
+  border-color: color-mix(in srgb, var(--training-accent) 30%, var(--border-soft));
+}
+
+.training-briefing.is-gold,
+.training-circuit.is-gold {
+  --training-accent: var(--training-gold);
+}
+
+.training-briefing.is-blue,
+.training-circuit.is-blue {
+  --training-accent: var(--training-blue);
+}
+
+.training-briefing.is-ember,
+.training-circuit.is-ember {
+  --training-accent: var(--training-ember);
+}
+
+.training-briefing.is-mint,
+.training-circuit.is-mint {
+  --training-accent: var(--training-mint);
+}
+
+.training-dialogue {
+  display: grid;
+  gap: 9px;
+}
+
+.training-dialogue article {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr);
+  align-items: center;
+  gap: 11px;
+  padding: 10px 12px;
+  background: rgba(4, 8, 11, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.065);
+  border-radius: 10px;
+}
+
+.training-dialogue article.is-ember {
+  margin-left: 34px;
+  border-color: rgba(255, 104, 69, 0.22);
+}
+
+.training-dialogue article.is-reply {
+  margin-right: 34px;
+  opacity: 0.82;
+}
+
+.training-dialogue img {
+  width: 54px;
+  height: 60px;
+  object-fit: cover;
+  object-position: center top;
+  border-radius: 8px 16px 8px 13px;
+}
+
+.training-dialogue span {
+  color: var(--training-accent);
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.training-dialogue .is-ember span {
+  color: var(--training-ember);
+}
+
+.training-dialogue p {
+  margin-top: 4px;
+  color: var(--soft-white);
+  font-size: 0.74rem;
+  line-height: 1.48;
+}
+
+.training-assignment-seal {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  min-height: 180px;
+  color: var(--training-accent);
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--training-accent) 11%, transparent),
+    transparent 61%
+  );
+  border-left: 1px solid color-mix(in srgb, var(--training-accent) 20%, transparent);
+}
+
+.training-assignment-seal span,
+.training-assignment-seal small {
+  font-family: Rajdhani, sans-serif;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.training-assignment-seal strong {
+  margin: 5px 0 -3px;
+  font-family: 'SystemDisplay', sans-serif;
+  font-size: 4.6rem;
+  line-height: 1;
+  text-shadow: 0 0 25px color-mix(in srgb, var(--training-accent) 34%, transparent);
+}
+
+.training-circuit {
+  border-color: color-mix(in srgb, var(--training-accent) 25%, var(--border-soft));
+}
+
+.training-circuit .section-header svg,
+.training-circuit .eyebrow {
+  color: var(--training-accent);
+}
+
+.training-circuit .section-header p:last-child {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.68rem;
+}
+
+.training-circuit__summary {
+  margin: 8px 0 14px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.55;
+}
+
+.training-personal-best {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: fit-content;
+  margin-bottom: 11px;
+  padding: 7px 10px;
+  color: var(--training-gold);
+  font-size: 0.63rem;
+  background: rgba(242, 189, 87, 0.06);
+  border: 1px solid rgba(242, 189, 87, 0.18);
+  border-radius: 8px;
+}
+
+.training-exercise-list {
+  display: grid;
+  gap: 8px;
+}
+
+.training-exercise-list article {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) 70px;
+  align-items: center;
+  gap: 11px;
+  padding: 11px 12px;
+  background: rgba(255, 255, 255, 0.018);
+  border: 1px solid var(--border-soft);
+  border-radius: 9px;
+}
+
+.training-exercise-list article > span {
+  color: var(--training-accent);
+  font-family: 'SystemDisplay', sans-serif;
+  font-size: 0.75rem;
+}
+
+.training-exercise-list strong,
+.training-exercise-list b,
+.training-exercise-list small {
+  display: block;
+}
+
+.training-exercise-list strong {
+  font-size: 0.78rem;
+}
+
+.training-exercise-list b {
+  margin-top: 2px;
+  color: var(--training-accent);
+  font-family: Rajdhani, sans-serif;
+  font-size: 0.68rem;
+}
+
+.training-exercise-list small {
+  margin-top: 4px;
+  color: var(--muted-2);
+  font-size: 0.59rem;
+  line-height: 1.4;
+}
+
+.training-exercise-list label {
+  display: grid;
+  justify-items: stretch;
+  gap: 3px;
+}
+
+.training-exercise-list label span {
+  color: var(--muted-2);
+  font-size: 0.48rem;
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+
+.training-exercise-list input {
+  width: 100%;
+  min-height: 38px;
+  padding: 7px;
+  color: var(--white);
+  text-align: center;
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+}
+
+.training-assignment-actions,
+.training-log-actions,
+.training-timer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.training-assignment-actions .text-button {
+  margin-left: auto;
+}
+
+.mission-action--training {
+  color: var(--training-ember, #ff6845);
+  background: rgba(255, 104, 69, 0.08);
+  border-color: rgba(255, 104, 69, 0.26);
+}
+
+.training-mission-gate {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 45px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 13px;
+  padding: 13px;
+  background: rgba(255, 104, 69, 0.055);
+  border: 1px solid rgba(255, 104, 69, 0.18);
+  border-radius: 10px;
+}
+
+.training-mission-gate > svg {
+  color: var(--training-ember, #ff6845);
+}
+
+.training-mission-gate p {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.67rem;
+  line-height: 1.45;
+}
+
+.training-active-console {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-soft);
+}
+
+.training-clock {
+  display: grid;
+  justify-items: center;
+  padding: 20px;
+  color: var(--training-accent);
+  background:
+    radial-gradient(
+      circle,
+      color-mix(in srgb, var(--training-accent) 10%, transparent),
+      transparent 66%
+    ),
+    rgba(0, 0, 0, 0.16);
+  border: 1px solid color-mix(in srgb, var(--training-accent) 22%, transparent);
+  border-radius: 13px;
+}
+
+.training-clock strong {
+  margin: 3px 0 -3px;
+  font-family: 'SystemDisplay', monospace;
+  font-size: clamp(3.2rem, 12vw, 6.2rem);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  text-shadow: 0 0 30px color-mix(in srgb, var(--training-accent) 30%, transparent);
+}
+
+.training-clock span {
+  font-size: 0.59rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+}
+
+.training-clock.is-complete {
+  color: var(--training-mint);
+}
+
+.training-counter-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  margin-top: 10px;
+}
+
+.training-counter-grid > div {
+  display: grid;
+  gap: 7px;
+  padding: 11px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-soft);
+  border-radius: 10px;
+}
+
+.training-counter-grid > div > span {
+  color: var(--muted-2);
+  font-size: 0.55rem;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.training-counter-grid > div > div {
+  display: grid;
+  grid-template-columns: 42px minmax(42px, 1fr) 42px;
+  align-items: center;
+  justify-items: center;
+}
+
+.training-counter-grid button {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  color: var(--training-accent);
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+}
+
+.training-counter-grid strong {
+  font-family: 'SystemDisplay', sans-serif;
+  font-size: 1.8rem;
+}
+
+.training-clear-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  margin-top: 12px;
+}
+
+.training-clear-form .field,
+.training-clear-form > small {
+  grid-column: 1 / -1;
+}
+
+.training-clear-form > small {
+  color: var(--muted-2);
+  font-size: 0.58rem;
+  text-align: center;
+}
+
+.training-log {
+  border-color: rgba(255, 104, 69, 0.2);
+}
+
+.training-log .section-header svg,
+.training-log .eyebrow {
+  color: var(--training-ember);
+}
+
+.training-manual-dialogue {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 9px;
+  margin: 14px 0;
+  padding: 11px;
+  background: rgba(242, 189, 87, 0.045);
+  border: 1px solid rgba(242, 189, 87, 0.16);
+  border-radius: 10px;
+}
+
+.training-manual-dialogue article {
+  margin: 0;
+}
+
+.training-manual-dialogue p {
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+.training-log-form {
+  margin-top: 12px;
+}
+
+.training-complete-legacy {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+  min-height: 150px;
+  color: var(--training-mint);
+}
+
+.training-complete-legacy p:last-child {
+  margin-top: 7px;
+  color: var(--muted);
+}
+
+.training-result-hero {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  min-height: 315px;
+  padding: 42px 20px 30px;
+  overflow: hidden;
+  color: var(--training-result-accent, var(--training-mint));
+  text-align: center;
+  background:
+    radial-gradient(
+      circle at 50% 40%,
+      color-mix(in srgb, var(--training-result-accent) 13%, transparent),
+      transparent 36%
+    ),
+    linear-gradient(150deg, rgba(8, 13, 17, 0.98), rgba(5, 8, 11, 0.97));
+  border: 1px solid color-mix(in srgb, var(--training-result-accent) 28%, var(--border-soft));
+  border-radius: 16px;
+}
+
+.training-result-hero.is-gold {
+  --training-result-accent: var(--training-gold);
+}
+.training-result-hero.is-blue {
+  --training-result-accent: var(--training-blue);
+}
+.training-result-hero.is-ember {
+  --training-result-accent: var(--training-ember);
+}
+.training-result-hero.is-mint,
+.training-result-hero.is-recovery {
+  --training-result-accent: var(--training-mint);
+}
+.training-result-hero.is-gym {
+  --training-result-accent: var(--training-blue);
+}
+.training-result-hero.is-conditioning {
+  --training-result-accent: var(--training-ember);
+}
+
+.training-result-hero__rays {
+  position: absolute;
+  inset: -80%;
+  pointer-events: none;
+  opacity: 0.32;
+  background: repeating-conic-gradient(
+    from 0deg,
+    transparent 0deg 10deg,
+    color-mix(in srgb, var(--training-result-accent) 13%, transparent) 10deg 12deg,
+    transparent 12deg 26deg
+  );
+  animation: trainingRays 30s linear infinite;
+}
+
+.training-result-hero > *:not(.training-result-hero__rays) {
+  position: relative;
+  z-index: 1;
+}
+
+.training-result-hero h1 {
+  margin: 7px 0 13px;
+  color: var(--white);
+  font-size: clamp(2rem, 8vw, 4.2rem);
+}
+
+.training-result-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.training-result-metrics span {
+  min-width: 112px;
+  padding: 9px 12px;
+  color: var(--muted);
+  font-size: 0.62rem;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid color-mix(in srgb, var(--training-result-accent) 18%, transparent);
+  border-radius: 9px;
+}
+
+.training-result-metrics strong {
+  display: block;
+  color: var(--training-result-accent);
+  font-family: 'SystemDisplay', sans-serif;
+  font-size: 1.25rem;
+}
+
+.training-result-hero .button {
+  margin-top: 16px;
+}
+
+.training-party-debrief {
+  background:
+    radial-gradient(circle at 50% 0, rgba(255, 104, 69, 0.08), transparent 32%), var(--panel);
+}
+
+.training-party-debrief .section-header svg,
+.training-party-debrief .eyebrow {
+  color: var(--training-ember);
+}
+
+.training-party-debrief__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  margin-top: 15px;
+}
+
+.training-debrief-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr) 34px;
+  align-items: start;
+  gap: 11px;
+  min-height: 144px;
+  padding: 11px;
+  overflow: hidden;
+  background:
+    linear-gradient(
+      120deg,
+      color-mix(in srgb, var(--companion-accent) 7%, transparent),
+      transparent 48%
+    ),
+    rgba(255, 255, 255, 0.018);
+  border: 1px solid color-mix(in srgb, var(--companion-accent) 22%, var(--border-soft));
+  border-radius: 11px;
+}
+
+.training-debrief-card--snow {
+  grid-column: 1 / -1;
+}
+
+.training-debrief-card__portrait {
+  position: relative;
+  width: 72px;
+  height: 108px;
+}
+
+.training-debrief-card__portrait img {
+  width: 72px;
+  height: 108px;
+  object-fit: cover;
+  object-position: center top;
+  filter: saturate(0.9) contrast(0.98);
+  border: 1px solid color-mix(in srgb, var(--companion-accent) 42%, transparent);
+  border-radius: 9px 20px 9px 15px;
+  animation: trainingBreath 2.8s ease-in-out infinite;
+}
+
+.training-debrief-card__portrait::before,
+.training-debrief-card__portrait::after,
+.training-debrief-card__portrait > span {
+  position: absolute;
+  z-index: 2;
+  width: 5px;
+  height: 10px;
+  content: '';
+  background: rgba(131, 220, 255, 0.86);
+  border-radius: 50% 50% 55% 55%;
+  box-shadow: 0 0 8px rgba(131, 220, 255, 0.45);
+  transform: rotate(18deg);
+}
+
+.training-debrief-card__portrait::before {
+  top: 12px;
+  right: 7px;
+}
+
+.training-debrief-card__portrait::after {
+  top: 22px;
+  right: 2px;
+  width: 3px;
+  height: 7px;
+  opacity: 0.7;
+}
+
+.training-debrief-card__portrait > span {
+  top: 8px;
+  left: 7px;
+  width: 3px;
+  height: 6px;
+  opacity: 0.58;
+}
+
+.training-debrief-card__state {
+  display: block;
+  color: var(--companion-accent);
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+.training-debrief-card strong {
+  display: block;
+  margin: 4px 0 6px;
+  font-family: 'SystemDisplay', sans-serif;
+  font-size: 0.98rem;
+}
+
+.training-debrief-card p {
+  color: var(--muted);
+  font-size: 0.68rem;
+  line-height: 1.5;
+}
+
+.training-debrief-card > .favorite-message-button {
+  align-self: start;
+}
+
+.training-history__list {
+  display: grid;
+  gap: 7px;
+  margin-top: 14px;
+}
+
+.training-history__list article {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  background: rgba(255, 255, 255, 0.018);
+  border: 1px solid var(--border-soft);
+  border-radius: 9px;
+}
+
+.training-history__mark {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  color: var(--training-ember);
+  background: rgba(255, 104, 69, 0.07);
+  border: 1px solid rgba(255, 104, 69, 0.16);
+  border-radius: 8px;
+}
+
+.training-history__list strong,
+.training-history__list small {
+  display: block;
+}
+
+.training-history__list strong {
+  font-size: 0.72rem;
+}
+
+.training-history__list small,
+.training-history__list article > span:last-child {
+  color: var(--muted-2);
+  font-size: 0.58rem;
+}
+
+.training-empty-copy {
+  padding: 18px;
+  color: var(--muted-2);
+  font-size: 0.66rem;
+  text-align: center;
+}
+
+.training-dashboard-card {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 13px;
+  margin-top: 14px;
+  color: var(--white);
+  background:
+    radial-gradient(circle at 8% 50%, rgba(255, 104, 69, 0.12), transparent 24%),
+    linear-gradient(110deg, rgba(18, 17, 21, 0.96), rgba(13, 19, 23, 0.94));
+  border-color: rgba(255, 104, 69, 0.2);
+}
+
+.training-dashboard-card > span {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  color: var(--training-ember, #ff6845);
+  background: rgba(255, 104, 69, 0.08);
+  border: 1px solid rgba(255, 104, 69, 0.2);
+  border-radius: 11px;
+}
+
+.training-dashboard-card strong,
+.training-dashboard-card small {
+  display: block;
+}
+
+.training-dashboard-card small {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.64rem;
+  line-height: 1.4;
+}
+
+.training-dashboard-card.is-completed {
+  border-color: rgba(67, 230, 194, 0.24);
+}
+
+.button--danger {
+  color: #ffb8aa;
+  background: rgba(231, 104, 104, 0.07);
+  border-color: rgba(231, 104, 104, 0.22);
+}
+
+html[data-theme='daybreak'] .training-commanders,
+html[data-theme='daybreak'] .training-briefing,
+html[data-theme='daybreak'] .training-result-hero,
+html[data-theme='daybreak'] .training-party-debrief,
+html[data-theme='daybreak'] .training-dashboard-card {
+  background-color: var(--panel);
+}
+
+html[data-theme='daybreak'] .training-location-grid > button,
+html[data-theme='daybreak'] .training-exercise-list article,
+html[data-theme='daybreak'] .training-debrief-card,
+html[data-theme='daybreak'] .training-history__list article,
+html[data-theme='daybreak'] .training-counter-grid > div {
+  background-color: rgba(255, 255, 255, 0.62);
+}
+
+@keyframes trainingBreath {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(2px) scale(0.992);
+  }
+}
+
+@keyframes trainingRays {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes trainingPulse {
+  50% {
+    opacity: 0.45;
+    transform: scale(0.94);
+  }
+}
+
+@media (max-width: 760px) {
+  .training-commanders {
+    grid-template-columns: 240px minmax(0, 1fr);
+  }
+
+  .training-commanders__portraits img {
+    width: 125px;
+  }
+
+  .training-location-grid,
+  .training-party-debrief__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .training-debrief-card--snow {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 600px) {
+  .training-commanders {
+    grid-template-columns: 1fr;
+    padding: 0 14px 18px;
+  }
+
+  .training-commanders__portraits {
+    width: 270px;
+    height: 190px;
+    margin-inline: auto;
+  }
+
+  .training-commanders__portraits img {
+    width: 137px;
+    height: 180px;
+  }
+
+  .training-commanders > div:last-child {
+    padding: 10px 8px 2px;
+    text-align: center;
+  }
+
+  .training-briefing {
+    grid-template-columns: 1fr;
+  }
+
+  .training-assignment-seal {
+    min-height: 130px;
+    border-top: 1px solid color-mix(in srgb, var(--training-accent) 20%, transparent);
+    border-left: 0;
+  }
+
+  .training-assignment-seal strong {
+    font-size: 3.8rem;
+  }
+
+  .training-dialogue article.is-ember {
+    margin-left: 15px;
+  }
+
+  .training-dialogue article.is-reply {
+    margin-right: 15px;
+  }
+
+  .training-exercise-list article {
+    grid-template-columns: 29px minmax(0, 1fr) 62px;
+    gap: 8px;
+    padding: 10px 8px;
+  }
+
+  .training-exercise-list small {
+    font-size: 0.56rem;
+  }
+
+  .training-assignment-actions,
+  .training-log-actions,
+  .training-timer-actions,
+  .training-clear-form {
+    grid-template-columns: 1fr;
+  }
+
+  .training-assignment-actions .button,
+  .training-log-actions .button,
+  .training-timer-actions .button,
+  .training-clear-form .button {
+    width: 100%;
+  }
+
+  .training-assignment-actions .text-button {
+    margin: 4px auto 0;
+  }
+
+  .training-mission-gate {
+    grid-template-columns: 38px minmax(0, 1fr);
+  }
+
+  .training-mission-gate .button {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .training-counter-grid {
+    gap: 6px;
+  }
+
+  .training-counter-grid > div {
+    padding: 9px 5px;
+  }
+
+  .training-counter-grid > div > div {
+    grid-template-columns: 36px minmax(36px, 1fr) 36px;
+  }
+
+  .training-counter-grid button {
+    width: 34px;
+    height: 34px;
+  }
+
+  .training-debrief-card {
+    grid-template-columns: 64px minmax(0, 1fr) 32px;
+  }
+
+  .training-debrief-card__portrait,
+  .training-debrief-card__portrait img {
+    width: 64px;
+    height: 100px;
+  }
+
+  .training-dashboard-card {
+    grid-template-columns: 42px minmax(0, 1fr) auto;
+    padding: 13px;
+  }
+
+  .training-dashboard-card > span {
+    width: 42px;
+    height: 42px;
+  }
+}
+
+@media (max-width: 390px) {
+  .training-location-grid > button {
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    padding: 11px;
+  }
+
+  .training-location-grid > button > span {
+    width: 40px;
+    height: 40px;
+  }
+
+  .training-dialogue article {
+    grid-template-columns: 46px minmax(0, 1fr);
+    padding: 8px;
+  }
+
+  .training-dialogue img {
+    width: 46px;
+    height: 54px;
+  }
+
+  .training-counter-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .training-exercise-list article {
+    grid-template-columns: 25px minmax(0, 1fr) 54px;
+  }
+
+  .training-exercise-list input {
+    padding-inline: 3px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .training-debrief-card__portrait img,
+  .training-result-hero__rays,
+  .training-loading svg {
+    animation: none !important;
+  }
+}
+
 /* Party Expansion: direct support, favorites, banter, milestones, and orientation */
 .app-header__actions,
 .header-help {
@@ -9480,4 +10627,49 @@ html[data-theme='daybreak'] .arc-milestones > button {
   .briefing-plan__capacity > span {
     width: 100%;
   }
+}
+
+/* Keep Training Hall art direction above the shared component cascade. */
+.panel.training-commanders {
+  background:
+    radial-gradient(circle at 13% 45%, rgba(242, 189, 87, 0.14), transparent 35%),
+    radial-gradient(circle at 35% 55%, rgba(255, 104, 69, 0.12), transparent 38%),
+    linear-gradient(115deg, rgba(12, 17, 22, 0.96), rgba(21, 14, 16, 0.92));
+  border-color: rgba(255, 104, 69, 0.2);
+}
+
+.panel.training-briefing {
+  background:
+    radial-gradient(
+      circle at 92% 20%,
+      color-mix(in srgb, var(--training-accent) 15%, transparent),
+      transparent 36%
+    ),
+    var(--panel);
+  border-color: color-mix(in srgb, var(--training-accent) 30%, var(--border-soft));
+}
+
+.panel.training-party-debrief {
+  background:
+    radial-gradient(circle at 50% 0, rgba(255, 104, 69, 0.08), transparent 32%), var(--panel);
+}
+
+.panel.training-dashboard-card {
+  background:
+    radial-gradient(circle at 8% 50%, rgba(255, 104, 69, 0.12), transparent 24%),
+    linear-gradient(110deg, rgba(18, 17, 21, 0.96), rgba(13, 19, 23, 0.94));
+  border-color: rgba(255, 104, 69, 0.2);
+}
+
+.mission-action.mission-action--training {
+  color: #ff6845;
+  background: rgba(255, 104, 69, 0.08);
+  border-color: rgba(255, 104, 69, 0.26);
+}
+
+html[data-theme='daybreak'] .panel.training-commanders,
+html[data-theme='daybreak'] .panel.training-briefing,
+html[data-theme='daybreak'] .panel.training-party-debrief,
+html[data-theme='daybreak'] .panel.training-dashboard-card {
+  background-color: var(--panel);
 }

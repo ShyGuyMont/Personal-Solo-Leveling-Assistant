@@ -4,6 +4,7 @@ import {
   ChevronUp,
   CircleAlert,
   Clock3,
+  Dumbbell,
   RotateCcw,
   ShieldCheck,
   Sparkles,
@@ -11,6 +12,7 @@ import {
   X,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { Link } from '@/router';
 import { CATEGORY_LABELS } from '@/config/missions';
 import { playSystemTone, vibrate } from '@/utils/feedback';
 import { STAT_LABELS } from '@/utils/format';
@@ -60,6 +62,8 @@ export function MissionCard({
   const requiresConfirmation = ['numeric', 'duration', 'checklist', 'choice'].includes(
     mission.method,
   );
+  const trainingHallMission =
+    mission.id === 'workout' && date === useGameStore.getState().systemDate;
   const checklistComplete =
     mission.method !== 'checklist' ||
     (mission.checklistItems?.length
@@ -129,6 +133,14 @@ export function MissionCard({
               <RotateCcw size={18} />
               <span className="sr-only">Undo {displayName}</span>
             </button>
+          ) : trainingHallMission ? (
+            <Link
+              to="/training-hall"
+              className="mission-action mission-action--training"
+              aria-label="Enter the Training Hall"
+            >
+              <Dumbbell size={19} />
+            </Link>
           ) : unavailableToday || requiresConfirmation ? (
             <button
               className="mission-action mission-action--deferred"
@@ -170,7 +182,21 @@ export function MissionCard({
               <X size={19} />
             </button>
           </header>
-          {mission.method === 'day-boundary' ? (
+          {trainingHallMission ? (
+            <div className="training-mission-gate">
+              <Dumbbell size={25} />
+              <div>
+                <strong>Rook and Ember are waiting in the Training Hall.</strong>
+                <p>
+                  Choose a home circuit, record a gym deployment, complete conditioning, or log a
+                  recovery protocol. The Hall awards this mission once when the work is finished.
+                </p>
+              </div>
+              <Link to="/training-hall" className="button button--primary">
+                Enter Training Hall
+              </Link>
+            </div>
+          ) : mission.method === 'day-boundary' ? (
             <div className="evening-check">
               <div className="info-callout">
                 <Clock3 size={17} />

@@ -6,6 +6,7 @@ import {
   CloudOff,
   CloudDownload,
   Diamond,
+  Dumbbell,
   HeartHandshake,
   HelpCircle,
   ListChecks,
@@ -16,11 +17,38 @@ import {
   Users,
   WalletCards,
 } from 'lucide-react';
-import { RANK_REQUIREMENTS } from '@/config/balance';
+import { BALANCE, RANK_REQUIREMENTS } from '@/config/balance';
+import { RANK_TRIALS } from '@/config/challenges';
 import { getCompanion, getCompanionImage } from '@/config/companions';
+import { DEFAULT_MISSIONS } from '@/config/missions';
 import { TITLE_LIBRARY } from '@/config/titles';
+import { accountXpForLevel, totalXpAtLevel } from '@/game/xp';
 import { Link } from '@/router';
 import { useGameStore } from '@/store/useGameStore';
+
+const DEFAULT_DAILY_MISSION_XP = DEFAULT_MISSIONS.reduce(
+  (sum, mission) => sum + (mission.customAccountXp ?? mission.accountXp),
+  0,
+);
+const DEFAULT_PERFECT_DAY_XP = DEFAULT_DAILY_MISSION_XP + BALANCE.account.perfectDayBonus;
+const DEFAULT_STEADY_FULL_CLEAR_XP =
+  DEFAULT_DAILY_MISSION_XP +
+  Math.round(DEFAULT_DAILY_MISSION_XP * 0.75) +
+  BALANCE.account.perfectDayBonus;
+const DEFAULT_HIGH_FULL_CLEAR_XP =
+  DEFAULT_DAILY_MISSION_XP +
+  Math.round(DEFAULT_DAILY_MISSION_XP * 1.5) +
+  BALANCE.account.perfectDayBonus;
+const WORLD_CLASS_REQUIREMENT = RANK_REQUIREMENTS.find(
+  (requirement) => requirement.rank === 'WORLD CLASS',
+)!;
+const WORLD_CLASS_TRIAL = RANK_TRIALS.find(
+  (trial) => trial.id === WORLD_CLASS_REQUIREMENT.trialTemplateId,
+)!;
+const WORLD_CLASS_LEVEL = WORLD_CLASS_REQUIREMENT.minimumLevel;
+const WORLD_CLASS_ACCOUNT_XP = totalXpAtLevel(WORLD_CLASS_LEVEL, accountXpForLevel);
+const EARLIEST_WORLD_CLASS_DAYS =
+  WORLD_CLASS_REQUIREMENT.completedDays + WORLD_CLASS_TRIAL.durationDays;
 
 const DESTINATIONS = [
   {
@@ -34,6 +62,12 @@ const DESTINATIONS = [
     icon: ListChecks,
     title: 'Missions',
     text: 'Complete, review, or configure the actions that build your stats.',
+  },
+  {
+    to: '/training-hall',
+    icon: Dumbbell,
+    title: 'Training Hall',
+    text: 'Let Rook and Ember run today’s home circuit or record a gym, conditioning, or recovery deployment.',
   },
   {
     to: '/status',
@@ -271,7 +305,17 @@ export function AboutPage() {
           </div>
           <p>
             <strong>Highest classification:</strong> World Class. Numerical account and stat levels
-            can continue as high as Level 999. Once a rank is earned, missed days do not demote it.
+            can continue as high as Level 999. World Class requires{' '}
+            {WORLD_CLASS_REQUIREMENT.completedDays} Completed Days before its final{' '}
+            {WORLD_CLASS_TRIAL.durationDays}-day Rank Trial can begin, so the earliest first-attempt
+            path is about {EARLIEST_WORLD_CLASS_DAYS} calendar days—roughly nineteen months. At
+            sustainable 75–90% long-term mission consistency, the full ladder is designed for
+            approximately twenty to twenty-four months when trials are passed on schedule; retries
+            can extend it. Every rank still depends on all six visible requirements and its Rank
+            Trial. The Level {WORLD_CLASS_LEVEL} gate equals{' '}
+            {WORLD_CLASS_ACCOUNT_XP.toLocaleString()} lifetime account XP, but the simulator confirms
+            that Completed Days and trials—not an oversized hidden XP wall—set the final pace. Once
+            a rank is earned, missed days do not demote it.
           </p>
         </details>
         <details>
@@ -291,6 +335,64 @@ export function AboutPage() {
             Challenges create longer arcs across a week, month, or special trial. Rare events
             occasionally offer an optional Emergency Quest or a Mission Pass. Declining an optional
             event does not punish you.
+          </p>
+        </details>
+        <details>
+          <summary>How does the Training Hall work?</summary>
+          <p>
+            Daily Workout opens the Training Hall. Choose where you are training: Home, Gym,
+            Conditioning, or Recovery. These are four honest paths to the same Daily Workout
+            mission, so completing more than one cannot create repeat XP. The older Daily Movement
+            mission was folded into Daily Workout; its account and stat rewards were preserved in
+            the combined mission.
+          </p>
+          <p>
+            At Home, Rook privately locks one of four circuits and Ember sets one saved clock: 15
+            minutes has a 30% chance, 20 has 35%, 25 has 25%, and 30 has 10%. Refreshing or leaving
+            the app does not redraw either choice. You may request one reassignment before starting.
+            The optional five-minute Boss Extension records the extra work but awards no additional
+            XP. Gym, Conditioning, and Recovery let you record completed facts instead of running
+            the Hall timer.
+          </p>
+          <p>
+            There is no readiness quiz and no separate warm-up gate. Choose loads and exercise
+            variations you can control, stop for concerning symptoms, and let instructions from your
+            physical therapist override the Hall. After a completed deployment, the entire party
+            appears in an in-character recovery debrief.
+          </p>
+        </details>
+        <details>
+          <summary>Where does XP come from, and what can multiply it?</summary>
+          <p>
+            Daily missions award the account and stat XP printed on their cards. Daily Workout is
+            worth 75 account XP and can be cleared once through any Training Hall path. Perfect
+            Days, completed challenges, Rank Trials, Companion Quest chapters, Treasury reviews, and
+            accepted rare events award their own displayed one-time XP. Campaign Arc milestones,
+            emotional check-ins, support conversations, Campfires, Councils, and ordinary Training
+            Hall overtime are records or guidance only and do not create hidden XP.
+          </p>
+          <p>
+            <strong>Current default daily account XP:</strong> Prayer 20, Bible 25, Integrity 40,
+            Kindness 20, Daily Workout 75, and Creator Work 35—for{' '}
+            <strong>{DEFAULT_DAILY_MISSION_XP} base XP</strong>. In a Stable System state, clearing
+            all six produces <strong>{DEFAULT_PERFECT_DAY_XP} XP</strong> with the 50-XP Perfect Day
+            reward, <strong>{DEFAULT_STEADY_FULL_CLEAR_XP} XP</strong> with a Steady Full Clear, or{' '}
+            <strong>{DEFAULT_HIGH_FULL_CLEAR_XP} XP</strong> with a High Full Clear. Optional or
+            customized missions change the total, and their cards remain the authoritative values.
+          </p>
+          <p>
+            Snow’s Daily Command is the only broad daily multiplier. It multiplies account and stat
+            XP from that day’s scheduled missions after the next Daily Review: Low stays at 1×;
+            Steady earns 1.5× at its target or 1.75× for every scheduled mission; High earns 2× at
+            its target or 2.5× for every scheduled mission. Special rewards are never multiplied,
+            and every reward uses a stable transaction key so repeated taps, refreshes, imports, or
+            reopening the Training Hall cannot duplicate it.
+          </p>
+          <p>
+            Those examples assume a Stable System state. Warning temporarily awards 90% of printed
+            account mission XP and Stagnant awards 75% until completed days restore stability; stat
+            mission XP remains as printed. Snow’s command bonus is calculated from the account XP
+            actually recorded, so the app does not secretly stack or duplicate rewards.
           </p>
         </details>
         <details>

@@ -41,6 +41,7 @@ import type {
   TreasurySettings,
   TreasuryTransaction,
   TreasuryWeek,
+  TrainingSession,
   UnlockedTitle,
   XpTransaction,
 } from '@/types/game';
@@ -88,6 +89,7 @@ export class SystemDatabase extends Dexie {
   treasurySavingsGoals!: EntityTable<TreasurySavingsGoal, 'id'>;
   treasuryWeeks!: EntityTable<TreasuryWeek, 'id'>;
   treasuryChallenges!: EntityTable<TreasuryDailyChallenge, 'id'>;
+  trainingSessions!: EntityTable<TrainingSession, 'id'>;
   appMetadata!: EntityTable<AppMetadata, 'id'>;
 
   constructor(name = 'the-system-db') {
@@ -369,6 +371,90 @@ export class SystemDatabase extends Dexie {
         await metadata.put({ id: 'schema-seeded', value: 9, updatedAt: now });
         await metadata.put({ id: 'app-version', value: '3.0.0', updatedAt: now });
       });
+    this.version(10)
+      .stores({
+        trainingSessions: 'id,date,location,status,circuitId,[date+status]',
+      })
+      .upgrade(async (transaction) => {
+        const now = new Date().toISOString();
+        const missions = transaction.table<MissionDefinition, string>('missions');
+        const movement = await missions.get('movement');
+        if (movement) {
+          await missions.put({
+            ...movement,
+            enabled: false,
+            isCore: false,
+            optional: true,
+            archived: true,
+          });
+        }
+        const workout = await missions.get('workout');
+        if (workout) {
+          await missions.put({
+            ...workout,
+            name: 'Daily Workout',
+            shortName: 'Workout',
+            description:
+              'Enter the Training Hall for a home circuit, gym deployment, conditioning mission, or recovery protocol.',
+            accountXp: 75,
+            statRewards: [
+              { stat: 'strength', xp: 18 },
+              { stat: 'endurance', xp: 14 },
+              { stat: 'discipline', xp: 8 },
+              { stat: 'vitality', xp: 22 },
+            ],
+            enabled: true,
+            isCore: true,
+            optional: false,
+            archived: false,
+          });
+        }
+        const briefings = transaction.table<DailyCommandBriefing, string>('dailyBriefings');
+        const planned = await briefings.where('status').equals('planned').toArray();
+        for (const briefing of planned) {
+          const originalScheduledIds = briefing.scheduledMissionIds ?? [];
+          if (!originalScheduledIds.includes('movement')) continue;
+          const scheduledMissionIds = Array.from(
+            new Set(
+              originalScheduledIds.map((missionId) =>
+                missionId === 'movement' ? 'workout' : missionId,
+              ),
+            ),
+          );
+          const requestedPriorityIds = [
+            briefing.mainMissionId,
+            briefing.supportMissionId,
+            briefing.bonusMissionId,
+          ]
+            .filter((missionId): missionId is string => Boolean(missionId))
+            .map((missionId) => (missionId === 'movement' ? 'workout' : missionId));
+          const priorityIds = Array.from(
+            new Set([...requestedPriorityIds, ...scheduledMissionIds]),
+          );
+          const priorityCount =
+            briefing.capacity === 'low' ? 1 : briefing.capacity === 'steady' ? 2 : 3;
+          const targetCompletionRate =
+            briefing.targetCompletionRate ??
+            (briefing.capacity === 'low' ? 0 : briefing.capacity === 'steady' ? 0.65 : 0.8);
+          const targetMissionCount = Math.min(
+            scheduledMissionIds.length,
+            Math.max(priorityCount, Math.ceil(scheduledMissionIds.length * targetCompletionRate)),
+          );
+          await briefings.put({
+            ...briefing,
+            scheduledMissionIds,
+            mainMissionId: priorityIds[0],
+            supportMissionId: priorityCount >= 2 ? priorityIds[1] : undefined,
+            bonusMissionId: priorityCount >= 3 ? priorityIds[2] : undefined,
+            targetCompletionRate,
+            targetMissionCount,
+            updatedAt: now,
+          });
+        }
+        const metadata = transaction.table<AppMetadata, string>('appMetadata');
+        await metadata.put({ id: 'schema-seeded', value: 10, updatedAt: now });
+        await metadata.put({ id: 'app-version', value: '3.5.0', updatedAt: now });
+      });
   }
 }
 
@@ -416,6 +502,7 @@ export const TABLE_NAMES = [
   'treasurySavingsGoals',
   'treasuryWeeks',
   'treasuryChallenges',
+  'trainingSessions',
   'appMetadata',
 ] as const;
 

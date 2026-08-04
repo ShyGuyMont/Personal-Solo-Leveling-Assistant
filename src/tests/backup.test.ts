@@ -62,7 +62,7 @@ describe('save validation and recovery', () => {
     expect(await listLocalSnapshots()).toHaveLength(5);
   });
 
-  it('round-trips every Version 3.0 campaign and Treasury record through Archive Shield', async () => {
+  it('round-trips every Version 3.5 campaign, Treasury, and Training Hall record through Archive Shield', async () => {
     const now = new Date().toISOString();
     await db.dailyBriefings.put({
       id: '2026-08-01',
@@ -162,9 +162,29 @@ describe('save validation and recovery', () => {
       category: 'groceries',
       createdAt: now,
     });
+    await db.trainingSessions.put({
+      id: '2026-08-01',
+      date: '2026-08-01',
+      location: 'home',
+      status: 'completed',
+      circuitId: 'iron-foundation',
+      durationMinutes: 20,
+      briefingVariant: 1,
+      debriefVariant: 3,
+      rerollUsed: false,
+      bossExtensionUsed: false,
+      assignedAt: now,
+      completedAt: now,
+      remainingSeconds: 0,
+      roundsCompleted: 5,
+      partialReps: 4,
+      difficulty: 4,
+      exerciseLoads: { 'double-db-front-squat': 25 },
+      updatedAt: now,
+    });
 
     const save = await createSaveFile();
-    expect(save.version).toBe(9);
+    expect(save.version).toBe(10);
     for (const table of [
       'dailyBriefings',
       'campaignArcs',
@@ -172,6 +192,7 @@ describe('save validation and recovery', () => {
       'companionQuestProgress',
       'monthlyCouncils',
       'treasuryTransactions',
+      'trainingSessions',
     ]) {
       expect(save.data[table]).toHaveLength(1);
     }
@@ -186,6 +207,7 @@ describe('save validation and recovery', () => {
         db.companionQuestProgress,
         db.monthlyCouncils,
         db.treasuryTransactions,
+        db.trainingSessions,
       ],
       async () => {
         await db.dailyBriefings.clear();
@@ -194,6 +216,7 @@ describe('save validation and recovery', () => {
         await db.companionQuestProgress.clear();
         await db.monthlyCouncils.clear();
         await db.treasuryTransactions.clear();
+        await db.trainingSessions.clear();
       },
     );
     await commitPreparedImport(prepared);
@@ -211,9 +234,10 @@ describe('save validation and recovery', () => {
       'Protect connection and consistency.',
     );
     expect((await db.treasuryTransactions.get('treasury:backup'))?.amountCents).toBe(2450);
+    expect((await db.trainingSessions.get('2026-08-01'))?.roundsCompleted).toBe(5);
   });
 
-  it('migrates a Version 2.1 save to Version 3.0 without losing the existing party', async () => {
+  it('migrates a Version 2.1 save to Version 3.5 without losing the existing party', async () => {
     const save = await createSaveFile();
     save.version = 7;
     for (const table of [
@@ -232,7 +256,7 @@ describe('save validation and recovery', () => {
     save.checksum = await digest(save.data);
 
     const prepared = await prepareSaveImport(asFile(save));
-    expect(prepared.save.version).toBe(9);
+    expect(prepared.save.version).toBe(10);
     expect(prepared.save.data.dailyBriefings).toEqual([]);
     const migrated = prepared.save.data.settings[0] as Record<string, unknown>;
     expect(migrated.enabledCompanionIds).toContain('amara');
@@ -240,6 +264,7 @@ describe('save validation and recovery', () => {
     expect(migrated.dailyBriefingEnabled).toBe(true);
     expect(prepared.save.data.treasurySettings).toHaveLength(1);
     expect(prepared.save.data.treasuryTransactions).toEqual([]);
+    expect(prepared.save.data.trainingSessions).toEqual([]);
   });
 
   it('rejects impossible Treasury values even when the checksum matches', async () => {
