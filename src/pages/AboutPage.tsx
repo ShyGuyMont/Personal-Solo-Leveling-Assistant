@@ -1,6 +1,7 @@
 import {
   Archive,
   ArrowLeft,
+  BookHeart,
   BookOpenCheck,
   CircleGauge,
   CloudOff,
@@ -68,6 +69,12 @@ const DESTINATIONS = [
     icon: Dumbbell,
     title: 'Training Hall',
     text: 'Let Rook and Ember run today’s home circuit or record a gym, conditioning, or recovery deployment.',
+  },
+  {
+    to: '/sanctuary',
+    icon: BookHeart,
+    title: 'Scripture Sanctuary',
+    text: 'Let Selah and Snow guide a full Bible study or open immediate Stronghold support.',
   },
   {
     to: '/status',
@@ -362,14 +369,47 @@ export function AboutPage() {
           </p>
         </details>
         <details>
+          <summary>How does the Scripture Sanctuary work?</summary>
+          <p>
+            The Bible mission opens the Scripture Sanctuary. Choose a Full Daily Study when you
+            want a deeper session, or Stronghold Protocol when temptation, anger, loneliness,
+            sadness, stress, shame, or another emotion is already loud. Choose one primary concern
+            and optionally one connected concern. The app then selects from 96 offline Scripture
+            references and gives original context, observation, application, and prayer prompts.
+            Read the actual passage in your preferred Bible translation.
+          </p>
+          <p>
+            Snow opens and closes; Selah guides the Scripture path; the companion responsible for
+            the concern joins them. Amara addresses the possible connection between pornography and
+            loneliness as a longing for closeness that pornography imitates but cannot fulfill. She
+            does not excuse the behavior, reduce every urge to loneliness, or use shame as a cure.
+            Ember helps interrupt urges, Cipher examines triggers and attention, and Haven supports
+            recovery from shame, sadness, and emotional overload.
+          </p>
+          <p>
+            The first completed Full Daily Study can clear that day’s Bible mission for its printed
+            25 account XP. Additional studies remain available but create no repeat reward.
+            Stronghold sessions are unlimited, never award XP, and never automatically mark the
+            Bible mission complete. Optional reflections, prayer notes, and next actions stay on
+            this device and are included in Archive Shield exports.
+          </p>
+          <p>
+            The Sanctuary is a spiritual reflection tool, not therapy, medical advice, crisis care,
+            or a replacement for trusted human support. Pastors, counselors, therapists, recovery
+            groups, and safe people can be part of faithful recovery. If you might harm yourself or
+            cannot stay safe, call or text 988 in the U.S. or contact local emergency services.
+          </p>
+        </details>
+        <details>
           <summary>Where does XP come from, and what can multiply it?</summary>
           <p>
             Daily missions award the account and stat XP printed on their cards. Daily Workout is
             worth 75 account XP and can be cleared once through any Training Hall path. Perfect
             Days, completed challenges, Rank Trials, Companion Quest chapters, Treasury reviews, and
             accepted rare events award their own displayed one-time XP. Campaign Arc milestones,
-            emotional check-ins, support conversations, Campfires, Councils, and ordinary Training
-            Hall overtime are records or guidance only and do not create hidden XP.
+            emotional check-ins, support conversations, Campfires, Councils, repeat Sanctuary
+            studies, Stronghold sessions, and ordinary Training Hall overtime are records or
+            guidance only and do not create hidden XP.
           </p>
           <p>
             <strong>Current default daily account XP:</strong> Prayer 20, Bible 25, Integrity 40,

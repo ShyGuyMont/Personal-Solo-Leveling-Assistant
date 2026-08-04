@@ -17,6 +17,7 @@ The design, writing, interface, icons, animations, and generated tones are origi
 - Monthly Councils generated after a completed month with nine fact-aware party messages, permanent history, and an optional next-month intention
 - Snow's optional Daily Command Briefing with Low, Steady, and High capacity planning, broad completion targets, and transparent 1×–2.5× scheduled-mission XP outcomes
 - Rook and Ember’s Training Hall with four home circuits, one saved weighted 15–30 minute assignment, persistent timer, load and round tracking, Gym / Conditioning / Recovery logs, and a full-party post-workout scene
+- Snow and Selah’s Scripture Sanctuary with 96 rotating passage paths, twelve emotional and spiritual concerns, guided reflection, deeper prayer structure, private history, and unlimited no-XP Stronghold support
 - User-authored Campaign Arcs with purpose, companion guidance, optional target dates, milestones, pause/resume, completion, and archive states
 - Eight extensive Companion Questlines: 40 authored chapters, 120 tracked or reflective objectives, no failure timers, fixed chapter rewards, and eight unique legendary completion titles
 - Treasury Command with paycheck and expense logging, bills, credit-card and other debt tracking, savings goals, amount masking, weekly plans and reviews, and Archive Shield protection
@@ -35,6 +36,31 @@ The design, writing, interface, icons, animations, and generated tones are origi
 
 There is no login, backend, external API, analytics, advertising, tracking, or paid service.
 
+## Version 4.0 · Scripture Sanctuary
+
+The Bible mission now opens a complete phone-first Scripture Sanctuary. A Full Daily Study begins
+with what the user is actually carrying, then selects a rotating three-passage path from 96 offline
+references spanning sexual integrity, shame, anger, sadness, loneliness, stress, numbness, focus,
+doubt, forgiveness, identity, and gratitude. Each path provides original context, observation,
+application, and prayer prompts while leaving the Bible text itself to the user’s preferred
+translation.
+
+Snow opens and closes each session. Selah leads the Scripture work, and the companion who best
+understands the selected struggle joins them. When sexual temptation and loneliness are selected
+together, Amara addresses pornography as possible counterfeit intimacy: a behavior that still needs
+honest boundaries while the underlying longing for closeness also receives care. This connection is
+never assumed to explain every urge, and shame is never used as the recovery strategy.
+
+Stronghold Protocol provides immediate, unlimited support when an urge or emotion is already loud.
+It combines environmental interruption, targeted Scripture, a next-ten-minutes action, and movement
+toward safe human connection. Stronghold sessions never award XP or clear the Bible mission. The
+first completed Full Daily Study clears the existing Bible mission once; repeated studies create no
+extra reward. Private reflections and prayer notes remain local and are protected by Archive Shield
+format 11.
+
+The Sanctuary is a faith and reflection tool, not clinical or crisis care. The interface encourages
+trusted people, pastors, counselors, therapists, and recovery groups when human support is needed.
+
 ## Version 3.5 · The Training Hall Update
 
 Daily Workout now opens the Training Hall. Rook chooses one of **Iron Foundation**, **Vanguard Frame**, **Shadow Engine**, or **Guardian Citadel**; Ember naturally declares a weighted 15, 20, 25, or 30-minute clock. The saved assignment cannot be changed by refreshing, one pre-start reassignment is available, and an optional five-minute Boss Extension records overtime without creating extra XP.
@@ -51,7 +77,7 @@ Rank gates and the development pacing simulator were also rebalanced for the exp
 - **Cipher, The Strategist** supports Discipline, Focus, Willpower, Creativity, YouTube, and ARC work. They are precise, dryly funny, and demanding, with a navy tech jacket and violet-cyan tactical glyphs.
 - **Haven, The Guardian** supports Character, Recovery, balance, and comebacks. He is patient and quietly humorous, with silver-streaked hair, a teal field coat, and a translucent shield glow.
 - **Ember, The Ignition** supports accountability, re-entry, and locking back in after momentum slips. She is fiery, blunt, and fiercely supportive, with copper-red hair, amber eyes, charcoal-and-crimson gear, and an ember-orange System halo.
-- **Amara, The Heartweaver** supports Empathy, relationships, communication, repair, healthy boundaries, and belonging. She is warm, perceptive, and playfully romantic, with warm olive skin, wavy chestnut hair, luminous pink eyes, rose-and-plum battle attire, and a radiant pink System halo.
+- **Amara, The Heartweaver** supports Empathy, relationships, communication, repair, healthy boundaries, belonging, and shame-free sexual-integrity support in the Sanctuary. She is warm, perceptive, and playfully romantic, with warm olive skin, wavy chestnut hair, luminous pink eyes, rose-and-plum battle attire, and a radiant pink System halo.
 - **Cassian, The Steward** supports Stewardship, budgeting, savings, debt reduction, spending awareness, and financial recovery. He is a calm, exacting, never-shaming white accountant type with fair skin, tousled light-brown hair, hazel eyes behind round gold-rimmed glasses, a pencil behind one ear, a dark ledger, and a tailored emerald-and-navy Steward coat.
 
 Companions never judge missed missions. Snow checks in once per System day, while stat level-ups notify the matching specialist. Ember may open one Lock-In signal when the previous day is unfinished or finalized below 50%; her response is direct but never removes XP, changes a streak, or attacks the user's worth. Amara owns the Empathy stat and ordinary Character-path relationship responses; every relationship objective offers a safe alternative and never requires contact with someone unsafe. Cassian owns the Stewardship stat and Treasury coaching; Budget Stability never removes account XP, rank, streaks, or mission credit. Ordinary mission reactions follow the selected Off, Quiet, Balanced, or Talkative setting. All eight portraits use a cohesive premium chibi RPG style, are bundled locally, and require no network connection.

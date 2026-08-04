@@ -313,7 +313,7 @@ export const COMPANIONS: CompanionDefinition[] = [
     title: 'The Heartweaver',
     shortRole: 'Empathy · Relationships · Belonging',
     description:
-      'Amara tends the bonds around the journey: friendship, family, romance, communication, appreciation, repair, and the courage to let healthy connection matter.',
+      'Amara tends the bonds around the journey: friendship, family, romance, communication, appreciation, repair, sexual integrity without shame, and the courage to let healthy connection matter.',
     appearance:
       'A warm olive-skinned Mediterranean woman with long wavy chestnut hair, luminous pink eyes, and rose, plum, ivory, and rose-gold battle attire beneath a radiant pink System halo.',
     personality:

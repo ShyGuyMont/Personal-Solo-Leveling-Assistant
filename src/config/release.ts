@@ -1,6 +1,6 @@
-export const APP_VERSION = '3.5.0';
-export const DATABASE_SCHEMA_VERSION = 10;
-export const SAVE_FORMAT_VERSION = 10;
+export const APP_VERSION = '4.0.0';
+export const DATABASE_SCHEMA_VERSION = 11;
+export const SAVE_FORMAT_VERSION = 11;
 
 export interface ReleaseSection {
   title: string;
@@ -10,39 +10,39 @@ export interface ReleaseSection {
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
   {
-    title: 'The Training Hall',
-    detail: 'Rook and Ember now command a complete phone-first training system.',
+    title: 'The Scripture Sanctuary',
+    detail: 'The Bible mission now opens a private, guided spiritual-formation space.',
     points: [
-      'Choose Home, Gym, Conditioning, or Recovery; every completed path clears the single Daily Workout mission exactly once.',
-      'Home training contains four full-body circuit protocols, a saved Rook assignment, Ember’s weighted 15–30 minute clock, one reassignment, and optional five-minute Boss overtime.',
-      'Timers survive leaving the screen, rounds and partial reps remain saved, adjustable-dumbbell loads can be recorded, and the entire party joins the post-training recovery scene.',
+      'Choose what feels most present from twelve concerns, then receive a rotating three-passage path with context, observation, application, and prayer prompts.',
+      'Snow opens and closes the space, Selah guides Scripture, and the companion who understands the selected struggle adds focused counsel.',
+      'A four-movement prayer framework supports deeper prayer while every reflection, prayer note, and next action remains optional and private.',
     ],
   },
   {
-    title: 'Physical Mission Consolidation',
-    detail: 'Daily Movement has been retired without lowering the physical path’s value.',
+    title: 'Stronghold Protocol',
+    detail: 'Immediate support is available when an urge or emotion is already loud.',
     points: [
-      'Daily Workout now contains the combined account and stat rewards that Movement and Workout previously awarded together.',
-      'Existing history remains intact, current briefing references migrate safely, and physical challenges now point to Training Hall deployments.',
-      'Gym, conditioning, recovery, and home circuits are alternate ways to clear one mission—not repeatable sources of extra XP.',
+      'Stronghold sessions combine practical pattern interruption, targeted Scripture, a ten-minute next action, and an invitation toward safe human connection.',
+      'Pornography support can explicitly address loneliness and counterfeit intimacy without excusing the behavior or using shame as the recovery strategy.',
+      'Stronghold sessions are unlimited and award no XP, so support never becomes a reward exploit or a reason to avoid returning.',
     ],
   },
   {
-    title: 'Progression Rebalance',
-    detail: 'Rank pacing now respects the larger mission and companion ecosystem.',
+    title: 'Ninety-Six Passage Paths',
+    detail: 'A broad offline reference library keeps guidance useful without copying a whole Bible.',
     points: [
-      'Rank requirements and mandatory trial durations were rebuilt around an achievable 18–24 month World Class progression instead of a distant multi-year extreme.',
-      'Snow’s Daily Command remains the major consistency multiplier: Low is 1×, Steady is 1.5× or 1.75× on a Full Clear, and High is 2× or 2.5× on a Full Clear.',
-      'Mission, Perfect Day, challenge, questline, Treasury, and rare-event rewards retain separate one-time transaction protection.',
+      'Eight paths each support sexual integrity, shame, anger, sadness, loneliness, stress, numbness, focus, doubt, forgiveness, identity, and gratitude.',
+      'The least-used passages rotate first, and connected concerns can be paired so the session addresses both the visible struggle and what may be beneath it.',
+      'The app provides references and original guidance; the user reads the passage in their own preferred Bible translation.',
     ],
   },
   {
-    title: 'Archive Shield 10',
-    detail: 'Training records join the portable, update-safe campaign save.',
+    title: 'Archive Shield 11',
+    detail: 'Sanctuary history joins the portable, update-safe local campaign save.',
     points: [
-      'Save format 10 preserves Training Hall assignments, timers, completed sessions, rounds, loads, effort, and private notes.',
-      'Version 3.0 and older saves migrate forward automatically without replacing existing campaign, companion, Treasury, or mission history.',
-      'The Update Center continues to install new releases without deleting the home-screen app or its local progression data.',
+      'Save format 11 preserves completed Sanctuary sessions, selected concerns, passage paths, optional reflections, prayer notes, outcomes, and Bible-mission credit.',
+      'Version 3.5 and older saves migrate forward automatically without replacing Training Hall, Treasury, companion, progression, or mission history.',
+      'The Sanctuary is a faith and reflection tool, not clinical or crisis care; its help text clearly encourages trusted and professional human support when needed.',
     ],
   },
 ];

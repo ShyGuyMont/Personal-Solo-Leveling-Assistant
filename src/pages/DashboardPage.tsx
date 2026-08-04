@@ -1,5 +1,6 @@
 import {
   ArrowRight,
+  BookHeart,
   CalendarDays,
   ChevronRight,
   Dumbbell,
@@ -60,6 +61,7 @@ export function DashboardPage() {
   const pending = todayRecords.filter((record) => record.status === 'pending');
   const percentage = todayRecords.length ? completeCount / todayRecords.length : 0;
   const workoutRecord = todayRecords.find((record) => record.missionId === 'workout');
+  const bibleRecord = todayRecords.find((record) => record.missionId === 'bible');
   const activeWeekly = challenges.find(
     (challenge) => challenge.kind === 'weekly' && challenge.status === 'active',
   );
@@ -179,6 +181,28 @@ export function DashboardPage() {
           <small>
             Home circuits, gym deployments, conditioning, recovery, records, and the full-party
             post-raid debrief.
+          </small>
+        </div>
+        <ChevronRight size={20} />
+      </Link>
+
+      <Link
+        to="/sanctuary"
+        className={`sanctuary-dashboard-card panel is-${bibleRecord?.status ?? 'available'}`}
+      >
+        <span>
+          <BookHeart size={24} />
+        </span>
+        <div>
+          <p className="eyebrow">SCRIPTURE SANCTUARY · SNOW & SELAH</p>
+          <strong>
+            {bibleRecord?.status === 'completed'
+              ? 'Today’s study is complete—the Sanctuary is still open'
+              : 'Bring what you are feeling into Scripture and prayer'}
+          </strong>
+          <small>
+            Guided Daily Study, immediate Stronghold support, rotating passages, private prayer
+            notes, and counsel from the companion who understands the struggle.
           </small>
         </div>
         <ChevronRight size={20} />

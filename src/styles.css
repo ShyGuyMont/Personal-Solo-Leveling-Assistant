@@ -6,7 +6,7 @@
   font-display: swap;
 }
 
-/* Version 3.5 · Training Hall */
+/* Version 4.0 · Scripture Sanctuary */
 .training-hall-page {
   --training-gold: #f2bd57;
   --training-blue: #71b6ff;
@@ -6951,7 +6951,7 @@ html[data-theme='daybreak'] .bottom-nav {
 }
 
 .bottom-nav {
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(7, minmax(0, 1fr));
 }
 
 .treasury-page {
@@ -10667,9 +10667,778 @@ html[data-theme='daybreak'] .arc-milestones > button {
   border-color: rgba(255, 104, 69, 0.26);
 }
 
+.mission-action.mission-action--sanctuary {
+  color: #bca7ff;
+  background: rgba(188, 167, 255, 0.08);
+  border-color: rgba(188, 167, 255, 0.26);
+}
+
+.sanctuary-mission-gate {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 13px;
+  padding: 14px;
+  color: #bca7ff;
+  background: rgba(188, 167, 255, 0.055);
+  border: 1px solid rgba(188, 167, 255, 0.18);
+  border-radius: 13px;
+}
+
+.sanctuary-mission-gate p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.panel.sanctuary-dashboard-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  color: var(--text);
+  background:
+    radial-gradient(circle at 8% 50%, rgba(188, 167, 255, 0.13), transparent 25%),
+    linear-gradient(110deg, rgba(16, 18, 28, 0.96), rgba(13, 19, 25, 0.94));
+  border-color: rgba(188, 167, 255, 0.21);
+}
+
+.sanctuary-dashboard-card > span {
+  display: grid;
+  width: 50px;
+  height: 50px;
+  color: #bca7ff;
+  place-items: center;
+  background: rgba(188, 167, 255, 0.08);
+  border: 1px solid rgba(188, 167, 255, 0.16);
+  border-radius: 14px;
+}
+
+.sanctuary-dashboard-card strong,
+.sanctuary-dashboard-card small {
+  display: block;
+}
+
+.sanctuary-dashboard-card small {
+  margin-top: 5px;
+  color: var(--muted-2);
+  line-height: 1.45;
+}
+
+.sanctuary-dashboard-card.is-completed > span {
+  color: var(--success);
+  background: rgba(67, 230, 194, 0.08);
+}
+
 html[data-theme='daybreak'] .panel.training-commanders,
 html[data-theme='daybreak'] .panel.training-briefing,
 html[data-theme='daybreak'] .panel.training-party-debrief,
 html[data-theme='daybreak'] .panel.training-dashboard-card {
   background-color: var(--panel);
+}
+
+html[data-theme='daybreak'] .panel.sanctuary-dashboard-card {
+  background-color: var(--panel);
+}
+
+/* Version 4.0 · Scripture Sanctuary */
+.sanctuary-page {
+  --sanctuary-blue: #7fc9ff;
+  --sanctuary-violet: #bca7ff;
+  --sanctuary-rose: #ff8fb7;
+  display: grid;
+  gap: 18px;
+}
+
+.sanctuary-page-heading .page-heading__glyph {
+  color: var(--sanctuary-violet);
+  background: rgba(188, 167, 255, 0.09);
+  border-color: rgba(188, 167, 255, 0.24);
+}
+
+.sanctuary-loading {
+  display: flex;
+  min-height: 180px;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--sanctuary-violet);
+}
+
+.panel.sanctuary-guides {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 18px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 8% 42%, rgba(127, 201, 255, 0.12), transparent 29%),
+    radial-gradient(circle at 23% 60%, rgba(188, 167, 255, 0.1), transparent 32%),
+    var(--panel);
+  border-color: rgba(155, 188, 255, 0.22);
+}
+
+.sanctuary-guides__portraits {
+  display: flex;
+  align-items: center;
+  padding-left: 6px;
+}
+
+.sanctuary-guides__portraits img {
+  width: 74px;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border: 2px solid rgba(127, 201, 255, 0.36);
+  border-radius: 20px;
+  background: rgba(7, 12, 20, 0.8);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
+}
+
+.sanctuary-guides__portraits img + img {
+  margin-left: -18px;
+  border-color: rgba(188, 167, 255, 0.44);
+}
+
+.sanctuary-guides__portraits img:nth-child(3) {
+  border-color: rgba(255, 143, 183, 0.48);
+}
+
+.sanctuary-guides > div:last-child {
+  display: grid;
+  gap: 7px;
+}
+
+.sanctuary-guides h2,
+.sanctuary-guides p {
+  margin: 0;
+}
+
+.sanctuary-guides p:not(.eyebrow) {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.sanctuary-mode-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.sanctuary-mode-grid > button {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 13px;
+  min-height: 112px;
+  padding: 16px;
+  color: var(--text);
+  text-align: left;
+  background: rgba(127, 201, 255, 0.055);
+  border: 1px solid rgba(127, 201, 255, 0.18);
+  border-radius: 16px;
+}
+
+.sanctuary-mode-grid > button.is-stronghold {
+  background: rgba(255, 143, 183, 0.055);
+  border-color: rgba(255, 143, 183, 0.2);
+}
+
+.sanctuary-mode-grid > button > span {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  color: var(--sanctuary-blue);
+  place-items: center;
+  background: rgba(127, 201, 255, 0.09);
+  border-radius: 15px;
+}
+
+.sanctuary-mode-grid > button.is-stronghold > span {
+  color: var(--sanctuary-rose);
+  background: rgba(255, 143, 183, 0.09);
+}
+
+.sanctuary-mode-grid strong,
+.sanctuary-mode-grid small {
+  display: block;
+}
+
+.sanctuary-mode-grid small {
+  margin-top: 5px;
+  color: var(--muted-2);
+  line-height: 1.45;
+}
+
+.sanctuary-today-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 13px;
+  padding: 11px 13px;
+  color: var(--success);
+  background: rgba(67, 230, 194, 0.07);
+  border: 1px solid rgba(67, 230, 194, 0.17);
+  border-radius: 12px;
+}
+
+.sanctuary-concern-gate {
+  display: grid;
+  gap: 15px;
+}
+
+.sanctuary-concern-gate > .text-button {
+  justify-self: start;
+}
+
+.sanctuary-concern-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.sanctuary-concern-list button {
+  display: grid;
+  align-content: start;
+  gap: 5px;
+  min-height: 120px;
+  padding: 13px;
+  color: var(--text);
+  text-align: left;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--border-soft);
+  border-radius: 13px;
+}
+
+.sanctuary-concern-list button > span {
+  color: var(--muted-2);
+  font-family: var(--font-display);
+  font-size: 0.58rem;
+  letter-spacing: 0.13em;
+}
+
+.sanctuary-concern-list button small {
+  color: var(--muted-2);
+  line-height: 1.4;
+}
+
+.sanctuary-concern-list button.is-selected {
+  background: rgba(188, 167, 255, 0.09);
+  border-color: rgba(188, 167, 255, 0.42);
+  box-shadow: inset 0 0 22px rgba(188, 167, 255, 0.04);
+}
+
+.sanctuary-concern-list button.is-selected > span {
+  color: var(--sanctuary-violet);
+}
+
+.sanctuary-start-actions,
+.sanctuary-finish-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.sanctuary-start-actions small {
+  color: var(--muted-2);
+}
+
+.sanctuary-back-link {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: 6px;
+  color: var(--muted);
+}
+
+.sanctuary-error {
+  padding: 12px 14px;
+  color: #ffb4c9;
+  background: rgba(255, 89, 133, 0.08);
+  border: 1px solid rgba(255, 89, 133, 0.22);
+  border-radius: 12px;
+}
+
+.sanctuary-amara-connection {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  background:
+    radial-gradient(circle at 7% 50%, rgba(255, 143, 183, 0.17), transparent 27%),
+    rgba(255, 143, 183, 0.055);
+  border: 1px solid rgba(255, 143, 183, 0.26);
+  border-radius: 16px;
+}
+
+.sanctuary-amara-connection img {
+  width: 72px;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border: 2px solid rgba(255, 143, 183, 0.45);
+  border-radius: 18px;
+}
+
+.sanctuary-amara-connection span {
+  color: var(--sanctuary-rose);
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  letter-spacing: 0.11em;
+}
+
+.sanctuary-amara-connection p {
+  margin: 6px 0 0;
+  color: var(--text);
+  line-height: 1.55;
+}
+
+.sanctuary-stronghold-steps ol {
+  display: grid;
+  gap: 9px;
+  padding: 0;
+  list-style: none;
+  counter-reset: stronghold;
+}
+
+.sanctuary-stronghold-steps li {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  align-items: start;
+  gap: 11px;
+  padding: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+  background: rgba(255, 143, 183, 0.045);
+  border: 1px solid rgba(255, 143, 183, 0.13);
+  border-radius: 12px;
+  counter-increment: stronghold;
+}
+
+.sanctuary-stronghold-steps li::before {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  color: var(--sanctuary-rose);
+  font-family: var(--font-display);
+  content: counter(stronghold, decimal-leading-zero);
+  place-items: center;
+  background: rgba(255, 143, 183, 0.09);
+  border-radius: 10px;
+}
+
+.sanctuary-passage-list {
+  display: grid;
+  gap: 12px;
+}
+
+.sanctuary-passage-card {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  gap: 15px;
+  padding: 17px;
+  border-color: rgba(188, 167, 255, 0.19);
+}
+
+.sanctuary-passage-card__number {
+  display: grid;
+  width: 46px;
+  height: 46px;
+  color: var(--sanctuary-violet);
+  font-family: var(--font-display);
+  place-items: center;
+  background: rgba(188, 167, 255, 0.08);
+  border: 1px solid rgba(188, 167, 255, 0.17);
+  border-radius: 13px;
+}
+
+.sanctuary-passage-card h3 {
+  margin: 3px 0 13px;
+  font-size: clamp(1.25rem, 4vw, 1.65rem);
+}
+
+.sanctuary-passage-card > div:last-child > span {
+  color: var(--sanctuary-violet);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sanctuary-passage-card dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  margin: 0;
+}
+
+.sanctuary-passage-card dl > div {
+  padding: 11px;
+  background: rgba(255, 255, 255, 0.024);
+  border: 1px solid var(--border-soft);
+  border-radius: 10px;
+}
+
+.sanctuary-passage-card dt {
+  margin-bottom: 4px;
+  color: var(--sanctuary-blue);
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.sanctuary-passage-card dd {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.sanctuary-prayer-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.sanctuary-prayer-grid article {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 10px;
+  padding: 11px;
+  background: rgba(127, 201, 255, 0.04);
+  border: 1px solid rgba(127, 201, 255, 0.12);
+  border-radius: 11px;
+}
+
+.sanctuary-prayer-grid article > span {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  color: var(--sanctuary-blue);
+  font-family: var(--font-display);
+  place-items: center;
+  background: rgba(127, 201, 255, 0.08);
+  border-radius: 9px;
+}
+
+.sanctuary-prayer-grid p {
+  margin: 4px 0 0;
+  color: var(--muted-2);
+  line-height: 1.4;
+}
+
+.sanctuary-reflection-form {
+  display: grid;
+  gap: 13px;
+}
+
+.sanctuary-outcomes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.sanctuary-outcomes button {
+  padding: 9px 11px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+}
+
+.sanctuary-outcomes button.is-selected {
+  color: var(--sanctuary-blue);
+  background: rgba(127, 201, 255, 0.08);
+  border-color: rgba(127, 201, 255, 0.3);
+}
+
+.sanctuary-completion-hero {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: clamp(25px, 6vw, 48px) 18px;
+  text-align: center;
+  background:
+    radial-gradient(circle at 50% 10%, rgba(188, 167, 255, 0.18), transparent 35%),
+    linear-gradient(145deg, rgba(15, 19, 31, 0.97), rgba(12, 16, 24, 0.96));
+  border: 1px solid rgba(188, 167, 255, 0.25);
+  border-radius: 20px;
+}
+
+.sanctuary-page--complete.is-stronghold .sanctuary-completion-hero {
+  background:
+    radial-gradient(circle at 50% 10%, rgba(255, 143, 183, 0.15), transparent 35%),
+    linear-gradient(145deg, rgba(25, 16, 26, 0.97), rgba(12, 16, 24, 0.96));
+  border-color: rgba(255, 143, 183, 0.23);
+}
+
+.sanctuary-completion-hero > svg {
+  color: var(--sanctuary-violet);
+}
+
+.sanctuary-completion-hero h1,
+.sanctuary-completion-hero p {
+  margin: 0;
+}
+
+.sanctuary-completion-hero h1 {
+  font-size: clamp(2rem, 8vw, 4rem);
+}
+
+.sanctuary-completion-hero > p:last-of-type {
+  max-width: 680px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.sanctuary-credit {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 6px;
+  padding: 9px 12px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+}
+
+.sanctuary-credit.is-earned {
+  color: var(--success);
+  border-color: rgba(67, 230, 194, 0.2);
+}
+
+.sanctuary-message-list {
+  display: grid;
+  gap: 9px;
+}
+
+.sanctuary-message-list article {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  padding: 11px;
+  background: color-mix(in srgb, var(--companion-accent) 5%, transparent);
+  border: 1px solid color-mix(in srgb, var(--companion-accent) 22%, transparent);
+  border-radius: 13px;
+}
+
+.sanctuary-message-list img {
+  width: 58px;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border: 2px solid color-mix(in srgb, var(--companion-accent) 48%, transparent);
+  border-radius: 14px;
+}
+
+.sanctuary-message-list span {
+  color: var(--companion-accent);
+  font-family: var(--font-display);
+  font-size: 0.64rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sanctuary-message-list p {
+  margin: 5px 0 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.sanctuary-support-callout {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 13px;
+  color: var(--sanctuary-blue);
+  border-color: rgba(127, 201, 255, 0.22);
+}
+
+.sanctuary-support-callout h2,
+.sanctuary-support-callout p {
+  margin: 0;
+}
+
+.sanctuary-support-callout p {
+  margin-top: 6px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.sanctuary-return {
+  justify-self: center;
+}
+
+.sanctuary-history__list {
+  display: grid;
+  gap: 7px;
+}
+
+.sanctuary-history__list article {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 9px;
+  background: rgba(255, 255, 255, 0.022);
+  border: 1px solid var(--border-soft);
+  border-radius: 11px;
+}
+
+.sanctuary-history__mark {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  color: var(--sanctuary-violet);
+  place-items: center;
+  background: rgba(188, 167, 255, 0.07);
+  border-radius: 10px;
+}
+
+.sanctuary-history__mark.is-stronghold {
+  color: var(--sanctuary-rose);
+  background: rgba(255, 143, 183, 0.07);
+}
+
+.sanctuary-history__list strong,
+.sanctuary-history__list small {
+  display: block;
+}
+
+.sanctuary-history__list small,
+.sanctuary-empty-copy,
+.sanctuary-privacy-note {
+  color: var(--muted-2);
+}
+
+.sanctuary-archive-detail {
+  display: grid;
+  gap: 8px;
+  padding: 11px 13px 13px;
+}
+
+.sanctuary-archive-detail p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.sanctuary-archive-detail strong {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--sanctuary-violet, #bca7ff);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.sanctuary-privacy-note {
+  margin: 12px 0 0;
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+html[data-theme='daybreak'] .panel.sanctuary-guides,
+html[data-theme='daybreak'] .sanctuary-completion-hero {
+  background-color: var(--panel);
+}
+
+html[data-theme='daybreak'] .sanctuary-concern-list button,
+html[data-theme='daybreak'] .sanctuary-passage-card dl > div,
+html[data-theme='daybreak'] .sanctuary-prayer-grid article,
+html[data-theme='daybreak'] .sanctuary-history__list article {
+  background-color: rgba(255, 255, 255, 0.55);
+}
+
+@media (max-width: 720px) {
+  .sanctuary-concern-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .sanctuary-mode-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .sanctuary-page {
+    width: min(100% - 20px, 1120px);
+    padding-top: 18px;
+  }
+
+  .sanctuary-mission-gate {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .sanctuary-mission-gate .button {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .bottom-nav__item span {
+    font-size: 0.45rem;
+  }
+
+  .panel.sanctuary-guides {
+    grid-template-columns: 1fr;
+    padding: 14px;
+  }
+
+  .sanctuary-guides__portraits img {
+    width: 58px;
+    border-radius: 15px;
+  }
+
+  .sanctuary-concern-list button {
+    min-height: 130px;
+    padding: 11px;
+  }
+
+  .sanctuary-passage-card {
+    grid-template-columns: 42px minmax(0, 1fr);
+    gap: 10px;
+    padding: 13px;
+  }
+
+  .sanctuary-passage-card__number {
+    width: 40px;
+    height: 40px;
+  }
+
+  .sanctuary-passage-card dl,
+  .sanctuary-prayer-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sanctuary-amara-connection {
+    grid-template-columns: 58px minmax(0, 1fr);
+  }
+
+  .sanctuary-amara-connection img {
+    width: 58px;
+    border-radius: 14px;
+  }
+
+  .sanctuary-start-actions,
+  .sanctuary-finish-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .sanctuary-start-actions .button,
+  .sanctuary-finish-actions .button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 380px) {
+  .sanctuary-concern-list {
+    grid-template-columns: 1fr;
+  }
+
+  .bottom-nav__item span {
+    display: none;
+  }
 }

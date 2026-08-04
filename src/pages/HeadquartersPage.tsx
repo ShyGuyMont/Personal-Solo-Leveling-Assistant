@@ -155,7 +155,7 @@ export function HeadquartersPage() {
           <div>
             <strong>Update Center</strong>
             <p>Check releases and open the Archive Shield.</p>
-            <small>Version 3.5</small>
+            <small>Version 4.0</small>
           </div>
         </Link>
       </section>
@@ -305,7 +305,9 @@ export function HeadquartersPage() {
           <p>
             Amara supports friendship, family, romance, community, honest communication,
             appreciation, repair, and healthy boundaries. She never asks you to contact someone
-            unsafe or confuse access with love.
+            unsafe or confuse access with love. In the Scripture Sanctuary, she also helps separate
+            genuine intimacy from pornography’s counterfeit closeness—especially when loneliness
+            may be feeding the pattern—without assuming that is the only cause or using shame.
           </p>
           <blockquote>“Your no gives your yes somewhere trustworthy to live.”</blockquote>
         </div>

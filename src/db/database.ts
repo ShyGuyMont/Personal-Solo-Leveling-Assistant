@@ -42,6 +42,7 @@ import type {
   TreasuryTransaction,
   TreasuryWeek,
   TrainingSession,
+  SanctuarySession,
   UnlockedTitle,
   XpTransaction,
 } from '@/types/game';
@@ -90,6 +91,7 @@ export class SystemDatabase extends Dexie {
   treasuryWeeks!: EntityTable<TreasuryWeek, 'id'>;
   treasuryChallenges!: EntityTable<TreasuryDailyChallenge, 'id'>;
   trainingSessions!: EntityTable<TrainingSession, 'id'>;
+  sanctuarySessions!: EntityTable<SanctuarySession, 'id'>;
   appMetadata!: EntityTable<AppMetadata, 'id'>;
 
   constructor(name = 'the-system-db') {
@@ -455,6 +457,31 @@ export class SystemDatabase extends Dexie {
         await metadata.put({ id: 'schema-seeded', value: 10, updatedAt: now });
         await metadata.put({ id: 'app-version', value: '3.5.0', updatedAt: now });
       });
+    this.version(11)
+      .stores({
+        sanctuarySessions:
+          'id,date,mode,status,primaryConcern,createdAt,[date+mode],[date+status]',
+      })
+      .upgrade(async (transaction) => {
+        const now = new Date().toISOString();
+        const missions = transaction.table<MissionDefinition, string>('missions');
+        const bible = await missions.get('bible');
+        if (bible) {
+          await missions.put({
+            ...bible,
+            description:
+              'Enter the Scripture Sanctuary for a guided study led by Selah and Snow.',
+            detailFields: ['passage', 'note'],
+            enabled: true,
+            isCore: true,
+            optional: false,
+            archived: false,
+          });
+        }
+        const metadata = transaction.table<AppMetadata, string>('appMetadata');
+        await metadata.put({ id: 'schema-seeded', value: 11, updatedAt: now });
+        await metadata.put({ id: 'app-version', value: '4.0.0', updatedAt: now });
+      });
   }
 }
 
@@ -503,6 +530,7 @@ export const TABLE_NAMES = [
   'treasuryWeeks',
   'treasuryChallenges',
   'trainingSessions',
+  'sanctuarySessions',
   'appMetadata',
 ] as const;
 

@@ -45,6 +45,21 @@ Daily Movement was retired because it duplicated the new location choice. Daily 
 
 The Training Hall is motivational recordkeeping, not medical care. Use loads and exercise variations you can control, stop for concerning symptoms, and follow your physical therapist’s instructions over the app.
 
+### Scripture Sanctuary
+
+The Bible mission opens a private section led by Snow and Selah. It has two entries:
+
+- **Daily Scripture Study:** Choose one primary concern and optionally one connected concern. The app assigns three rotating references with original context, observation, application, and prayer prompts, followed by a four-part prayer path: Adoration, Honesty, Gratitude, and Ask & surrender.
+- **Stronghold Protocol:** Use this when temptation or an emotion is already loud. It gives immediate environmental and connection steps, two targeted Scripture references, an optional private response, and a next-ten-minutes action.
+
+The twelve paths are sexual integrity, shame, anger, sadness, loneliness, stress, numbness, focus, doubt, forgiveness, identity, and gratitude. There are 96 offline passage references. The app does not copy a full Bible; read each reference in your preferred translation.
+
+Snow opens and closes, Selah guides Scripture, and the relevant specialist joins. Amara can address pornography and loneliness together as possible counterfeit intimacy—a longing for closeness that the behavior imitates but cannot fulfill. The app does not assume loneliness explains every urge, excuse harmful choices, or use shame as a recovery strategy. Ember supports immediate interruption, Cipher helps identify triggers and attention patterns, and Haven supports shame-free recovery and emotional overload.
+
+The first completed Daily Study can clear the existing Bible mission once for its printed 25 account XP. Repeated Daily Studies remain available without another reward. Stronghold is unlimited, creates no XP, and never automatically clears the Bible mission. Reflections, prayer notes, outcomes, and next actions are optional, stay on the device, and are included in Archive Shield exports.
+
+The Sanctuary is a spiritual reflection tool, not therapy, medical advice, crisis care, or a replacement for people. Trusted friends, pastors, counselors, therapists, and recovery groups can be part of faithful recovery. If you might harm yourself or cannot stay safe, call or text 988 in the U.S. or contact local emergency services.
+
 ### Status
 
 Your progression record: overall level, rank qualification, individual stats, titles, achievements, cosmetics, and collection progress.
@@ -115,7 +130,7 @@ The next Daily Review verifies the outcome and applies the bonus to account and 
 
 ### Archive
 
-Your permanent record. It contains daily reviews, mission history, Training Hall sessions, stat transactions, level and rank history, reports, Weekly Campfires, Monthly Councils, daily briefings, Campaign Arcs, Companion Quest progress, rare signals, Party Check-Ins, Direct Support channels, favorites, banter, and companion transmissions.
+Your permanent record. It contains daily reviews, mission history, Training Hall sessions, Scripture Sanctuary history, stat transactions, level and rank history, reports, Weekly Campfires, Monthly Councils, daily briefings, Campaign Arcs, Companion Quest progress, rare signals, Party Check-Ins, Direct Support channels, favorites, banter, and companion transmissions.
 
 ### Settings
 
@@ -123,7 +138,7 @@ Appearance, Snow's briefing toggle, companion frequency, individual companion co
 
 ### Update Center
 
-Shows the installed release, database and save versions, online status, last update check, current save size, last portable export, and all Version 3.5 release notes. **Check for update** contacts only the GitHub Pages release channel; it does not upload personal data. If a release is waiting, export first if desired and choose **Install update**. The home-screen app remains installed and reloads once.
+Shows the installed release, database and save versions, online status, last update check, current save size, last portable export, and all Version 4.0 release notes. **Check for update** contacts only the GitHub Pages release channel; it does not upload personal data. If a release is waiting, export first if desired and choose **Install update**. The home-screen app remains installed and reloads once.
 
 ### About & Help
 
@@ -160,7 +175,7 @@ XP is written through stable transaction IDs so repeated taps cannot award the s
 
 Normal daily missions award the XP printed on their cards. The current six default missions total **215 base account XP**: Prayer 20, Bible 25, Integrity 40, Kindness 20, Daily Workout 75, and Creator Work 35. In a Stable System state, completing all six yields **265 XP** with the 50-XP Perfect Day reward, **426 XP** with a Steady Full Clear, or **588 XP** with a High Full Clear. Optional and customized missions change those totals, so the mission cards remain authoritative.
 
-Perfect Days, completed challenges, Rank Trials, Companion Quest chapters, Treasury reviews, and accepted rare events award their own displayed one-time XP. Campaign Arc milestones, Party conversations, Campfires, Councils, Training Hall overtime, and logging more than one physical path do not create hidden or repeatable XP. Snow’s Daily Command is the only broad positive multiplier, and it applies only to scheduled mission account and stat XP after Daily Review. These examples assume a Stable state: Warning temporarily awards 90% of printed account mission XP and Stagnant awards 75% until completed days restore stability; stat mission XP remains as printed. The command bonus is calculated from XP actually recorded, preventing hidden stacking or duplicate rewards.
+Perfect Days, completed challenges, Rank Trials, Companion Quest chapters, Treasury reviews, and accepted rare events award their own displayed one-time XP. Campaign Arc milestones, Party conversations, Campfires, Councils, repeat Sanctuary studies, Stronghold sessions, Training Hall overtime, and logging more than one physical path do not create hidden or repeatable XP. Snow’s Daily Command is the only broad positive multiplier, and it applies only to scheduled mission account and stat XP after Daily Review. These examples assume a Stable state: Warning temporarily awards 90% of printed account mission XP and Stagnant awards 75% until completed days restore stability; stat mission XP remains as printed. The command bonus is calculated from XP actually recorded, preventing hidden stacking or duplicate rewards.
 
 ## The companion party
 
@@ -170,7 +185,7 @@ Perfect Days, completed challenges, Rank Trials, Companion Quest chapters, Treas
 - **Cipher, The Strategist:** Discipline, Focus, Willpower, Creativity, YouTube, and ARC.
 - **Haven, The Guardian:** Character, Recovery, balance, and comebacks.
 - **Ember, The Ignition:** Accountability, re-entry, and locking back in without shame.
-- **Amara, The Heartweaver:** Empathy, friendship, family, romance, communication, repair, healthy boundaries, and belonging.
+- **Amara, The Heartweaver:** Empathy, friendship, family, romance, communication, repair, healthy boundaries, belonging, and shame-free sexual-integrity support in the Sanctuary.
 - **Cassian, The Steward:** Stewardship, budgeting, saving, debt reduction, spending awareness, and shame-free financial recovery.
 
 Ordinary reactions follow the companion frequency selected in Settings. Party Banter is an occasional two-character exchange after a mission. Major ranks, level milestones, and achievements can trigger a full-party celebration.
@@ -220,7 +235,7 @@ Before clearing browser data, changing phones, or installing a major release:
 3. Store the downloaded JSON file somewhere private and recoverable.
 4. On the new installation, choose **Import save** and review the preview before confirming.
 
-Backups include Training Hall assignments and completed sessions, Party conversations, Weekly Campfires, Monthly Councils, briefings, Campaign Arcs, Companion Quest progress, Amara, favorite messages, banter history, Treasury data, settings, progression, missions, and the rest of the campaign record. Imports are checksum-verified, previewed, validated up to 32 MB, and protected by an automatic pre-import recovery snapshot.
+Backups include Scripture Sanctuary sessions and optional private notes, Training Hall assignments and completed sessions, Party conversations, Weekly Campfires, Monthly Councils, briefings, Campaign Arcs, Companion Quest progress, Amara, favorite messages, banter history, Treasury data, settings, progression, missions, and the rest of the campaign record. Imports are checksum-verified, previewed, validated up to 32 MB, and protected by an automatic pre-import recovery snapshot.
 
 ## Updating the installed app
 

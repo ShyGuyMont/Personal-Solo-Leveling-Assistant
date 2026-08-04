@@ -1,7 +1,7 @@
 import { db, TABLE_NAMES } from '@/db/database';
 import type { BackupSnapshot, Profile, SaveFile, Settings, AccountProgression } from '@/types/game';
 
-export const SAVE_VERSION = 10;
+export const SAVE_VERSION = 11;
 export const MAX_IMPORT_BYTES = 32 * 1024 * 1024;
 const MAX_SNAPSHOTS = 5;
 const FORBIDDEN_KEYS = new Set(['__proto__', 'prototype', 'constructor']);
@@ -105,6 +105,9 @@ function migrateData(
   }
   if (version <= 9) {
     data.trainingSessions ??= [];
+  }
+  if (version <= 10) {
+    data.sanctuarySessions ??= [];
   }
   const migrationTime = new Date().toISOString();
   if (!data.treasurySettings.some((row) => isObject(row) && row.id === 'primary')) {
@@ -377,6 +380,76 @@ function validateData(data: Record<string, unknown[]>) {
       ) {
         throw new Error('A Training Hall load record contains an impossible value.');
       }
+    }
+  }
+
+  const sanctuaryModes = new Set(['study', 'stronghold']);
+  const sanctuaryStatuses = new Set(['active', 'completed', 'abandoned']);
+  const sanctuaryOutcomes = new Set(['steadier', 'moved', 'connected', 'need-support']);
+  const sanctuaryConcerns = new Set([
+    'sexual-integrity',
+    'shame',
+    'anger',
+    'sadness',
+    'loneliness',
+    'stress',
+    'numbness',
+    'focus',
+    'doubt',
+    'forgiveness',
+    'identity',
+    'gratitude',
+  ]);
+  const companionIds = new Set([
+    'snow',
+    'rook',
+    'selah',
+    'cipher',
+    'haven',
+    'ember',
+    'amara',
+    'cassian',
+  ]);
+  for (const row of data.sanctuarySessions) {
+    if (!isObject(row)) {
+      throw new Error('A Scripture Sanctuary record contains an impossible value.');
+    }
+    const passages = row.passageIds;
+    const companions = row.companionIds;
+    if (
+      !validDate(row.date) ||
+      !sanctuaryModes.has(String(row.mode)) ||
+      !sanctuaryStatuses.has(String(row.status)) ||
+      !sanctuaryConcerns.has(String(row.primaryConcern)) ||
+      (row.secondaryConcern !== undefined &&
+        (!sanctuaryConcerns.has(String(row.secondaryConcern)) ||
+          row.secondaryConcern === row.primaryConcern)) ||
+      !Array.isArray(passages) ||
+      passages.length < 1 ||
+      passages.length > 4 ||
+      passages.some((id) => typeof id !== 'string' || !id.trim()) ||
+      new Set(passages).size !== passages.length ||
+      !Array.isArray(companions) ||
+      companions.length < 2 ||
+      companions.length > 8 ||
+      companions.some((id) => !companionIds.has(String(id))) ||
+      new Set(companions).size !== companions.length ||
+      !companions.includes('snow') ||
+      !companions.includes('selah') ||
+      typeof row.bibleMissionCredited !== 'boolean' ||
+      (row.bibleMissionCredited &&
+        (row.mode !== 'study' || row.status !== 'completed')) ||
+      (row.status === 'completed' && typeof row.completedAt !== 'string') ||
+      (row.outcome !== undefined && !sanctuaryOutcomes.has(String(row.outcome))) ||
+      typeof row.createdAt !== 'string' ||
+      typeof row.updatedAt !== 'string' ||
+      (row.reflection !== undefined &&
+        (typeof row.reflection !== 'string' || row.reflection.length > 2000)) ||
+      (row.prayer !== undefined && (typeof row.prayer !== 'string' || row.prayer.length > 3000)) ||
+      (row.nextAction !== undefined &&
+        (typeof row.nextAction !== 'string' || row.nextAction.length > 500))
+    ) {
+      throw new Error('A Scripture Sanctuary record contains an impossible value.');
     }
   }
 }

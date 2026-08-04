@@ -1,5 +1,6 @@
 import {
   Archive,
+  BookHeart,
   CircleGauge,
   CircleHelp,
   Dumbbell,
@@ -18,6 +19,7 @@ const NAV = [
   { to: '/missions', label: 'Missions', icon: ListChecks },
   { to: '/status', label: 'Status', icon: Shield },
   { to: '/training-hall', label: 'Training', icon: Dumbbell },
+  { to: '/sanctuary', label: 'Sanctuary', icon: BookHeart },
   { to: '/treasury', label: 'Treasury', icon: WalletCards },
   { to: '/archive', label: 'Archive', icon: Archive },
 ];

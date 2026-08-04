@@ -23,7 +23,7 @@ export const DEFAULT_MISSIONS: MissionDefinition[] = [
     id: 'bible',
     name: 'Bible',
     shortName: 'Bible',
-    description: 'Read or study Scripture.',
+    description: 'Enter the Scripture Sanctuary for a guided study led by Selah and Snow.',
     category: 'faith',
     method: 'toggle',
     accountXp: 25,

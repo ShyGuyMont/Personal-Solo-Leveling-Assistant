@@ -49,6 +49,7 @@ import {
   revealTreasuryChallenge,
 } from '@/game/treasury';
 import { reopenTrainingCompletion } from '@/game/training';
+import { reopenSanctuaryCredit } from '@/game/sanctuary';
 import type {
   DailyReview,
   Focus,
@@ -255,6 +256,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     try {
       const mission = get().missions.find((item) => item.id === missionId);
       const trainingHallCompletion = missionId === 'workout' && Boolean(details?.trainingSessionId);
+      const sanctuaryCompletion = missionId === 'bible' && Boolean(details?.sanctuarySessionId);
       const previousStats = get().stats;
       const previousRank = get().progression?.rank;
       const result = await completeMission({
@@ -268,7 +270,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         const before = previousStats.find((item) => item.id === stat.id);
         return before && stat.level > before.level;
       });
-      if (!trainingHallCompletion) {
+      if (!trainingHallCompletion && !sanctuaryCompletion) {
         for (const stat of leveledStats) {
           await queueCompanionReaction({
             trigger: 'stat-level',
@@ -354,6 +356,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
       await undoMission(date ?? get().systemDate, missionId);
       if (missionId === 'workout') {
         await reopenTrainingCompletion(date ?? get().systemDate);
+      }
+      if (missionId === 'bible') {
+        await reopenSanctuaryCredit(date ?? get().systemDate);
       }
       set({ ...(await readSnapshot()), error: undefined });
     } catch (error) {

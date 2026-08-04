@@ -1,5 +1,6 @@
 import {
   Check,
+  BookHeart,
   ChevronDown,
   ChevronUp,
   CircleAlert,
@@ -64,6 +65,7 @@ export function MissionCard({
   );
   const trainingHallMission =
     mission.id === 'workout' && date === useGameStore.getState().systemDate;
+  const sanctuaryMission = mission.id === 'bible' && date === useGameStore.getState().systemDate;
   const checklistComplete =
     mission.method !== 'checklist' ||
     (mission.checklistItems?.length
@@ -141,6 +143,14 @@ export function MissionCard({
             >
               <Dumbbell size={19} />
             </Link>
+          ) : sanctuaryMission ? (
+            <Link
+              to="/sanctuary"
+              className="mission-action mission-action--sanctuary"
+              aria-label="Enter the Scripture Sanctuary"
+            >
+              <BookHeart size={19} />
+            </Link>
           ) : unavailableToday || requiresConfirmation ? (
             <button
               className="mission-action mission-action--deferred"
@@ -194,6 +204,21 @@ export function MissionCard({
               </div>
               <Link to="/training-hall" className="button button--primary">
                 Enter Training Hall
+              </Link>
+            </div>
+          ) : sanctuaryMission ? (
+            <div className="sanctuary-mission-gate">
+              <BookHeart size={25} />
+              <div>
+                <strong>Snow and Selah are waiting in the Scripture Sanctuary.</strong>
+                <p>
+                  Choose what you are carrying, read a guided Scripture path, reflect, and pray.
+                  Your first completed Daily Study clears this mission; Stronghold support remains
+                  available without repeatable XP.
+                </p>
+              </div>
+              <Link to="/sanctuary" className="button button--primary">
+                Enter Scripture Sanctuary
               </Link>
             </div>
           ) : mission.method === 'day-boundary' ? (

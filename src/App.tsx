@@ -56,6 +56,11 @@ const TreasuryPage = lazy(() =>
 const TrainingHallPage = lazy(() =>
   import('@/pages/TrainingHallPage').then((module) => ({ default: module.TrainingHallPage })),
 );
+const ScriptureSanctuaryPage = lazy(() =>
+  import('@/pages/ScriptureSanctuaryPage').then((module) => ({
+    default: module.ScriptureSanctuaryPage,
+  })),
+);
 
 export function App() {
   const { loading, profile, load, refresh } = useGameStore();
@@ -94,6 +99,7 @@ export function App() {
       '/update-center': UpdateCenterPage,
       '/treasury': TreasuryPage,
       '/training-hall': TrainingHallPage,
+      '/sanctuary': ScriptureSanctuaryPage,
     }[path] ?? DashboardPage;
 
   return (

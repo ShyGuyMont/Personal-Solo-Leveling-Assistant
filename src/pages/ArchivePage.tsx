@@ -1,6 +1,7 @@
 import {
   Archive,
   BatteryMedium,
+  BookHeart,
   BookOpen,
   ChevronLeft,
   ChevronRight,
@@ -25,7 +26,9 @@ import { getCompanion, getCompanionImage } from '@/config/companions';
 import { getMoodDefinition } from '@/config/partyChat';
 import { getSupportTopic } from '@/config/support';
 import { getQuestline } from '@/config/questlines';
+import { getSanctuaryConcern } from '@/config/scripture';
 import { getArchiveData } from '@/db/repositories';
+import { getSanctuaryPassages } from '@/game/sanctuary';
 import {
   dateRange,
   endOfMonth,
@@ -59,6 +62,7 @@ import type {
   SupportConversation,
   CompanionQuestProgress,
   StatTransaction,
+  SanctuarySession,
 } from '@/types/game';
 
 type ArchiveTab = 'calendar' | 'reports' | 'missions' | 'stats' | 'progression' | 'system';
@@ -92,6 +96,7 @@ export function ArchivePage() {
   const [arcMilestones, setArcMilestones] = useState<ArcMilestone[]>([]);
   const [questProgress, setQuestProgress] = useState<CompanionQuestProgress[]>([]);
   const [monthlyCouncils, setMonthlyCouncils] = useState<MonthlyCouncil[]>([]);
+  const [sanctuarySessions, setSanctuarySessions] = useState<SanctuarySession[]>([]);
   const [selectedReview, setSelectedReview] = useState<DailyReview>();
   const [missionFilter, setMissionFilter] = useState('all');
 
@@ -116,6 +121,7 @@ export function ArchivePage() {
       setArcMilestones(data.arcMilestones);
       setQuestProgress(data.companionQuestProgress);
       setMonthlyCouncils(data.monthlyCouncils);
+      setSanctuarySessions(data.sanctuarySessions);
     });
   }, []);
 
@@ -701,6 +707,60 @@ export function ArchivePage() {
                 ))}
               {!dailyEvents.some((event) => event.kind !== 'none') && (
                 <div className="empty-state">Rare daily events will be recorded here.</div>
+              )}
+            </div>
+          </section>
+          <section className="panel archive-list-panel party-checkin-archive">
+            <header className="section-header">
+              <div>
+                <p className="eyebrow">SCRIPTURE SANCTUARY</p>
+                <h2>Study and Stronghold history</h2>
+              </div>
+              <Link to="/sanctuary" className="text-link">
+                Open Sanctuary <BookHeart size={16} />
+              </Link>
+            </header>
+            <div className="party-checkin-archive__list">
+              {sanctuarySessions
+                .filter((entry) => entry.status === 'completed')
+                .slice(0, 60)
+                .map((entry) => (
+                  <details key={entry.id} className="party-checkin-archive__item">
+                    <summary>
+                      <BookHeart size={18} />
+                      <div>
+                        <strong>
+                          {entry.mode === 'study' ? 'Daily Scripture Study' : 'Stronghold Protocol'}
+                        </strong>
+                        <small>
+                          {formatLongDate(entry.date)} ·{' '}
+                          {getSanctuaryConcern(entry.primaryConcern).label}
+                          {entry.secondaryConcern
+                            ? ` + ${getSanctuaryConcern(entry.secondaryConcern).label}`
+                            : ''}
+                        </small>
+                      </div>
+                      <ChevronRight size={17} />
+                    </summary>
+                    <div className="sanctuary-archive-detail">
+                      <p>
+                        <strong>Scripture path</strong>{' '}
+                        {getSanctuaryPassages(entry)
+                          .map((passage) => passage.reference)
+                          .join(' · ')}
+                      </p>
+                      {entry.reflection && (
+                        <p><strong>Reflection</strong> {entry.reflection}</p>
+                      )}
+                      {entry.prayer && <p><strong>Prayer</strong> {entry.prayer}</p>}
+                      {entry.nextAction && (
+                        <p><strong>Next action</strong> {entry.nextAction}</p>
+                      )}
+                    </div>
+                  </details>
+                ))}
+              {!sanctuarySessions.some((entry) => entry.status === 'completed') && (
+                <div className="empty-state">Completed Sanctuary sessions will be saved here.</div>
               )}
             </div>
           </section>

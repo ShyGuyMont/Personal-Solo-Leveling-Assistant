@@ -62,7 +62,7 @@ describe('save validation and recovery', () => {
     expect(await listLocalSnapshots()).toHaveLength(5);
   });
 
-  it('round-trips every Version 3.5 campaign, Treasury, and Training Hall record through Archive Shield', async () => {
+  it('round-trips every Version 4.0 campaign, Treasury, Training, and Sanctuary record through Archive Shield', async () => {
     const now = new Date().toISOString();
     await db.dailyBriefings.put({
       id: '2026-08-01',
@@ -182,9 +182,27 @@ describe('save validation and recovery', () => {
       exerciseLoads: { 'double-db-front-squat': 25 },
       updatedAt: now,
     });
+    await db.sanctuarySessions.put({
+      id: 'sanctuary:backup',
+      date: '2026-08-01',
+      mode: 'study',
+      status: 'completed',
+      primaryConcern: 'loneliness',
+      secondaryConcern: 'sexual-integrity',
+      passageIds: ['lonely-1', 'lonely-2', 'integrity-1'],
+      companionIds: ['snow', 'selah', 'amara'],
+      createdAt: now,
+      updatedAt: now,
+      completedAt: now,
+      reflection: 'The urge was connected to isolation.',
+      prayer: 'Help me move toward honest connection.',
+      nextAction: 'Text a trusted friend.',
+      outcome: 'connected',
+      bibleMissionCredited: true,
+    });
 
     const save = await createSaveFile();
-    expect(save.version).toBe(10);
+    expect(save.version).toBe(11);
     for (const table of [
       'dailyBriefings',
       'campaignArcs',
@@ -193,6 +211,7 @@ describe('save validation and recovery', () => {
       'monthlyCouncils',
       'treasuryTransactions',
       'trainingSessions',
+      'sanctuarySessions',
     ]) {
       expect(save.data[table]).toHaveLength(1);
     }
@@ -208,6 +227,7 @@ describe('save validation and recovery', () => {
         db.monthlyCouncils,
         db.treasuryTransactions,
         db.trainingSessions,
+        db.sanctuarySessions,
       ],
       async () => {
         await db.dailyBriefings.clear();
@@ -217,6 +237,7 @@ describe('save validation and recovery', () => {
         await db.monthlyCouncils.clear();
         await db.treasuryTransactions.clear();
         await db.trainingSessions.clear();
+        await db.sanctuarySessions.clear();
       },
     );
     await commitPreparedImport(prepared);
@@ -235,9 +256,12 @@ describe('save validation and recovery', () => {
     );
     expect((await db.treasuryTransactions.get('treasury:backup'))?.amountCents).toBe(2450);
     expect((await db.trainingSessions.get('2026-08-01'))?.roundsCompleted).toBe(5);
+    expect((await db.sanctuarySessions.get('sanctuary:backup'))?.prayer).toBe(
+      'Help me move toward honest connection.',
+    );
   });
 
-  it('migrates a Version 2.1 save to Version 3.5 without losing the existing party', async () => {
+  it('migrates a Version 2.1 save to Version 4.0 without losing the existing party', async () => {
     const save = await createSaveFile();
     save.version = 7;
     for (const table of [
@@ -256,7 +280,7 @@ describe('save validation and recovery', () => {
     save.checksum = await digest(save.data);
 
     const prepared = await prepareSaveImport(asFile(save));
-    expect(prepared.save.version).toBe(10);
+    expect(prepared.save.version).toBe(11);
     expect(prepared.save.data.dailyBriefings).toEqual([]);
     const migrated = prepared.save.data.settings[0] as Record<string, unknown>;
     expect(migrated.enabledCompanionIds).toContain('amara');
@@ -265,6 +289,7 @@ describe('save validation and recovery', () => {
     expect(prepared.save.data.treasurySettings).toHaveLength(1);
     expect(prepared.save.data.treasuryTransactions).toEqual([]);
     expect(prepared.save.data.trainingSessions).toEqual([]);
+    expect(prepared.save.data.sanctuarySessions).toEqual([]);
   });
 
   it('rejects impossible Treasury values even when the checksum matches', async () => {
@@ -281,5 +306,27 @@ describe('save validation and recovery', () => {
     ];
     save.checksum = await digest(save.data);
     await expect(prepareSaveImport(asFile(save))).rejects.toThrow(/Treasury ledger entry/i);
+  });
+
+  it('rejects impossible Sanctuary credit even when the checksum matches', async () => {
+    const now = new Date().toISOString();
+    const save = await createSaveFile();
+    save.data.sanctuarySessions = [
+      {
+        id: 'sanctuary:impossible',
+        date: '2026-08-01',
+        mode: 'stronghold',
+        status: 'completed',
+        primaryConcern: 'stress',
+        passageIds: ['stress-1', 'stress-2'],
+        companionIds: ['snow', 'selah', 'haven'],
+        createdAt: now,
+        updatedAt: now,
+        completedAt: now,
+        bibleMissionCredited: true,
+      },
+    ];
+    save.checksum = await digest(save.data);
+    await expect(prepareSaveImport(asFile(save))).rejects.toThrow(/Scripture Sanctuary/i);
   });
 });

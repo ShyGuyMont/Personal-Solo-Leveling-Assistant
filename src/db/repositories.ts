@@ -40,6 +40,7 @@ export async function getArchiveData() {
     arcMilestones,
     companionQuestProgress,
     monthlyCouncils,
+    sanctuarySessions,
   ] = await Promise.all([
     db.dailyReviews.where('status').equals('finalized').sortBy('date'),
     db.dailyMissions.toArray(),
@@ -68,6 +69,7 @@ export async function getArchiveData() {
       .then((items) => items.sort((a, b) => b.createdAt.localeCompare(a.createdAt))),
     db.companionQuestProgress.toArray(),
     db.monthlyCouncils.orderBy('monthStart').reverse().toArray(),
+    db.sanctuarySessions.orderBy('createdAt').reverse().toArray(),
   ]);
   return {
     reviews,
@@ -89,6 +91,7 @@ export async function getArchiveData() {
     arcMilestones,
     companionQuestProgress,
     monthlyCouncils,
+    sanctuarySessions,
   };
 }
 

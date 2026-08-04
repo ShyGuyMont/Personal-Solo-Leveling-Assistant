@@ -170,6 +170,7 @@ export interface MissionDetails {
   quantity?: number;
   checklist?: Record<string, boolean>;
   trainingSessionId?: string;
+  sanctuarySessionId?: string;
 }
 
 export type TrainingLocation = 'home' | 'gym' | 'conditioning' | 'recovery';
@@ -204,6 +205,41 @@ export interface TrainingSession {
   recoveryProtocol?: string;
   note?: string;
   updatedAt: string;
+}
+
+export type SanctuaryMode = 'study' | 'stronghold';
+export type SanctuaryStatus = 'active' | 'completed' | 'abandoned';
+export type SanctuaryConcern =
+  | 'sexual-integrity'
+  | 'shame'
+  | 'anger'
+  | 'sadness'
+  | 'loneliness'
+  | 'stress'
+  | 'numbness'
+  | 'focus'
+  | 'doubt'
+  | 'forgiveness'
+  | 'identity'
+  | 'gratitude';
+
+export interface SanctuarySession {
+  id: string;
+  date: LocalDateKey;
+  mode: SanctuaryMode;
+  status: SanctuaryStatus;
+  primaryConcern: SanctuaryConcern;
+  secondaryConcern?: SanctuaryConcern;
+  passageIds: string[];
+  companionIds: CompanionId[];
+  createdAt: string;
+  updatedAt: string;
+  completedAt?: string;
+  reflection?: string;
+  prayer?: string;
+  nextAction?: string;
+  outcome?: 'steadier' | 'moved' | 'connected' | 'need-support';
+  bibleMissionCredited: boolean;
 }
 
 export interface DailyMissionRecord {
