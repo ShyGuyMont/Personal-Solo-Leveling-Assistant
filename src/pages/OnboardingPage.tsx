@@ -189,6 +189,7 @@ export function OnboardingPage() {
                   type="button"
                   key={option.id}
                   className={focus === option.id ? 'is-selected' : ''}
+                  aria-pressed={focus === option.id}
                   onClick={() => setFocus(option.id)}
                 >
                   <span>{option.label}</span>
@@ -201,6 +202,7 @@ export function OnboardingPage() {
             <button
               type="button"
               className={`preference-toggle ${sound ? 'is-on' : ''}`}
+              aria-pressed={sound}
               onClick={() => setSound((value) => !value)}
             >
               {sound ? <Volume2 size={18} /> : <VolumeX size={18} />}
