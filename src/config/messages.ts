@@ -86,7 +86,7 @@ const LEVEL = [
 
 const RANK = [
   'Your classification has changed.',
-  'Rank advancement confirmed. New standards now apply.',
+  'Class advancement confirmed. New standards now apply.',
   'The system recognizes sustained growth.',
   'A monumental threshold has been crossed.',
 ];

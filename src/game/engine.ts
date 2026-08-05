@@ -21,6 +21,7 @@ import {
   parseDateKey,
 } from '@/utils/date';
 import { createId, stableId } from '@/utils/id';
+import { formatClassName } from '@/utils/format';
 import type {
   AccountProgression,
   DailyMissionRecord,
@@ -1236,8 +1237,8 @@ export async function completeChallenge(progressId: string, systemDate: LocalDat
             id: stableId('progression-event', 'rank', template.rankTarget, now),
             kind: 'rank-up',
             createdAt: now,
-            headline: `${template.rankTarget}-RANK ACHIEVED`,
-            detail: 'Classification advanced. The permanent rank archive has been updated.',
+            headline: `${formatClassName(template.rankTarget).toUpperCase()} ACHIEVED`,
+            detail: 'Classification advanced. The permanent Class archive has been updated.',
             acknowledged: false,
           });
           await unlockTitle('rank-breaker', rewardId, now);
@@ -1274,14 +1275,14 @@ export async function activateBossChallenge(templateId: string, systemDate: Loca
 
 export async function activateRankTrial(templateId: string, systemDate: LocalDateKey) {
   const template = RANK_TRIALS.find((item) => item.id === templateId);
-  if (!template) throw new Error('Rank Trial not found.');
+  if (!template) throw new Error('Class Trial not found.');
   const settings = await db.settings.get('primary');
   if (!settings) throw new Error('Settings not found.');
   const existing = await db.challengeProgress
     .where('[kind+status]')
     .equals(['rank-trial', 'active'])
     .first();
-  if (existing) throw new Error('A Rank Trial is already active.');
+  if (existing) throw new Error('A Class Trial is already active.');
   const previous = await db.challengeProgress.where('templateId').equals(templateId).last();
   if (previous?.cooldownUntil && compareDateKeys(previous.cooldownUntil, systemDate) > 0) {
     throw new Error(`This trial is in cooldown until ${previous.cooldownUntil}.`);

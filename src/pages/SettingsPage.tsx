@@ -26,9 +26,11 @@ import {
 import { equipTitle, saveConfiguration } from '@/db/repositories';
 import { DEFAULT_MISSIONS, OPTIONAL_MISSION_TEMPLATES } from '@/config/missions';
 import { COMPANIONS, getCompanionImage } from '@/config/companions';
+import { APP_VERSION } from '@/config/release';
 import { Modal } from '@/components/Modal';
 import { Link } from '@/router';
 import { useGameStore } from '@/store/useGameStore';
+import { formatClassName } from '@/utils/format';
 import type {
   BackupSnapshot,
   CompanionId,
@@ -148,7 +150,7 @@ export function SettingsPage() {
                 maxLength={50}
               />
               <small>
-                Cosmetic nickname only—it does not affect XP, stats, achievement titles, or rank.
+                Cosmetic nickname only—it does not affect XP, stats, achievement titles, or class.
               </small>
             </label>
             <label className="field">
@@ -910,10 +912,10 @@ export function SettingsPage() {
               <p className="eyebrow">ARCHIVE SHIELD · LOCAL DATA</p>
               <h2>Full-campaign backup</h2>
               <p>
-                Everything—including Version 5.0 Kitchen notes, structured Training Hall records,
-                Treasury records, Campaign Arcs, questlines, briefings, Councils, chats, Amara, and
-                Cassian—is stored on this device. Export regularly before clearing browser data or
-                changing phones.
+                Everything—including System Ascension preferences, Kitchen notes, structured
+                Training Hall records, Treasury records, Campaign Arcs, questlines, briefings,
+                Councils, chats, and all nine companions—is stored on this device. Export regularly
+                before clearing browser data or changing phones.
               </p>
             </div>
           </header>
@@ -1022,7 +1024,7 @@ export function SettingsPage() {
           <Info size={21} />
           <div>
             <p className="eyebrow">ABOUT</p>
-            <h2>The System · Version 5.0.0</h2>
+            <h2>The System · Version {APP_VERSION}</h2>
             <p>
               An original, offline-first personal progression RPG. It uses no login, backend,
               external API, analytics, advertising, tracking, paid service, or copied franchise
@@ -1057,9 +1059,9 @@ export function SettingsPage() {
                 <strong>{preparedImport.preview.displayName}</strong>
               </div>
               <div>
-                <span>Level / Rank</span>
+                <span>Level / Class</span>
                 <strong>
-                  {preparedImport.preview.level} / {preparedImport.preview.rank}
+                  {preparedImport.preview.level} / {formatClassName(preparedImport.preview.rank)}
                 </strong>
               </div>
               <div>

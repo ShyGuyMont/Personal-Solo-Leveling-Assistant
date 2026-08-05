@@ -871,7 +871,7 @@ export const RECOVERY_CHALLENGES: ChallengeTemplate[] = [
 export const RANK_TRIALS: ChallengeTemplate[] = [
   {
     id: 'trial-e',
-    name: 'E-Rank Trial · First Classification',
+    name: 'E-Class Trial · First Classification',
     description: 'Complete 5 of the next 7 days with no failed core missions.',
     kind: 'rank-trial',
     category: 'rank',
@@ -886,7 +886,7 @@ export const RANK_TRIALS: ChallengeTemplate[] = [
   },
   {
     id: 'trial-d',
-    name: 'D-Rank Trial · Twin Pillars',
+    name: 'D-Class Trial · Twin Pillars',
     description: 'Complete 10 workouts and 10 faith missions within 21 days.',
     kind: 'rank-trial',
     category: 'rank',
@@ -909,7 +909,7 @@ export const RANK_TRIALS: ChallengeTemplate[] = [
   },
   {
     id: 'trial-c',
-    name: 'C-Rank Trial · Thirty-Day Campaign',
+    name: 'C-Class Trial · Thirty-Day Campaign',
     description: 'Complete a 30-day campaign at 85% or higher.',
     kind: 'rank-trial',
     category: 'rank',
@@ -924,7 +924,7 @@ export const RANK_TRIALS: ChallengeTemplate[] = [
   },
   {
     id: 'trial-b',
-    name: 'B-Rank Trial · Balanced Campaign',
+    name: 'B-Class Trial · Balanced Campaign',
     description: 'Sustain an 87% rate across a balanced 35-day campaign.',
     kind: 'rank-trial',
     category: 'rank',
@@ -939,7 +939,7 @@ export const RANK_TRIALS: ChallengeTemplate[] = [
   },
   {
     id: 'trial-a',
-    name: 'A-Rank Trial · Forty-Five-Day Crucible',
+    name: 'A-Class Trial · Forty-Five-Day Crucible',
     description: 'Complete a 45-day campaign with 90% completion and balanced growth.',
     kind: 'rank-trial',
     category: 'rank',
@@ -954,7 +954,7 @@ export const RANK_TRIALS: ChallengeTemplate[] = [
   },
   {
     id: 'trial-s',
-    name: 'S-Rank Trial · Sixty-Day Threshold',
+    name: 'S-Class Trial · Sixty-Day Threshold',
     description: 'Complete a strict 60-day campaign at 92% or higher.',
     kind: 'rank-trial',
     category: 'rank',

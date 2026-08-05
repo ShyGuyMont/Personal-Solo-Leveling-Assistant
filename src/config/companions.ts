@@ -77,9 +77,9 @@ export const COMPANIONS: CompanionDefinition[] = [
         'Level {level} {stat}. Look how far the version of you who started has carried us.',
       ],
       'rank-up': [
-        'New rank confirmed. I was here for the struggle, so believe me when I say—you earned this.',
+        'New class confirmed. I was here for the struggle, so believe me when I say—you earned this.',
         'Classification advanced. Come on, let yourself feel proud. I already am.',
-        'A new rank suits you. Not because the road was easy—because you kept becoming.',
+        'A new class suits you. Not because the road was easy—because you kept becoming.',
       ],
       'rare-event': [
         'Rare signal cleared. Of course you found a way to turn surprise into progress.',
@@ -126,7 +126,7 @@ export const COMPANIONS: CompanionDefinition[] = [
         'Your {stat} advanced to level {level}. Stand tall and remember what built it.',
       ],
       'rank-up': [
-        'New rank confirmed. I knew your work would become impossible to ignore.',
+        'New class confirmed. I knew your work would become impossible to ignore.',
         'Classification advanced. Enjoy the moment—then we build again.',
       ],
       'rare-event': [
@@ -162,7 +162,7 @@ export const COMPANIONS: CompanionDefinition[] = [
         'Your {stat} has deepened to level {level}. Let it shape the next choice, too.',
       ],
       'rank-up': [
-        'Your rank changed, but the truest victory is who you are becoming.',
+        'Your class changed, but the truest victory is who you are becoming.',
         'A new classification. Receive it with gratitude, then continue faithfully.',
       ],
       'rare-event': [
@@ -202,7 +202,7 @@ export const COMPANIONS: CompanionDefinition[] = [
         'Your {stat} advanced to level {level}. Keep the process; discard the excuses.',
       ],
       'rank-up': [
-        'Rank advanced. The data has finally caught up with your effort.',
+        'Class advanced. The data has finally caught up with your effort.',
         'New classification confirmed. Our next plan can be more ambitious.',
       ],
       'rare-event': [
@@ -238,7 +238,7 @@ export const COMPANIONS: CompanionDefinition[] = [
         'Your {stat} advanced to level {level}. Quiet growth is still real growth.',
       ],
       'rank-up': [
-        'A higher rank is good. Reaching it without abandoning yourself is better.',
+        'A higher class is good. Reaching it without abandoning yourself is better.',
         'Classification advanced. I am proud of the way you kept your humanity with you.',
       ],
       'rare-event': [
@@ -281,7 +281,7 @@ export const COMPANIONS: CompanionDefinition[] = [
         'Good hit. Lock that feeling in and carry it into the next honest move.',
       ],
       'rank-up': [
-        'New rank. Good. Now look at what happens when you refuse to stay down.',
+        'New class. Good. Now look at what happens when you refuse to stay down.',
         'Classification advanced. That fire was never gone—you learned how to reach it again.',
       ],
       'rare-event': [
@@ -340,7 +340,7 @@ export const COMPANIONS: CompanionDefinition[] = [
         'Your {stat} advanced to level {level}. Keep the tenderness; keep the boundaries too.',
       ],
       'rank-up': [
-        'A new rank—and you still remembered that no victory has to make you less human. I love that.',
+        'A new class—and you still remembered that no victory has to make you less human. I love that.',
         'Classification advanced. Let the people who care about you celebrate the person behind the achievement.',
         'Your power grew, but so did your capacity to connect. That is a beautiful kind of ascension.',
       ],
@@ -398,8 +398,8 @@ export const COMPANIONS: CompanionDefinition[] = [
       ],
       'rank-up': [
         'Classification advanced. Strength is easier to sustain when the resources beneath it are under command.',
-        'New rank confirmed. Celebrate it without turning celebration into an unplanned charge.',
-        'Your rank rose. So must the quality of the plan protecting what you are building.',
+        'New class confirmed. Celebrate it without turning celebration into an unplanned charge.',
+        'Your class rose. So must the quality of the plan protecting what you are building.',
       ],
       'rare-event': [
         'Unexpected opportunity handled without abandoning the plan. That is controlled flexibility.',
@@ -464,9 +464,9 @@ export const COMPANIONS: CompanionDefinition[] = [
         'Your {stat} advanced to level {level}. Delicious progress—metaphorically. Do not eat the badge.',
       ],
       'rank-up': [
-        'New rank! Sit down, breathe, and let me cook—figuratively. You are doing the cooking. I am supervising loudly.',
+        'New class! Sit down, breathe, and let me cook—figuratively. You are doing the cooking. I am supervising loudly.',
         'Classification advanced. Your standards rose; the quality of your fuel comes with them.',
-        'A higher rank deserves celebration. We can make it taste incredible without making tomorrow pay for it.',
+        'A higher class deserves celebration. We can make it taste incredible without making tomorrow pay for it.',
       ],
       'rare-event': [
         'Rare objective complete! Good. Surprise is acceptable when it produces results—or a new sauce.',

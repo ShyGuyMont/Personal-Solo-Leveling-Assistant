@@ -27,6 +27,7 @@ import { TITLE_LIBRARY } from '@/config/titles';
 import { accountXpForLevel, totalXpAtLevel } from '@/game/xp';
 import { Link } from '@/router';
 import { useGameStore } from '@/store/useGameStore';
+import { formatClassName } from '@/utils/format';
 
 const DEFAULT_DAILY_MISSION_XP = DEFAULT_MISSIONS.reduce(
   (sum, mission) => sum + (mission.customAccountXp ?? mission.accountXp),
@@ -57,7 +58,7 @@ const DESTINATIONS = [
     to: '/',
     icon: CircleGauge,
     title: 'System',
-    text: 'See today’s progress, current rank, and quick missions.',
+    text: 'See today’s progress, current class, and quick missions.',
   },
   {
     to: '/missions',
@@ -87,7 +88,7 @@ const DESTINATIONS = [
     to: '/status',
     icon: Shield,
     title: 'Status',
-    text: 'Understand your level, rank, stats, achievements, and collection.',
+    text: 'Understand your level, class, stats, achievements, and collection.',
   },
   {
     to: '/challenges',
@@ -235,7 +236,7 @@ export function AboutPage() {
           <BookOpenCheck size={21} />
         </header>
         <details open>
-          <summary>What are my level, rank, and two kinds of title?</summary>
+          <summary>What are my level, class, and two kinds of title?</summary>
           <div className="about-progression-grid">
             <article>
               <strong>Account Level</strong>
@@ -244,16 +245,16 @@ export function AboutPage() {
               </p>
             </article>
             <article>
-              <strong>Rank</strong>
+              <strong>Class</strong>
               <p>
-                Your long-term classification. Meet every requirement, then pass the Rank Trial.
+                Your long-term classification. Meet every requirement, then pass the Class Trial.
               </p>
             </article>
             <article>
               <strong>Custom System Title</strong>
               <p>
                 A nickname you write for yourself. It is cosmetic and never changes XP, stats, or
-                rank.
+                class.
               </p>
             </article>
             <article>
@@ -270,12 +271,13 @@ export function AboutPage() {
           </p>
         </details>
         <details>
-          <summary>How do ranks work?</summary>
+          <summary>How do classes work?</summary>
           <p>
-            You begin at F Rank. The ladder is F → E → D → C → B → A → S → World Class. For each
-            step, meet all six requirements shown below; then the matching Rank Trial becomes
-            available. Passing it advances you exactly one rank. A failed trial keeps your rank and
-            earned progress, enters a cooldown, and can be attempted again later.
+            You begin at F-Class. The ladder is F-Class → E-Class → D-Class → C-Class → B-Class →
+            A-Class → S-Class → World Class. For each step, meet all six requirements shown below;
+            then the matching Class Trial becomes available. Passing it advances you exactly one
+            class. A failed trial keeps your class and earned progress, enters a cooldown, and can
+            be attempted again later.
           </p>
           <div className="about-rank-grid">
             {RANK_REQUIREMENTS.filter((requirement) => requirement.rank !== 'F').map(
@@ -283,7 +285,7 @@ export function AboutPage() {
                 <article key={requirement.rank}>
                   <header>
                     <span>QUALIFY FOR</span>
-                    <strong>{requirement.rank}</strong>
+                    <strong>{formatClassName(requirement.rank)}</strong>
                   </header>
                   <ul>
                     <li>
@@ -321,15 +323,15 @@ export function AboutPage() {
             <strong>Highest classification:</strong> World Class. Numerical account and stat levels
             can continue as high as Level 999. World Class requires{' '}
             {WORLD_CLASS_REQUIREMENT.completedDays} Completed Days before its final{' '}
-            {WORLD_CLASS_TRIAL.durationDays}-day Rank Trial can begin, so the earliest first-attempt
-            path is about {EARLIEST_WORLD_CLASS_DAYS} calendar days—roughly nineteen months. At
-            sustainable 75–90% long-term mission consistency, the full ladder is designed for
-            approximately twenty to twenty-four months when trials are passed on schedule; retries
-            can extend it. Every rank still depends on all six visible requirements and its Rank
-            Trial. The Level {WORLD_CLASS_LEVEL} gate equals{' '}
+            {WORLD_CLASS_TRIAL.durationDays}-day Class Trial can begin, so the earliest
+            first-attempt path is about {EARLIEST_WORLD_CLASS_DAYS} calendar days—roughly nineteen
+            months. At sustainable 75–90% long-term mission consistency, the full ladder is designed
+            for approximately twenty to twenty-four months when trials are passed on schedule;
+            retries can extend it. Every class still depends on all six visible requirements and its
+            Class Trial. The Level {WORLD_CLASS_LEVEL} gate equals{' '}
             {WORLD_CLASS_ACCOUNT_XP.toLocaleString()} lifetime account XP, but the simulator
             confirms that Completed Days and trials—not an oversized hidden XP wall—set the final
-            pace. Once a rank is earned, missed days do not demote it.
+            pace. Once a class is earned, missed days do not demote it.
           </p>
         </details>
         <details>
@@ -337,10 +339,10 @@ export function AboutPage() {
           <p>
             Titles unlock automatically from objective facts already recorded by the app—mission
             totals, Perfect Days, streaks, finalized reviews, stat levels, completed challenges,
-            Recovery or exception milestones, and ranks. For example, Steady Hand unlocks at 25
-            missions, Unbroken Focus at Focus Level 20, Deep Root at Faith Level 30, Rank Breaker
-            after a rank-up, and Beyond Measure at World Class. Unlocks are permanent, are not
-            random, and do not automatically replace the title you chose to equip.
+            Recovery or exception milestones, and classes. For example, Steady Hand unlocks at 25
+            missions, Unbroken Focus at Focus Level 20, Deep Root at Faith Level 30, Class Breaker
+            after a class advancement, and Beyond Measure at World Class. Unlocks are permanent, are
+            not random, and do not automatically replace the title you chose to equip.
           </p>
         </details>
         <details>
@@ -445,7 +447,7 @@ export function AboutPage() {
           <p>
             Daily missions award the account and stat XP printed on their cards. Daily Workout is
             worth 75 account XP and can be cleared once through any Training Hall path. Perfect
-            Days, completed challenges, Rank Trials, Companion Quest chapters, Treasury reviews,
+            Days, completed challenges, Class Trials, Companion Quest chapters, Treasury reviews,
             rewarded Kitchen Orders, Double Deployment surges, and accepted rare events award their
             own displayed one-time XP. Campaign Arc milestones, emotional check-ins, support
             conversations, Campfires, Councils, repeat Sanctuary studies, Stronghold sessions, and
@@ -519,7 +521,7 @@ export function AboutPage() {
             Treasury Command is a private manual money planner led by Cassian. Log income and
             spending, track bills, debt, and savings, set realistic weekly targets, then finalize a
             Weekly Review for its displayed one-time reward. Budget Stability is a coaching signal,
-            not a punishment: it never removes account XP or changes rank, streaks, or missions. No
+            not a punishment: it never removes account XP or changes class, streaks, or missions. No
             bank is connected, and all Treasury records are included in Archive Shield exports.
           </p>
         </details>
@@ -539,7 +541,7 @@ export function AboutPage() {
           <p>
             Campfires summarize a completed week with at least one finalized Daily Review. Monthly
             Councils assemble all nine companions after a completed calendar month and review
-            mission balance, Perfect Days, levels, ranks, titles, Campaign milestones, quest
+            mission balance, Perfect Days, levels, classes, titles, Campaign milestones, quest
             chapters, and relationship actions that were actually recorded. Their commentary is
             saved in Headquarters and the Archive, and never changes scoring. The Council also gives
             you an optional place to write one next-month intention.
@@ -564,7 +566,7 @@ export function AboutPage() {
             debt reduction, spending awareness, and shame-free financial recovery. Saffron
             specializes in practical cooking, training-supportive meals, leftovers, and lowering the
             friction that makes eating out feel automatic. Companion words never secretly change XP,
-            streaks, mission results, or rank requirements.
+            streaks, mission results, or class requirements.
           </p>
         </details>
         <details>

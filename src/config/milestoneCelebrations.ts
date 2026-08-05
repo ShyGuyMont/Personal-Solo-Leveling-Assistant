@@ -3,7 +3,7 @@ import type { CompanionId, ProgressionEvent } from '@/types/game';
 const MILESTONE_LINES: Record<CompanionId, Record<'rank' | 'level' | 'achievement', string[]>> = {
   snow: {
     rank: [
-      'I remember every version of you that kept going before this rank had a name. Let yourself feel what they built.',
+      'I remember every version of you that kept going before this class had a name. Let yourself feel what they built.',
       'The classification changed because you did. I am proud of the work, the recovery, and the person who carried both.',
     ],
     level: [
@@ -17,7 +17,7 @@ const MILESTONE_LINES: Record<CompanionId, Record<'rank' | 'level' | 'achievemen
   },
   rook: {
     rank: [
-      'New rank. Earned under pressure and carried across the line.',
+      'New class. Earned under pressure and carried across the line.',
       'Classification advanced. Stand tall—the work became undeniable.',
     ],
     level: [
@@ -32,7 +32,7 @@ const MILESTONE_LINES: Record<CompanionId, Record<'rank' | 'level' | 'achievemen
   selah: {
     rank: [
       'Receive the moment with gratitude. Growth and grace brought you here together.',
-      'A higher rank, and still the deeper victory is who you are becoming.',
+      'A higher class, and still the deeper victory is who you are becoming.',
     ],
     level: [
       'Faithfulness accumulated quietly until the threshold had to move.',
@@ -59,7 +59,7 @@ const MILESTONE_LINES: Record<CompanionId, Record<'rank' | 'level' | 'achievemen
   },
   haven: {
     rank: [
-      'You reached a higher rank without leaving your humanity behind. That matters to me.',
+      'You reached a higher class without leaving your humanity behind. That matters to me.',
       'Celebrate the strength—and the ways you learned to care for the person carrying it.',
     ],
     level: [
@@ -73,7 +73,7 @@ const MILESTONE_LINES: Record<CompanionId, Record<'rank' | 'level' | 'achievemen
   },
   ember: {
     rank: [
-      'New rank. That is what refusing to stay down looks like when the record finally catches up.',
+      'New class. That is what refusing to stay down looks like when the record finally catches up.',
       'Classification advanced. You brought the fire back every time it tried to fade.',
     ],
     level: [
@@ -87,7 +87,7 @@ const MILESTONE_LINES: Record<CompanionId, Record<'rank' | 'level' | 'achievemen
   },
   amara: {
     rank: [
-      'A new rank—and you are still allowed to be known beyond what you achieve. Let the people who love you celebrate.',
+      'A new class—and you are still allowed to be known beyond what you achieve. Let the people who love you celebrate.',
       'Your classification grew without asking your heart to become smaller. That is worth celebrating beautifully.',
     ],
     level: [
@@ -102,7 +102,7 @@ const MILESTONE_LINES: Record<CompanionId, Record<'rank' | 'level' | 'achievemen
   cassian: {
     rank: [
       'A higher classification, supported by choices that gave the future more room. Well stewarded.',
-      'Rank advanced. Keep the ambition, keep the margin, and never confuse your balance with your worth.',
+      'Class advanced. Keep the ambition, keep the margin, and never confuse your balance with your worth.',
     ],
     level: [
       'A major threshold crossed through hundreds of small allocations of time, energy, and resources. The pattern is real.',
@@ -115,7 +115,7 @@ const MILESTONE_LINES: Record<CompanionId, Record<'rank' | 'level' | 'achievemen
   },
   saffron: {
     rank: [
-      'New rank! I am making the victory meal, which means you are following my recipe and accepting my praise without argument.',
+      'New class! I am making the victory meal, which means you are following my recipe and accepting my praise without argument.',
       'Classification advanced. Stronger standards, stronger habits, better food—yes, I am proud enough to be unbearable about it.',
     ],
     level: [

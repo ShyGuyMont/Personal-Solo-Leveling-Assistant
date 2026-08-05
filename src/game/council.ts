@@ -152,7 +152,7 @@ function snowClosing(metrics: MonthlyCouncilMetrics) {
       ? `${metrics.levelsGained} level${metrics.levelsGained === 1 ? '' : 's'}`
       : '',
     metrics.rankChanges
-      ? `${metrics.rankChanges} rank change${metrics.rankChanges === 1 ? '' : 's'}`
+      ? `${metrics.rankChanges} class advancement${metrics.rankChanges === 1 ? '' : 's'}`
       : '',
     metrics.titlesGained
       ? `${metrics.titlesGained} title${metrics.titlesGained === 1 ? '' : 's'}`

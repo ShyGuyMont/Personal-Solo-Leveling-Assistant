@@ -41,7 +41,7 @@ export function MonthlyCouncilView({
           </p>
           <h2>The full party reviews the chapter</h2>
           <p>
-            Built from finalized records. The council cannot change your score, rank, streaks, or
+            Built from finalized records. The council cannot change your score, class, streaks, or
             mission history.
           </p>
         </div>

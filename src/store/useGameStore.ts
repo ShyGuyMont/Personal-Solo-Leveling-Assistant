@@ -390,7 +390,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       await activateRankTrial(templateId, get().systemDate);
       set({ ...(await readSnapshot()), error: undefined });
     } catch (error) {
-      set({ error: error instanceof Error ? error.message : 'Rank Trial could not begin.' });
+      set({ error: error instanceof Error ? error.message : 'Class Trial could not begin.' });
       throw error;
     }
   },

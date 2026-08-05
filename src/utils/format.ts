@@ -1,4 +1,4 @@
-import type { StatName } from '@/types/game';
+import type { Rank, StatName } from '@/types/game';
 
 export function formatNumber(value: number) {
   return new Intl.NumberFormat('en-US').format(Math.round(value));
@@ -14,6 +14,10 @@ export function titleCase(value: string) {
     .filter(Boolean)
     .map((word) => word[0].toUpperCase() + word.slice(1))
     .join(' ');
+}
+
+export function formatClassName(rank: Rank | string) {
+  return rank === 'WORLD CLASS' ? 'World Class' : `${rank}-Class`;
 }
 
 export const STAT_LABELS: Record<StatName, string> = {

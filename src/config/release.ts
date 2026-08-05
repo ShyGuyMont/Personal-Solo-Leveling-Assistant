@@ -1,4 +1,4 @@
-export const APP_VERSION = '5.0.0';
+export const APP_VERSION = '6.0.0';
 export const DATABASE_SCHEMA_VERSION = 12;
 export const SAVE_FORMAT_VERSION = 12;
 
@@ -10,39 +10,40 @@ export interface ReleaseSection {
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
   {
-    title: 'Toji Ascension Gym',
-    detail: 'Gym Deployment is now a complete progressive resistance-training program.',
+    title: 'System Ascension Interface',
+    detail: 'The complete app now inhabits one dimensional, route-aware command system.',
     points: [
-      'Vanguard Frame, Iron Citadel, and Shadow Hunter form the three-day foundation; Heavenly Restriction is an optional fourth specialization day.',
-      'Rook recommends the session that has waited longest while substitutions, every working set, load, reps, rest, effort, and optional finisher remain under your control.',
-      'Previous performance becomes the next target, top-of-range sets trigger a small-increase prompt, and new volume records are called out after the session.',
+      'Abyssal Hologram atmosphere, Command Chamber structure, and Living Companion Realm accents now work as one visual language.',
+      'Layered gates, tactical depth planes, illuminated surfaces, responsive navigation, and tactile controls make the interface feel spatial without sacrificing clarity.',
+      'Abyss and Daybreak remain distinct lighting palettes, while Clean mode and Reduced Motion preserve a calm, accessible alternative.',
     ],
   },
   {
-    title: 'Double Deployment',
-    detail: 'Home circuits remain available even after a full gym session.',
+    title: 'Class System',
+    detail:
+      'The long-term classification is now expressed consistently from F-Class to World Class.',
     points: [
-      'Completing one Gym Deployment and one Home Circuit on the same System day awards one fixed +150 XP Ascension Surge plus Strength, Endurance, Discipline, and Vitality XP.',
-      'The Daily Workout mission still pays only once, and the surge is never multiplied by Snow’s Daily Command.',
-      'Stable transaction keys prevent duplicate rewards after repeated taps, reloads, updates, or save imports.',
+      'The dashboard and Status record share a new animated Class emblem with a distinct energy signature for every classification.',
+      'Class Trials, qualification, achievements, history, celebrations, companion dialogue, help, and save previews now use the same player-facing language.',
+      'The proven internal progression model and every existing save remain compatible; this release changes presentation, not earned advancement.',
     ],
   },
   {
-    title: 'Saffron and the Kitchen',
-    detail: 'The ninth companion turns cooking into Provision Command.',
+    title: 'Living Companion Realms',
+    detail: 'Every major destination now carries the energy of the companions who guide it.',
     points: [
-      'Saffron, The Flame Chef, brings a complete chibi portrait, emotional check-ins, direct support, banter, milestones, Campfires, Councils, training debriefs, and a five-chapter questline.',
-      'Twelve no-bean, no-pea recipes rotate away from recent meals and include ingredients, guided steps, substitutions, leftovers, and food-safety checkpoints.',
-      'One daily ingredient swap and no-penalty decline keep the system honest; the first three completed orders each week award 40 account XP plus Stewardship, Vitality, and Discipline.',
+      'Training, Sanctuary, Kitchen, Treasury, Party, Campaign, Archive, and progression spaces each tune the global light, energy, and dimensional grid.',
+      'Snow and the full party now appear inside richer portrait frames and companion-colored command surfaces.',
+      'Mission cards, destination gates, major panels, and milestone overlays respond with deeper motion and lighting while remaining phone-first.',
     ],
   },
   {
-    title: 'Archive Shield 12',
-    detail: 'Every new workout and Kitchen fact joins the update-safe local campaign save.',
+    title: 'Ascension Without Compromise',
+    detail: 'The visual upgrade respects privacy, accessibility, offline use, and the tested game.',
     points: [
-      'Save format 12 preserves multiple same-day training sessions, gym set logs, substitutions, progression prompts, personal records, Kitchen orders, checklists, ratings, and private notes.',
-      'Version 4.0 and older saves migrate forward automatically, enable Saffron, and preserve every existing mission, companion, Treasury, Sanctuary, and progression record.',
-      'Snow’s offline help now explains structured gym progression, Double Deployment scoring, Saffron’s weekly reward cap, and the complete nine-companion party.',
+      'No database migration is required, and Archive Shield 12 continues to protect the full campaign.',
+      'Generated PWA preview output no longer enters source control or lint checks after local development.',
+      'Selected onboarding preferences now announce their state correctly to assistive technology.',
     ],
   },
 ];

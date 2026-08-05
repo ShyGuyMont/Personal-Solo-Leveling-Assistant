@@ -88,7 +88,7 @@ export const COSMETICS: CosmeticDefinition[] = [
     description: 'A vivid violet interface for higher classifications.',
     kind: 'theme',
     rarity: 'legendary',
-    unlockCondition: 'Reach A-Rank',
+    unlockCondition: 'Reach A-Class',
     previewClass: 'theme-ascendant',
   },
   {

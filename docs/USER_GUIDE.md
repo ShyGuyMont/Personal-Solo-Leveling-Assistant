@@ -4,7 +4,7 @@ This guide explains the app without requiring technical knowledge. The same esse
 
 ## What The System is
 
-The System is a private, phone-first progression game built around real-life actions. You complete missions that matter to you, and the app records the resulting XP, stats, levels, streaks, challenges, achievements, and ranks.
+The System is a private, phone-first progression game built around real-life actions. You complete missions that matter to you, and the app records the resulting XP, stats, levels, streaks, challenges, achievements, and classes.
 
 The game language makes progress easier to see. It does not measure your worth, diagnose you, or decide whether a day was meaningful.
 
@@ -24,7 +24,7 @@ You do not need to use every screen every day.
 
 ### System
 
-Your main dashboard. It shows today's completion, rank, account level, System state, Snow's Daily Command Briefing, Campaign Command, quick missions, current challenge, recent stat activity, rare events, and your companion roster.
+Your main dashboard. It shows today's completion, class, account level, System state, Snow's Daily Command Briefing, Campaign Command, quick missions, current challenge, recent stat activity, rare events, and your companion roster.
 
 ### Missions
 
@@ -84,11 +84,11 @@ The Sanctuary is a spiritual reflection tool, not therapy, medical advice, crisi
 
 ### Status
 
-Your progression record: overall level, rank qualification, individual stats, titles, achievements, cosmetics, and collection progress.
+Your progression record: overall level, Class qualification, individual stats, titles, achievements, cosmetics, and collection progress.
 
 ### Challenges
 
-Longer arcs such as weekly, monthly, Boss, Recovery, and Rank Trial challenges. Challenges have explicit requirements and saved progress.
+Longer arcs such as weekly, monthly, Boss, Recovery, and Class Trial challenges. Challenges have explicit requirements and saved progress.
 
 ### Party Channel
 
@@ -111,7 +111,7 @@ Cassian's private money-management section. It works without a bank connection a
 - **Savings:** Named goals, targets, current progress, and contributions.
 - **Weekly:** Spending and dining limits, savings and debt targets, one intention, the final Weekly Review, and the 75% challenge toggle.
 
-The app does not connect to a bank or provide financial advice. Budget Stability is a coaching signal only. It never reduces account XP, rank, streaks, missions, or permanent progress. A completed Weekly Review grants its shown reward once. Treasury data stays on this device and is included in Archive Shield exports.
+The app does not connect to a bank or provide financial advice. Budget Stability is a coaching signal only. It never reduces account XP, class, streaks, missions, or permanent progress. A completed Weekly Review grants its shown reward once. Treasury data stays on this device and is included in Archive Shield exports.
 
 Each day independently has a **75% chance** to open Cassian's optional **No Eating Out** directive. Passing grants the displayed account XP plus Stewardship progress. Failure removes no core XP. It lowers Budget Stability temporarily and opens a short recovery debrief that restores half of that signal penalty.
 
@@ -128,9 +128,9 @@ The home of the full nine-person party. Headquarters contains:
 - The newest **Weekly Campfire Recap** and every earlier saved Campfire.
 - The newest **Monthly Council** and every earlier saved Council.
 
-A Campfire is created after a week ends when that week has at least one finalized Daily Review. It uses the actual finalized mission record to show completed missions, completion rate, Perfect Days, category strengths, and the next suggested focus. Every companion comments in character. A Campfire changes no XP, streak, rank, mission result, or reward.
+A Campfire is created after a week ends when that week has at least one finalized Daily Review. It uses the actual finalized mission record to show completed missions, completion rate, Perfect Days, category strengths, and the next suggested focus. Every companion comments in character. A Campfire changes no XP, streak, class, mission result, or reward.
 
-A Monthly Council is created after a calendar month ends when that month has at least one finalized Daily Review. All nine companions review recorded mission balance, relationship actions, Treasury progress, Kitchen Orders, levels, ranks, titles, Campaign milestones, and Companion Quest chapters. Snow opens and closes. You can save one optional next-month intention. Council messages and intentions never change scoring.
+A Monthly Council is created after a calendar month ends when that month has at least one finalized Daily Review. All nine companions review recorded mission balance, relationship actions, Treasury progress, Kitchen Orders, levels, classes, titles, Campaign milestones, and Companion Quest chapters. Snow opens and closes. You can save one optional next-month intention. Council messages and intentions never change scoring.
 
 ### Campaign Command
 
@@ -153,7 +153,7 @@ The next Daily Review verifies the outcome and applies the bonus to account and 
 
 ### Archive
 
-Your permanent record. It contains daily reviews, mission history, multi-session Training Hall records, Kitchen Orders, Scripture Sanctuary history, stat transactions, level and rank history, reports, Weekly Campfires, Monthly Councils, daily briefings, Campaign Arcs, Companion Quest progress, rare signals, Party Check-Ins, Direct Support channels, favorites, banter, and companion transmissions.
+Your permanent record. It contains daily reviews, mission history, multi-session Training Hall records, Kitchen Orders, Scripture Sanctuary history, stat transactions, level and Class history, reports, Weekly Campfires, Monthly Councils, daily briefings, Campaign Arcs, Companion Quest progress, rare signals, Party Check-Ins, Direct Support channels, favorites, banter, and companion transmissions.
 
 ### Settings
 
@@ -161,44 +161,44 @@ Appearance, Snow's briefing toggle, companion frequency, individual companion co
 
 ### Update Center
 
-Shows the installed release, database and save versions, online status, last update check, current save size, last portable export, and all Version 5.0 release notes. **Check for update** contacts only the GitHub Pages release channel; it does not upload personal data. If a release is waiting, export first if desired and choose **Install update**. The home-screen app remains installed and reloads once.
+Shows the installed release, database and save versions, online status, last update check, current save size, last portable export, and all Version 6.0 release notes. **Check for update** contacts only the GitHub Pages release channel; it does not upload personal data. If a release is waiting, export first if desired and choose **Install update**. The home-screen app remains installed and reloads once.
 
 ### About & Help
 
-Tap **Help** in the top-right corner from any page. Snow explains the app, gives a three-step starting path, links directly to every major destination, distinguishes levels, ranks, custom and earned titles, and shows the complete rank ladder.
+Tap **Help** in the top-right corner from any page. Snow explains the app, gives a three-step starting path, links directly to every major destination, distinguishes levels, classes, custom and earned titles, and shows the complete Class ladder.
 
-## XP, levels, stats, and ranks
+## XP, levels, stats, and classes
 
 **Account XP** raises your overall level. **Stat XP** records which areas of life a mission strengthened. Each mission shows its rewards before completion.
 
 The four identity and progression labels have different purposes:
 
 - **Account Level:** Your overall XP level.
-- **Rank:** Your long-term classification, earned through balanced prerequisites and a Rank Trial.
+- **Class:** Your long-term classification, earned through balanced prerequisites and a Class Trial.
 - **Custom System Title:** A cosmetic nickname you write yourself. It never affects progression.
 - **Achievement Title:** An earned distinction that unlocks from recorded accomplishments. Choose an unlocked title to equip in Settings.
 
-Ranks are separate from levels. You begin at F and advance through **F → E → D → C → B → A → S → World Class**. Each advancement requires every prerequisite below and then completion of the corresponding Rank Trial.
+Classes are separate from levels. You begin at F-Class and advance through **F-Class → E-Class → D-Class → C-Class → B-Class → A-Class → S-Class → World Class**. Each advancement requires every prerequisite below and then completion of the corresponding Class Trial.
 
-| Target rank | Account level | Missions | Completed days | Discipline | Balanced stats | Challenges |
-| ----------- | ------------: | -------: | -------------: | ---------: | -------------- | ---------: |
-| E           |            10 |       50 |             12 |          3 | 4 at Level 2   |          1 |
-| D           |            20 |      180 |             40 |          6 | 5 at Level 3   |          4 |
-| C           |            32 |      420 |             90 |         10 | 6 at Level 5   |          8 |
-| B           |            40 |      750 |            150 |         13 | 7 at Level 7   |         15 |
-| A           |            50 |    1,300 |            240 |         18 | 8 at Level 9   |         26 |
-| S           |            58 |    2,050 |            360 |         22 | 9 at Level 12  |         38 |
-| World Class |            65 |    2,850 |            480 |         26 | 10 at Level 14 |         55 |
+| Target class | Account level | Missions | Completed days | Discipline | Balanced stats | Challenges |
+| ------------ | ------------: | -------: | -------------: | ---------: | -------------- | ---------: |
+| E-Class      |            10 |       50 |             12 |          3 | 4 at Level 2   |          1 |
+| D-Class      |            20 |      180 |             40 |          6 | 5 at Level 3   |          4 |
+| C-Class      |            32 |      420 |             90 |         10 | 6 at Level 5   |          8 |
+| B-Class      |            40 |      750 |            150 |         13 | 7 at Level 7   |         15 |
+| A-Class      |            50 |    1,300 |            240 |         18 | 8 at Level 9   |         26 |
+| S-Class      |            58 |    2,050 |            360 |         22 | 9 at Level 12  |         38 |
+| World Class  |            65 |    2,850 |            480 |         26 | 10 at Level 14 |         55 |
 
-Passing a trial advances exactly one rank. If a trial expires before completion, the earned rank and previous campaign progress remain intact; the trial enters a cooldown and can be attempted again later. World Class is the highest rank. Its 480 Completed Days gate comes before a final 90-day Rank Trial, making the earliest modeled first-attempt path about 570 calendar days, or roughly nineteen months. At sustainable 75–90% long-term mission consistency, expect approximately twenty to twenty-four months when trials are passed on schedule; retries can extend that timeline. Actual timing depends on every visible gate, not XP alone. Numerical account and stat levels can continue as high as Level 999.
+Passing a trial advances exactly one class. If a trial expires before completion, the earned class and previous campaign progress remain intact; the trial enters a cooldown and can be attempted again later. World Class is the highest class. Its 480 Completed Days gate comes before a final 90-day Class Trial, making the earliest modeled first-attempt path about 570 calendar days, or roughly nineteen months. At sustainable 75–90% long-term mission consistency, expect approximately twenty to twenty-four months when trials are passed on schedule; retries can extend that timeline. Actual timing depends on every visible gate, not XP alone. Numerical account and stat levels can continue as high as Level 999.
 
-The System contains 50 achievement and questline titles. They unlock automatically from objective saved facts such as mission totals, Perfect Days, streaks, finalized Daily Reviews, stat levels, challenges, Recovery and exception milestones, rank advancement, and completed Companion Questlines. Unlocks are permanent and never random, but the user decides which unlocked title to equip.
+The System contains 50 achievement and questline titles. They unlock automatically from objective saved facts such as mission totals, Perfect Days, streaks, finalized Daily Reviews, stat levels, challenges, Recovery and exception milestones, Class advancement, and completed Companion Questlines. Unlocks are permanent and never random, but the user decides which unlocked title to equip.
 
 XP is written through stable transaction IDs so repeated taps cannot award the same mission twice. Undo is available only during the active System day and writes an inverse transaction instead of deleting history.
 
 Normal daily missions award the XP printed on their cards. The current six default missions total **215 base account XP**: Prayer 20, Bible 25, Integrity 40, Kindness 20, Daily Workout 75, and Creator Work 35. In a Stable System state, completing all six yields **265 XP** with the 50-XP Perfect Day reward, **426 XP** with a Steady Full Clear, or **588 XP** with a High Full Clear. Optional and customized missions change those totals, so the mission cards remain authoritative.
 
-Perfect Days, completed challenges, Rank Trials, Companion Quest chapters, Treasury reviews, the first three weekly Kitchen Orders, Double Deployment, and accepted rare events award their own displayed one-time XP. Campaign Arc milestones, Party conversations, Campfires, Councils, repeat Sanctuary studies, Stronghold sessions, ordinary Training Hall overtime, and cooking beyond the weekly Kitchen cap do not create hidden or repeatable XP. Snow’s Daily Command is the only broad positive multiplier, and it applies only to scheduled mission account and stat XP after Daily Review—not to Kitchen or Double Deployment rewards. These examples assume a Stable state: Warning temporarily awards 90% of printed account mission XP and Stagnant awards 75% until completed days restore stability; stat mission XP remains as printed. The command bonus is calculated from XP actually recorded, preventing hidden stacking or duplicate rewards.
+Perfect Days, completed challenges, Class Trials, Companion Quest chapters, Treasury reviews, the first three weekly Kitchen Orders, Double Deployment, and accepted rare events award their own displayed one-time XP. Campaign Arc milestones, Party conversations, Campfires, Councils, repeat Sanctuary studies, Stronghold sessions, ordinary Training Hall overtime, and cooking beyond the weekly Kitchen cap do not create hidden or repeatable XP. Snow’s Daily Command is the only broad positive multiplier, and it applies only to scheduled mission account and stat XP after Daily Review—not to Kitchen or Double Deployment rewards. These examples assume a Stable state: Warning temporarily awards 90% of printed account mission XP and Stagnant awards 75% until completed days restore stability; stat mission XP remains as printed. The command bonus is calculated from XP actually recorded, preventing hidden stacking or duplicate rewards.
 
 ## The companion party
 
@@ -212,7 +212,7 @@ Perfect Days, completed challenges, Rank Trials, Companion Quest chapters, Treas
 - **Cassian, The Steward:** Stewardship, budgeting, saving, debt reduction, spending awareness, and shame-free financial recovery.
 - **Saffron, The Flame Chef:** Cooking confidence, practical nutrition, meal preparation, leftovers, and defeating expensive convenience without body shame.
 
-Ordinary reactions follow the companion frequency selected in Settings. Party Banter is an occasional two-character exchange after a mission. Major ranks, level milestones, and achievements can trigger a full-party celebration.
+Ordinary reactions follow the companion frequency selected in Settings. Party Banter is an occasional two-character exchange after a mission. Major Classes, level milestones, and achievements can trigger a full-party celebration.
 
 If the previous day is unfinished or finalized below 50%, Ember may send one Lock-In message. She is deliberately more aggressive than the rest of the party, but her job is to interrupt avoidance and make the next step smaller—not to punish, insult, or remove progress. Recovery Mode suppresses this signal.
 

@@ -14,12 +14,12 @@ export default defineConfig({
       registerType: 'prompt',
       includeAssets: ['icons/apple-touch-icon.png', 'icons/icon-192.png', 'icons/icon-512.png'],
       manifest: {
-        name: 'The System — Real-Life Progression RPG',
+        name: 'The System — System Ascension',
         short_name: 'The System',
         description:
           'An offline-first personal progression RPG for faith, discipline, health, creativity, and character.',
-        theme_color: '#07090c',
-        background_color: '#07090c',
+        theme_color: '#05080d',
+        background_color: '#05080d',
         display: 'standalone',
         orientation: 'portrait-primary',
         scope: './',

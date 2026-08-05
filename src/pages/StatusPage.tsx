@@ -10,13 +10,14 @@ import {
 import { useEffect, useMemo, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { Modal } from '@/components/Modal';
+import { ClassEmblem } from '@/components/ClassEmblem';
 import { ProgressBar } from '@/components/ProgressBar';
 import { StatRadar } from '@/components/StatRadar';
 import { getTitle } from '@/config/titles';
 import { equipCosmetic, getCollectionData, getStatHistory } from '@/db/repositories';
 import { calculateRankQualification } from '@/game/rank';
 import { getStatProtectedLevel } from '@/game/stats';
-import { formatNumber, STAT_LABELS, titleCase } from '@/utils/format';
+import { formatClassName, formatNumber, STAT_LABELS, titleCase } from '@/utils/format';
 import { useGameStore } from '@/store/useGameStore';
 import type {
   Achievement,
@@ -85,7 +86,7 @@ export function StatusPage() {
 
       <section className={`identity-card identity-card--${profile.cosmeticFrame}`}>
         <div className="identity-card__sigil">
-          <span>{progression.rank}</span>
+          <ClassEmblem rank={progression.rank} compact />
         </div>
         <div className="identity-card__copy">
           <p className="eyebrow">ACTIVE PROFILE</p>
@@ -98,8 +99,8 @@ export function StatusPage() {
           <ProgressBar value={progression.currentLevelXp} max={progression.xpToNextLevel} />
         </div>
         <div className="identity-card__rank">
-          <span>CURRENT RANK</span>
-          <strong>{progression.rank}</strong>
+          <span>CURRENT CLASS</span>
+          <strong>{formatClassName(progression.rank)}</strong>
         </div>
       </section>
 
@@ -126,7 +127,7 @@ export function StatusPage() {
             <div>
               <p className="eyebrow eyebrow--purple">
                 {qualification.targetRank
-                  ? `${qualification.targetRank}-RANK QUALIFICATION`
+                  ? `${formatClassName(qualification.targetRank).toUpperCase()} QUALIFICATION`
                   : 'HIGHEST CLASSIFICATION'}
               </p>
               <h2>
@@ -148,7 +149,7 @@ export function StatusPage() {
             </div>
           ))}
           <div className={`trial-state trial-state--${qualification.trialStatus}`}>
-            <span>RANK TRIAL</span>
+            <span>CLASS TRIAL</span>
             <strong>{titleCase(qualification.trialStatus)}</strong>
           </div>
         </section>

@@ -168,7 +168,7 @@ export function OnboardingPage() {
                 maxLength={50}
               />
               <small>
-                Cosmetic nickname only—it does not affect XP, stats, achievement titles, or rank.
+                Cosmetic nickname only—it does not affect XP, stats, achievement titles, or class.
               </small>
             </label>
             <label className="field">

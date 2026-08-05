@@ -19,6 +19,7 @@ import { useEffect, useState, type CSSProperties } from 'react';
 import { CampfireRecapView } from '@/components/CampfireRecapView';
 import { MonthlyCouncilView } from '@/components/MonthlyCouncilView';
 import { COMPANIONS, getCompanion, getCompanionImage } from '@/config/companions';
+import { APP_VERSION } from '@/config/release';
 import { getFavoriteMessages } from '@/game/favorites';
 import { getRecentCampfireRecaps } from '@/game/campfire';
 import { getRecentMonthlyCouncils } from '@/game/council';
@@ -156,7 +157,7 @@ export function HeadquartersPage() {
           <div>
             <strong>Update Center</strong>
             <p>Check releases and open the Archive Shield.</p>
-            <small>Version 5.0</small>
+            <small>Version {APP_VERSION}</small>
           </div>
         </Link>
       </section>

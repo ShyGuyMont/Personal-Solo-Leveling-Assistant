@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { ChallengeCard } from '@/components/ChallengeCard';
+import { ClassEmblem } from '@/components/ClassEmblem';
 import { CompanionRoster } from '@/components/CompanionRoster';
 import { DailyEventCard } from '@/components/DailyEventCard';
 import { DailyBriefingCard } from '@/components/DailyBriefingCard';
@@ -106,6 +107,7 @@ export function DashboardPage() {
     },
     daySeed(systemDate),
   );
+  const systemStateLabel = systemState === 'rank-qualified' ? 'class ready' : systemState;
 
   if (!profile || !progression || !settings) return null;
 
@@ -113,9 +115,19 @@ export function DashboardPage() {
     <div className="page dashboard-page">
       <section className={`hero-panel hero-panel--${systemState}`}>
         <div className="hero-panel__scan" />
+        <div className="hero-panel__gate" aria-hidden="true">
+          <span />
+          <span />
+          <span />
+          <i />
+        </div>
+        <div className="hero-panel__version" aria-hidden="true">
+          <span>V6.0</span>
+          <b>SYSTEM ASCENSION</b>
+        </div>
         <div className="hero-panel__top">
           <div>
-            <p className="eyebrow">{formatLongDate(systemDate)}</p>
+            <p className="eyebrow">SYSTEM COMMAND · {formatLongDate(systemDate)}</p>
             <h1>
               Welcome, <span>{profile.displayName}</span>
             </h1>
@@ -126,10 +138,7 @@ export function DashboardPage() {
           </Link>
         </div>
         <div className="identity-strip">
-          <div className="rank-emblem">
-            <span>RANK</span>
-            <strong>{progression.rank}</strong>
-          </div>
+          <ClassEmblem rank={progression.rank} />
           <div className="level-block">
             <div>
               <span>LEVEL {progression.level}</span>
@@ -156,7 +165,7 @@ export function DashboardPage() {
           <div>
             <Shield size={17} />
             <span>System state</span>
-            <strong>{systemState}</strong>
+            <strong>{systemStateLabel}</strong>
           </div>
         </div>
       </section>

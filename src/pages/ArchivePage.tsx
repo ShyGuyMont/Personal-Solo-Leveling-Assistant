@@ -41,7 +41,7 @@ import {
   startOfMonth,
   toDateKey,
 } from '@/utils/date';
-import { formatPercent, STAT_LABELS } from '@/utils/format';
+import { formatClassName, formatPercent, STAT_LABELS } from '@/utils/format';
 import { getMissionDisplayName } from '@/utils/privacy';
 import { useGameStore } from '@/store/useGameStore';
 import { Link } from '@/router';
@@ -597,7 +597,7 @@ export function ArchivePage() {
           <section className="panel archive-list-panel">
             <header className="section-header">
               <div>
-                <p className="eyebrow eyebrow--purple">RANK HISTORY</p>
+                <p className="eyebrow eyebrow--purple">CLASS HISTORY</p>
                 <h2>Classifications earned</h2>
               </div>
             </header>
@@ -607,7 +607,7 @@ export function ArchivePage() {
                   <Flame size={17} />
                   <div>
                     <strong>
-                      {entry.from} → {entry.to}
+                      {formatClassName(entry.from)} → {formatClassName(entry.to)}
                     </strong>
                     <small>{entry.date}</small>
                   </div>
@@ -615,7 +615,7 @@ export function ArchivePage() {
               ))}
               {!rankHistory.length && (
                 <div className="empty-state">
-                  <span>Rank advancement will appear here.</span>
+                  <span>Class advancement will appear here.</span>
                 </div>
               )}
             </div>

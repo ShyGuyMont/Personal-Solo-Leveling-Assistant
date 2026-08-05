@@ -4,6 +4,7 @@ import {
   CircleGauge,
   CircleHelp,
   ChefHat,
+  Crown,
   Dumbbell,
   ListChecks,
   Shield,
@@ -14,6 +15,7 @@ import { SystemMark } from '@/components/SystemMark';
 import { NavLink } from '@/router';
 import { useRoutePath } from '@/routeState';
 import { useGameStore } from '@/store/useGameStore';
+import { formatClassName } from '@/utils/format';
 
 const NAV = [
   { to: '/', label: 'System', icon: CircleGauge },
@@ -26,9 +28,23 @@ const NAV = [
   { to: '/archive', label: 'Archive', icon: Archive },
 ];
 
+function getRealm(path: string) {
+  if (path.startsWith('/training-hall')) return 'training';
+  if (path.startsWith('/sanctuary')) return 'sanctuary';
+  if (path.startsWith('/kitchen')) return 'kitchen';
+  if (path.startsWith('/treasury')) return 'treasury';
+  if (path.startsWith('/headquarters') || path.startsWith('/party-chat')) return 'party';
+  if (path.startsWith('/campaigns')) return 'campaign';
+  if (path.startsWith('/archive')) return 'archive';
+  if (path.startsWith('/status') || path.startsWith('/challenges')) return 'progression';
+  return 'system';
+}
+
 export function AppShell({ children }: { children: ReactNode }) {
   const path = useRoutePath();
   const settings = useGameStore((state) => state.settings);
+  const progression = useGameStore((state) => state.progression);
+  const realm = getRealm(path);
   const [privacyActive, setPrivacyActive] = useState(false);
   const [online, setOnline] = useState(navigator.onLine);
 
@@ -70,19 +86,36 @@ export function AppShell({ children }: { children: ReactNode }) {
       data-theme={settings?.colorTheme ?? 'abyss'}
       data-interface={settings?.interfaceStyle ?? 'system'}
       data-intensity={settings?.themeIntensity ?? 'standard'}
+      data-realm={realm}
     >
       <div className="ambient-grid" />
       <div className="ambient-orb ambient-orb--mint" />
       <div className="ambient-orb ambient-orb--purple" />
+      <div className="ascension-atmosphere" aria-hidden="true">
+        <span className="ascension-atmosphere__plane ascension-atmosphere__plane--far" />
+        <span className="ascension-atmosphere__plane ascension-atmosphere__plane--near" />
+        <span className="ascension-atmosphere__gate">
+          <i />
+          <i />
+          <i />
+        </span>
+        <span className="ascension-atmosphere__signal" />
+      </div>
       <header className="app-header">
         <NavLink to="/" className="brand" aria-label="The System home">
           <SystemMark small />
           <span>
             <span className="brand__name">THE SYSTEM</span>
-            <span className="brand__tag">PERSONAL ASCENSION INTERFACE</span>
+            <span className="brand__tag">V6.0 · SYSTEM ASCENSION</span>
           </span>
         </NavLink>
         <div className="app-header__actions">
+          {progression && (
+            <NavLink to="/status" className="header-class-chip">
+              <Crown size={13} aria-hidden="true" />
+              <span>{formatClassName(progression.rank)}</span>
+            </NavLink>
+          )}
           <NavLink to="/about" className="header-help" aria-label="About and help">
             <CircleHelp size={20} />
             <span>HELP</span>

@@ -1,6 +1,6 @@
 # The System
 
-The System is a private, phone-first, offline progression RPG. The player is the real user: daily missions build account XP, stats, streaks, challenge progress, levels, achievements, cosmetics, and long-term rank qualification.
+The System is a private, phone-first, offline progression RPG. The player is the real user: daily missions build account XP, stats, streaks, challenge progress, levels, achievements, cosmetics, and long-term Class qualification.
 
 The design, writing, interface, icons, animations, and generated tones are original. No franchise art, logos, dialogue, interface assets, or sound recordings are included.
 
@@ -26,7 +26,7 @@ The design, writing, interface, icons, animations, and generated tones are origi
 - Words to Carry favorites for saving companion messages from Check-Ins, Direct Support, banter, milestones, and ordinary reactions
 - A Snow-guided About & Help screen available from every page, with plain-language navigation, rules, privacy guidance, and a three-step starting path
 - One saved rare-event roll per System day: optional Emergency Quests and claimable Mission Passes without refresh rerolls
-- F through World Class rank qualifications and seven saved Rank Trials
+- F-Class through World Class qualifications and seven saved Class Trials
 - 30+ weekly, 20+ monthly, six Boss, and ten supportive Recovery challenges
 - 40+ titles, 50 achievements, 12 cosmetics, and full progression overlays
 - Archive calendar, transparent weekly/monthly reports, history, stat analysis, and deterministic focus suggestions
@@ -36,6 +36,26 @@ The design, writing, interface, icons, animations, and generated tones are origi
 - Installable iPhone PWA with safe-area support, offline caching, code-split screens, user-controlled update prompts, and a dedicated Update Center
 
 There is no login, backend, external API, analytics, advertising, tracking, or paid service.
+
+## Version 6.0 · System Ascension
+
+Version 6.0 evolves the existing layout into one dimensional command interface. **Abyssal
+Hologram** atmosphere establishes the global depth and energy language, **Command Chamber**
+structure gives navigation and information panels tactile presence, and **Living Companion Realms**
+change the ambient light and visual signature around Training, Sanctuary, Kitchen, Treasury, Party,
+Campaign, Archive, and progression spaces.
+
+The dashboard now opens around a layered System gate, a route-aware tactical atmosphere, and a new
+Class emblem with distinct visual energy for each classification. Command cards, primary controls,
+Party portraits, Status identity records, navigation, and progression celebrations use deeper
+lighting and spatial motion while remaining readable and phone-first. Abyss and Daybreak continue
+as lighting palettes; Clean mode and Reduced Motion retain quieter presentations.
+
+Player-facing progression language is now consistent across the complete ladder: **F-Class →
+E-Class → D-Class → C-Class → B-Class → A-Class → S-Class → World Class**. Class Trials,
+qualification, achievements, history, companion dialogue, milestone celebrations, help, and save
+previews all use the same terminology. Internal save fields retain their established names, so
+Version 6.0 requires no database migration and preserves every earned classification.
 
 ## Version 5.0 · Forge & Flame
 
@@ -99,7 +119,7 @@ Home circuits support the user’s adjustable dumbbells, bodyweight work, planks
 
 Daily Movement has been safely retired as a duplicate. Daily Workout now carries the combined 75 account XP and Strength, Endurance, Discipline, and Vitality rewards that both former physical missions awarded together. Existing history is preserved, old briefing references migrate forward, and Training Hall state is included in Archive Shield format 10.
 
-Rank gates and the development pacing simulator were also rebalanced for the expanded XP ecosystem. The simulator includes the duration and rewards of every mandatory Rank Trial instead of estimating from qualification gates alone. World Class now requires 480 Completed Days before its final 90-day trial, placing the earliest first-attempt path at roughly nineteen months and a sustainable path around twenty to twenty-four months.
+Class gates and the development pacing simulator were also rebalanced for the expanded XP ecosystem. The simulator includes the duration and rewards of every mandatory Class Trial instead of estimating from qualification gates alone. World Class now requires 480 Completed Days before its final 90-day trial, placing the earliest first-attempt path at roughly nineteen months and a sustainable path around twenty to twenty-four months.
 
 - **Snow, The Constant** is the primary whole-journey companion. She greets each new System day and supports major milestones, difficult seasons, and victories. She has long black hair, a pearl-white and navy support jacket, and an ice-blue System halo.
 - **Rook, The Vanguard** supports Strength, Endurance, and Vitality. He is bold, competitive, and protective, with graphite-and-gold armor and amber energy.
@@ -111,7 +131,7 @@ Rank gates and the development pacing simulator were also rebalanced for the exp
 - **Cassian, The Steward** supports Stewardship, budgeting, savings, debt reduction, spending awareness, and financial recovery. He is a calm, exacting, never-shaming white accountant type with fair skin, tousled light-brown hair, hazel eyes behind round gold-rimmed glasses, a pencil behind one ear, a dark ledger, and a tailored emerald-and-navy Steward coat.
 - **Saffron, The Flame Chef** supports cooking, meal preparation, training nutrition, leftovers, and reducing expensive convenience choices. She is theatrical, fiery, and nurturing, with warm olive-brown skin, vivid green eyes, dark curls, a white chef jacket, forest-green apron, and tangerine flame accents.
 
-Companions never judge missed missions. Snow checks in once per System day, while stat level-ups notify the matching specialist. Ember may open one Lock-In signal when the previous day is unfinished or finalized below 50%; her response is direct but never removes XP, changes a streak, or attacks the user's worth. Amara owns the Empathy stat and ordinary Character-path relationship responses; every relationship objective offers a safe alternative and never requires contact with someone unsafe. Cassian owns the Stewardship stat and Treasury coaching; Budget Stability never removes account XP, rank, streaks, or mission credit. Saffron runs the Kitchen without body shame or punishment dieting. Ordinary mission reactions follow the selected Off, Quiet, Balanced, or Talkative setting. All nine portraits use a cohesive premium chibi RPG style, are bundled locally, and require no network connection.
+Companions never judge missed missions. Snow checks in once per System day, while stat level-ups notify the matching specialist. Ember may open one Lock-In signal when the previous day is unfinished or finalized below 50%; her response is direct but never removes XP, changes a streak, or attacks the user's worth. Amara owns the Empathy stat and ordinary Character-path relationship responses; every relationship objective offers a safe alternative and never requires contact with someone unsafe. Cassian owns the Stewardship stat and Treasury coaching; Budget Stability never removes account XP, class, streaks, or mission credit. Saffron runs the Kitchen without body shame or punishment dieting. Ordinary mission reactions follow the selected Off, Quiet, Balanced, or Talkative setting. All nine portraits use a cohesive premium chibi RPG style, are bundled locally, and require no network connection.
 
 The Party Check-In lets the user choose Energized, Proud, Good, Okay, Tired, Stressed, Frustrated, Discouraged, Lonely, or Not sure. Snow opens and closes each conversation while Rook, Selah, Cipher, Haven, Ember, Amara, and Cassian answer in character. Each companion has emotion-specific dialogue pools, and the app uses the least recently heard line only after every unused line in that pool has been heard. Check-ins are saved locally in the Archive and intentionally award no XP, alter no streak, and create no penalty.
 
@@ -119,7 +139,7 @@ Direct Support offers Motivation, Make a plan, Faith & perspective, Calm down, R
 
 At the start of a new week, Headquarters can present a saved Campfire Recap for the previous completed week. It counts finalized Daily Reviews, mission records, Treasury progress, and Kitchen Orders, then gives all nine companions distinct commentary based on those facts. Snow closes the gathering. Campfires can be favorited, reopened in Headquarters, and reviewed in the Archive.
 
-After a calendar month with at least one finalized Daily Review, a Monthly Council records mission totals, completion rate, Perfect Days, category balance, relationship actions, Treasury progress, Kitchen Orders, levels, ranks, titles, Campaign milestones, and Companion Quest chapters. Snow opens and closes; all nine specialists speak between. Councils are permanent, never change scoring, and include an optional next-month intention.
+After a calendar month with at least one finalized Daily Review, a Monthly Council records mission totals, completion rate, Perfect Days, category balance, relationship actions, Treasury progress, Kitchen Orders, levels, classes, titles, Campaign milestones, and Companion Quest chapters. Snow opens and closes; all nine specialists speak between. Councils are permanent, never change scoring, and include an optional next-month intention.
 
 ### Campaign Command
 
@@ -143,15 +163,15 @@ Every companion also has one authored five-chapter questline:
 
 Treasury Command is an entirely local manual money-management section. It records paychecks, expenses, dining purchases, recurring bills and payments, debt balances and payments, and savings goals and contributions. It never connects to a bank or sends financial data anywhere. Amounts can be masked while the screen is open, and every Treasury record is included in the integrity-checked Archive Shield save.
 
-Each week can have a spending limit, dining limit, savings target, debt target, and one written intention. The Weekly Review summarizes what actually happened and grants its displayed reward exactly once. Budget Stability is a transparent coaching score; it cannot reduce core XP, rank, streaks, mission results, or permanent progress.
+Each week can have a spending limit, dining limit, savings target, debt target, and one written intention. The Weekly Review summarizes what actually happened and grants its displayed reward exactly once. Budget Stability is a transparent coaching score; it cannot reduce core XP, class, streaks, mission results, or permanent progress.
 
 Each System day independently has a 75% chance to open **No Eating Out**. Passing grants the displayed account XP and Stewardship progress. Logging an eating-out expense or choosing failure records the result honestly and lowers Budget Stability only. A short recovery debrief restores half of that signal penalty and prepares an easier next choice.
 
 Only one questline is active at a time; beginning or resuming one pauses the other without losing progress. Each chapter has three objectives, a fixed idempotent XP reward, and story text. Chapters never expire or fail. Completing all five unlocks that companion's unique legendary title.
 
-Occasional Party Banter can follow a completed mission. Its chance follows the selected companion frequency and is never required for rewards. Major rank, account-level milestone, and achievement overlays become full-party celebrations. A heart control can preserve any meaningful line in Words to Carry; the copied message remains available even after the original toast is dismissed.
+Occasional Party Banter can follow a completed mission. Its chance follows the selected companion frequency and is never required for rewards. Major Class, account-level milestone, and achievement overlays become full-party celebrations. A heart control can preserve any meaningful line in Words to Carry; the copied message remains available even after the original toast is dismissed.
 
-The universal Help control opens Snow's About & Help briefing. It explains every destination; the difference between account levels, ranks, custom System titles, and earned achievement titles; the complete rank ladder and qualification requirements; challenges and events; what to do after a hard day; and where local data lives. A longer nontechnical guide is available at [`docs/USER_GUIDE.md`](docs/USER_GUIDE.md).
+The universal Help control opens Snow's About & Help briefing. It explains every destination; the difference between account levels, classes, custom System titles, and earned achievement titles; the complete Class ladder and qualification requirements; challenges and events; what to do after a hard day; and where local data lives. A longer nontechnical guide is available at [`docs/USER_GUIDE.md`](docs/USER_GUIDE.md).
 
 Rare daily events are optional and persisted before display. Each new System day has a 7% chance of an Emergency Quest, a 5% chance of a Mission Pass, and an 88% chance of no rare event. Declining or missing an Emergency Quest has no penalty. A Mission Pass protects one pending required mission without spending a monthly protected exception, but it does not award that mission's XP.
 
@@ -215,7 +235,7 @@ When updating an existing installation, commit and push the changed project thro
 Open **Update Center → Archive Shield** or **Settings → Archive Shield · Local Data**:
 
 - **Export full save** downloads a dated JSON file containing the entire campaign, including Training Hall assignments and history, Treasury records, briefings, Campaign Arcs, quest progress, Councils, party history, settings, unlocks, cosmetics, reports, and app metadata.
-- **Import save** inspects the file first and shows candidate name, level, rank, and export date. It validates size, schema, required records, duplicate IDs, impossible values, unsafe object keys, supported version, and checksum before confirmation.
+- **Import save** inspects the file first and shows candidate name, level, class, and export date. It validates size, schema, required records, duplicate IDs, impossible values, unsafe object keys, supported version, and checksum before confirmation.
 - A local snapshot is made before each daily finalization, import, and reset. The newest five remain available in Settings. The newest valid snapshot is also offered from onboarding after reset.
 - **Reset app data** is isolated from ordinary controls, offers an export, requires typing `RESET`, and makes one final snapshot.
 
@@ -241,11 +261,11 @@ Mission definitions use stable IDs. In **Settings → Mission Configuration**, m
 
 Optional missions award their configured XP but never determine Perfect Day status. Disabled or changed missions do not erase existing daily records.
 
-### Challenges, ranks, and reports
+### Challenges, classes, and reports
 
-Weekly/monthly selection is deterministic, avoids recent repeats where possible, and scales within a bounded difficulty ceiling based on recent completion. Boss Challenges are optional. Failed Rank Trials preserve progress and enter a saved cooldown.
+Weekly/monthly selection is deterministic, avoids recent repeats where possible, and scales within a bounded difficulty ceiling based on recent completion. Boss Challenges are optional. Failed Class Trials preserve progress and enter a saved cooldown.
 
-Ranks are separate from levels. Qualification checks account level, completions, days, Discipline, balanced stats, challenge completions, and a final trial. Weekly and monthly reports are saved locally. Their focus suggestion always identifies the lowest category completion rate; ties use fixed category order, and no health or personality inference is made.
+Classes are separate from levels. Qualification checks account level, completions, days, Discipline, balanced stats, challenge completions, and a final trial. Weekly and monthly reports are saved locally. Their focus suggestion always identifies the lowest category completion rate; ties use fixed category order, and no health or personality inference is made.
 
 ## Project layout
 

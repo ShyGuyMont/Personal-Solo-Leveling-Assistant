@@ -63,7 +63,7 @@ export function ChallengesPage() {
           <div>
             <Crown size={19} />
             <span>
-              <strong>Rank Trial</strong>
+              <strong>Class Trial</strong>
               <small>Unlocked through complete qualification</small>
             </span>
           </div>
@@ -88,7 +88,7 @@ export function ChallengesPage() {
               <div className="locked-operation">
                 <LockKeyhole size={23} />
                 <div>
-                  <strong>{template?.name ?? 'Next Rank Trial'}</strong>
+                  <strong>{template?.name ?? 'Next Class Trial'}</strong>
                   <span>Complete every qualification requirement to unlock this operation.</span>
                 </div>
               </div>

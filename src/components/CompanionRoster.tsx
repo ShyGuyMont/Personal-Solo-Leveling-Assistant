@@ -31,6 +31,7 @@ export function CompanionRoster({ detailed = false }: { detailed?: boolean }) {
             <article
               key={companion.id}
               className={`companion-card ${isPrimary ? 'companion-card--primary' : ''}`}
+              data-companion={companion.id}
               style={{ '--companion-accent': companion.accent } as CSSProperties}
             >
               <div className="companion-card__portrait" style={{ borderColor: companion.accent }}>
