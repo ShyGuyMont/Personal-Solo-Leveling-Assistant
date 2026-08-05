@@ -21,10 +21,13 @@ import {
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FavoriteMessageButton } from '@/components/FavoriteMessageButton';
+import { GymDeploymentPanel } from '@/components/GymDeploymentPanel';
+import { BALANCE } from '@/config/balance';
 import {
   EMBER_DURATION_LINES,
   ROOK_CIRCUIT_LINES,
   ROOK_TIME_REPLIES,
+  getGymWorkout,
   getTrainingCircuit,
   getTrainingTimeTitle,
 } from '@/config/training';
@@ -45,6 +48,7 @@ import {
   saveTrainingProgress,
   selectTrainingLocation,
   startTrainingTimer,
+  type GymWorkoutAvailability,
 } from '@/game/training';
 import { useGameStore } from '@/store/useGameStore';
 import type { CompanionId, TrainingLocation, TrainingSession } from '@/types/game';
@@ -64,7 +68,7 @@ const LOCATION_OPTIONS: Array<{
   {
     id: 'gym',
     title: 'Gym Deployment',
-    subtitle: 'Train at the gym, then record the completed session here.',
+    subtitle: 'Choose a Toji Ascension session and track every working set.',
     icon: Building2,
   },
   {
@@ -90,6 +94,7 @@ const POST_TRAINING_STATES: Record<CompanionId, string> = {
   ember: 'Destroyed · asking for another round',
   amara: 'Disheveled · openly proud',
   cassian: 'Physically insolvent · floor-bound',
+  saffron: 'Famished · threatening the recovery meal',
 };
 
 function formatClock(totalSeconds: number) {
@@ -100,6 +105,7 @@ function formatClock(totalSeconds: number) {
 
 function trainingLabel(session: TrainingSession) {
   if (session.circuitId) return getTrainingCircuit(session.circuitId).name;
+  if (session.gymWorkoutId) return getGymWorkout(session.gymWorkoutId).name;
   return (
     {
       gym: 'Gym Deployment',
@@ -121,9 +127,12 @@ function formatMinutes(minutes: number) {
 }
 
 export function TrainingHallPage() {
-  const { systemDate, todayRecords, complete } = useGameStore();
+  const { systemDate, todayRecords, complete, refresh } = useGameStore();
   const [session, setSession] = useState<TrainingSession>();
+  const [todaySessions, setTodaySessions] = useState<TrainingSession[]>([]);
   const [recent, setRecent] = useState<TrainingSession[]>([]);
+  const [gymAvailability, setGymAvailability] = useState<GymWorkoutAvailability[]>([]);
+  const [doubleDeploymentRewarded, setDoubleDeploymentRewarded] = useState(false);
   const [loading, setLoading] = useState(true);
   const [working, setWorking] = useState(false);
   const [error, setError] = useState('');
@@ -134,7 +143,6 @@ export function TrainingHallPage() {
   const [difficulty, setDifficulty] = useState(3);
   const [note, setNote] = useState('');
   const [loggedDuration, setLoggedDuration] = useState(45);
-  const [gymFocus, setGymFocus] = useState<TrainingSession['gymFocus']>('strength');
   const [conditioningType, setConditioningType] =
     useState<TrainingSession['conditioningType']>('walk-run');
   const [distance, setDistance] = useState('');
@@ -146,7 +154,10 @@ export function TrainingHallPage() {
   const reload = useCallback(async () => {
     const data = await getTrainingHallData(systemDate);
     setSession(data.today);
+    setTodaySessions(data.todaySessions);
     setRecent(data.recent);
+    setGymAvailability(data.gymAvailability);
+    setDoubleDeploymentRewarded(data.doubleDeploymentRewarded);
     if (data.today) {
       setLoads(data.today.exerciseLoads ?? {});
       setRounds(data.today.roundsCompleted ?? 0);
@@ -156,7 +167,6 @@ export function TrainingHallPage() {
       setLoggedDuration(
         data.today.loggedDurationMinutes ?? (data.today.location === 'gym' ? 45 : 20),
       );
-      setGymFocus(data.today.gymFocus ?? 'strength');
       setConditioningType(data.today.conditioningType ?? 'walk-run');
       setDistance(data.today.distance ? String(data.today.distance) : '');
       setRecoveryProtocol(data.today.recoveryProtocol ?? 'Stretching and plank protocol');
@@ -178,7 +188,7 @@ export function TrainingHallPage() {
 
   useEffect(() => {
     if (!session || session.status !== 'active' || remainingSeconds > 0) return;
-    void markTrainingTimerComplete(systemDate).then((next) => {
+    void markTrainingTimerComplete(session.id).then((next) => {
       if (next) setSession(next);
     });
   }, [remainingSeconds, session, systemDate]);
@@ -228,24 +238,27 @@ export function TrainingHallPage() {
   const chooseLocation = async (location: TrainingLocation) => {
     const next = await run(() => selectTrainingLocation(systemDate, location));
     if (!next) return;
-    setLoggedDuration(location === 'gym' ? 45 : location === 'conditioning' ? 25 : 15);
+    setLoggedDuration(location === 'gym' ? 65 : location === 'conditioning' ? 25 : 15);
   };
 
   const updateRounds = async (nextRounds: number) => {
+    if (!session) return;
     const value = Math.max(0, nextRounds);
     setRounds(value);
-    await saveTrainingProgress(systemDate, { roundsCompleted: value });
+    await saveTrainingProgress(session.id, { roundsCompleted: value });
   };
 
   const updatePartial = async (nextPartial: number) => {
+    if (!session) return;
     const value = Math.max(0, nextPartial);
     setPartialReps(value);
-    await saveTrainingProgress(systemDate, { partialReps: value });
+    await saveTrainingProgress(session.id, { partialReps: value });
   };
 
   const finishHome = async () => {
     const completedSession = await run(() =>
       completeHomeTraining({
+        sessionId: session?.id,
         date: systemDate,
         roundsCompleted: rounds,
         partialReps,
@@ -258,6 +271,7 @@ export function TrainingHallPage() {
     try {
       await syncWorkoutMission(completedSession);
       await reload();
+      await refresh();
     } catch (caught) {
       setError(
         caught instanceof Error
@@ -272,11 +286,11 @@ export function TrainingHallPage() {
     const location = session.location;
     const completedSession = await run(() =>
       completeLoggedTraining({
+        sessionId: session.id,
         date: systemDate,
         location,
         duration: loggedDuration,
         difficulty,
-        gymFocus: session.location === 'gym' ? gymFocus : undefined,
         conditioningType: session.location === 'conditioning' ? conditioningType : undefined,
         distance: session.location === 'conditioning' && distance ? Number(distance) : undefined,
         recoveryProtocol: session.location === 'recovery' ? recoveryProtocol : undefined,
@@ -296,12 +310,39 @@ export function TrainingHallPage() {
     }
   };
 
+  const finishStructuredGym = async (completedSession: TrainingSession) => {
+    try {
+      await syncWorkoutMission(completedSession);
+      await reload();
+      await refresh();
+    } catch (caught) {
+      setError(
+        caught instanceof Error
+          ? `${caught.message} Your Gym Deployment is safe; use Sync mission credit below.`
+          : 'The Gym Deployment is safe, but mission credit still needs to be synced.',
+      );
+    }
+  };
+
+  const beginDoubleDeployment = async (location: 'home' | 'gym') => {
+    const next = await run(() => selectTrainingLocation(systemDate, location));
+    if (!next) return;
+    setLoads(next.exerciseLoads ?? {});
+    setRounds(next.roundsCompleted ?? 0);
+    setPartialReps(next.partialReps ?? 0);
+    setDifficulty(3);
+    setNote('');
+    setLoggedDuration(location === 'gym' ? 65 : 20);
+    await reload();
+    setSession(next);
+  };
+
   const chooseDifferentPath = async () => {
     if (!session || ['active', 'paused'].includes(session.status)) {
       setError('End the active circuit before changing deployment paths.');
       return;
     }
-    await abandonTrainingSession(systemDate);
+    await abandonTrainingSession(session.id);
     setSession(undefined);
     setError('');
   };
@@ -317,6 +358,16 @@ export function TrainingHallPage() {
       )
       .sort((a, b) => (b.roundsCompleted ?? 0) - (a.roundsCompleted ?? 0))[0];
   }, [recent, session?.circuitId, session?.durationMinutes]);
+
+  const completedLocations = new Set(
+    todaySessions.filter((entry) => entry.status === 'completed').map((entry) => entry.location),
+  );
+  const doubleDeploymentOption =
+    completedLocations.has('gym') && !completedLocations.has('home')
+      ? ('home' as const)
+      : completedLocations.has('home') && !completedLocations.has('gym')
+        ? ('gym' as const)
+        : undefined;
 
   if (loading) {
     return (
@@ -361,7 +412,7 @@ export function TrainingHallPage() {
     </section>
   );
 
-  if (workoutCompleted && session?.status !== 'completed') {
+  if (workoutCompleted && !todaySessions.length) {
     return (
       <div className="page training-hall-page">
         <header className="page-heading training-page-heading">
@@ -379,7 +430,10 @@ export function TrainingHallPage() {
           <div>
             <p className="eyebrow">DAILY WORKOUT COMPLETE</p>
             <h2>Today’s mission was already recorded.</h2>
-            <p>The Training Hall will be ready to generate a fresh assignment next System day.</p>
+            <p>
+              Today’s mission predates a Hall record. The Training Hall will generate a fresh
+              assignment next System day.
+            </p>
           </div>
         </section>
         {renderHistory()}
@@ -422,6 +476,75 @@ export function TrainingHallPage() {
 
         {error && <div className="training-error">{error}</div>}
 
+        {doubleDeploymentRewarded && (
+          <section className="panel double-deployment-banner is-earned">
+            <Flame size={27} />
+            <div>
+              <p className="eyebrow">ASCENSION SURGE · DOUBLE DEPLOYMENT</p>
+              <h2>Home + Gym cleared</h2>
+              <p>
+                Exceptional effort recorded. +{BALANCE.training.doubleDeploymentAccountXp} account
+                XP plus Strength, Endurance, Discipline, and Vitality growth.
+              </p>
+              <small>This one-time daily reward is never multiplied by Snow’s Daily Command.</small>
+            </div>
+          </section>
+        )}
+
+        {!doubleDeploymentRewarded && doubleDeploymentOption && (
+          <section className="panel double-deployment-banner">
+            <Dumbbell size={27} />
+            <div>
+              <p className="eyebrow">OPTIONAL · NOT REQUIRED</p>
+              <h2>Double Deployment available</h2>
+              <p>
+                {doubleDeploymentOption === 'home'
+                  ? 'The Gym Deployment is complete. You may still accept Rook and Ember’s Home Circuit.'
+                  : 'The Home Circuit is complete. You may still complete a structured Gym Deployment.'}
+              </p>
+              <strong>Clear both for an Ascension Surge worth +150 account XP.</strong>
+              <small>
+                This is an exceptional-day bonus, not a daily expectation. Never chase it through
+                pain, broken form, or inadequate recovery.
+              </small>
+            </div>
+            <button
+              className="button button--primary"
+              disabled={working}
+              onClick={() => void beginDoubleDeployment(doubleDeploymentOption)}
+            >
+              <Flame size={17} />
+              {doubleDeploymentOption === 'home' ? 'Accept Home Circuit' : 'Open Gym Deployment'}
+            </button>
+          </section>
+        )}
+
+        {session.gymPersonalRecords?.length ? (
+          <section className="panel gym-result-intelligence">
+            <Trophy size={23} />
+            <div>
+              <p className="eyebrow">PERSONAL RECORD SCAN</p>
+              <h2>{session.gymPersonalRecords.length} progression signal(s)</h2>
+              <p>{session.gymPersonalRecords.join(' · ')}</p>
+            </div>
+          </section>
+        ) : null}
+
+        {session.gymProgressionPrompts?.length ? (
+          <section className="panel gym-result-intelligence">
+            <ShieldCheck size={23} />
+            <div>
+              <p className="eyebrow">ROOK · NEXT DEPLOYMENT</p>
+              <h2>Progression orders</h2>
+              <ul>
+                {session.gymProgressionPrompts.map((prompt) => (
+                  <li key={prompt}>{prompt}</li>
+                ))}
+              </ul>
+            </div>
+          </section>
+        ) : null}
+
         <section className="panel training-party-debrief">
           <header className="section-header">
             <div>
@@ -433,7 +556,7 @@ export function TrainingHallPage() {
           <div className="training-party-debrief__grid">
             {COMPANIONS.map((companion) => {
               const message = getTrainingDebriefMessage(session, companion.id);
-              const messageId = `${session.date}:${companion.id}`;
+              const messageId = `${session.id}:${companion.id}`;
               const favoriteId = `training:${messageId}`;
               return (
                 <article
@@ -516,8 +639,8 @@ export function TrainingHallPage() {
             Ember · The Ignition
           </h2>
           <p>
-            One Daily Workout mission. Four legitimate deployment paths. Home assignments are drawn
-            once and preserved through refreshes.
+            One Daily Workout mission. Four legitimate deployment paths. Gym sessions build the
+            physique; Home circuits remain available—even after a Gym clear.
           </p>
         </div>
       </section>
@@ -630,7 +753,7 @@ export function TrainingHallPage() {
                             [exercise.id]: event.target.value ? Number(event.target.value) : 0,
                           }))
                         }
-                        onBlur={() => void saveTrainingLoads(systemDate, loads)}
+                        onBlur={() => void saveTrainingLoads(session.id, loads)}
                       />
                     </label>
                   )}
@@ -644,8 +767,8 @@ export function TrainingHallPage() {
                   className="button button--primary"
                   disabled={working}
                   onClick={async () => {
-                    await saveTrainingLoads(systemDate, loads);
-                    await run(() => startTrainingTimer(systemDate));
+                    await saveTrainingLoads(session.id, loads);
+                    await run(() => startTrainingTimer(session.id));
                   }}
                 >
                   <Play size={18} /> Begin {session.durationMinutes}-minute trial
@@ -659,13 +782,15 @@ export function TrainingHallPage() {
                         'Request one reassignment? Rook will choose a different circuit and Ember will reset the clock.',
                       )
                     ) {
-                      void run(() => assignHomeTraining(systemDate, true)).then((next) => {
-                        if (next) {
-                          setLoads({});
-                          setRounds(0);
-                          setPartialReps(0);
-                        }
-                      });
+                      void run(() => assignHomeTraining(systemDate, true, session.id)).then(
+                        (next) => {
+                          if (next) {
+                            setLoads({});
+                            setRounds(0);
+                            setPartialReps(0);
+                          }
+                        },
+                      );
                     }
                   }}
                 >
@@ -730,14 +855,14 @@ export function TrainingHallPage() {
                     {session.status === 'active' ? (
                       <button
                         className="button button--ghost"
-                        onClick={() => void run(() => pauseTrainingTimer(systemDate))}
+                        onClick={() => void run(() => pauseTrainingTimer(session.id))}
                       >
                         <Pause size={17} /> Pause
                       </button>
                     ) : (
                       <button
                         className="button button--primary"
-                        onClick={() => void run(() => startTrainingTimer(systemDate))}
+                        onClick={() => void run(() => startTrainingTimer(session.id))}
                       >
                         <Play size={17} /> Resume
                       </button>
@@ -746,7 +871,7 @@ export function TrainingHallPage() {
                       className="button button--danger"
                       onClick={() => {
                         if (window.confirm('End this session without Daily Workout credit?')) {
-                          void run(() => abandonTrainingSession(systemDate));
+                          void run(() => abandonTrainingSession(session.id));
                         }
                       }}
                     >
@@ -784,7 +909,7 @@ export function TrainingHallPage() {
                       <button
                         className="button button--ghost"
                         disabled={working}
-                        onClick={() => void run(() => activateBossExtension(systemDate))}
+                        onClick={() => void run(() => activateBossExtension(session.id))}
                       >
                         <Flame size={18} /> Open five-minute Boss Extension
                       </button>
@@ -798,6 +923,17 @@ export function TrainingHallPage() {
             )}
           </section>
         </>
+      ) : session?.location === 'gym' ? (
+        <GymDeploymentPanel
+          session={session}
+          availability={gymAvailability}
+          working={working}
+          onWorkingChange={setWorking}
+          onSessionChange={setSession}
+          onComplete={finishStructuredGym}
+          onBack={chooseDifferentPath}
+          onError={setError}
+        />
       ) : session ? (
         <section className={`panel training-log is-${session.location}`}>
           <header className="section-header">
@@ -805,9 +941,7 @@ export function TrainingHallPage() {
               <p className="eyebrow">{session.location.toUpperCase()} DEPLOYMENT</p>
               <h2>{trainingLabel(session)}</h2>
             </div>
-            {session.location === 'gym' ? (
-              <Building2 size={23} />
-            ) : session.location === 'conditioning' ? (
+            {session.location === 'conditioning' ? (
               <Footprints size={23} />
             ) : (
               <HeartPulse size={23} />
@@ -820,11 +954,9 @@ export function TrainingHallPage() {
                 <span>ROOK · DEPLOYMENT</span>
                 <p>
                   “
-                  {session.location === 'gym'
-                    ? 'Gym deployment accepted. Train with purpose, then bring the completed facts back to the Hall.'
-                    : session.location === 'conditioning'
-                      ? 'Conditioning assignment accepted. Choose a sustainable pace and finish the distance you honestly began.'
-                      : 'Recovery protocol accepted. Deliberate stretching and plank work count when they are actually completed.'}
+                  {session.location === 'conditioning'
+                    ? 'Conditioning assignment accepted. Choose a sustainable pace and finish the distance you honestly began.'
+                    : 'Recovery protocol accepted. Deliberate stretching and plank work count when they are actually completed.'}
                   ”
                 </p>
               </div>
@@ -835,11 +967,9 @@ export function TrainingHallPage() {
                 <span>EMBER · TERMS</span>
                 <p>
                   “
-                  {session.location === 'gym'
-                    ? 'Then make the trip count. I want a finished session, not twenty minutes of wandering between machines.'
-                    : session.location === 'conditioning'
-                      ? 'Good. Pick the pace, keep moving, and bring me the honest time when the work is finished.'
-                      : 'Recovery is still training when you do it on purpose. Complete the protocol; do not just think about it.'}
+                  {session.location === 'conditioning'
+                    ? 'Good. Pick the pace, keep moving, and bring me the honest time when the work is finished.'
+                    : 'Recovery is still training when you do it on purpose. Complete the protocol; do not just think about it.'}
                   ”
                 </p>
               </div>
@@ -857,23 +987,6 @@ export function TrainingHallPage() {
                 onChange={(event) => setLoggedDuration(Number(event.target.value))}
               />
             </label>
-            {session.location === 'gym' && (
-              <label className="field">
-                <span>Training focus</span>
-                <select
-                  value={gymFocus}
-                  onChange={(event) =>
-                    setGymFocus(event.target.value as TrainingSession['gymFocus'])
-                  }
-                >
-                  <option value="strength">Strength</option>
-                  <option value="cardio">Cardio</option>
-                  <option value="mixed">Mixed</option>
-                  <option value="class">Class</option>
-                  <option value="other">Other</option>
-                </select>
-              </label>
-            )}
             {session.location === 'conditioning' && (
               <>
                 <label className="field">

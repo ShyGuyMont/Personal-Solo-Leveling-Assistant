@@ -910,7 +910,7 @@ export function SettingsPage() {
               <p className="eyebrow">ARCHIVE SHIELD · LOCAL DATA</p>
               <h2>Full-campaign backup</h2>
               <p>
-                Everything—including Version 4.0 Scripture Sanctuary notes, Training Hall records,
+                Everything—including Version 5.0 Kitchen notes, structured Training Hall records,
                 Treasury records, Campaign Arcs, questlines, briefings, Councils, chats, Amara, and
                 Cassian—is stored on this device. Export regularly before clearing browser data or
                 changing phones.
@@ -1022,7 +1022,7 @@ export function SettingsPage() {
           <Info size={21} />
           <div>
             <p className="eyebrow">ABOUT</p>
-            <h2>The System · Version 4.0.0</h2>
+            <h2>The System · Version 5.0.0</h2>
             <p>
               An original, offline-first personal progression RPG. It uses no login, backend,
               external API, analytics, advertising, tracking, paid service, or copied franchise

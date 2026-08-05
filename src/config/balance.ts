@@ -34,6 +34,24 @@ export const BALANCE = {
     recoveryReturnDays: 3,
   },
   protectedExceptionsPerMonth: 2,
+  training: {
+    doubleDeploymentAccountXp: 150,
+    doubleDeploymentStatXp: {
+      strength: 25,
+      endurance: 25,
+      discipline: 12,
+      vitality: 18,
+    },
+  },
+  kitchen: {
+    rewardedOrdersPerWeek: 3,
+    completedOrderAccountXp: 40,
+    completedOrderStatXp: {
+      stewardship: 10,
+      vitality: 12,
+      discipline: 8,
+    },
+  },
   weeklyChallengeAccountXp: [100, 150, 220, 300, 420],
   monthlyChallengeAccountXp: [350, 500, 700, 950, 1250],
 } as const;

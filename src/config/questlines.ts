@@ -1432,6 +1432,178 @@ export const COMPANION_QUESTLINES: CompanionQuestlineDefinition[] = [
       },
     ],
   },
+  {
+    id: 'saffron-the-fire-we-feed',
+    companionId: 'saffron',
+    title: 'The Fire We Feed',
+    subtitle:
+      'A five-chapter campaign for confidence in the Kitchen, meals that support training, and preparation strong enough to defeat convenience.',
+    premise:
+      'Saffron believes cooking is not a performance. It is command over the moment hunger becomes urgent: a skill that can nourish the body, protect the Treasury, and make tomorrow kinder. Beneath all the shouting, she wants you to trust that you can care for yourself with your own hands.',
+    completionTitleId: 'keeper-of-the-hearth',
+    chapters: [
+      {
+        id: 'saffron-1-light-the-stove',
+        number: 1,
+        title: 'Light the Stove',
+        rewardXp: 100,
+        intro:
+          'Saffron starts with proof, not culinary ambition. One completed recipe is enough to turn the Kitchen from a threat into a place where you have already succeeded.',
+        completionMessage:
+          '“You see? The stove was never judging you. That was my job—and I judge this beginning excellent.” — Saffron',
+        objectives: [
+          tracked(
+            'saffron-1-order',
+            'Cook the first order',
+            'Complete one assigned Kitchen Order.',
+            'kitchen-orders',
+            1,
+          ),
+          tracked(
+            'saffron-1-line',
+            'Defeat convenience once',
+            'Complete one No Eating Out challenge.',
+            'no-eating-out-wins',
+            1,
+          ),
+          manual(
+            'saffron-1-reason',
+            'Name what dinner protects',
+            'Write why cooking matters to the life you are building.',
+            'Is this about strength, savings, confidence, health, tomorrow’s lunch, or something more personal?',
+          ),
+        ],
+      },
+      {
+        id: 'saffron-2-build-the-plate',
+        number: 2,
+        title: 'Build the Plate',
+        rewardXp: 140,
+        intro:
+          'Recipes become less intimidating when their structure becomes visible: a protein anchor, vegetables, useful energy, and enough flavor to want the meal again.',
+        completionMessage:
+          '“Now you are not merely following steps. You can see why the plate works. Dangerous! You may become competent.” — Saffron',
+        objectives: [
+          tracked(
+            'saffron-2-orders',
+            'Repeat the structure',
+            'Complete two Kitchen Orders.',
+            'kitchen-orders',
+            2,
+          ),
+          manual(
+            'saffron-2-formula',
+            'Write your plate formula',
+            'Choose one favorite protein, vegetable, and carbohydrate combination.',
+            'What simple combination would still sound good on a tired evening?',
+          ),
+          manual(
+            'saffron-2-flavor',
+            'Claim a flavor profile',
+            'Record one seasoning, sauce, or flavor combination you genuinely enjoy.',
+            'What makes a home-cooked meal feel like something you want rather than something you tolerate?',
+          ),
+        ],
+      },
+      {
+        id: 'saffron-3-defeat-delivery',
+        number: 3,
+        title: 'Defeat Delivery',
+        rewardXp: 180,
+        intro:
+          'The enemy is often not hunger but urgency. Saffron asks you to make the home option visible, fast, and ready before a difficult evening begins.',
+        completionMessage:
+          '“Convenience arrived at the gate and found dinner already waiting. That is not willpower. That is preparation.” — Saffron',
+        objectives: [
+          tracked(
+            'saffron-3-orders',
+            'Hold the Kitchen line',
+            'Complete three Kitchen Orders.',
+            'kitchen-orders',
+            3,
+          ),
+          tracked(
+            'saffron-3-wins',
+            'Close the delivery portal',
+            'Complete two No Eating Out challenges.',
+            'no-eating-out-wins',
+            2,
+          ),
+          manual(
+            'saffron-3-emergency',
+            'Build an emergency meal',
+            'Define one meal you can assemble in fifteen minutes or less.',
+            'Which freezer, pantry, or refrigerator ingredients make ordering out less urgent?',
+          ),
+        ],
+      },
+      {
+        id: 'saffron-4-leftover-arsenal',
+        number: 4,
+        title: 'The Leftover Arsenal',
+        rewardXp: 220,
+        intro:
+          'A meal becomes a system when it protects more than tonight. Saffron turns extra portions into tomorrow’s lunch, recovery fuel, and saved money.',
+        completionMessage:
+          '“One fire, several meals. That is Kitchen magic, except it is mostly containers and refusing to forget them.” — Saffron',
+        objectives: [
+          tracked(
+            'saffron-4-orders',
+            'Stock the arsenal',
+            'Complete three Kitchen Orders.',
+            'kitchen-orders',
+            3,
+          ),
+          tracked(
+            'saffron-4-training',
+            'Feed the frame',
+            'Complete three Physical missions.',
+            'category-count',
+            3,
+            'physical',
+          ),
+          manual(
+            'saffron-4-leftovers',
+            'Write the leftover rule',
+            'Choose when you will portion and use leftovers.',
+            'What simple rule prevents cooked food from disappearing behind the groceries?',
+          ),
+        ],
+      },
+      {
+        id: 'saffron-5-hearth-under-command',
+        number: 5,
+        title: 'Hearth Under Command',
+        rewardXp: 300,
+        intro:
+          'The final chapter is not a perfect diet. It is ownership: recipes you can repeat, recovery after an unplanned order, and a Kitchen that belongs in the life you are building.',
+        completionMessage:
+          '“The fire answers to you now. Feed your strength, protect your future, and never again tell me you cannot cook.” — Saffron',
+        objectives: [
+          tracked(
+            'saffron-5-orders',
+            'Prove the pattern',
+            'Complete five Kitchen Orders.',
+            'kitchen-orders',
+            5,
+          ),
+          tracked(
+            'saffron-5-wins',
+            'Keep the line',
+            'Complete three No Eating Out challenges.',
+            'no-eating-out-wins',
+            3,
+          ),
+          manual(
+            'saffron-5-charter',
+            'Write the Kitchen charter',
+            'Record three rules that make home cooking easier to repeat.',
+            'What will always be stocked, when will you decide dinner, and how will you recover after ordering out?',
+          ),
+        ],
+      },
+    ],
+  },
 ];
 
 export function getQuestline(id: string) {

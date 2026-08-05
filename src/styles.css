@@ -2096,7 +2096,7 @@ html[data-theme='daybreak'] .about-rank-grid article {
 
 .headquarters-hero__portraits {
   position: relative;
-  height: 250px;
+  height: 320px;
 }
 
 .headquarters-hero__portraits img {
@@ -2676,13 +2676,13 @@ html[data-theme='daybreak'] .headquarters-roster__grid article {
 
   .headquarters-hero__portraits {
     width: 300px;
-    height: 228px;
+    height: 285px;
     margin-inline: auto;
   }
 
   .headquarters-hero__portraits img {
-    width: 108px;
-    height: 123px;
+    width: 100px;
+    height: 112px;
   }
 
   .headquarters-hero > div:last-child {
@@ -2770,10 +2770,12 @@ html[data-theme='daybreak'] .headquarters-roster__grid article {
 
   .headquarters-hero__portraits {
     width: 270px;
+    height: 270px;
   }
 
   .headquarters-hero__portraits img {
-    width: 100px;
+    width: 90px;
+    height: 104px;
   }
 
   .campfire-message-list article {
@@ -6350,9 +6352,14 @@ p {
   inset: 0;
   z-index: 130;
   display: grid;
-  place-items: center;
-  overflow: hidden;
+  align-items: start;
+  justify-items: center;
+  overflow-x: hidden;
+  overflow-y: auto;
   padding: max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom));
+  overscroll-behavior-y: contain;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
   background:
     radial-gradient(circle at center, rgba(67, 230, 194, 0.18), transparent 42%),
     rgba(2, 4, 6, 0.96);
@@ -6380,7 +6387,10 @@ p {
   position: relative;
   display: grid;
   width: min(520px, 100%);
+  min-height: calc(100dvh - 48px);
+  align-content: center;
   justify-items: center;
+  padding: 20px 0;
   text-align: center;
 }
 
@@ -6950,8 +6960,1018 @@ html[data-theme='daybreak'] .bottom-nav {
   color: var(--muted-2);
 }
 
+.headquarters-kitchen {
+  margin-top: 10px;
+  border-color: rgba(255, 138, 61, 0.3);
+}
+
+.headquarters-kitchen > span {
+  color: #ff8a3d;
+  background: rgba(255, 138, 61, 0.09);
+}
+
 .bottom-nav {
-  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+}
+
+/* Version 5.0 · Toji Ascension Gym */
+.gym-deployment-picker,
+.gym-workout-console,
+.gym-result-intelligence,
+.double-deployment-banner {
+  display: grid;
+  gap: 18px;
+}
+
+.gym-recommendation-callout {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  padding: 14px;
+  border: 1px solid rgba(242, 166, 90, 0.34);
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(242, 166, 90, 0.12), rgba(8, 13, 18, 0.72));
+}
+
+.gym-recommendation-callout img {
+  width: 72px;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border: 1px solid rgba(242, 166, 90, 0.45);
+  border-radius: 16px;
+}
+
+.gym-recommendation-callout div {
+  display: grid;
+  gap: 3px;
+}
+
+.gym-recommendation-callout span,
+.gym-workout-card__status,
+.gym-session-progress span,
+.gym-session-progress small,
+.gym-finisher span {
+  color: var(--muted-2);
+  font-family: Rajdhani, sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.gym-recommendation-callout p,
+.gym-working-set-note,
+.gym-exercise-stack article > p,
+.gym-finisher p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.gym-workout-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.gym-workout-card {
+  position: relative;
+  display: grid;
+  min-height: 185px;
+  gap: 7px;
+  padding: 18px;
+  color: var(--text);
+  text-align: left;
+  border: 1px solid var(--line);
+  border-radius: 17px;
+  background: rgba(11, 17, 23, 0.74);
+}
+
+.gym-workout-card.is-recommended {
+  border-color: rgba(67, 230, 194, 0.55);
+  box-shadow: inset 0 0 28px rgba(67, 230, 194, 0.05);
+}
+
+.gym-workout-card > svg {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  color: var(--mint);
+}
+
+.gym-workout-card strong {
+  font-family: Rajdhani, sans-serif;
+  font-size: 1.25rem;
+}
+
+.gym-workout-card small,
+.gym-workout-card em {
+  color: var(--muted-2);
+  font-style: normal;
+}
+
+.gym-workout-card p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.gym-deployment-briefing {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 120px;
+  gap: 16px;
+  align-items: stretch;
+}
+
+.gym-session-progress {
+  display: grid;
+  place-content: center;
+  text-align: center;
+  border: 1px solid rgba(67, 230, 194, 0.24);
+  border-radius: 16px;
+  background: rgba(67, 230, 194, 0.05);
+}
+
+.gym-session-progress strong {
+  color: var(--mint);
+  font-family: Rajdhani, sans-serif;
+  font-size: 2.1rem;
+}
+
+.gym-rest-dock {
+  position: sticky;
+  top: 82px;
+  z-index: 25;
+  display: flex;
+  width: min(420px, calc(100% - 24px));
+  min-height: 52px;
+  align-items: center;
+  gap: 10px;
+  margin: 0 auto;
+  padding: 9px 12px;
+  color: var(--text);
+  border: 1px solid rgba(255, 105, 63, 0.48);
+  border-radius: 18px;
+  background: rgba(12, 15, 20, 0.94);
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(18px);
+}
+
+.gym-rest-dock span {
+  flex: 1;
+  color: var(--muted-2);
+  font-family: Rajdhani, sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+}
+
+.gym-rest-dock strong {
+  color: #ff8b68;
+  font-variant-numeric: tabular-nums;
+}
+
+.gym-rest-dock button,
+.gym-rest-button {
+  color: var(--mint);
+  border: 0;
+  background: transparent;
+}
+
+.gym-working-set-note {
+  padding: 12px 14px;
+  border-left: 2px solid var(--mint);
+  background: rgba(67, 230, 194, 0.045);
+}
+
+.gym-exercise-stack {
+  display: grid;
+  gap: 12px;
+}
+
+.gym-exercise-stack > article {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(5, 10, 14, 0.5);
+}
+
+.gym-exercise-stack > article.is-complete {
+  border-color: rgba(67, 230, 194, 0.38);
+  background: rgba(67, 230, 194, 0.045);
+}
+
+.gym-exercise-stack article > header {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  gap: 11px;
+  align-items: center;
+}
+
+.gym-exercise-stack article > header > span {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  color: var(--mint);
+  font-family: Rajdhani, sans-serif;
+  border: 1px solid rgba(67, 230, 194, 0.3);
+  border-radius: 10px;
+}
+
+.gym-exercise-stack article > header > div {
+  display: grid;
+  gap: 3px;
+}
+
+.gym-exercise-stack select {
+  width: 100%;
+  color: var(--text);
+  font-family: Rajdhani, sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  border: 0;
+  background: transparent;
+}
+
+.gym-exercise-stack option {
+  color: #111820;
+}
+
+.gym-exercise-stack b {
+  color: var(--muted-2);
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+
+.gym-set-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.gym-set-grid > div {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr);
+  gap: 6px;
+  align-items: end;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.018);
+}
+
+.gym-set-grid > div.is-complete {
+  border-color: rgba(67, 230, 194, 0.35);
+}
+
+.gym-set-check {
+  display: grid;
+  width: 30px;
+  height: 36px;
+  place-items: center;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.gym-set-grid > div.is-complete .gym-set-check {
+  color: #07100e;
+  background: var(--mint);
+  border-color: var(--mint);
+}
+
+.gym-set-grid label {
+  display: grid;
+  gap: 3px;
+}
+
+.gym-set-grid label span {
+  color: var(--muted-2);
+  font-size: 0.58rem;
+}
+
+.gym-set-grid input {
+  width: 100%;
+  min-width: 0;
+  padding: 8px 5px;
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.gym-rest-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  justify-self: start;
+}
+
+.gym-finisher {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 13px;
+  align-items: center;
+  padding: 16px;
+  border: 1px solid rgba(255, 105, 63, 0.32);
+  border-radius: 16px;
+  background: rgba(255, 105, 63, 0.055);
+}
+
+.gym-finisher > div {
+  display: grid;
+  gap: 4px;
+}
+
+.gym-finisher button {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  color: #ff8b68;
+  place-items: center;
+  border: 1px solid rgba(255, 105, 63, 0.4);
+  border-radius: 50%;
+  background: transparent;
+}
+
+.gym-finisher.is-complete button {
+  color: #07100e;
+  background: #ff8b68;
+}
+
+.gym-completion-actions,
+.double-deployment-banner {
+  align-items: center;
+}
+
+.gym-completion-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.gym-completion-actions small {
+  flex: 1 1 220px;
+  color: var(--muted-2);
+}
+
+.double-deployment-banner {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  border-color: rgba(242, 166, 90, 0.38);
+  background: linear-gradient(135deg, rgba(242, 166, 90, 0.1), rgba(67, 230, 194, 0.04));
+}
+
+.double-deployment-banner.is-earned {
+  border-color: rgba(67, 230, 194, 0.48);
+}
+
+.double-deployment-banner > svg {
+  color: #f2a65a;
+}
+
+.double-deployment-banner h2,
+.gym-result-intelligence h2 {
+  margin: 2px 0 4px;
+}
+
+.double-deployment-banner p,
+.gym-result-intelligence p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.gym-result-intelligence ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 20px;
+  color: var(--muted);
+}
+
+/* Version 5.0 · Saffron's Kitchen */
+.kitchen-page {
+  --kitchen-orange: #ff8a3d;
+  --kitchen-green: #78dd8f;
+  display: grid;
+  gap: 18px;
+}
+
+.kitchen-loading {
+  text-align: center;
+}
+
+.kitchen-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 24px;
+  align-items: center;
+  min-height: 285px;
+  overflow: hidden;
+  border-color: color-mix(in srgb, var(--companion-accent), transparent 48%);
+  background:
+    radial-gradient(circle at 14% 42%, rgba(255, 138, 61, 0.22), transparent 34%),
+    linear-gradient(135deg, rgba(19, 31, 24, 0.97), rgba(13, 15, 20, 0.97));
+}
+
+.kitchen-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent 55%, rgba(120, 221, 143, 0.04));
+}
+
+.kitchen-hero__portrait {
+  position: relative;
+  z-index: 1;
+}
+
+.kitchen-hero__portrait img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border: 1px solid rgba(255, 138, 61, 0.45);
+  border-radius: 24px;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.36);
+}
+
+.kitchen-hero__portrait span {
+  position: absolute;
+  right: -7px;
+  bottom: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 9px;
+  color: #101712;
+  font-family: Rajdhani, sans-serif;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  background: var(--kitchen-orange);
+  border-radius: 9px;
+}
+
+.kitchen-hero__copy {
+  position: relative;
+  z-index: 1;
+}
+
+.kitchen-hero__copy h1 {
+  max-width: 720px;
+  margin: 4px 0 9px;
+  font-size: clamp(2rem, 5vw, 3.7rem);
+}
+
+.kitchen-hero__copy > p:last-of-type,
+.kitchen-reward-card p,
+.kitchen-summons p,
+.kitchen-order-briefing p,
+.kitchen-completion-card p,
+.kitchen-complete-state p,
+.kitchen-declined-state p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.kitchen-hero__chips,
+.kitchen-result-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.kitchen-hero__chips span,
+.kitchen-result-chips span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px;
+  color: var(--muted);
+  border: 1px solid rgba(255, 138, 61, 0.25);
+  border-radius: 999px;
+  background: rgba(255, 138, 61, 0.06);
+}
+
+.kitchen-reward-card,
+.kitchen-summons,
+.kitchen-order-briefing,
+.kitchen-complete-state,
+.kitchen-declined-state {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: center;
+}
+
+.kitchen-reward-card h2,
+.kitchen-summons h2,
+.kitchen-complete-state h2,
+.kitchen-declined-state h2 {
+  margin: 3px 0 7px;
+}
+
+.kitchen-order-meter {
+  display: flex;
+  gap: 8px;
+}
+
+.kitchen-order-meter span {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  color: var(--muted-2);
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.kitchen-order-meter span.is-complete {
+  color: #0a1410;
+  background: var(--kitchen-green);
+  border-color: var(--kitchen-green);
+}
+
+.kitchen-summons {
+  grid-template-columns: 120px minmax(0, 1fr);
+}
+
+.kitchen-summons img,
+.kitchen-order-briefing img,
+.kitchen-complete-state__portrait img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border: 1px solid rgba(255, 138, 61, 0.38);
+  border-radius: 19px;
+}
+
+.kitchen-summons .button {
+  margin-top: 14px;
+}
+
+.kitchen-order-briefing {
+  grid-template-columns: 82px minmax(0, 1fr);
+  border-color: rgba(255, 138, 61, 0.38);
+  background: linear-gradient(135deg, rgba(255, 138, 61, 0.1), rgba(120, 221, 143, 0.035));
+}
+
+.kitchen-order-briefing span {
+  color: var(--kitchen-orange);
+  font-family: Rajdhani, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.kitchen-order-briefing p {
+  margin-top: 5px;
+  color: var(--text);
+  font-size: 1.05rem;
+}
+
+.kitchen-recipe-console,
+.kitchen-completion-card,
+.kitchen-library,
+.kitchen-history {
+  display: grid;
+  gap: 18px;
+}
+
+.kitchen-recipe-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: start;
+}
+
+.kitchen-recipe-header h2 {
+  margin: 3px 0 6px;
+  font-size: clamp(1.7rem, 4vw, 2.6rem);
+}
+
+.kitchen-recipe-header p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.kitchen-recipe-meta {
+  display: grid;
+  gap: 7px;
+}
+
+.kitchen-recipe-meta span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 10px;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  white-space: nowrap;
+}
+
+.kitchen-plate-note {
+  padding: 13px 15px;
+  border-left: 2px solid var(--kitchen-green);
+  background: rgba(120, 221, 143, 0.045);
+}
+
+.kitchen-plate-note strong {
+  color: var(--kitchen-green);
+  font-family: Rajdhani, sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+}
+
+.kitchen-plate-note p {
+  margin: 4px 0 0;
+  color: var(--muted);
+}
+
+.kitchen-recipe-grid,
+.kitchen-intel-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.kitchen-recipe-grid > section,
+.kitchen-intel-grid > article {
+  padding: 15px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: rgba(5, 10, 14, 0.48);
+}
+
+.kitchen-recipe-grid h3 {
+  margin-top: 0;
+}
+
+.kitchen-checklist {
+  display: grid;
+  gap: 7px;
+}
+
+.kitchen-checklist button {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  gap: 9px;
+  align-items: center;
+  padding: 9px;
+  color: var(--muted);
+  text-align: left;
+  border: 1px solid rgba(255, 255, 255, 0.055);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.016);
+}
+
+.kitchen-checklist button > span {
+  display: grid;
+  width: 29px;
+  height: 29px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+}
+
+.kitchen-checklist button.is-checked {
+  color: var(--text);
+  border-color: rgba(120, 221, 143, 0.28);
+  background: rgba(120, 221, 143, 0.045);
+}
+
+.kitchen-checklist button.is-checked > span {
+  color: #09130d;
+  background: var(--kitchen-green);
+  border-color: var(--kitchen-green);
+}
+
+.kitchen-intel-grid {
+  grid-template-columns: 1.2fr 1fr 1fr;
+}
+
+.kitchen-intel-grid strong {
+  color: var(--kitchen-orange);
+}
+
+.kitchen-intel-grid p,
+.kitchen-intel-grid li {
+  color: var(--muted);
+}
+
+.kitchen-intel-grid ul {
+  margin-bottom: 0;
+  padding-left: 19px;
+}
+
+.kitchen-order-actions,
+.kitchen-completion-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.kitchen-completion-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.kitchen-completion-grid label,
+.kitchen-completion-card > label {
+  display: grid;
+  gap: 7px;
+}
+
+.kitchen-completion-grid label > span,
+.kitchen-completion-card > label > span {
+  color: var(--muted-2);
+  font-size: 0.78rem;
+}
+
+.kitchen-completion-card input,
+.kitchen-completion-card textarea {
+  width: 100%;
+}
+
+.kitchen-clear-button {
+  justify-self: start;
+}
+
+.kitchen-complete-state {
+  grid-template-columns: 110px minmax(0, 1fr);
+  border-color: rgba(120, 221, 143, 0.38);
+}
+
+.kitchen-complete-state__portrait {
+  position: relative;
+}
+
+.kitchen-complete-state__portrait span {
+  position: absolute;
+  right: -5px;
+  bottom: -5px;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  color: #08130d;
+  place-items: center;
+  background: var(--kitchen-green);
+  border-radius: 50%;
+}
+
+.kitchen-declined-state {
+  grid-template-columns: auto minmax(0, 1fr);
+}
+
+.kitchen-declined-state > svg {
+  color: var(--muted-2);
+}
+
+.kitchen-library__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.kitchen-library details {
+  padding: 13px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(5, 10, 14, 0.45);
+}
+
+.kitchen-library summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  cursor: pointer;
+  list-style: none;
+}
+
+.kitchen-library summary span {
+  display: grid;
+  gap: 3px;
+}
+
+.kitchen-library summary small,
+.kitchen-library details p,
+.kitchen-library details li {
+  color: var(--muted);
+}
+
+.kitchen-library details > strong {
+  color: var(--kitchen-orange);
+}
+
+.kitchen-library__safety {
+  display: flex;
+  gap: 7px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.kitchen-history__list {
+  display: grid;
+  gap: 8px;
+}
+
+.kitchen-history__list article {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 11px;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.kitchen-history__list article > span {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  color: var(--muted-2);
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.kitchen-history__list article > span.is-complete {
+  color: #09130d;
+  background: var(--kitchen-green);
+}
+
+.kitchen-history__list article > div {
+  display: grid;
+}
+
+.kitchen-history__list small,
+.kitchen-history__list em {
+  color: var(--muted-2);
+  font-style: normal;
+}
+
+.kitchen-disclaimer {
+  margin: 0;
+  padding: 0 8px;
+  color: var(--muted-2);
+  font-size: 0.76rem;
+  text-align: center;
+}
+
+html[data-theme='daybreak'] .gym-workout-card,
+html[data-theme='daybreak'] .gym-exercise-stack > article,
+html[data-theme='daybreak'] .kitchen-recipe-grid > section,
+html[data-theme='daybreak'] .kitchen-intel-grid > article,
+html[data-theme='daybreak'] .kitchen-library details {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+html[data-theme='daybreak'] .kitchen-hero {
+  background:
+    radial-gradient(circle at 14% 42%, rgba(255, 138, 61, 0.2), transparent 36%),
+    linear-gradient(135deg, rgba(250, 247, 233, 0.98), rgba(231, 238, 223, 0.98));
+}
+
+@media (max-width: 760px) {
+  .gym-workout-grid,
+  .kitchen-recipe-grid,
+  .kitchen-library__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .gym-set-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .kitchen-intel-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .bottom-nav__item span {
+    font-size: 0.41rem;
+    letter-spacing: 0;
+  }
+
+  .gym-deployment-briefing,
+  .double-deployment-banner {
+    grid-template-columns: 1fr;
+  }
+
+  .gym-session-progress {
+    min-height: 76px;
+  }
+
+  .gym-set-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .gym-set-grid > div {
+    grid-template-columns: 36px minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .gym-completion-actions,
+  .gym-completion-actions .button,
+  .double-deployment-banner .button,
+  .kitchen-order-actions,
+  .kitchen-order-actions .button,
+  .kitchen-clear-button {
+    width: 100%;
+  }
+
+  .kitchen-page {
+    width: min(100% - 20px, 1120px);
+    padding-top: 18px;
+  }
+
+  .kitchen-hero {
+    grid-template-columns: 94px minmax(0, 1fr);
+    gap: 12px;
+    min-height: 210px;
+    padding: 13px;
+  }
+
+  .kitchen-hero__portrait img {
+    border-radius: 16px;
+  }
+
+  .kitchen-hero__portrait span {
+    right: -4px;
+    font-size: 0;
+  }
+
+  .kitchen-hero__portrait span svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .kitchen-hero__copy h1 {
+    font-size: 1.65rem;
+  }
+
+  .kitchen-hero__copy > p:last-of-type {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    font-size: 0.78rem;
+  }
+
+  .kitchen-hero__chips span:last-child {
+    display: none;
+  }
+
+  .kitchen-reward-card,
+  .kitchen-recipe-header,
+  .kitchen-completion-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .kitchen-order-meter {
+    justify-self: start;
+  }
+
+  .kitchen-summons {
+    grid-template-columns: 78px minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .kitchen-summons .button {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .kitchen-order-briefing {
+    grid-template-columns: 62px minmax(0, 1fr);
+    padding: 13px;
+  }
+
+  .kitchen-recipe-meta {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .kitchen-complete-state {
+    grid-template-columns: 78px minmax(0, 1fr);
+  }
+
+  .kitchen-history__list article > em {
+    display: none;
+  }
+}
+
+@media (max-width: 380px) {
+  .bottom-nav__item span {
+    display: none;
+  }
 }
 
 .treasury-page {
@@ -9317,6 +10337,16 @@ html[data-theme='daybreak'] .party-checkin-archive__item {
   color: var(--muted);
 }
 
+.kitchen-dashboard-card {
+  border-color: rgba(255, 138, 61, 0.3);
+}
+
+.kitchen-dashboard-card > span {
+  color: #ff8a3d;
+  background: rgba(255, 138, 61, 0.09);
+  border-color: rgba(255, 138, 61, 0.26);
+}
+
 .campaigns-page,
 .update-center-page {
   display: grid;
@@ -10773,8 +11803,7 @@ html[data-theme='daybreak'] .panel.sanctuary-dashboard-card {
   overflow: hidden;
   background:
     radial-gradient(circle at 8% 42%, rgba(127, 201, 255, 0.12), transparent 29%),
-    radial-gradient(circle at 23% 60%, rgba(188, 167, 255, 0.1), transparent 32%),
-    var(--panel);
+    radial-gradient(circle at 23% 60%, rgba(188, 167, 255, 0.1), transparent 32%), var(--panel);
   border-color: rgba(155, 188, 255, 0.22);
 }
 

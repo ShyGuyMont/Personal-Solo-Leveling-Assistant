@@ -430,6 +430,71 @@ export const COMPANIONS: CompanionDefinition[] = [
       ],
     },
   },
+  {
+    id: 'saffron',
+    name: 'Saffron',
+    title: 'The Flame Chef',
+    shortRole: 'Cooking · Nutrition · Meal preparation',
+    description:
+      'Saffron commands the Kitchen: practical home cooking, protein-forward plates, prepared leftovers, and the food habits that support training without setting the Treasury on fire.',
+    appearance:
+      'A warm olive-brown woman with vivid green eyes and a thick dark curly bob beneath a modern white chef hat. Her white fantasy chef jacket, forest-green apron, tangerine trim, and glowing wooden spoon make every recipe assignment look like a battle order.',
+    personality:
+      'Brilliant, theatrical, fiercely nurturing, and equipped with a very short culinary fuse. She scolds empty refrigerators and delivery apps—not your body—and always turns the heat back toward a doable next meal.',
+    accent: '#ff8a3d',
+    image: 'companions/saffron.png',
+    categories: ['physical', 'discipline'],
+    stats: [],
+    messages: {
+      'daily-briefing': [
+        'Kitchen check! What are you eating before hunger starts making expensive decisions for you?',
+        'Protein, vegetables, something satisfying, and a plan. This is a meal—not an archaeological dig through delivery menus.',
+        'If dinner is mysterious by noon, the delivery app is already winning. We are choosing first.',
+        'Train hard, yes. But do not ask your body to build anything from crumbs and chaos.',
+      ],
+      mission: [
+        'Good. Now feed the person who completed it like you expect him to do it again tomorrow.',
+        'Objective cleared! I am proud of you. Also, drink water. Pride does not replace hydration.',
+        'That is real work. The Kitchen will have something worthy of it.',
+        'Progress recorded. Excellent. No, this does not make a bag of chips a recovery meal.',
+      ],
+      'stat-level': [
+        '{stat} reached level {level}. Wonderful! Now we support the upgrade with an actual meal.',
+        'Level {level} {stat}. You are growing; therefore the Kitchen refuses to remain an afterthought.',
+        'Your {stat} advanced to level {level}. Delicious progress—metaphorically. Do not eat the badge.',
+      ],
+      'rank-up': [
+        'New rank! Sit down, breathe, and let me cook—figuratively. You are doing the cooking. I am supervising loudly.',
+        'Classification advanced. Your standards rose; the quality of your fuel comes with them.',
+        'A higher rank deserves celebration. We can make it taste incredible without making tomorrow pay for it.',
+      ],
+      'rare-event': [
+        'Rare objective complete! Good. Surprise is acceptable when it produces results—or a new sauce.',
+        'You handled the unexpected. That calls for a prepared meal, not an unprepared purchase.',
+      ],
+      'mission-pass': [
+        'Keep the pass. Rest is strategic. Skipping every vegetable because you rested is not.',
+        'Protection secured. Use it when needed, then make the next meal easy enough to protect the comeback.',
+      ],
+      comeback: [
+        'You came back! No guilt casserole, no punishment diet. We make one honest meal and restart from there.',
+        'The Kitchen is still open. Put the shame outside, wash your hands, and let us make something good.',
+        'A rough stretch does not require starvation or perfection. It requires groceries and one recipe you can repeat.',
+      ],
+      kitchen: [
+        'Order complete! Look at that—money protected, protein handled, and delivery thoroughly defeated.',
+        'You cooked it yourself. I knew you could. Obviously I will be taking partial credit.',
+        'Taste, adjust, remember what worked. A repeatable meal is more valuable than one dramatic masterpiece.',
+        'Leftovers secured! Tomorrow-you has just been rescued from a suspiciously expensive decision.',
+        'That plate supports the training hall and the Treasury. Two victories, one pan. Magnificent.',
+        'Not perfect? Good! Kitchens are laboratories. Record the adjustment and make the next batch better.',
+      ],
+      achievement: [
+        'Achievement confirmed! We are celebrating with flavor, not financial sabotage.',
+        'That badge is proof. I want a proper victory meal and absolutely no apologizing for being proud.',
+      ],
+    },
+  },
 ];
 
 export function getCompanion(id: CompanionId) {

@@ -3,7 +3,10 @@ import { db } from '@/db/database';
 import { initializeProfile, seedReferenceData } from '@/db/seed';
 import {
   activateBossExtension,
+  assignGymWorkout,
   assignHomeTraining,
+  awardDoubleDeploymentReward,
+  completeGymTraining,
   completeHomeTraining,
   completeLoggedTraining,
   getRemainingTrainingSeconds,
@@ -88,20 +91,89 @@ describe('Training Hall', () => {
     expect((await db.progression.get('primary'))?.totalXp).toBe(0);
   });
 
-  it('records gym, conditioning, and recovery as bounded alternate workout paths', async () => {
-    await selectTrainingLocation(DATE, 'gym');
-    const gym = await completeLoggedTraining({
-      date: DATE,
-      location: 'gym',
+  it('requires a complete structured Gym Deployment and bounds its recorded facts', async () => {
+    const opened = await selectTrainingLocation(DATE, 'gym');
+    const assigned = await assignGymWorkout(opened.id, 'vanguard-frame-gym');
+    const logs = Object.fromEntries(
+      Object.entries(assigned.gymExerciseLogs ?? {}).map(([exerciseId, sets]) => [
+        exerciseId,
+        sets.map((set) => ({ ...set, weight: 25, reps: 10, completed: true })),
+      ]),
+    );
+    const gym = await completeGymTraining({
+      sessionId: assigned.id,
       duration: 2000,
       difficulty: 7,
-      gymFocus: 'mixed',
+      logs,
+      choices: assigned.gymExerciseChoices ?? {},
+      finisherCompleted: true,
       note: 'Full session.',
     });
 
     expect(gym.location).toBe('gym');
-    expect(gym.loggedDurationMinutes).toBe(1440);
+    expect(gym.gymWorkoutId).toBe('vanguard-frame-gym');
+    expect(gym.loggedDurationMinutes).toBe(360);
     expect(gym.difficulty).toBe(5);
+    expect(gym.gymPersonalRecords).toEqual(['First structured baseline secured']);
     expect((await db.progression.get('primary'))?.totalXp).toBe(0);
+  });
+
+  it('awards the Home + Gym Double Deployment surge exactly once', async () => {
+    const home = await assignHomeTraining(DATE);
+    await db.trainingSessions.update(home.id, { status: 'paused', remainingSeconds: 0 });
+    await completeHomeTraining({
+      sessionId: home.id,
+      date: DATE,
+      roundsCompleted: 4,
+      partialReps: 0,
+      difficulty: 4,
+      exerciseLoads: {},
+    });
+
+    const opened = await selectTrainingLocation(DATE, 'gym');
+    const assigned = await assignGymWorkout(opened.id, 'iron-citadel-gym');
+    const logs = Object.fromEntries(
+      Object.entries(assigned.gymExerciseLogs ?? {}).map(([exerciseId, sets]) => [
+        exerciseId,
+        sets.map((set) => ({ ...set, weight: 30, reps: 12, completed: true })),
+      ]),
+    );
+    await completeGymTraining({
+      sessionId: assigned.id,
+      duration: 70,
+      difficulty: 4,
+      logs,
+      choices: assigned.gymExerciseChoices ?? {},
+      finisherCompleted: false,
+    });
+
+    expect((await db.progression.get('primary'))?.totalXp).toBe(150);
+    expect(await db.trainingSessions.where('date').equals(DATE).toArray()).toHaveLength(2);
+    expect((await awardDoubleDeploymentReward(DATE)).alreadyAwarded).toBe(true);
+    expect((await db.progression.get('primary'))?.totalXp).toBe(150);
+  });
+
+  it('keeps conditioning and recovery as bounded non-gym paths', async () => {
+    await selectTrainingLocation(DATE, 'conditioning');
+    const conditioning = await completeLoggedTraining({
+      date: DATE,
+      location: 'conditioning',
+      duration: 2000,
+      difficulty: 7,
+      conditioningType: 'walk-run',
+    });
+    expect(conditioning.loggedDurationMinutes).toBe(1440);
+    expect(conditioning.difficulty).toBe(5);
+
+    const recoveryDate = '2026-08-04' as LocalDateKey;
+    await selectTrainingLocation(recoveryDate, 'recovery');
+    const recovery = await completeLoggedTraining({
+      date: recoveryDate,
+      location: 'recovery',
+      duration: 20,
+      difficulty: 2,
+      recoveryProtocol: 'PT planks and mobility',
+    });
+    expect(recovery.recoveryProtocol).toBe('PT planks and mobility');
   });
 });

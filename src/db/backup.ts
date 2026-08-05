@@ -1,7 +1,7 @@
 import { db, TABLE_NAMES } from '@/db/database';
 import type { BackupSnapshot, Profile, SaveFile, Settings, AccountProgression } from '@/types/game';
 
-export const SAVE_VERSION = 11;
+export const SAVE_VERSION = 12;
 export const MAX_IMPORT_BYTES = 32 * 1024 * 1024;
 const MAX_SNAPSHOTS = 5;
 const FORBIDDEN_KEYS = new Set(['__proto__', 'prototype', 'constructor']);
@@ -109,6 +109,9 @@ function migrateData(
   if (version <= 10) {
     data.sanctuarySessions ??= [];
   }
+  if (version <= 11) {
+    data.kitchenSessions ??= [];
+  }
   const migrationTime = new Date().toISOString();
   if (!data.treasurySettings.some((row) => isObject(row) && row.id === 'primary')) {
     data.treasurySettings.push({
@@ -150,6 +153,10 @@ function migrateData(
         version <= 8 && !migratedCompanionIds.includes('cassian')
           ? [...migratedCompanionIds, 'cassian']
           : migratedCompanionIds;
+      const withSaffron =
+        version <= 11 && !withCassian.includes('saffron')
+          ? [...withCassian, 'saffron']
+          : withCassian;
       return {
         privacyScreenEnabled: false,
         sensitiveMissionAlias: 'Integrity Protocol',
@@ -161,7 +168,7 @@ function migrateData(
         companionMode: 'balanced',
         dailyBriefingEnabled: true,
         ...row,
-        enabledCompanionIds: ['snow', ...withCassian.filter((id) => id !== 'snow')],
+        enabledCompanionIds: ['snow', ...withSaffron.filter((id) => id !== 'snow')],
       };
     }
     return row;
@@ -348,14 +355,21 @@ function validateData(data: Record<string, unknown[]>) {
     'shadow-engine',
     'guardian-citadel',
   ]);
+  const gymWorkouts = new Set([
+    'vanguard-frame-gym',
+    'iron-citadel-gym',
+    'shadow-hunter-gym',
+    'heavenly-restriction-gym',
+  ]);
   for (const row of data.trainingSessions) {
     if (
       !isObject(row) ||
       !validDate(row.date) ||
-      row.id !== row.date ||
+      (row.id !== row.date && !String(row.id).startsWith(`${row.date}:`)) ||
       !trainingLocations.has(String(row.location)) ||
       !trainingStatuses.has(String(row.status)) ||
       (row.circuitId !== undefined && !trainingCircuits.has(String(row.circuitId))) ||
+      (row.gymWorkoutId !== undefined && !gymWorkouts.has(String(row.gymWorkoutId))) ||
       (row.durationMinutes !== undefined &&
         ![15, 20, 25, 30].includes(Number(row.durationMinutes))) ||
       (row.loggedDurationMinutes !== undefined &&
@@ -379,6 +393,78 @@ function validateData(data: Record<string, unknown[]>) {
         )
       ) {
         throw new Error('A Training Hall load record contains an impossible value.');
+      }
+    }
+    if (row.gymExerciseLogs !== undefined) {
+      if (!isObject(row.gymExerciseLogs)) {
+        throw new Error('A Training Hall set log contains an impossible value.');
+      }
+      for (const sets of Object.values(row.gymExerciseLogs)) {
+        if (
+          !Array.isArray(sets) ||
+          sets.length > 12 ||
+          sets.some(
+            (set) =>
+              !isObject(set) ||
+              typeof set.completed !== 'boolean' ||
+              (set.weight !== undefined &&
+                (!Number.isFinite(set.weight) ||
+                  Number(set.weight) < 0 ||
+                  Number(set.weight) > 1500)) ||
+              (set.reps !== undefined &&
+                (!Number.isFinite(set.reps) || Number(set.reps) < 0 || Number(set.reps) > 1000)),
+          )
+        ) {
+          throw new Error('A Training Hall set log contains an impossible value.');
+        }
+      }
+    }
+  }
+
+  const kitchenRecipes = new Set([
+    'lemon-chicken-potatoes',
+    'garlic-shrimp-rice',
+    'turkey-taco-potato-skillet',
+    'salmon-crispy-potatoes',
+    'steak-bites-potatoes',
+    'breakfast-potato-hash',
+    'chicken-fajita-bowls',
+    'beef-broccoli-stir-fry',
+    'turkey-meatball-pasta',
+    'cajun-shrimp-potato-skillet',
+    'honey-garlic-chicken-bowls',
+    'crab-loaded-potatoes',
+  ]);
+  for (const row of data.kitchenSessions) {
+    if (
+      !isObject(row) ||
+      !validDate(row.date) ||
+      row.id !== row.date ||
+      !kitchenRecipes.has(String(row.recipeId)) ||
+      !['assigned', 'completed', 'declined'].includes(String(row.status)) ||
+      typeof row.rerollUsed !== 'boolean' ||
+      typeof row.rewardApplied !== 'boolean' ||
+      (row.servingsPrepared !== undefined &&
+        (!Number.isInteger(row.servingsPrepared) ||
+          Number(row.servingsPrepared) < 1 ||
+          Number(row.servingsPrepared) > 30)) ||
+      (row.difficulty !== undefined &&
+        (!Number.isInteger(row.difficulty) ||
+          Number(row.difficulty) < 1 ||
+          Number(row.difficulty) > 5)) ||
+      (row.rating !== undefined &&
+        (!Number.isInteger(row.rating) || Number(row.rating) < 1 || Number(row.rating) > 5)) ||
+      (row.note !== undefined && (typeof row.note !== 'string' || row.note.length > 2000))
+    ) {
+      throw new Error('A Kitchen order contains an impossible value.');
+    }
+    for (const checklist of [row.ingredientChecks, row.stepChecks]) {
+      if (
+        checklist !== undefined &&
+        (!isObject(checklist) ||
+          Object.values(checklist).some((value) => typeof value !== 'boolean'))
+      ) {
+        throw new Error('A Kitchen checklist contains an impossible value.');
       }
     }
   }
@@ -409,6 +495,7 @@ function validateData(data: Record<string, unknown[]>) {
     'ember',
     'amara',
     'cassian',
+    'saffron',
   ]);
   for (const row of data.sanctuarySessions) {
     if (!isObject(row)) {
@@ -431,14 +518,13 @@ function validateData(data: Record<string, unknown[]>) {
       new Set(passages).size !== passages.length ||
       !Array.isArray(companions) ||
       companions.length < 2 ||
-      companions.length > 8 ||
+      companions.length > 9 ||
       companions.some((id) => !companionIds.has(String(id))) ||
       new Set(companions).size !== companions.length ||
       !companions.includes('snow') ||
       !companions.includes('selah') ||
       typeof row.bibleMissionCredited !== 'boolean' ||
-      (row.bibleMissionCredited &&
-        (row.mode !== 'study' || row.status !== 'completed')) ||
+      (row.bibleMissionCredited && (row.mode !== 'study' || row.status !== 'completed')) ||
       (row.status === 'completed' && typeof row.completedAt !== 'string') ||
       (row.outcome !== undefined && !sanctuaryOutcomes.has(String(row.outcome))) ||
       typeof row.createdAt !== 'string' ||

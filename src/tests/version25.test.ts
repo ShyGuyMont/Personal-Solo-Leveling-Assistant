@@ -30,18 +30,18 @@ describe('Campaign systems through Version 3.0', () => {
     });
   });
 
-  it('provides eight extensive five-chapter questlines with unique objectives and titles', () => {
-    expect(COMPANION_QUESTLINES).toHaveLength(8);
-    expect(new Set(COMPANION_QUESTLINES.map((questline) => questline.companionId)).size).toBe(8);
+  it('provides nine extensive five-chapter questlines with unique objectives and titles', () => {
+    expect(COMPANION_QUESTLINES).toHaveLength(9);
+    expect(new Set(COMPANION_QUESTLINES.map((questline) => questline.companionId)).size).toBe(9);
     expect(new Set(COMPANION_QUESTLINES.map((questline) => questline.completionTitleId)).size).toBe(
-      8,
+      9,
     );
     const chapters = COMPANION_QUESTLINES.flatMap((questline) => questline.chapters);
     const objectives = chapters.flatMap((chapter) => chapter.objectives);
-    expect(chapters).toHaveLength(40);
-    expect(objectives).toHaveLength(120);
-    expect(new Set(chapters.map((chapter) => chapter.id)).size).toBe(40);
-    expect(new Set(objectives.map((objective) => objective.id)).size).toBe(120);
+    expect(chapters).toHaveLength(45);
+    expect(objectives).toHaveLength(135);
+    expect(new Set(chapters.map((chapter) => chapter.id)).size).toBe(45);
+    expect(new Set(objectives.map((objective) => objective.id)).size).toBe(135);
     expect(
       chapters.every((chapter) => chapter.objectives.length === 3 && chapter.rewardXp > 0),
     ).toBe(true);
@@ -161,7 +161,7 @@ describe('Campaign systems through Version 3.0', () => {
     const second = await ensureMonthlyCouncil('2026-08-01');
     expect(first?.id).toBe('monthly-council:2026-07-01');
     expect(second?.id).toBe(first?.id);
-    expect(first?.messages).toHaveLength(9);
+    expect(first?.messages).toHaveLength(10);
     expect(first?.messages.map((message) => message.companionId)).toEqual([
       'snow',
       'rook',
@@ -171,6 +171,7 @@ describe('Campaign systems through Version 3.0', () => {
       'ember',
       'amara',
       'cassian',
+      'saffron',
       'snow',
     ]);
     expect(first?.metrics.relationshipActions).toBe(1);

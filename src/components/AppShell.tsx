@@ -3,6 +3,7 @@ import {
   BookHeart,
   CircleGauge,
   CircleHelp,
+  ChefHat,
   Dumbbell,
   ListChecks,
   Shield,
@@ -20,6 +21,7 @@ const NAV = [
   { to: '/status', label: 'Status', icon: Shield },
   { to: '/training-hall', label: 'Training', icon: Dumbbell },
   { to: '/sanctuary', label: 'Sanctuary', icon: BookHeart },
+  { to: '/kitchen', label: 'Kitchen', icon: ChefHat },
   { to: '/treasury', label: 'Treasury', icon: WalletCards },
   { to: '/archive', label: 'Archive', icon: Archive },
 ];

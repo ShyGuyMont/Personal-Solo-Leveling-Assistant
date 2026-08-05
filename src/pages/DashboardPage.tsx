@@ -2,6 +2,7 @@ import {
   ArrowRight,
   BookHeart,
   CalendarDays,
+  ChefHat,
   ChevronRight,
   Dumbbell,
   Map as MapIcon,
@@ -239,6 +240,20 @@ export function DashboardPage() {
         )}
       </Link>
 
+      <Link to="/kitchen" className="campaign-command-card kitchen-dashboard-card panel">
+        <span>
+          <ChefHat size={23} />
+        </span>
+        <div>
+          <p className="eyebrow">PROVISION COMMAND · SAFFRON</p>
+          <strong>Ask Saffron what we are cooking</strong>
+          <small>
+            Twelve rotating recipes, guided steps, leftovers, and three rewarded orders per week.
+          </small>
+        </div>
+        <ChevronRight size={20} />
+      </Link>
+
       <Link to="/campaigns" className="campaign-command-card panel">
         <span>
           <MapIcon size={23} />
@@ -247,7 +262,7 @@ export function DashboardPage() {
           <p className="eyebrow">LONG-RANGE COMMAND</p>
           <strong>Campaign Arcs & Companion Questlines</strong>
           <small>
-            Build your own milestones or enter one of eight five-chapter party campaigns.
+            Build your own milestones or enter one of nine five-chapter party campaigns.
           </small>
         </div>
         <ChevronRight size={20} />

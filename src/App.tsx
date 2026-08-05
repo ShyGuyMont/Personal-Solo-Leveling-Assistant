@@ -61,6 +61,9 @@ const ScriptureSanctuaryPage = lazy(() =>
     default: module.ScriptureSanctuaryPage,
   })),
 );
+const KitchenPage = lazy(() =>
+  import('@/pages/KitchenPage').then((module) => ({ default: module.KitchenPage })),
+);
 
 export function App() {
   const { loading, profile, load, refresh } = useGameStore();
@@ -100,6 +103,7 @@ export function App() {
       '/treasury': TreasuryPage,
       '/training-hall': TrainingHallPage,
       '/sanctuary': ScriptureSanctuaryPage,
+      '/kitchen': KitchenPage,
     }[path] ?? DashboardPage;
 
   return (

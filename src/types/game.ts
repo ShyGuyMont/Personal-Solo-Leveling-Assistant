@@ -37,7 +37,7 @@ export type RecoveryReason = 'illness' | 'injury' | 'travel' | 'emergency' | 'ov
 export type InterfaceStyle = 'clean' | 'system';
 export type ColorTheme = 'abyss' | 'daybreak';
 export type CompanionId =
-  'snow' | 'rook' | 'selah' | 'cipher' | 'haven' | 'ember' | 'amara' | 'cassian';
+  'snow' | 'rook' | 'selah' | 'cipher' | 'haven' | 'ember' | 'amara' | 'cassian' | 'saffron';
 export type CompanionMode = 'off' | 'quiet' | 'balanced' | 'talkative';
 export type MoodId =
   | 'energized'
@@ -62,7 +62,8 @@ export type FavoriteMessageSource =
   | 'council'
   | 'milestone'
   | 'treasury'
-  | 'training';
+  | 'training'
+  | 'kitchen';
 export type DailyEventKind = 'none' | 'emergency-quest' | 'mission-pass';
 export type DailyCapacity = 'low' | 'steady' | 'high';
 export type DailyCommandOutcome =
@@ -82,6 +83,7 @@ export type CompanionTrigger =
   | 'comeback'
   | 'lock-in'
   | 'treasury'
+  | 'kitchen'
   | 'achievement';
 
 export interface Profile {
@@ -176,10 +178,24 @@ export interface MissionDetails {
 export type TrainingLocation = 'home' | 'gym' | 'conditioning' | 'recovery';
 export type TrainingCircuitId =
   'iron-foundation' | 'vanguard-frame' | 'shadow-engine' | 'guardian-citadel';
+export type GymWorkoutId =
+  'vanguard-frame-gym' | 'iron-citadel-gym' | 'shadow-hunter-gym' | 'heavenly-restriction-gym';
 export type TrainingSessionStatus = 'assigned' | 'active' | 'paused' | 'completed' | 'abandoned';
 
+export interface GymExerciseSetLog {
+  weight?: number;
+  reps?: number;
+  completed: boolean;
+}
+
+export interface GymFinisherAssignment {
+  name: string;
+  minutes: 5 | 8 | 10;
+  cue: string;
+}
+
 export interface TrainingSession {
-  id: LocalDateKey;
+  id: string;
   date: LocalDateKey;
   location: TrainingLocation;
   status: TrainingSessionStatus;
@@ -200,10 +216,51 @@ export interface TrainingSession {
   exerciseLoads?: Record<string, number>;
   difficulty?: number;
   gymFocus?: 'strength' | 'cardio' | 'mixed' | 'class' | 'other';
+  gymWorkoutId?: GymWorkoutId;
+  gymExerciseLogs?: Record<string, GymExerciseSetLog[]>;
+  gymExerciseChoices?: Record<string, string>;
+  gymFinisher?: GymFinisherAssignment;
+  gymFinisherCompleted?: boolean;
+  gymProgressionPrompts?: string[];
+  gymPersonalRecords?: string[];
   conditioningType?: 'walk' | 'run' | 'walk-run' | 'other';
   distance?: number;
   recoveryProtocol?: string;
   note?: string;
+  updatedAt: string;
+}
+
+export type KitchenRecipeId =
+  | 'lemon-chicken-potatoes'
+  | 'garlic-shrimp-rice'
+  | 'turkey-taco-potato-skillet'
+  | 'salmon-crispy-potatoes'
+  | 'steak-bites-potatoes'
+  | 'breakfast-potato-hash'
+  | 'chicken-fajita-bowls'
+  | 'beef-broccoli-stir-fry'
+  | 'turkey-meatball-pasta'
+  | 'cajun-shrimp-potato-skillet'
+  | 'honey-garlic-chicken-bowls'
+  | 'crab-loaded-potatoes';
+export type KitchenSessionStatus = 'assigned' | 'completed' | 'declined';
+
+export interface KitchenSession {
+  id: LocalDateKey;
+  date: LocalDateKey;
+  recipeId: KitchenRecipeId;
+  status: KitchenSessionStatus;
+  assignmentVariant: number;
+  rerollUsed: boolean;
+  assignedAt: string;
+  completedAt?: string;
+  ingredientChecks?: Record<string, boolean>;
+  stepChecks?: Record<string, boolean>;
+  servingsPrepared?: number;
+  difficulty?: number;
+  rating?: number;
+  note?: string;
+  rewardApplied: boolean;
   updatedAt: string;
 }
 
@@ -326,6 +383,8 @@ export interface XpTransaction {
     | 'treasury'
     | 'daily-event'
     | 'daily-command'
+    | 'training'
+    | 'kitchen'
     | 'recovery'
     | 'reversal'
     | 'penalty';
@@ -346,6 +405,8 @@ export interface StatTransaction {
     | 'treasury'
     | 'daily-event'
     | 'daily-command'
+    | 'training'
+    | 'kitchen'
     | 'recovery'
     | 'reversal'
     | 'decay';
@@ -632,6 +693,7 @@ export interface CampfireMetrics {
   noEatingOutWins?: number;
   savingsContributedCents?: number;
   debtPaidCents?: number;
+  kitchenOrders?: number;
 }
 
 export interface CampfireRecap {
@@ -708,7 +770,8 @@ export type QuestObjectiveMetric =
   | 'treasury-debt-payments'
   | 'treasury-savings'
   | 'treasury-weekly-reviews'
-  | 'no-eating-out-wins';
+  | 'no-eating-out-wins'
+  | 'kitchen-orders';
 
 export interface QuestObjectiveDefinition {
   id: string;
@@ -781,6 +844,7 @@ export interface MonthlyCouncilMetrics {
   noEatingOutWins: number;
   savingsContributedCents: number;
   debtPaidCents: number;
+  kitchenOrders?: number;
 }
 
 export interface MonthlyCouncil {

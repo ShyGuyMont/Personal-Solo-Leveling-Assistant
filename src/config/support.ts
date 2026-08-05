@@ -57,7 +57,7 @@ type SupportSpeaker = CompanionId | 'snow-close';
 
 const BASE_SUPPORT_DIALOGUE: Record<
   SupportTopicId,
-  Record<Exclude<SupportSpeaker, 'cassian'>, readonly string[]>
+  Record<Exclude<SupportSpeaker, 'cassian' | 'saffron'>, readonly string[]>
 > = {
   motivation: {
     snow: [
@@ -346,10 +346,47 @@ const CASSIAN_SUPPORT_DIALOGUE: Record<SupportTopicId, readonly string[]> = {
   ],
 };
 
+const SAFFRON_SUPPORT_DIALOGUE: Record<SupportTopicId, readonly string[]> = {
+  motivation: [
+    'You need momentum? Choose dinner before hunger chooses chaos. One pan, one protein, one vegetable—move!',
+    'Start with the smallest useful preparation: thaw the protein, wash the potato, or put the pan where you can see it.',
+    'Energy follows action. Chop one ingredient, and I will stop yelling long enough for you to notice you already began.',
+  ],
+  'make-a-plan': [
+    'Plan three dinners, not thirty. Give each one leftovers, then let repetition do the heavy lifting.',
+    'Put the easiest meal on the hardest day. That is strategy, not laziness, and I will fight anyone who says otherwise.',
+    'Pick the protein, the vegetable, and the useful carbohydrate first. Flavor comes next; confusion does not get a seat.',
+  ],
+  'faith-perspective': [
+    'Food can be received with gratitude instead of fear. Prepare what you have, care for the body carrying you, and let enough be enough.',
+    'A shared meal, a quiet prayer, an ordinary provision—none of these are too small to become sacred through gratitude.',
+    'Care for your body without worshiping it. Feed it faithfully, enjoy the gift, and remember your worth was never a measurement.',
+  ],
+  'calm-down': [
+    'No decisions over an empty stomach and a loud nervous system. Drink water, eat something simple, then reassess.',
+    'Lower the heat—literally and emotionally. Breathe while the pan warms; dinner does not need to become another emergency.',
+    'Choose familiar food tonight. This is not the hour for culinary greatness; it is the hour for a steady meal.',
+  ],
+  recover: [
+    'No punishment meals. We learn what made cooking hard, prepare one easier option, and feed tomorrow with more kindness.',
+    'One delivery order did not banish you from my Kitchen. Save the leftovers, restock one staple, and return tomorrow.',
+    'Recovery needs food, water, and sleep—not guilt dressed as discipline. Start with the need directly in front of you.',
+  ],
+  celebrate: [
+    'Excellent! We are making something that tastes like a victory without making Cassian stare silently at the receipt.',
+    'Let the meal mark the moment. Flavor is allowed, pride is allowed, and leftovers are still mandatory.',
+    'A real win deserves a real pause. Sit down, eat slowly, and do not make me confiscate the next objective.',
+  ],
+};
+
 export const SUPPORT_DIALOGUE = Object.fromEntries(
   SUPPORT_TOPICS.map(({ id }) => [
     id,
-    { ...BASE_SUPPORT_DIALOGUE[id], cassian: CASSIAN_SUPPORT_DIALOGUE[id] },
+    {
+      ...BASE_SUPPORT_DIALOGUE[id],
+      cassian: CASSIAN_SUPPORT_DIALOGUE[id],
+      saffron: SAFFRON_SUPPORT_DIALOGUE[id],
+    },
   ]),
 ) as Record<SupportTopicId, Record<SupportSpeaker, readonly string[]>>;
 

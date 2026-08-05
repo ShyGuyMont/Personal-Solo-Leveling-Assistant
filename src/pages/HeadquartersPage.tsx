@@ -1,6 +1,7 @@
 import {
   ArrowLeft,
   BookOpenCheck,
+  ChefHat,
   ChevronRight,
   Crown,
   Flame,
@@ -63,7 +64,7 @@ export function HeadquartersPage() {
       </div>
 
       <section className="headquarters-hero panel">
-        <div className="headquarters-hero__portraits" aria-label="Your eight System companions">
+        <div className="headquarters-hero__portraits" aria-label="Your nine System companions">
           {COMPANIONS.map((companion, index) => (
             <img
               key={companion.id}
@@ -71,9 +72,9 @@ export function HeadquartersPage() {
               alt={companion.name}
               style={
                 {
-                  '--portrait-left': index < 4 ? `${index * 23}%` : `${(index - 4) * 23}%`,
-                  '--portrait-top': index < 4 ? '0%' : '38%',
-                  '--portrait-angle': `${(index - 3) * 1.25}deg`,
+                  '--portrait-left': `${(index % 3) * 32}%`,
+                  '--portrait-top': `${Math.floor(index / 3) * 30}%`,
+                  '--portrait-angle': `${((index % 3) - 1) * 1.4}deg`,
                   '--companion-accent': companion.accent,
                 } as CSSProperties
               }
@@ -81,7 +82,7 @@ export function HeadquartersPage() {
           ))}
         </div>
         <div>
-          <p className="eyebrow">FULL PARTY HEADQUARTERS · EIGHT LINKS ONLINE</p>
+          <p className="eyebrow">FULL PARTY HEADQUARTERS · NINE LINKS ONLINE</p>
           <h1>Your people are here, {firstName}.</h1>
           <p>
             Check in, request support, revisit words worth carrying, or gather around the weekly
@@ -144,8 +145,8 @@ export function HeadquartersPage() {
           </span>
           <div>
             <strong>Campaign Command</strong>
-            <p>Open Campaign Arcs and all eight companion questlines.</p>
-            <small>40 story chapters</small>
+            <p>Open Campaign Arcs and all nine companion questlines.</p>
+            <small>45 story chapters</small>
           </div>
         </Link>
         <Link to="/update-center" className="panel">
@@ -155,7 +156,7 @@ export function HeadquartersPage() {
           <div>
             <strong>Update Center</strong>
             <p>Check releases and open the Archive Shield.</p>
-            <small>Version 4.0</small>
+            <small>Version 5.0</small>
           </div>
         </Link>
       </section>
@@ -168,6 +169,20 @@ export function HeadquartersPage() {
           <p className="eyebrow">CASSIAN · TREASURY COMMAND</p>
           <strong>Open the private ledger</strong>
           <small>Paychecks, spending, bills, debt, savings, and weekly reviews</small>
+        </div>
+        <ChevronRight size={19} />
+      </Link>
+
+      <Link to="/kitchen" className="headquarters-treasury headquarters-kitchen panel">
+        <span>
+          <ChefHat size={23} />
+        </span>
+        <div>
+          <p className="eyebrow">SAFFRON · PROVISION COMMAND</p>
+          <strong>Enter the Kitchen</strong>
+          <small>
+            Daily recipe orders, cooking guidance, leftovers, and training-supportive meals
+          </small>
         </div>
         <ChevronRight size={19} />
       </Link>
@@ -221,7 +236,7 @@ export function HeadquartersPage() {
             <p className="eyebrow">MONTHLY COUNCIL</p>
             <h2>The first council is still gathering.</h2>
             <p>
-              After a calendar month with at least one finalized Daily Review, all eight companions
+              After a calendar month with at least one finalized Daily Review, all nine companions
               will assemble with a fact-based review and space for your next intention.
             </p>
           </div>
@@ -270,7 +285,7 @@ export function HeadquartersPage() {
             <p className="eyebrow">WEEKLY CAMPFIRE</p>
             <h2>The first recap is still gathering.</h2>
             <p>
-              After a completed week with at least one finalized Daily Review, all eight companions
+              After a completed week with at least one finalized Daily Review, all nine companions
               will meet here with comments based on the real record.
             </p>
           </div>
@@ -306,8 +321,8 @@ export function HeadquartersPage() {
             Amara supports friendship, family, romance, community, honest communication,
             appreciation, repair, and healthy boundaries. She never asks you to contact someone
             unsafe or confuse access with love. In the Scripture Sanctuary, she also helps separate
-            genuine intimacy from pornography’s counterfeit closeness—especially when loneliness
-            may be feeding the pattern—without assuming that is the only cause or using shame.
+            genuine intimacy from pornography’s counterfeit closeness—especially when loneliness may
+            be feeding the pattern—without assuming that is the only cause or using shame.
           </p>
           <blockquote>“Your no gives your yes somewhere trustworthy to live.”</blockquote>
         </div>
@@ -317,7 +332,7 @@ export function HeadquartersPage() {
         <div className="headquarters-section-title">
           <div>
             <p className="eyebrow">PARTY ROSTER</p>
-            <h2>Eight different kinds of support</h2>
+            <h2>Nine different kinds of support</h2>
           </div>
           <Users size={23} />
         </div>

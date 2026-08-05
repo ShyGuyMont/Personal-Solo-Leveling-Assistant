@@ -1,6 +1,6 @@
-export const APP_VERSION = '4.0.0';
-export const DATABASE_SCHEMA_VERSION = 11;
-export const SAVE_FORMAT_VERSION = 11;
+export const APP_VERSION = '5.0.0';
+export const DATABASE_SCHEMA_VERSION = 12;
+export const SAVE_FORMAT_VERSION = 12;
 
 export interface ReleaseSection {
   title: string;
@@ -10,39 +10,39 @@ export interface ReleaseSection {
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
   {
-    title: 'The Scripture Sanctuary',
-    detail: 'The Bible mission now opens a private, guided spiritual-formation space.',
+    title: 'Toji Ascension Gym',
+    detail: 'Gym Deployment is now a complete progressive resistance-training program.',
     points: [
-      'Choose what feels most present from twelve concerns, then receive a rotating three-passage path with context, observation, application, and prayer prompts.',
-      'Snow opens and closes the space, Selah guides Scripture, and the companion who understands the selected struggle adds focused counsel.',
-      'A four-movement prayer framework supports deeper prayer while every reflection, prayer note, and next action remains optional and private.',
+      'Vanguard Frame, Iron Citadel, and Shadow Hunter form the three-day foundation; Heavenly Restriction is an optional fourth specialization day.',
+      'Rook recommends the session that has waited longest while substitutions, every working set, load, reps, rest, effort, and optional finisher remain under your control.',
+      'Previous performance becomes the next target, top-of-range sets trigger a small-increase prompt, and new volume records are called out after the session.',
     ],
   },
   {
-    title: 'Stronghold Protocol',
-    detail: 'Immediate support is available when an urge or emotion is already loud.',
+    title: 'Double Deployment',
+    detail: 'Home circuits remain available even after a full gym session.',
     points: [
-      'Stronghold sessions combine practical pattern interruption, targeted Scripture, a ten-minute next action, and an invitation toward safe human connection.',
-      'Pornography support can explicitly address loneliness and counterfeit intimacy without excusing the behavior or using shame as the recovery strategy.',
-      'Stronghold sessions are unlimited and award no XP, so support never becomes a reward exploit or a reason to avoid returning.',
+      'Completing one Gym Deployment and one Home Circuit on the same System day awards one fixed +150 XP Ascension Surge plus Strength, Endurance, Discipline, and Vitality XP.',
+      'The Daily Workout mission still pays only once, and the surge is never multiplied by Snow’s Daily Command.',
+      'Stable transaction keys prevent duplicate rewards after repeated taps, reloads, updates, or save imports.',
     ],
   },
   {
-    title: 'Ninety-Six Passage Paths',
-    detail: 'A broad offline reference library keeps guidance useful without copying a whole Bible.',
+    title: 'Saffron and the Kitchen',
+    detail: 'The ninth companion turns cooking into Provision Command.',
     points: [
-      'Eight paths each support sexual integrity, shame, anger, sadness, loneliness, stress, numbness, focus, doubt, forgiveness, identity, and gratitude.',
-      'The least-used passages rotate first, and connected concerns can be paired so the session addresses both the visible struggle and what may be beneath it.',
-      'The app provides references and original guidance; the user reads the passage in their own preferred Bible translation.',
+      'Saffron, The Flame Chef, brings a complete chibi portrait, emotional check-ins, direct support, banter, milestones, Campfires, Councils, training debriefs, and a five-chapter questline.',
+      'Twelve no-bean, no-pea recipes rotate away from recent meals and include ingredients, guided steps, substitutions, leftovers, and food-safety checkpoints.',
+      'One daily ingredient swap and no-penalty decline keep the system honest; the first three completed orders each week award 40 account XP plus Stewardship, Vitality, and Discipline.',
     ],
   },
   {
-    title: 'Archive Shield 11',
-    detail: 'Sanctuary history joins the portable, update-safe local campaign save.',
+    title: 'Archive Shield 12',
+    detail: 'Every new workout and Kitchen fact joins the update-safe local campaign save.',
     points: [
-      'Save format 11 preserves completed Sanctuary sessions, selected concerns, passage paths, optional reflections, prayer notes, outcomes, and Bible-mission credit.',
-      'Version 3.5 and older saves migrate forward automatically without replacing Training Hall, Treasury, companion, progression, or mission history.',
-      'The Sanctuary is a faith and reflection tool, not clinical or crisis care; its help text clearly encourages trusted and professional human support when needed.',
+      'Save format 12 preserves multiple same-day training sessions, gym set logs, substitutions, progression prompts, personal records, Kitchen orders, checklists, ratings, and private notes.',
+      'Version 4.0 and older saves migrate forward automatically, enable Saffron, and preserve every existing mission, companion, Treasury, Sanctuary, and progression record.',
+      'Snow’s offline help now explains structured gym progression, Double Deployment scoring, Saffron’s weekly reward cap, and the complete nine-companion party.',
     ],
   },
 ];

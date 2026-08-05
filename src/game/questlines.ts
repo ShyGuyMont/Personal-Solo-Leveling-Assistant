@@ -99,6 +99,18 @@ async function currentForObjective(
         .count())
     );
   }
+  if (objective.metric === 'kitchen-orders') {
+    return (
+      baseline +
+      (await db.kitchenSessions
+        .filter(
+          (session) =>
+            session.status === 'completed' &&
+            Boolean(session.completedAt && session.completedAt >= since),
+        )
+        .count())
+    );
+  }
   const treasuryKind = {
     'treasury-income': 'income',
     'treasury-expenses': 'expense',

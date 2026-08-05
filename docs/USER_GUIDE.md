@@ -35,15 +35,37 @@ Your full objective list. Missions can use a simple completion button or request
 Daily Workout opens a dedicated physical section led by Rook and Ember. Choose one honest path:
 
 - **Home Circuit:** Rook assigns Iron Foundation, Vanguard Frame, Shadow Engine, or Guardian Citadel. Ember sets a saved 15, 20, 25, or 30-minute clock. Record rounds, partial reps, effort, dumbbell loads, and an optional private note.
-- **Gym Deployment:** Complete your own gym session, then record its minutes, focus, effort, and optional note.
+- **Gym Deployment:** Choose Vanguard Frame, Iron Citadel, Shadow Hunter, or optional Heavenly Restriction. Rook recommends the overdue foundation; record substitutions, every working set, load, reps, rests, effort, and an optional note.
 - **Conditioning Mission:** Record a completed walk, run, walk/run, or other conditioning session, with optional distance.
 - **Recovery Protocol:** Record deliberate stretching, plank work, mobility, or physical-therapy exercises.
 
-The Home assignment is drawn once per day and survives refreshes or leaving the app. A single reassignment is available before starting. The optional five-minute Boss Extension records extra work but creates no repeat XP. Every path clears the same Daily Workout mission once, then opens an exhausted in-character recovery debrief from all eight companions.
+The Home assignment is drawn once per day and survives refreshes or leaving the app. A single reassignment is available before starting. The optional five-minute Boss Extension records extra work but creates no repeat XP. Every path clears the same Daily Workout mission once, then opens an exhausted in-character recovery debrief from all nine companions.
+
+The three foundational gym sessions are designed to cover the major movement patterns across a week. Heavenly Restriction adds extra back, shoulder, and arm work only when recovery supports a fourth day. Previous loads and reps become the next target. Reaching the top of every assigned rep range triggers a prompt to use the smallest available increase next time; the app never raises a load automatically.
+
+After either a completed Gym Deployment or Home Circuit, you may optionally complete the other. This **Double Deployment** awards one fixed **+150 account XP** surge plus Strength, Endurance, Discipline, and Vitality XP. Daily Workout itself still pays only once. The surge is never multiplied by Snow’s Daily Command and can be awarded only once per System date.
 
 Daily Movement was retired because it duplicated the new location choice. Daily Workout now preserves the two former physical missions’ combined reward: 75 account XP plus Strength, Endurance, Discipline, and Vitality stat XP. Existing Movement history remains in the Archive.
 
 The Training Hall is motivational recordkeeping, not medical care. Use loads and exercise variations you can control, stop for concerning symptoms, and follow your physical therapist’s instructions over the app.
+
+### Saffron’s Kitchen
+
+Saffron, The Flame Chef, runs an optional cooking section designed to make home meals easier than ordering out. Tap **Receive today’s order** and she assigns one of twelve recipes while avoiding the three most recent meals and favoring recipes used least often. The library contains chicken, turkey, beef, salmon and other fish, shrimp, crab, eggs, vegetables, rice, pasta, and potatoes. It intentionally contains no beans or peas.
+
+Each order includes:
+
+- A complete ingredient checklist and numbered cooking steps.
+- Preparation and cooking time, servings, difficulty, equipment, and cost tier.
+- A plain-language reason the plate supports training and satiety.
+- Easy ingredient substitutions, leftover-storage guidance, and a food-safety checkpoint.
+- One ingredient swap each day if the first assignment is not workable.
+- A no-penalty decline when cooking is not realistic that day.
+- Servings prepared, effort, “would make again” rating, and an optional private adjustment note.
+
+The first **three** completed Kitchen Orders in each week award **40 account XP** plus 10 Stewardship, 12 Vitality, and 8 Discipline XP. Later completed meals remain in history without awarding XP. Kitchen rewards are fixed special rewards, are never multiplied by Daily Command, and use stable transaction IDs to prevent duplicate rewards.
+
+The recipe guidance is general meal-planning support, not medical nutrition therapy or a prescribed calorie plan. Allergies, health conditions, and instructions from a clinician or registered dietitian always take priority. Follow the temperature and storage guidance shown in each recipe.
 
 ### Scripture Sanctuary
 
@@ -95,28 +117,29 @@ Each day independently has a **75% chance** to open Cassian's optional **No Eati
 
 ### Party Headquarters
 
-The home of the full eight-person party. Headquarters contains:
+The home of the full nine-person party. Headquarters contains:
 
 - Shortcuts to Check-In, Direct Support, and Words to Carry.
 - The complete companion roster and each person's role.
 - **Ember's Lock-In Protocol**, which explains when her re-entry signal can appear.
 - **Amara's Heartweaver Protocol**, which explains her relationship, empathy, and healthy-boundary support.
 - **Cassian's Treasury Command**, which supports money clarity, saving, debt reduction, spending awareness, and recovery.
+- **Saffron’s Provision Command**, which supports practical cooking, leftovers, training-supportive meals, and reducing the friction behind expensive convenience choices.
 - The newest **Weekly Campfire Recap** and every earlier saved Campfire.
 - The newest **Monthly Council** and every earlier saved Council.
 
 A Campfire is created after a week ends when that week has at least one finalized Daily Review. It uses the actual finalized mission record to show completed missions, completion rate, Perfect Days, category strengths, and the next suggested focus. Every companion comments in character. A Campfire changes no XP, streak, rank, mission result, or reward.
 
-A Monthly Council is created after a calendar month ends when that month has at least one finalized Daily Review. All eight companions review recorded mission balance, relationship actions, Treasury progress, levels, ranks, titles, Campaign milestones, and Companion Quest chapters. Snow opens and closes. You can save one optional next-month intention. Council messages and intentions never change scoring.
+A Monthly Council is created after a calendar month ends when that month has at least one finalized Daily Review. All nine companions review recorded mission balance, relationship actions, Treasury progress, Kitchen Orders, levels, ranks, titles, Campaign milestones, and Companion Quest chapters. Snow opens and closes. You can save one optional next-month intention. Council messages and intentions never change scoring.
 
 ### Campaign Command
 
 This screen has two parts:
 
 - **Campaign Arcs** are long-term goals you define. Each can have a purpose, path, companion guide, optional target date, and unlimited milestones. Pause, resume, complete, or archive an Arc without losing its history. Arcs create no automatic XP.
-- **Companion Questlines** are authored five-chapter stories. Each of the eight companions has 15 objectives across five chapters, for 40 chapters and 120 objectives total. Only one questline is active at a time, but pausing never loses progress. There are no deadlines, decay, or failure states. Completing a chapter grants its displayed fixed XP once; completing all five unlocks a unique legendary title.
+- **Companion Questlines** are authored five-chapter stories. Each of the nine companions has 15 objectives across five chapters, for 45 chapters and 135 objectives total. Only one questline is active at a time, but pausing never loses progress. There are no deadlines, decay, or failure states. Completing a chapter grants its displayed fixed XP once; completing all five unlocks a unique legendary title.
 
-The eight questlines are **The One Who Stayed**, **Tempered Foundation**, **Rooted in Light**, **Signal to Reality**, **Shelter Without Stagnation**, **Reignite Protocol**, **The Courage to Connect**, and **The Keeper's Ledger**.
+The nine questlines are **The One Who Stayed**, **Tempered Foundation**, **Rooted in Light**, **Signal to Reality**, **Shelter Without Stagnation**, **Reignite Protocol**, **The Courage to Connect**, **The Keeper's Ledger**, and Saffron’s **The Fire We Feed**.
 
 ### Snow's Daily Command Briefing
 
@@ -130,7 +153,7 @@ The next Daily Review verifies the outcome and applies the bonus to account and 
 
 ### Archive
 
-Your permanent record. It contains daily reviews, mission history, Training Hall sessions, Scripture Sanctuary history, stat transactions, level and rank history, reports, Weekly Campfires, Monthly Councils, daily briefings, Campaign Arcs, Companion Quest progress, rare signals, Party Check-Ins, Direct Support channels, favorites, banter, and companion transmissions.
+Your permanent record. It contains daily reviews, mission history, multi-session Training Hall records, Kitchen Orders, Scripture Sanctuary history, stat transactions, level and rank history, reports, Weekly Campfires, Monthly Councils, daily briefings, Campaign Arcs, Companion Quest progress, rare signals, Party Check-Ins, Direct Support channels, favorites, banter, and companion transmissions.
 
 ### Settings
 
@@ -138,7 +161,7 @@ Appearance, Snow's briefing toggle, companion frequency, individual companion co
 
 ### Update Center
 
-Shows the installed release, database and save versions, online status, last update check, current save size, last portable export, and all Version 4.0 release notes. **Check for update** contacts only the GitHub Pages release channel; it does not upload personal data. If a release is waiting, export first if desired and choose **Install update**. The home-screen app remains installed and reloads once.
+Shows the installed release, database and save versions, online status, last update check, current save size, last portable export, and all Version 5.0 release notes. **Check for update** contacts only the GitHub Pages release channel; it does not upload personal data. If a release is waiting, export first if desired and choose **Install update**. The home-screen app remains installed and reloads once.
 
 ### About & Help
 
@@ -175,7 +198,7 @@ XP is written through stable transaction IDs so repeated taps cannot award the s
 
 Normal daily missions award the XP printed on their cards. The current six default missions total **215 base account XP**: Prayer 20, Bible 25, Integrity 40, Kindness 20, Daily Workout 75, and Creator Work 35. In a Stable System state, completing all six yields **265 XP** with the 50-XP Perfect Day reward, **426 XP** with a Steady Full Clear, or **588 XP** with a High Full Clear. Optional and customized missions change those totals, so the mission cards remain authoritative.
 
-Perfect Days, completed challenges, Rank Trials, Companion Quest chapters, Treasury reviews, and accepted rare events award their own displayed one-time XP. Campaign Arc milestones, Party conversations, Campfires, Councils, repeat Sanctuary studies, Stronghold sessions, Training Hall overtime, and logging more than one physical path do not create hidden or repeatable XP. Snow’s Daily Command is the only broad positive multiplier, and it applies only to scheduled mission account and stat XP after Daily Review. These examples assume a Stable state: Warning temporarily awards 90% of printed account mission XP and Stagnant awards 75% until completed days restore stability; stat mission XP remains as printed. The command bonus is calculated from XP actually recorded, preventing hidden stacking or duplicate rewards.
+Perfect Days, completed challenges, Rank Trials, Companion Quest chapters, Treasury reviews, the first three weekly Kitchen Orders, Double Deployment, and accepted rare events award their own displayed one-time XP. Campaign Arc milestones, Party conversations, Campfires, Councils, repeat Sanctuary studies, Stronghold sessions, ordinary Training Hall overtime, and cooking beyond the weekly Kitchen cap do not create hidden or repeatable XP. Snow’s Daily Command is the only broad positive multiplier, and it applies only to scheduled mission account and stat XP after Daily Review—not to Kitchen or Double Deployment rewards. These examples assume a Stable state: Warning temporarily awards 90% of printed account mission XP and Stagnant awards 75% until completed days restore stability; stat mission XP remains as printed. The command bonus is calculated from XP actually recorded, preventing hidden stacking or duplicate rewards.
 
 ## The companion party
 
@@ -187,6 +210,7 @@ Perfect Days, completed challenges, Rank Trials, Companion Quest chapters, Treas
 - **Ember, The Ignition:** Accountability, re-entry, and locking back in without shame.
 - **Amara, The Heartweaver:** Empathy, friendship, family, romance, communication, repair, healthy boundaries, belonging, and shame-free sexual-integrity support in the Sanctuary.
 - **Cassian, The Steward:** Stewardship, budgeting, saving, debt reduction, spending awareness, and shame-free financial recovery.
+- **Saffron, The Flame Chef:** Cooking confidence, practical nutrition, meal preparation, leftovers, and defeating expensive convenience without body shame.
 
 Ordinary reactions follow the companion frequency selected in Settings. Party Banter is an occasional two-character exchange after a mission. Major ranks, level milestones, and achievements can trigger a full-party celebration.
 
@@ -235,7 +259,7 @@ Before clearing browser data, changing phones, or installing a major release:
 3. Store the downloaded JSON file somewhere private and recoverable.
 4. On the new installation, choose **Import save** and review the preview before confirming.
 
-Backups include Scripture Sanctuary sessions and optional private notes, Training Hall assignments and completed sessions, Party conversations, Weekly Campfires, Monthly Councils, briefings, Campaign Arcs, Companion Quest progress, Amara, favorite messages, banter history, Treasury data, settings, progression, missions, and the rest of the campaign record. Imports are checksum-verified, previewed, validated up to 32 MB, and protected by an automatic pre-import recovery snapshot.
+Backups include Scripture Sanctuary sessions and optional private notes, multi-session Training Hall records and gym set logs, Kitchen Orders and private cooking notes, Party conversations, Weekly Campfires, Monthly Councils, briefings, Campaign Arcs, all nine Companion Questlines, favorite messages, banter history, Treasury data, settings, progression, missions, and the rest of the campaign record. Imports are checksum-verified, previewed, validated up to 32 MB, and protected by an automatic pre-import recovery snapshot.
 
 ## Updating the installed app
 

@@ -92,10 +92,11 @@ export interface MoodDialogue {
   ember: string[];
   amara: string[];
   cassian: string[];
+  saffron: string[];
   'snow-close': string[];
 }
 
-const BASE_PARTY_DIALOGUE: Record<MoodId, Omit<MoodDialogue, 'cassian'>> = {
+const BASE_PARTY_DIALOGUE: Record<MoodId, Omit<MoodDialogue, 'cassian' | 'saffron'>> = {
   energized: {
     snow: [
       'I can feel that energy from here. I am glad you brought it to us—let’s point it somewhere that matters.',
@@ -661,10 +662,77 @@ const CASSIAN_PARTY_DIALOGUE: Record<MoodId, string[]> = {
   ],
 };
 
+const SAFFRON_PARTY_DIALOGUE: Record<MoodId, string[]> = {
+  energized: [
+    'Good! Use some of that energy before it escapes: choose dinner, prepare two extra portions, and make tomorrow easier.',
+    'High flame, excellent. We train, we cook, and we leave enough in the tank to enjoy what we made.',
+    'You look ready to conquer something. I nominate the recipe that keeps frightening you away from the stove.',
+    'Energy like this deserves a proper plate. Give me one bold flavor and one useful preparation for tomorrow.',
+  ],
+  proud: [
+    'You should be proud! Do not shrink it. I am already planning a meal dramatic enough to match the evidence.',
+    'There it is—that look belongs to someone who kept a promise. Sit with it while the potatoes crisp.',
+    'Victory acknowledged! We celebrate with flavor, leftovers, and absolutely no guilt about enjoying either.',
+    'Tell the truth: you did well. Good. Now say it again while I protect the celebration from becoming takeout debt.',
+  ],
+  good: [
+    'Good is wonderful. It means dinner can be simple, deliberate, and eaten without fighting the whole day first.',
+    'Steady mood, steady flame. Let us make one reliable meal and enjoy the absence of catastrophe.',
+    'Nothing needs rescuing, so we can prepare instead. Future-you is getting leftovers whether he appreciates me or not.',
+    'A calm day is perfect for learning what seasoning actually does. No, "some" is not a measurement!',
+  ],
+  okay: [
+    'Okay can cook. Choose the easiest complete meal, use frozen vegetables if needed, and call ordinary success enough.',
+    'We are not chasing brilliance tonight. Protein, vegetables, potatoes or rice, and the dignity of being fed.',
+    'Hold the middle. No punishment salad and no delivery spiral—just food you can make with the energy you have.',
+    'An average day still deserves dinner. I will lower the complexity, not the standard of care.',
+  ],
+  tired: [
+    'Then we make the easiest recipe in the book. Frozen vegetables are heroes, microwave rice is legal, and I will hear no snobbery.',
+    'Tired is when preparation earns its crown. Use the leftovers first; that is what they fought for.',
+    'No heroic cooking. One pan, short steps, early bedtime. I can be intense and reasonable at the same time!',
+    'Feed the fatigue before it starts ordering expensive comfort. Simple food now, softer evening after.',
+  ],
+  stressed: [
+    'Before stress turns into checkout, drink water and name what food is already available. We solve the actual need first.',
+    'Keep the knife work simple and the heat moderate. Dinner is allowed to calm the room instead of testing you.',
+    'Stress wants everything now. The Kitchen wants one step at a time: pan, protein, vegetable, breathe.',
+    'Do not confuse emotional urgency with culinary urgency. We can make something warm without making the night louder.',
+  ],
+  frustrated: [
+    'Good, point the heat somewhere useful—but not at yourself and not at the smoke alarm. What condition can we change?',
+    'If the recipe failed, we adjust it. If the day failed, we feed you anyway. Neither requires a character trial.',
+    'Frustration is data wearing armor. Was it time, ingredients, skill, or energy? Name the enemy before swinging.',
+    'You may be angry. You may not declare the entire Kitchen cursed because one potato took too long.',
+  ],
+  discouraged: [
+    'Listen to me: one meal made at home is not small. It is proof that care can exist even when confidence is quiet.',
+    'The physique, savings, and habits are all built in meals too ordinary to look heroic. Make one of those today.',
+    'You do not need to love cooking yet. You only need one recipe that makes the next choice less difficult.',
+    'No measuring your whole future against tonight. Feed the person in front of me; tomorrow can build from there.',
+  ],
+  lonely: [
+    'Loneliness is hungry for company, not merely food. Cook with the party open, message someone safe, and let the meal hold both needs gently.',
+    'A delivery driver cannot fix an empty room. Make something comforting, then reach toward a voice that knows your name.',
+    'You are not cooking alone. I am right here being unreasonable about seasoning, and the whole party is staying for dinner.',
+    'Choose a meal that feels warm and familiar, then invite connection in whatever safe form is available tonight.',
+  ],
+  unsure: [
+    'When you cannot name the feeling, name the meal: warm or fresh, crunchy or soft, quick or worth waiting for.',
+    'No perfect answer required. Pick a familiar protein, your favorite potato, and one vegetable. Clarity may arrive after dinner.',
+    'Uncertainty does not mean emergency takeout. Use the simplest known recipe and let your body settle.',
+    'We can stay curious. Cook something repeatable, notice how you feel afterward, and keep the useful evidence.',
+  ],
+};
+
 export const PARTY_DIALOGUE = Object.fromEntries(
   PARTY_MOODS.map(({ id }) => [
     id,
-    { ...BASE_PARTY_DIALOGUE[id], cassian: CASSIAN_PARTY_DIALOGUE[id] },
+    {
+      ...BASE_PARTY_DIALOGUE[id],
+      cassian: CASSIAN_PARTY_DIALOGUE[id],
+      saffron: SAFFRON_PARTY_DIALOGUE[id],
+    },
   ]),
 ) as Record<MoodId, MoodDialogue>;
 

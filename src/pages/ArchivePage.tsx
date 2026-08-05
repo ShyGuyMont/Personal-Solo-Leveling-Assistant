@@ -3,6 +3,8 @@ import {
   BatteryMedium,
   BookHeart,
   BookOpen,
+  CookingPot,
+  Dumbbell,
   ChevronLeft,
   ChevronRight,
   Filter,
@@ -27,6 +29,8 @@ import { getMoodDefinition } from '@/config/partyChat';
 import { getSupportTopic } from '@/config/support';
 import { getQuestline } from '@/config/questlines';
 import { getSanctuaryConcern } from '@/config/scripture';
+import { getKitchenRecipe } from '@/config/kitchen';
+import { getGymWorkout, getTrainingCircuit } from '@/config/training';
 import { getArchiveData } from '@/db/repositories';
 import { getSanctuaryPassages } from '@/game/sanctuary';
 import {
@@ -63,6 +67,8 @@ import type {
   CompanionQuestProgress,
   StatTransaction,
   SanctuarySession,
+  TrainingSession,
+  KitchenSession,
 } from '@/types/game';
 
 type ArchiveTab = 'calendar' | 'reports' | 'missions' | 'stats' | 'progression' | 'system';
@@ -97,6 +103,8 @@ export function ArchivePage() {
   const [questProgress, setQuestProgress] = useState<CompanionQuestProgress[]>([]);
   const [monthlyCouncils, setMonthlyCouncils] = useState<MonthlyCouncil[]>([]);
   const [sanctuarySessions, setSanctuarySessions] = useState<SanctuarySession[]>([]);
+  const [trainingSessions, setTrainingSessions] = useState<TrainingSession[]>([]);
+  const [kitchenSessions, setKitchenSessions] = useState<KitchenSession[]>([]);
   const [selectedReview, setSelectedReview] = useState<DailyReview>();
   const [missionFilter, setMissionFilter] = useState('all');
 
@@ -122,6 +130,8 @@ export function ArchivePage() {
       setQuestProgress(data.companionQuestProgress);
       setMonthlyCouncils(data.monthlyCouncils);
       setSanctuarySessions(data.sanctuarySessions);
+      setTrainingSessions(data.trainingSessions);
+      setKitchenSessions(data.kitchenSessions);
     });
   }, []);
 
@@ -713,6 +723,65 @@ export function ArchivePage() {
           <section className="panel archive-list-panel party-checkin-archive">
             <header className="section-header">
               <div>
+                <p className="eyebrow">TRAINING & PROVISION</p>
+                <h2>Hall and Kitchen history</h2>
+              </div>
+              <Link to="/kitchen" className="text-link">
+                Open Kitchen <CookingPot size={16} />
+              </Link>
+            </header>
+            <div className="archive-list">
+              {trainingSessions
+                .filter((entry) => entry.status === 'completed')
+                .slice(0, 60)
+                .map((entry) => (
+                  <div key={`training:${entry.id}`} className="archive-row">
+                    <Dumbbell size={17} />
+                    <div>
+                      <strong>
+                        {entry.gymWorkoutId
+                          ? getGymWorkout(entry.gymWorkoutId).name
+                          : entry.circuitId
+                            ? getTrainingCircuit(entry.circuitId).name
+                            : entry.location === 'conditioning'
+                              ? 'Conditioning Mission'
+                              : 'Recovery Protocol'}
+                      </strong>
+                      <small>
+                        {formatLongDate(entry.date)} · {entry.location} ·{' '}
+                        {entry.loggedDurationMinutes ?? entry.durationMinutes ?? 0} minutes
+                      </small>
+                    </div>
+                    <span className="status-chip">training</span>
+                  </div>
+                ))}
+              {kitchenSessions
+                .filter((entry) => entry.status !== 'assigned')
+                .slice(0, 60)
+                .map((entry) => (
+                  <div key={`kitchen:${entry.id}`} className="archive-row">
+                    <CookingPot size={17} />
+                    <div>
+                      <strong>{getKitchenRecipe(entry.recipeId).name}</strong>
+                      <small>
+                        {formatLongDate(entry.date)} · {entry.status}
+                        {entry.servingsPrepared ? ` · ${entry.servingsPrepared} servings` : ''}
+                      </small>
+                    </div>
+                    <span className="status-chip">kitchen</span>
+                  </div>
+                ))}
+              {!trainingSessions.some((entry) => entry.status === 'completed') &&
+                !kitchenSessions.some((entry) => entry.status !== 'assigned') && (
+                  <div className="empty-state">
+                    Completed Training Hall and Kitchen records will be preserved here.
+                  </div>
+                )}
+            </div>
+          </section>
+          <section className="panel archive-list-panel party-checkin-archive">
+            <header className="section-header">
+              <div>
                 <p className="eyebrow">SCRIPTURE SANCTUARY</p>
                 <h2>Study and Stronghold history</h2>
               </div>
@@ -750,11 +819,19 @@ export function ArchivePage() {
                           .join(' · ')}
                       </p>
                       {entry.reflection && (
-                        <p><strong>Reflection</strong> {entry.reflection}</p>
+                        <p>
+                          <strong>Reflection</strong> {entry.reflection}
+                        </p>
                       )}
-                      {entry.prayer && <p><strong>Prayer</strong> {entry.prayer}</p>}
+                      {entry.prayer && (
+                        <p>
+                          <strong>Prayer</strong> {entry.prayer}
+                        </p>
+                      )}
                       {entry.nextAction && (
-                        <p><strong>Next action</strong> {entry.nextAction}</p>
+                        <p>
+                          <strong>Next action</strong> {entry.nextAction}
+                        </p>
                       )}
                     </div>
                   </details>

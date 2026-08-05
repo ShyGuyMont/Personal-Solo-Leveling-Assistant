@@ -402,6 +402,14 @@ export const TITLE_LIBRARY: TitleDefinition[] = [
     rarity: 'legendary',
     accent: '#f4c95d',
   },
+  {
+    id: 'keeper-of-the-hearth',
+    name: 'Keeper of the Hearth',
+    description: 'Preparation became nourishment, savings, and a form of care you can repeat.',
+    condition: 'Complete The Fire We Feed.',
+    rarity: 'legendary',
+    accent: '#ff8a3d',
+  },
 ];
 
 export function getTitle(id: string) {

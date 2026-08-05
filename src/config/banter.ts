@@ -399,9 +399,76 @@ const CASSIAN_BANTER: Record<MissionCategory, BanterExchange> = {
   },
 };
 
+const SAFFRON_BANTER: Record<MissionCategory, BanterExchange> = {
+  physical: {
+    id: 'physical-provision',
+    messages: [
+      { companionId: 'rook', message: 'The work is recorded. Now recovery has the floor.' },
+      {
+        companionId: 'saffron',
+        message:
+          'Correct! Water first, then food worthy of those working sets. Nobody escapes unfed.',
+      },
+    ],
+  },
+  faith: {
+    id: 'faith-table',
+    messages: [
+      {
+        companionId: 'selah',
+        message: 'Receive provision with gratitude and make room at the table for peace.',
+      },
+      {
+        companionId: 'saffron',
+        message:
+          'Gratitude, good seasoning, and enough to share. Finally, a protocol I can support without revisions.',
+      },
+    ],
+  },
+  discipline: {
+    id: 'discipline-prepared',
+    messages: [
+      { companionId: 'cipher', message: 'The planned action defeated the impulse. Efficient.' },
+      {
+        companionId: 'saffron',
+        message:
+          'Because the better choice was ready before hunger started negotiating. Preparation wins!',
+      },
+    ],
+  },
+  creator: {
+    id: 'creator-fed',
+    messages: [
+      {
+        companionId: 'saffron',
+        message: 'Good work. Now eat before inspiration becomes dizziness and bad decisions.',
+      },
+      { companionId: 'cipher', message: 'A blunt but operationally sound production note.' },
+    ],
+  },
+  character: {
+    id: 'character-table',
+    messages: [
+      {
+        companionId: 'amara',
+        message: 'Care can look like making sure someone feels welcome at the table.',
+      },
+      {
+        companionId: 'saffron',
+        message:
+          'Exactly. Feed people, respect boundaries, and never make them earn the last potato.',
+      },
+    ],
+  },
+};
+
 export const PARTY_BANTER = Object.fromEntries(
   Object.entries(BASE_PARTY_BANTER).map(([category, exchanges]) => [
     category,
-    [...exchanges, CASSIAN_BANTER[category as MissionCategory]],
+    [
+      ...exchanges,
+      CASSIAN_BANTER[category as MissionCategory],
+      SAFFRON_BANTER[category as MissionCategory],
+    ],
   ]),
 ) as Record<MissionCategory, BanterExchange[]>;

@@ -129,6 +129,20 @@ function cassianCouncil(metrics: MonthlyCouncilMetrics) {
   ];
 }
 
+function saffronCouncil(metrics: MonthlyCouncilMetrics) {
+  const orders = metrics.kitchenOrders;
+  if (orders) {
+    return [
+      `Kitchen council reports ${orders} completed order${orders === 1 ? '' : 's'}. Those meals supported training, protected the Treasury, and made several difficult evenings easier before they arrived.`,
+      `${orders} home-cooked meal${orders === 1 ? '' : 's'} became part of the campaign. Keep the recipes you would repeat and adjust the ones that created too much friction.`,
+      `The fire answered ${orders} time${orders === 1 ? '' : 's'} this month. Next cycle, choose one favorite as a standard and one new recipe as an experiment.`,
+    ];
+  }
+  return [
+    'The Kitchen had no completed orders in the monthly record. We do not begin with restriction—we begin with one grocery list and one meal simple enough for a tired night.',
+  ];
+}
+
 function snowClosing(metrics: MonthlyCouncilMetrics) {
   const focus = metrics.focusCategory
     ? CATEGORY_LABELS[metrics.focusCategory]
@@ -176,6 +190,7 @@ export function buildMonthlyCouncilMessages(
     { companionId: 'ember', role: 'response', slot: 'ember', pool: emberCouncil(metrics) },
     { companionId: 'amara', role: 'response', slot: 'amara', pool: amaraCouncil(metrics) },
     { companionId: 'cassian', role: 'response', slot: 'cassian', pool: cassianCouncil(metrics) },
+    { companionId: 'saffron', role: 'response', slot: 'saffron', pool: saffronCouncil(metrics) },
     { companionId: 'snow', role: 'closing', slot: 'snow-close', pool: snowClosing(metrics) },
   ];
   return entries.map((entry, order) => ({
@@ -214,6 +229,7 @@ export async function ensureMonthlyCouncil(systemDate: LocalDateKey) {
     treasuryWeeks,
     treasuryChallenges,
     treasuryTransactions,
+    kitchenSessions,
   ] = await Promise.all([
     db.dailyMissions.where('date').between(monthStart, monthEnd, true, true).toArray(),
     db.missions.toArray(),
@@ -245,6 +261,7 @@ export async function ensureMonthlyCouncil(systemDate: LocalDateKey) {
     db.treasuryWeeks.where('weekStart').between(monthStart, monthEnd, true, true).toArray(),
     db.treasuryChallenges.where('date').between(monthStart, monthEnd, true, true).toArray(),
     db.treasuryTransactions.where('date').between(monthStart, monthEnd, true, true).toArray(),
+    db.kitchenSessions.where('date').between(monthStart, monthEnd, true, true).toArray(),
   ]);
   const records = allRecords.filter((record) => reviewedDates.has(record.date));
   const categories = new Map(missions.map((mission) => [mission.id, mission.category]));
@@ -284,6 +301,7 @@ export async function ensureMonthlyCouncil(systemDate: LocalDateKey) {
     debtPaidCents: treasuryTransactions
       .filter((transaction) => transaction.kind === 'debt-payment')
       .reduce((sum, transaction) => sum + transaction.amountCents, 0),
+    kitchenOrders: kitchenSessions.filter((session) => session.status === 'completed').length,
   };
   const council: MonthlyCouncil = {
     id,

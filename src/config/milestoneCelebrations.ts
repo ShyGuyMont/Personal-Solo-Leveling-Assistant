@@ -113,6 +113,20 @@ const MILESTONE_LINES: Record<CompanionId, Record<'rank' | 'level' | 'achievemen
       'Achievement secured. Celebrate without sabotaging tomorrow; joy and stewardship belong at the same table.',
     ],
   },
+  saffron: {
+    rank: [
+      'New rank! I am making the victory meal, which means you are following my recipe and accepting my praise without argument.',
+      'Classification advanced. Stronger standards, stronger habits, better food—yes, I am proud enough to be unbearable about it.',
+    ],
+    level: [
+      'Another threshold cleared. All those ordinary meals and ordinary choices were feeding something extraordinary.',
+      'Level milestone confirmed! Sit with the victory while I make sure celebration does not arrive in a delivery bag.',
+    ],
+    achievement: [
+      'Proof on the board and a proper meal on the way. This is how we celebrate without making tomorrow clean up the wreckage.',
+      'Achievement secured! I expect pride, gratitude, and an honest appetite. No minimizing any of them.',
+    ],
+  },
 };
 
 function hash(value: string) {
@@ -131,7 +145,17 @@ export function getMilestoneCelebration(event: ProgressionEvent) {
   const kind =
     event.kind === 'rank-up' ? 'rank' : event.kind === 'level-milestone' ? 'level' : 'achievement';
   return (
-    ['snow', 'rook', 'selah', 'cipher', 'haven', 'ember', 'amara', 'cassian'] as CompanionId[]
+    [
+      'snow',
+      'rook',
+      'selah',
+      'cipher',
+      'haven',
+      'ember',
+      'amara',
+      'cassian',
+      'saffron',
+    ] as CompanionId[]
   ).map((companionId) => {
     const pool = MILESTONE_LINES[companionId][kind];
     return {

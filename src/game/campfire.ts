@@ -178,6 +178,29 @@ function cassianLines(metrics: CampfireMetrics) {
   ];
 }
 
+function saffronLines(metrics: CampfireMetrics) {
+  const orders = metrics.kitchenOrders ?? 0;
+  if (orders >= 3) {
+    return [
+      `${orders} Kitchen Orders cleared! That is training fuel, protected money, and several future meals rescued from panic. Magnificent.`,
+      `The Kitchen produced ${orders} complete meals this week. Notice which recipe was easiest to repeat; reliability is a power of its own.`,
+      `${orders} times you turned ingredients into proof that convenience does not command you. Keep the favorite and improve one small thing next week.`,
+    ];
+  }
+  if (orders > 0) {
+    return [
+      `${orders} Kitchen Order${orders === 1 ? '' : 's'} cleared. That is real care made edible—and possibly tomorrow’s lunch if you listened about the containers.`,
+      `The stove answered ${orders} time${orders === 1 ? '' : 's'} this week. Good. Next cycle, repeat the easiest win before chasing culinary glory.`,
+      `${orders} home-cooked meal${orders === 1 ? '' : 's'} reached the record. Small? Absolutely not. That meal protected the Training Hall and Treasury together.`,
+    ];
+  }
+  return [
+    'The Kitchen record was quiet this week. No punishment speech—choose one easy recipe early, buy what it needs, and make ordering out less convenient than cooking.',
+    'No Kitchen Order cleared. Fine. Next week starts with a protein in the refrigerator and one meal decided before hunger gets loud.',
+    'The stove can reopen without a dramatic diet. One pan, one complete meal, several leftovers. I will handle the shouting.',
+  ];
+}
+
 function closingLines(metrics: CampfireMetrics) {
   const focus = metrics.focusCategory
     ? CATEGORY_LABELS[metrics.focusCategory]
@@ -222,6 +245,7 @@ export function buildCampfireMessages(
     { companionId: 'ember', role: 'response', pool: emberLines(metrics), slot: 'ember' },
     { companionId: 'amara', role: 'response', pool: amaraLines(metrics), slot: 'amara' },
     { companionId: 'cassian', role: 'response', pool: cassianLines(metrics), slot: 'cassian' },
+    { companionId: 'saffron', role: 'response', pool: saffronLines(metrics), slot: 'saffron' },
     { companionId: 'snow', role: 'closing', pool: closingLines(metrics), slot: 'snow-close' },
   ];
   return entries.map((entry, order) => {
@@ -253,14 +277,21 @@ export async function ensureWeeklyCampfireRecap(systemDate: LocalDateKey, weekSt
   if (!reviews.length) return undefined;
 
   const reviewedDates = new Set(reviews.map((review) => review.date));
-  const [allRecords, missions, treasuryWeeks, treasuryChallenges, treasuryTransactions] =
-    await Promise.all([
-      db.dailyMissions.where('date').between(weekStart, weekEnd, true, true).toArray(),
-      db.missions.toArray(),
-      db.treasuryWeeks.where('weekStart').between(weekStart, weekEnd, true, true).toArray(),
-      db.treasuryChallenges.where('date').between(weekStart, weekEnd, true, true).toArray(),
-      db.treasuryTransactions.where('date').between(weekStart, weekEnd, true, true).toArray(),
-    ]);
+  const [
+    allRecords,
+    missions,
+    treasuryWeeks,
+    treasuryChallenges,
+    treasuryTransactions,
+    kitchenSessions,
+  ] = await Promise.all([
+    db.dailyMissions.where('date').between(weekStart, weekEnd, true, true).toArray(),
+    db.missions.toArray(),
+    db.treasuryWeeks.where('weekStart').between(weekStart, weekEnd, true, true).toArray(),
+    db.treasuryChallenges.where('date').between(weekStart, weekEnd, true, true).toArray(),
+    db.treasuryTransactions.where('date').between(weekStart, weekEnd, true, true).toArray(),
+    db.kitchenSessions.where('date').between(weekStart, weekEnd, true, true).toArray(),
+  ]);
   const records = allRecords.filter((record) => reviewedDates.has(record.date));
   const categories = new Map(missions.map((mission) => [mission.id, mission.category]));
   const categoryCompleted: CampfireMetrics['categoryCompleted'] = {};
@@ -300,6 +331,7 @@ export async function ensureWeeklyCampfireRecap(systemDate: LocalDateKey, weekSt
     debtPaidCents: treasuryTransactions
       .filter((transaction) => transaction.kind === 'debt-payment')
       .reduce((sum, transaction) => sum + transaction.amountCents, 0),
+    kitchenOrders: kitchenSessions.filter((session) => session.status === 'completed').length,
   };
   const recap: CampfireRecap = {
     id,

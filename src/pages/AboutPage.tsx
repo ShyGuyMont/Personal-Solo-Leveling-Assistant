@@ -3,6 +3,7 @@ import {
   ArrowLeft,
   BookHeart,
   BookOpenCheck,
+  ChefHat,
   CircleGauge,
   CloudOff,
   CloudDownload,
@@ -68,7 +69,13 @@ const DESTINATIONS = [
     to: '/training-hall',
     icon: Dumbbell,
     title: 'Training Hall',
-    text: 'Let Rook and Ember run today’s home circuit or record a gym, conditioning, or recovery deployment.',
+    text: 'Run a home circuit or track one of four complete Toji Ascension gym sessions with Rook and Ember.',
+  },
+  {
+    to: '/kitchen',
+    icon: ChefHat,
+    title: 'Saffron’s Kitchen',
+    text: 'Receive a guided recipe order, prepare leftovers, and build food habits that support training and saving.',
   },
   {
     to: '/sanctuary',
@@ -320,9 +327,9 @@ export function AboutPage() {
             approximately twenty to twenty-four months when trials are passed on schedule; retries
             can extend it. Every rank still depends on all six visible requirements and its Rank
             Trial. The Level {WORLD_CLASS_LEVEL} gate equals{' '}
-            {WORLD_CLASS_ACCOUNT_XP.toLocaleString()} lifetime account XP, but the simulator confirms
-            that Completed Days and trials—not an oversized hidden XP wall—set the final pace. Once
-            a rank is earned, missed days do not demote it.
+            {WORLD_CLASS_ACCOUNT_XP.toLocaleString()} lifetime account XP, but the simulator
+            confirms that Completed Days and trials—not an oversized hidden XP wall—set the final
+            pace. Once a rank is earned, missed days do not demote it.
           </p>
         </details>
         <details>
@@ -349,17 +356,27 @@ export function AboutPage() {
           <p>
             Daily Workout opens the Training Hall. Choose where you are training: Home, Gym,
             Conditioning, or Recovery. These are four honest paths to the same Daily Workout
-            mission, so completing more than one cannot create repeat XP. The older Daily Movement
-            mission was folded into Daily Workout; its account and stat rewards were preserved in
-            the combined mission.
+            mission, so the mission itself cannot create repeat XP. The older Daily Movement mission
+            was folded into Daily Workout; its account and stat rewards were preserved in the
+            combined mission.
           </p>
           <p>
             At Home, Rook privately locks one of four circuits and Ember sets one saved clock: 15
             minutes has a 30% chance, 20 has 35%, 25 has 25%, and 30 has 10%. Refreshing or leaving
             the app does not redraw either choice. You may request one reassignment before starting.
             The optional five-minute Boss Extension records the extra work but awards no additional
-            XP. Gym, Conditioning, and Recovery let you record completed facts instead of running
-            the Hall timer.
+            XP. Gym opens four structured Toji Ascension sessions: Vanguard Frame, Iron Citadel,
+            Shadow Hunter, and the optional fourth-day Heavenly Restriction session. Rook recommends
+            an overdue foundation, every working set is logged, substitutions stay available, and
+            the next appearance of that workout carries forward your previous loads and reps.
+            Conditioning and Recovery remain simple completed-fact logs.
+          </p>
+          <p>
+            You may clear both a Gym Deployment and a Home Circuit on the same day. This awards one
+            fixed <strong>+{BALANCE.training.doubleDeploymentAccountXp} XP</strong> Double
+            Deployment surge plus its displayed stat rewards. It is never multiplied by Daily
+            Command and can be awarded only once for that date. The second session is optional;
+            recovery and sustainable weekly progress remain more important than chasing the bonus.
           </p>
           <p>
             There is no readiness quiz and no separate warm-up gate. Choose loads and exercise
@@ -369,12 +386,31 @@ export function AboutPage() {
           </p>
         </details>
         <details>
+          <summary>How does Saffron’s Kitchen work?</summary>
+          <p>
+            The Kitchen is an optional daily cooking system led by Saffron, The Flame Chef. Ask for
+            an order and she selects from twelve no-bean, no-pea recipes centered on chicken,
+            turkey, beef, fish, crab, shrimp, eggs, vegetables, rice, pasta, and plenty of potatoes.
+            Recent recipes are avoided, one ingredient swap is available, and declining carries no
+            penalty. Ingredients, steps, substitutions, food-safety reminders, leftover guidance,
+            servings, difficulty, rating, and your private adjustment note are saved locally.
+          </p>
+          <p>
+            The first {BALANCE.kitchen.rewardedOrdersPerWeek} completed orders each week award{' '}
+            <strong>{BALANCE.kitchen.completedOrderAccountXp} account XP</strong> plus Stewardship,
+            Vitality, and Discipline XP. Additional meals are still recorded but award no XP. These
+            are fixed special rewards and Daily Command never multiplies them. The recipes provide
+            general meal-planning support rather than calorie targets or medical nutrition therapy;
+            allergies, health conditions, and clinician guidance always override the app.
+          </p>
+        </details>
+        <details>
           <summary>How does the Scripture Sanctuary work?</summary>
           <p>
-            The Bible mission opens the Scripture Sanctuary. Choose a Full Daily Study when you
-            want a deeper session, or Stronghold Protocol when temptation, anger, loneliness,
-            sadness, stress, shame, or another emotion is already loud. Choose one primary concern
-            and optionally one connected concern. The app then selects from 96 offline Scripture
+            The Bible mission opens the Scripture Sanctuary. Choose a Full Daily Study when you want
+            a deeper session, or Stronghold Protocol when temptation, anger, loneliness, sadness,
+            stress, shame, or another emotion is already loud. Choose one primary concern and
+            optionally one connected concern. The app then selects from 96 offline Scripture
             references and gives original context, observation, application, and prayer prompts.
             Read the actual passage in your preferred Bible translation.
           </p>
@@ -405,11 +441,12 @@ export function AboutPage() {
           <p>
             Daily missions award the account and stat XP printed on their cards. Daily Workout is
             worth 75 account XP and can be cleared once through any Training Hall path. Perfect
-            Days, completed challenges, Rank Trials, Companion Quest chapters, Treasury reviews, and
-            accepted rare events award their own displayed one-time XP. Campaign Arc milestones,
-            emotional check-ins, support conversations, Campfires, Councils, repeat Sanctuary
-            studies, Stronghold sessions, and ordinary Training Hall overtime are records or
-            guidance only and do not create hidden XP.
+            Days, completed challenges, Rank Trials, Companion Quest chapters, Treasury reviews,
+            rewarded Kitchen Orders, Double Deployment surges, and accepted rare events award their
+            own displayed one-time XP. Campaign Arc milestones, emotional check-ins, support
+            conversations, Campfires, Councils, repeat Sanctuary studies, Stronghold sessions, and
+            ordinary Training Hall overtime are records or guidance only and do not create hidden
+            XP.
           </p>
           <p>
             <strong>Current default daily account XP:</strong> Prayer 20, Bible 25, Integrity 40,
@@ -497,7 +534,7 @@ export function AboutPage() {
           <summary>How do Weekly Campfires and Monthly Councils work?</summary>
           <p>
             Campfires summarize a completed week with at least one finalized Daily Review. Monthly
-            Councils assemble all eight companions after a completed calendar month and review
+            Councils assemble all nine companions after a completed calendar month and review
             mission balance, Perfect Days, levels, ranks, titles, Campaign milestones, quest
             chapters, and relationship actions that were actually recorded. Their commentary is
             saved in Headquarters and the Archive, and never changes scoring. The Council also gives
@@ -515,13 +552,15 @@ export function AboutPage() {
         <details>
           <summary>What do the companions change?</summary>
           <p>
-            Snow, Rook, Selah, Cipher, Haven, Ember, Amara, and Cassian provide context,
+            Snow, Rook, Selah, Cipher, Haven, Ember, Amara, Cassian, and Saffron provide context,
             encouragement, check-ins, direct support, banter, milestone celebrations,
             accountability, weekly Campfires, Monthly Councils, and personal questlines. Amara
             specializes in empathy, relationships, belonging, communication, repair, and healthy
             boundaries; she never requires unsafe contact. Cassian specializes in budgeting, saving,
-            debt reduction, spending awareness, and shame-free financial recovery. Companion words
-            never secretly change XP, streaks, mission results, or rank requirements.
+            debt reduction, spending awareness, and shame-free financial recovery. Saffron
+            specializes in practical cooking, training-supportive meals, leftovers, and lowering the
+            friction that makes eating out feel automatic. Companion words never secretly change XP,
+            streaks, mission results, or rank requirements.
           </p>
         </details>
         <details>

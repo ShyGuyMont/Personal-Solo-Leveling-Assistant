@@ -10,16 +10,17 @@ The design, writing, interface, icons, animations, and generated tones are origi
 - Custom and template missions, weekday schedules, optional completion types, notes, and stable history IDs
 - Daily Review, idempotent rewards, current-day undo, Perfect and Protected Perfect Days, humane momentum/decay, and Recovery Mode
 - System and Clean interface styles, plus Abyss and light Daybreak color themes with selectable visual intensity
-- Eight original chibi companion characters with daily greetings, stat-specific encouragement, shame-free accountability, occasional two-character banter, cinematic milestone celebrations, adjustable frequency, and individual mute controls
+- Nine original chibi companion characters with daily greetings, stat-specific encouragement, shame-free accountability, occasional two-character banter, cinematic milestone celebrations, adjustable frequency, and individual mute controls
 - A private Party Channel with ten-mood Check-Ins, six Direct Support topics, whole-party or one-to-one responses, history-aware dialogue rotation, and locally saved conversations that never affect XP or streaks
 - Full Party Headquarters with the complete roster, support shortcuts, saved-message counts, Ember's Lock-In Protocol, Amara's Heartweaver Protocol, permanent Weekly Campfires, and Monthly Councils
 - Weekly Campfire Recaps generated once per completed week from finalized mission data, with an in-character review from every companion and no hidden rewards or penalties
 - Monthly Councils generated after a completed month with nine fact-aware party messages, permanent history, and an optional next-month intention
 - Snow's optional Daily Command Briefing with Low, Steady, and High capacity planning, broad completion targets, and transparent 1×–2.5× scheduled-mission XP outcomes
-- Rook and Ember’s Training Hall with four home circuits, one saved weighted 15–30 minute assignment, persistent timer, load and round tracking, Gym / Conditioning / Recovery logs, and a full-party post-workout scene
+- Rook and Ember’s Training Hall with four home circuits, four structured progressive gym sessions, set/load/rep/rest tracking, Conditioning and Recovery logs, a one-time Home + Gym Double Deployment surge, and a full-party post-workout scene
+- Saffron’s Kitchen with twelve rotating no-bean, no-pea recipes, guided ingredients and steps, substitutions, food-safety and leftover guidance, three rewarded weekly orders, and permanent cooking history
 - Snow and Selah’s Scripture Sanctuary with 96 rotating passage paths, twelve emotional and spiritual concerns, guided reflection, deeper prayer structure, private history, and unlimited no-XP Stronghold support
 - User-authored Campaign Arcs with purpose, companion guidance, optional target dates, milestones, pause/resume, completion, and archive states
-- Eight extensive Companion Questlines: 40 authored chapters, 120 tracked or reflective objectives, no failure timers, fixed chapter rewards, and eight unique legendary completion titles
+- Nine extensive Companion Questlines: 45 authored chapters, 135 tracked or reflective objectives, no failure timers, fixed chapter rewards, and nine unique legendary completion titles
 - Treasury Command with paycheck and expense logging, bills, credit-card and other debt tracking, savings goals, amount masking, weekly plans and reviews, and Archive Shield protection
 - Cassian's 75%-chance No Eating Out directive with explicit bonus XP, Stewardship growth, no core-XP loss on failure, and a practical recovery debrief
 - Words to Carry favorites for saving companion messages from Check-Ins, Direct Support, banter, milestones, and ordinary reactions
@@ -35,6 +36,35 @@ The design, writing, interface, icons, animations, and generated tones are origi
 - Installable iPhone PWA with safe-area support, offline caching, code-split screens, user-controlled update prompts, and a dedicated Update Center
 
 There is no login, backend, external API, analytics, advertising, tracking, or paid service.
+
+## Version 5.0 · Forge & Flame
+
+Gym Deployment is now a complete Toji Ascension program. **Vanguard Frame**, **Iron Citadel**, and
+**Shadow Hunter** form a balanced three-day foundation; **Heavenly Restriction** is an optional
+fourth specialization day. Rook recommends the foundational session that has waited longest. Every
+working set can record a substitution, load, and reps; rest timers stay attached to each exercise;
+and the next appearance of a workout carries forward the previous performance. Reaching the top of
+every prescribed rep range produces a conservative load-increase prompt rather than an automatic
+jump.
+
+Home Circuit remains available after a completed gym session. Clearing both on the same System day
+awards one fixed **+150 account XP** Double Deployment surge plus Strength, Endurance, Discipline,
+and Vitality XP. The Daily Workout mission still pays only once, the surge is never multiplied by
+Daily Command, and stable transaction IDs prevent repeat rewards after refreshes or imports.
+
+**Saffron, The Flame Chef** is the ninth companion. She is a theatrical, short-tempered, fiercely
+supportive nutrition-minded chef with warm olive-brown skin, vivid green eyes, dark curls, a white
+chef jacket, forest-green apron, and tangerine System flame. Her Kitchen rotates among twelve meals
+built around the user’s preferred proteins, vegetables, potatoes, rice, and pasta—with no beans or
+peas. Each order includes ingredients, guided steps, substitutions, food-safety checkpoints,
+leftover guidance, one swap, a no-penalty decline, and a private result record. The first three
+completed orders each week award 40 account XP plus Stewardship, Vitality, and Discipline; later
+orders remain recorded without becoming an XP farm.
+
+Saffron also has full emotional check-ins, Direct Support, banter, milestone celebrations, Training
+Hall debriefs, Weekly Campfires, Monthly Councils, and the five-chapter **The Fire We Feed**
+questline. Archive Shield 12 preserves all new Kitchen and multi-session Training Hall data while
+migrating Version 4.0 saves automatically.
 
 ## Version 4.0 · Scripture Sanctuary
 
@@ -65,7 +95,7 @@ trusted people, pastors, counselors, therapists, and recovery groups when human 
 
 Daily Workout now opens the Training Hall. Rook chooses one of **Iron Foundation**, **Vanguard Frame**, **Shadow Engine**, or **Guardian Citadel**; Ember naturally declares a weighted 15, 20, 25, or 30-minute clock. The saved assignment cannot be changed by refreshing, one pre-start reassignment is available, and an optional five-minute Boss Extension records overtime without creating extra XP.
 
-Home circuits support the user’s adjustable dumbbells, bodyweight work, planks, and Burn Machine. Gym, Conditioning, and Recovery are equal alternate paths for days trained elsewhere. Finishing any one path clears the Daily Workout once and opens an exhausted, in-character recovery scene with all eight companions.
+Home circuits support the user’s adjustable dumbbells, bodyweight work, planks, and Burn Machine. Gym, Conditioning, and Recovery are equal alternate paths for days trained elsewhere. Finishing any one path clears the Daily Workout once and opens an exhausted, in-character recovery scene with the full party.
 
 Daily Movement has been safely retired as a duplicate. Daily Workout now carries the combined 75 account XP and Strength, Endurance, Discipline, and Vitality rewards that both former physical missions awarded together. Existing history is preserved, old briefing references migrate forward, and Training Hall state is included in Archive Shield format 10.
 
@@ -79,16 +109,17 @@ Rank gates and the development pacing simulator were also rebalanced for the exp
 - **Ember, The Ignition** supports accountability, re-entry, and locking back in after momentum slips. She is fiery, blunt, and fiercely supportive, with copper-red hair, amber eyes, charcoal-and-crimson gear, and an ember-orange System halo.
 - **Amara, The Heartweaver** supports Empathy, relationships, communication, repair, healthy boundaries, belonging, and shame-free sexual-integrity support in the Sanctuary. She is warm, perceptive, and playfully romantic, with warm olive skin, wavy chestnut hair, luminous pink eyes, rose-and-plum battle attire, and a radiant pink System halo.
 - **Cassian, The Steward** supports Stewardship, budgeting, savings, debt reduction, spending awareness, and financial recovery. He is a calm, exacting, never-shaming white accountant type with fair skin, tousled light-brown hair, hazel eyes behind round gold-rimmed glasses, a pencil behind one ear, a dark ledger, and a tailored emerald-and-navy Steward coat.
+- **Saffron, The Flame Chef** supports cooking, meal preparation, training nutrition, leftovers, and reducing expensive convenience choices. She is theatrical, fiery, and nurturing, with warm olive-brown skin, vivid green eyes, dark curls, a white chef jacket, forest-green apron, and tangerine flame accents.
 
-Companions never judge missed missions. Snow checks in once per System day, while stat level-ups notify the matching specialist. Ember may open one Lock-In signal when the previous day is unfinished or finalized below 50%; her response is direct but never removes XP, changes a streak, or attacks the user's worth. Amara owns the Empathy stat and ordinary Character-path relationship responses; every relationship objective offers a safe alternative and never requires contact with someone unsafe. Cassian owns the Stewardship stat and Treasury coaching; Budget Stability never removes account XP, rank, streaks, or mission credit. Ordinary mission reactions follow the selected Off, Quiet, Balanced, or Talkative setting. All eight portraits use a cohesive premium chibi RPG style, are bundled locally, and require no network connection.
+Companions never judge missed missions. Snow checks in once per System day, while stat level-ups notify the matching specialist. Ember may open one Lock-In signal when the previous day is unfinished or finalized below 50%; her response is direct but never removes XP, changes a streak, or attacks the user's worth. Amara owns the Empathy stat and ordinary Character-path relationship responses; every relationship objective offers a safe alternative and never requires contact with someone unsafe. Cassian owns the Stewardship stat and Treasury coaching; Budget Stability never removes account XP, rank, streaks, or mission credit. Saffron runs the Kitchen without body shame or punishment dieting. Ordinary mission reactions follow the selected Off, Quiet, Balanced, or Talkative setting. All nine portraits use a cohesive premium chibi RPG style, are bundled locally, and require no network connection.
 
 The Party Check-In lets the user choose Energized, Proud, Good, Okay, Tired, Stressed, Frustrated, Discouraged, Lonely, or Not sure. Snow opens and closes each conversation while Rook, Selah, Cipher, Haven, Ember, Amara, and Cassian answer in character. Each companion has emotion-specific dialogue pools, and the app uses the least recently heard line only after every unused line in that pool has been heard. Check-ins are saved locally in the Archive and intentionally award no XP, alter no streak, and create no penalty.
 
-Direct Support offers Motivation, Make a plan, Faith & perspective, Calm down, Recover, and Celebrate. The user can hear from the full party or intentionally open a focused channel with any of the eight companions, including Amara and Cassian. Support uses separate topic-specific dialogue pools with history-aware rotation. It is selection-based, works offline, and changes no progression data.
+Direct Support offers Motivation, Make a plan, Faith & perspective, Calm down, Recover, and Celebrate. The user can hear from the full party or intentionally open a focused channel with any of the nine companions, including Amara, Cassian, and Saffron. Support uses separate topic-specific dialogue pools with history-aware rotation. It is selection-based, works offline, and changes no progression data.
 
-At the start of a new week, Headquarters can present a saved Campfire Recap for the previous completed week. It counts finalized Daily Reviews, mission records, and relevant Treasury progress, then gives all eight companions distinct commentary based on those facts. Snow closes the gathering. Campfires can be favorited, reopened in Headquarters, and reviewed in the Archive.
+At the start of a new week, Headquarters can present a saved Campfire Recap for the previous completed week. It counts finalized Daily Reviews, mission records, Treasury progress, and Kitchen Orders, then gives all nine companions distinct commentary based on those facts. Snow closes the gathering. Campfires can be favorited, reopened in Headquarters, and reviewed in the Archive.
 
-After a calendar month with at least one finalized Daily Review, a Monthly Council records mission totals, completion rate, Perfect Days, category balance, relationship actions, Treasury progress, levels, ranks, titles, Campaign milestones, and Companion Quest chapters. Snow opens and closes; all seven specialists speak between. Councils are permanent, never change scoring, and include an optional next-month intention.
+After a calendar month with at least one finalized Daily Review, a Monthly Council records mission totals, completion rate, Perfect Days, category balance, relationship actions, Treasury progress, Kitchen Orders, levels, ranks, titles, Campaign milestones, and Companion Quest chapters. Snow opens and closes; all nine specialists speak between. Councils are permanent, never change scoring, and include an optional next-month intention.
 
 ### Campaign Command
 
@@ -106,6 +137,7 @@ Every companion also has one authored five-chapter questline:
 - Ember — **Reignite Protocol**
 - Amara — **The Courage to Connect**
 - Cassian — **The Keeper's Ledger**
+- Saffron — **The Fire We Feed**
 
 ### Treasury Command
 

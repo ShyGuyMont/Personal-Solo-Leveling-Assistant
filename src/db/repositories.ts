@@ -41,6 +41,8 @@ export async function getArchiveData() {
     companionQuestProgress,
     monthlyCouncils,
     sanctuarySessions,
+    trainingSessions,
+    kitchenSessions,
   ] = await Promise.all([
     db.dailyReviews.where('status').equals('finalized').sortBy('date'),
     db.dailyMissions.toArray(),
@@ -70,6 +72,8 @@ export async function getArchiveData() {
     db.companionQuestProgress.toArray(),
     db.monthlyCouncils.orderBy('monthStart').reverse().toArray(),
     db.sanctuarySessions.orderBy('createdAt').reverse().toArray(),
+    db.trainingSessions.orderBy('date').reverse().toArray(),
+    db.kitchenSessions.orderBy('date').reverse().toArray(),
   ]);
   return {
     reviews,
@@ -92,6 +96,8 @@ export async function getArchiveData() {
     companionQuestProgress,
     monthlyCouncils,
     sanctuarySessions,
+    trainingSessions,
+    kitchenSessions,
   };
 }
 

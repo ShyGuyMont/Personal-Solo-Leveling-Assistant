@@ -1,0 +1,566 @@
+import type { KitchenRecipeId } from '@/types/game';
+
+export interface KitchenRecipeDefinition {
+  id: KitchenRecipeId;
+  name: string;
+  codename: string;
+  saffronFavorite: string;
+  protein: 'chicken' | 'turkey' | 'beef' | 'fish' | 'shrimp' | 'crab' | 'eggs';
+  prepMinutes: number;
+  cookMinutes: number;
+  servings: number;
+  costTier: '$' | '$$' | '$$$';
+  difficulty: 'Easy' | 'Moderate';
+  equipment: string;
+  plate: string;
+  ingredients: string[];
+  steps: string[];
+  swaps: string[];
+  storage: string;
+  safety: string;
+}
+
+export const KITCHEN_RECIPES: KitchenRecipeDefinition[] = [
+  {
+    id: 'lemon-chicken-potatoes',
+    name: 'Lemon-Garlic Chicken & Crispy Potatoes',
+    codename: 'THE SHEET-PAN STANDARD',
+    saffronFavorite:
+      'This is my favorite sheet-pan order! One tray, actual food, and almost no excuse to summon a delivery driver!',
+    protein: 'chicken',
+    prepMinutes: 15,
+    cookMinutes: 35,
+    servings: 4,
+    costTier: '$',
+    difficulty: 'Easy',
+    equipment: 'Large sheet pan · mixing bowl · food thermometer',
+    plate:
+      'Chicken anchors the plate; potatoes provide training fuel; broccoli adds volume, fiber, and color.',
+    ingredients: [
+      '1½ lb boneless skinless chicken breast or thighs, cut into large pieces',
+      '1½ lb baby or Yukon Gold potatoes, halved or cubed',
+      '5 cups broccoli florets, fresh or frozen',
+      '2 tbsp olive oil',
+      '1 lemon',
+      '3 cloves garlic, minced, or 1 tsp garlic powder',
+      '1 tsp paprika',
+      '½ tsp dried oregano',
+      'Salt and black pepper',
+    ],
+    steps: [
+      'Heat the oven to 425°F. Line or lightly oil a large sheet pan.',
+      'Toss the potatoes with half the oil, paprika, oregano, salt, and pepper. Roast for 15 minutes.',
+      'Toss the chicken with the remaining oil, garlic, lemon zest, salt, and pepper.',
+      'Add chicken and broccoli to the pan. Spread everything into one layer.',
+      'Roast 18–22 minutes more, stirring once, until the chicken reaches 165°F and potatoes are tender.',
+      'Squeeze lemon juice over the tray. Divide into four containers so tomorrow already has an answer.',
+    ],
+    swaps: [
+      'Use frozen broccoli straight from the freezer; allow a few extra minutes.',
+      'Use sweet potatoes for a sweeter variation.',
+      'Use a salt-free seasoning blend when you want the recipe even simpler.',
+    ],
+    storage: 'Refrigerate cooked portions promptly in shallow containers and use within 3–4 days.',
+    safety: 'Chicken must reach 165°F in the thickest piece. Reheat leftovers to 165°F.',
+  },
+  {
+    id: 'garlic-shrimp-rice',
+    name: 'Garlic Shrimp Rice Bowls',
+    codename: 'TEN-MINUTE SEA RAID',
+    saffronFavorite:
+      'Shrimp cooks faster than delivery arrives! If you overcook it after I said that, I will be personally offended!',
+    protein: 'shrimp',
+    prepMinutes: 10,
+    cookMinutes: 18,
+    servings: 4,
+    costTier: '$$',
+    difficulty: 'Easy',
+    equipment: 'Large skillet · saucepan or microwave rice · food thermometer',
+    plate:
+      'Shrimp supplies the protein anchor, rice supports training, and peppers plus zucchini fill out the bowl.',
+    ingredients: [
+      '1½ lb peeled and deveined shrimp, thawed',
+      '3 cups cooked rice',
+      '2 bell peppers, sliced',
+      '2 medium zucchini, sliced',
+      '1 tbsp olive oil',
+      '1 tbsp butter',
+      '3 cloves garlic, minced',
+      '1 tsp smoked paprika',
+      '½ lemon',
+      'Salt, black pepper, and optional red-pepper flakes',
+    ],
+    steps: [
+      'Pat the shrimp dry and season with paprika, salt, and pepper.',
+      'Heat olive oil in a large skillet. Cook peppers and zucchini for 5–7 minutes; remove to a plate.',
+      'Add butter and garlic. Stir for 30 seconds, then add shrimp in one layer.',
+      'Cook about 2 minutes per side, until opaque and 145°F. Do not keep punishing them after they are done.',
+      'Return vegetables to the skillet and squeeze lemon over everything.',
+      'Divide rice, shrimp, and vegetables among four bowls or containers.',
+    ],
+    swaps: [
+      'Use frozen stir-fry vegetables to eliminate chopping.',
+      'Use microwave brown rice when time is the main enemy.',
+      'Replace shrimp with bite-size chicken, cooking it fully to 165°F.',
+    ],
+    storage: 'Refrigerate promptly and use within 3–4 days. Reheat seafood leftovers to 165°F.',
+    safety:
+      'Cook shrimp and other seafood to 145°F; keep raw seafood separate from ready-to-eat ingredients.',
+  },
+  {
+    id: 'turkey-taco-potato-skillet',
+    name: 'Turkey Taco Potato Skillet',
+    codename: 'NO-BEAN TACO PROTOCOL',
+    saffronFavorite:
+      'No beans. I heard you the first time! Turkey, potatoes, peppers, actual flavor—now stop looking suspicious!',
+    protein: 'turkey',
+    prepMinutes: 12,
+    cookMinutes: 28,
+    servings: 4,
+    costTier: '$',
+    difficulty: 'Easy',
+    equipment: 'Large covered skillet · food thermometer',
+    plate:
+      'Lean turkey and potatoes make the base while peppers, onions, tomatoes, and spinach add variety.',
+    ingredients: [
+      '1¼ lb lean ground turkey',
+      '1½ lb Yukon Gold potatoes, cut into small cubes',
+      '1 bell pepper, diced',
+      '1 small onion, diced',
+      '2 cups spinach',
+      '1 cup plain tomato salsa',
+      '1 tbsp olive oil',
+      '2 tsp chili powder',
+      '1 tsp cumin',
+      '½ tsp garlic powder',
+      'Optional: shredded cheese, plain Greek yogurt, cilantro, or lime',
+    ],
+    steps: [
+      'Microwave the potato cubes with a splash of water for 5 minutes to shorten skillet time.',
+      'Heat oil in a large skillet. Brown turkey with chili powder, cumin, and garlic powder.',
+      'Cook until the turkey reaches 165°F, breaking it into bite-size pieces.',
+      'Add onion, pepper, and potatoes. Cover and cook 8–10 minutes, stirring occasionally.',
+      'Stir in salsa and spinach; cook until the spinach wilts and potatoes are tender.',
+      'Divide into four portions and add optional toppings when serving.',
+    ],
+    swaps: [
+      'Use lean ground beef and cook it to 160°F.',
+      'Use frozen diced potatoes and frozen peppers to reduce prep.',
+      'Serve over chopped romaine when you want a lighter potato portion.',
+    ],
+    storage: 'Cool promptly, refrigerate, and use within 3–4 days. Reheat to 165°F.',
+    safety: 'Ground turkey must reach 165°F. Ground beef, if substituted, must reach 160°F.',
+  },
+  {
+    id: 'salmon-crispy-potatoes',
+    name: 'Paprika Salmon with Crispy Potatoes',
+    codename: 'OMEGA FORGE',
+    saffronFavorite:
+      'Salmon, crispy potatoes, asparagus. This plate looks expensive and still costs less than ordering it. Respect the fish!',
+    protein: 'fish',
+    prepMinutes: 12,
+    cookMinutes: 32,
+    servings: 4,
+    costTier: '$$$',
+    difficulty: 'Easy',
+    equipment: 'Large sheet pan · food thermometer',
+    plate:
+      'Salmon provides protein and seafood variety; potatoes and asparagus complete a satisfying tray.',
+    ingredients: [
+      '4 salmon fillets, about 5–6 oz each',
+      '1½ lb baby potatoes, halved',
+      '1 bunch asparagus, trimmed',
+      '2 tbsp olive oil',
+      '1 tsp smoked paprika',
+      '½ tsp garlic powder',
+      '1 lemon',
+      'Salt and black pepper',
+    ],
+    steps: [
+      'Heat the oven to 425°F. Toss potatoes with 1 tbsp oil, paprika, salt, and pepper.',
+      'Roast potatoes cut-side down for 18 minutes.',
+      'Move potatoes aside. Add asparagus and salmon; coat lightly with remaining oil, garlic, salt, and pepper.',
+      'Roast 10–14 minutes more, depending on thickness, until salmon reaches 145°F.',
+      'Squeeze lemon over the salmon and vegetables.',
+      'Pack leftovers only after cooling slightly; keep portions shallow so they chill quickly.',
+    ],
+    swaps: [
+      'Use frozen salmon thawed safely in the refrigerator.',
+      'Use broccoli or Brussels sprouts instead of asparagus.',
+      'Use cod or tilapia and cook to 145°F.',
+    ],
+    storage: 'Refrigerate promptly and use within 3–4 days. Reheat leftovers to 165°F.',
+    safety:
+      'Fish must reach 145°F in the thickest part. Keep raw fish and its juices away from produce.',
+  },
+  {
+    id: 'steak-bites-potatoes',
+    name: 'Pepper Steak Bites & Roasted Potatoes',
+    codename: 'IRON SKILLET FEAST',
+    saffronFavorite:
+      'Steak and potatoes. I made your favorite food useful—try to act surprised and get the pan hot!',
+    protein: 'beef',
+    prepMinutes: 15,
+    cookMinutes: 30,
+    servings: 4,
+    costTier: '$$$',
+    difficulty: 'Moderate',
+    equipment: 'Sheet pan · heavy skillet · food thermometer',
+    plate:
+      'Lean steak supplies protein and iron; potatoes provide energy; carrots and Brussels sprouts bring color and fiber.',
+    ingredients: [
+      '1½ lb sirloin steak, cut into large cubes',
+      '1½ lb potatoes, cubed',
+      '3 cups Brussels sprouts or broccoli',
+      '3 carrots, sliced',
+      '2 tbsp olive oil, divided',
+      '1 tbsp butter',
+      '2 cloves garlic, minced',
+      '1 tsp black pepper',
+      '½ tsp smoked paprika',
+      'Salt',
+    ],
+    steps: [
+      'Heat the oven to 425°F. Toss potatoes, vegetables, 1 tbsp oil, paprika, salt, and pepper on a sheet pan.',
+      'Roast for 25–30 minutes, stirring once.',
+      'Pat steak dry and season. Heat a heavy skillet until hot, then add remaining oil.',
+      'Sear steak in batches so the pieces brown instead of steam.',
+      'Add butter and garlic during the final minute. Cook steak to at least 145°F, then rest 3 minutes.',
+      'Divide steak, potatoes, and vegetables into four portions.',
+    ],
+    swaps: [
+      'Use lean ground beef formed into small patties and cook to 160°F.',
+      'Use chicken pieces and cook to 165°F for a lower-cost version.',
+      'Choose frozen roasting vegetables when fresh prep feels like the barrier.',
+    ],
+    storage: 'Refrigerate promptly and use within 3–4 days. Reheat leftovers to 165°F.',
+    safety:
+      'Whole-cut beef must reach 145°F and rest at least 3 minutes. Ground beef must reach 160°F.',
+  },
+  {
+    id: 'breakfast-potato-hash',
+    name: 'Egg, Turkey Bacon & Potato Hash',
+    codename: 'MORNING ARMOR',
+    saffronFavorite:
+      'Breakfast can be dinner and I will fight anyone who disagrees! Eggs, potatoes, vegetables—move!',
+    protein: 'eggs',
+    prepMinutes: 10,
+    cookMinutes: 25,
+    servings: 4,
+    costTier: '$',
+    difficulty: 'Easy',
+    equipment: 'Large covered skillet',
+    plate:
+      'Eggs and turkey bacon anchor the meal; potatoes provide staying power; spinach and peppers add vegetables.',
+    ingredients: [
+      '8 large eggs',
+      '8 slices turkey bacon, chopped',
+      '1½ lb potatoes, cut into small cubes',
+      '1 bell pepper, diced',
+      '½ onion, diced',
+      '3 cups spinach',
+      '1 tbsp olive oil',
+      '½ tsp smoked paprika',
+      'Salt and black pepper',
+      'Optional: shredded cheese or hot sauce',
+    ],
+    steps: [
+      'Microwave potato cubes with a splash of water for 5 minutes.',
+      'Cook turkey bacon in a large skillet according to package directions; remove when done.',
+      'Add oil, potatoes, pepper, onion, paprika, salt, and pepper. Cook until browned and tender.',
+      'Stir in spinach until wilted, then return turkey bacon to the skillet.',
+      'Make four wells, add two eggs per portion, cover, and cook until the whites and yolks are firm—or scramble the eggs through the hash.',
+      'Divide into four servings and add optional toppings.',
+    ],
+    swaps: [
+      'Use fully cooked chicken sausage instead of turkey bacon.',
+      'Use frozen potatoes with peppers and onions for minimal prep.',
+      'Add mushrooms or tomatoes instead of spinach.',
+    ],
+    storage: 'Refrigerate promptly and use within 3–4 days. Reheat to 165°F.',
+    safety: 'Cook eggs until yolks and whites are firm; egg dishes should reach 160°F.',
+  },
+  {
+    id: 'chicken-fajita-bowls',
+    name: 'Chicken Fajita Rice Bowls',
+    codename: 'COLOR RAID',
+    saffronFavorite:
+      'Three colors of peppers because food is allowed to look alive! No beans hiding underneath, either!',
+    protein: 'chicken',
+    prepMinutes: 15,
+    cookMinutes: 22,
+    servings: 4,
+    costTier: '$$',
+    difficulty: 'Easy',
+    equipment: 'Large skillet · saucepan or microwave rice · food thermometer',
+    plate:
+      'Chicken supplies the protein, rice supports training, and peppers, onions, lettuce, and salsa bring volume and flavor.',
+    ingredients: [
+      '1½ lb boneless skinless chicken, sliced',
+      '3 cups cooked rice',
+      '3 bell peppers, sliced',
+      '1 large onion, sliced',
+      '2 cups chopped romaine',
+      '1 cup plain tomato salsa',
+      '1 tbsp olive oil',
+      '2 tsp chili powder',
+      '1 tsp cumin',
+      '½ tsp garlic powder',
+      'Optional: lime, avocado, Greek yogurt, or cheese',
+    ],
+    steps: [
+      'Season chicken with chili powder, cumin, garlic, salt, and pepper.',
+      'Heat half the oil in a large skillet and cook chicken until browned and 165°F; remove.',
+      'Add remaining oil, peppers, and onion. Cook 6–8 minutes until crisp-tender.',
+      'Return chicken and any juices to the skillet; toss everything together.',
+      'Build bowls with rice, fajita mixture, romaine, and salsa.',
+      'Pack hot and cold components separately when saving leftovers.',
+    ],
+    swaps: [
+      'Use frozen fajita vegetables.',
+      'Use lean beef strips, cooked to 145°F with a 3-minute rest.',
+      'Use potatoes instead of rice when that sounds better—Saffron officially permits it.',
+    ],
+    storage: 'Refrigerate promptly and use within 3–4 days. Keep lettuce separate until serving.',
+    safety: 'Chicken must reach 165°F. Use separate utensils for raw and cooked chicken.',
+  },
+  {
+    id: 'beef-broccoli-stir-fry',
+    name: 'Beef & Broccoli Stir-Fry',
+    codename: 'TAKEOUT INTERCEPTION',
+    saffronFavorite:
+      'This is what you order from takeout, except now the price does not insult Cassian! Heat the skillet!',
+    protein: 'beef',
+    prepMinutes: 15,
+    cookMinutes: 15,
+    servings: 4,
+    costTier: '$$',
+    difficulty: 'Moderate',
+    equipment: 'Large skillet or wok · saucepan or microwave rice',
+    plate:
+      'Lean beef and broccoli form the center while rice makes the meal satisfying enough to compete with takeout.',
+    ingredients: [
+      '1¼ lb sirloin or flank steak, thinly sliced',
+      '6 cups broccoli florets',
+      '3 cups cooked rice',
+      '⅓ cup reduced-sodium soy sauce',
+      '2 tbsp water',
+      '1 tbsp honey',
+      '1 tbsp cornstarch',
+      '2 cloves garlic, minced',
+      '1 tsp grated ginger or ½ tsp ground ginger',
+      '1 tbsp neutral oil',
+    ],
+    steps: [
+      'Whisk soy sauce, water, honey, cornstarch, garlic, and ginger.',
+      'Heat half the oil in a large skillet. Cook broccoli with 2 tbsp water until bright and crisp-tender; remove.',
+      'Add remaining oil and cook beef in batches so it browns.',
+      'Cook beef to at least 145°F, then allow a 3-minute rest.',
+      'Return broccoli, add sauce, and simmer 1–2 minutes until glossy and thickened.',
+      'Serve over rice and divide leftovers into separate portions.',
+    ],
+    swaps: [
+      'Use frozen broccoli; thaw or cook off excess water first.',
+      'Use chicken and cook to 165°F.',
+      'Add mushrooms, carrots, or bell peppers for extra vegetables.',
+    ],
+    storage: 'Refrigerate promptly and use within 3–4 days. Reheat to 165°F.',
+    safety:
+      'Whole-cut beef must reach 145°F and rest 3 minutes; substituted chicken must reach 165°F.',
+  },
+  {
+    id: 'turkey-meatball-pasta',
+    name: 'Turkey Meatball Marinara Pasta',
+    codename: 'LEFTOVER LEGION',
+    saffronFavorite:
+      'Meatballs make leftovers feel intentional. Make the full batch! Future-you is not getting abandoned to an app menu!',
+    protein: 'turkey',
+    prepMinutes: 18,
+    cookMinutes: 27,
+    servings: 4,
+    costTier: '$',
+    difficulty: 'Moderate',
+    equipment: 'Sheet pan · pot · food thermometer',
+    plate:
+      'Turkey meatballs provide protein, pasta provides training fuel, and marinara, zucchini, and spinach build the vegetable side.',
+    ingredients: [
+      '1¼ lb lean ground turkey',
+      '1 egg',
+      '½ cup breadcrumbs',
+      '¼ cup grated Parmesan',
+      '1 tsp Italian seasoning',
+      '12 oz pasta, preferably whole-grain if you enjoy it',
+      '24 oz marinara sauce',
+      '2 zucchini, chopped',
+      '3 cups spinach',
+      'Salt, pepper, and cooking spray or a little olive oil',
+    ],
+    steps: [
+      'Heat the oven to 425°F. Mix turkey, egg, breadcrumbs, Parmesan, seasoning, salt, and pepper.',
+      'Shape into roughly 20 meatballs and place on a lightly oiled sheet pan.',
+      'Bake 15–18 minutes until meatballs reach 165°F.',
+      'Boil pasta according to package directions. Add zucchini during the final 3 minutes, then drain.',
+      'Warm marinara, stir in spinach until wilted, then add pasta, zucchini, and meatballs.',
+      'Divide into four generous portions; freeze one if four meals in a row sounds unrealistic.',
+    ],
+    swaps: [
+      'Use frozen turkey meatballs that fit your budget; heat according to the label.',
+      'Use lean ground beef and cook meatballs to 160°F.',
+      'Use frozen chopped spinach or mixed vegetables.',
+    ],
+    storage: 'Refrigerate for 3–4 days or freeze portions. Reheat leftovers to 165°F.',
+    safety: 'Ground turkey and egg-containing meatballs must reach 165°F.',
+  },
+  {
+    id: 'cajun-shrimp-potato-skillet',
+    name: 'Cajun Shrimp & Potato Skillet',
+    codename: 'FIRE COAST SKILLET',
+    saffronFavorite:
+      'Shrimp plus potatoes plus enough seasoning to wake the entire Headquarters. Obviously this is a favorite!',
+    protein: 'shrimp',
+    prepMinutes: 12,
+    cookMinutes: 24,
+    servings: 4,
+    costTier: '$$',
+    difficulty: 'Easy',
+    equipment: 'Large covered skillet · food thermometer',
+    plate:
+      'Shrimp anchors the meal, potatoes provide carbohydrates, and peppers plus zucchini give the skillet volume.',
+    ingredients: [
+      '1½ lb peeled and deveined shrimp, thawed',
+      '1½ lb potatoes, cut into small cubes',
+      '2 bell peppers, chopped',
+      '2 zucchini, chopped',
+      '1 tbsp olive oil',
+      '1 tbsp butter',
+      '1½ tsp Cajun seasoning, adjusted for sodium and heat',
+      '½ tsp garlic powder',
+      '½ lemon',
+    ],
+    steps: [
+      'Microwave potato cubes with a splash of water for 5 minutes.',
+      'Heat oil in a large skillet. Cook potatoes 6–8 minutes until browned.',
+      'Add peppers, zucchini, and half the Cajun seasoning. Cover for 4 minutes.',
+      'Move vegetables aside, add butter and shrimp, and season with the remaining spices.',
+      'Cook shrimp about 2 minutes per side until opaque and 145°F.',
+      'Toss everything together and finish with lemon.',
+    ],
+    swaps: [
+      'Use a salt-free Cajun blend and adjust salt yourself.',
+      'Use chicken pieces and cook to 165°F.',
+      'Use frozen pepper-and-onion mix to reduce chopping.',
+    ],
+    storage: 'Refrigerate promptly and use within 3–4 days. Reheat to 165°F.',
+    safety: 'Shrimp and other seafood must reach 145°F.',
+  },
+  {
+    id: 'honey-garlic-chicken-bowls',
+    name: 'Honey-Garlic Chicken Bowls',
+    codename: 'DELIVERY DISRUPTOR',
+    saffronFavorite:
+      'Sweet, garlicky, fast, and portioned for tomorrow. Delivery never stood a chance—unless you refuse to turn on the stove!',
+    protein: 'chicken',
+    prepMinutes: 12,
+    cookMinutes: 20,
+    servings: 4,
+    costTier: '$',
+    difficulty: 'Easy',
+    equipment: 'Large skillet · saucepan or microwave rice · food thermometer',
+    plate:
+      'Chicken is the protein anchor, rice supports training, and broccoli plus carrots make the bowl substantial.',
+    ingredients: [
+      '1½ lb chicken breast or thighs, cut into bite-size pieces',
+      '3 cups cooked rice',
+      '5 cups broccoli florets',
+      '2 carrots, thinly sliced',
+      '⅓ cup reduced-sodium soy sauce',
+      '2 tbsp honey',
+      '3 cloves garlic, minced',
+      '1 tbsp cornstarch mixed with 2 tbsp water',
+      '1 tbsp neutral oil',
+      'Optional: sesame seeds or sliced scallions',
+    ],
+    steps: [
+      'Whisk soy sauce, honey, garlic, and the cornstarch mixture.',
+      'Heat half the oil and cook broccoli and carrots until crisp-tender; remove.',
+      'Add remaining oil and chicken. Cook until browned and 165°F.',
+      'Return vegetables and pour in sauce. Simmer 1–2 minutes until thickened.',
+      'Taste before adding extra salt.',
+      'Divide rice and chicken mixture among four bowls.',
+    ],
+    swaps: [
+      'Use frozen broccoli and carrots.',
+      'Use shrimp, cooking it to 145°F.',
+      'Use potatoes instead of rice for Saffron-approved variation number seventy-three.',
+    ],
+    storage: 'Refrigerate promptly and use within 3–4 days. Reheat to 165°F.',
+    safety:
+      'Chicken must reach 165°F. Never reuse a plate or utensil that held raw chicken without washing it.',
+  },
+  {
+    id: 'crab-loaded-potatoes',
+    name: 'Crab-Loaded Baked Potatoes',
+    codename: 'TREASURE CHEST POTATOES',
+    saffronFavorite:
+      'Crab inside a potato. It is practically treasure storage! Yes, it costs more—that is why we make it at home!',
+    protein: 'crab',
+    prepMinutes: 12,
+    cookMinutes: 50,
+    servings: 4,
+    costTier: '$$$',
+    difficulty: 'Easy',
+    equipment: 'Oven or microwave · mixing bowl · sheet pan',
+    plate:
+      'Crab and Greek yogurt create the protein-rich filling; the potato provides energy; a large salad completes the plate.',
+    ingredients: [
+      '4 large russet potatoes',
+      '12 oz cooked lump crab meat, checked for shell',
+      '¾ cup plain Greek yogurt',
+      '½ cup shredded cheddar',
+      '2 celery stalks, finely diced',
+      '2 scallions, sliced',
+      '1 tsp Dijon mustard',
+      '½ lemon',
+      'Black pepper and optional Old Bay-style seasoning',
+      '1 large bag salad greens plus tomatoes or cucumbers',
+    ],
+    steps: [
+      'Heat the oven to 425°F. Pierce potatoes and bake 45–60 minutes until tender, or microwave according to appliance guidance.',
+      'Mix crab, Greek yogurt, half the cheese, celery, scallions, mustard, lemon, pepper, and seasoning.',
+      'Split cooked potatoes and fluff the centers.',
+      'Divide crab mixture among potatoes and top with remaining cheese.',
+      'Return to the oven for 5–8 minutes until hot. Previously cooked seafood filling should reach 165°F.',
+      'Serve each potato with a generous salad.',
+    ],
+    swaps: [
+      'Use canned crab, drained well, for a lower-cost version.',
+      'Use cooked shrimp chopped into bite-size pieces.',
+      'Use broccoli instead of celery if you prefer a warm vegetable filling.',
+    ],
+    storage: 'Refrigerate promptly and use within 3–4 days. Reheat the filled potato to 165°F.',
+    safety:
+      'Use cooked crab from a safe source, check carefully for shell, keep chilled, and reheat the prepared filling to 165°F.',
+  },
+];
+
+export const SAFFRON_ASSIGNMENT_LINES = [
+  'I chose this because it is fast, balanced, and considerably less expensive than surrendering to a delivery app. You better like it!',
+  'Today’s order is one of my favorites. That means you will follow the steps before improvising something tragic!',
+  'Protein, vegetables, useful carbohydrates, leftovers. I have solved dinner. Your role is to actually cook it!',
+  'The Kitchen has issued a direct order. It tastes good, it supports training, and there is not one bean hiding in it!',
+  'Cassian wants the savings. Rook wants the recovery fuel. I want you to stop acting like the stove is an ancient curse!',
+  'I selected a meal that can compete with takeout without turning dinner into a two-hour side quest. Move!',
+] as const;
+
+export const SAFFRON_COMPLETION_LINES = [
+  'You cooked it! Fine, I am proud of you. Pack the leftovers before I become emotional and start yelling again!',
+  'Kitchen order cleared. The meal exists, tomorrow is easier, and the delivery app has suffered a strategic defeat!',
+  'Look at that—real food made by you. Remember this evidence the next time your brain claims cooking is impossible!',
+  'Excellent. Eat slowly, save the extra portions, and accept that I was right with whatever dignity you have left!',
+  'The plate supports the training and the receipt supports the Treasury. That is what coordinated command looks like!',
+  'Order complete. I will allow one moment of celebration before I inspect how you stored the leftovers!',
+] as const;
+
+export function getKitchenRecipe(id: KitchenRecipeId) {
+  return KITCHEN_RECIPES.find((recipe) => recipe.id === id)!;
+}

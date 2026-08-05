@@ -42,6 +42,7 @@ import type {
   TreasuryTransaction,
   TreasuryWeek,
   TrainingSession,
+  KitchenSession,
   SanctuarySession,
   UnlockedTitle,
   XpTransaction,
@@ -91,6 +92,7 @@ export class SystemDatabase extends Dexie {
   treasuryWeeks!: EntityTable<TreasuryWeek, 'id'>;
   treasuryChallenges!: EntityTable<TreasuryDailyChallenge, 'id'>;
   trainingSessions!: EntityTable<TrainingSession, 'id'>;
+  kitchenSessions!: EntityTable<KitchenSession, 'id'>;
   sanctuarySessions!: EntityTable<SanctuarySession, 'id'>;
   appMetadata!: EntityTable<AppMetadata, 'id'>;
 
@@ -459,8 +461,7 @@ export class SystemDatabase extends Dexie {
       });
     this.version(11)
       .stores({
-        sanctuarySessions:
-          'id,date,mode,status,primaryConcern,createdAt,[date+mode],[date+status]',
+        sanctuarySessions: 'id,date,mode,status,primaryConcern,createdAt,[date+mode],[date+status]',
       })
       .upgrade(async (transaction) => {
         const now = new Date().toISOString();
@@ -469,8 +470,7 @@ export class SystemDatabase extends Dexie {
         if (bible) {
           await missions.put({
             ...bible,
-            description:
-              'Enter the Scripture Sanctuary for a guided study led by Selah and Snow.',
+            description: 'Enter the Scripture Sanctuary for a guided study led by Selah and Snow.',
             detailFields: ['passage', 'note'],
             enabled: true,
             isCore: true,
@@ -481,6 +481,39 @@ export class SystemDatabase extends Dexie {
         const metadata = transaction.table<AppMetadata, string>('appMetadata');
         await metadata.put({ id: 'schema-seeded', value: 11, updatedAt: now });
         await metadata.put({ id: 'app-version', value: '4.0.0', updatedAt: now });
+      });
+    this.version(12)
+      .stores({
+        trainingSessions:
+          'id,date,location,status,circuitId,gymWorkoutId,[date+location],[date+status]',
+        kitchenSessions: 'id,date,status,recipeId,[date+status]',
+      })
+      .upgrade(async (transaction) => {
+        const now = new Date().toISOString();
+        const settings = transaction.table<Settings, string>('settings');
+        const current = await settings.get('primary');
+        if (current) {
+          await settings.update('primary', {
+            enabledCompanionIds: Array.from(
+              new Set([
+                ...(current.enabledCompanionIds ?? [
+                  'snow',
+                  'rook',
+                  'selah',
+                  'cipher',
+                  'haven',
+                  'ember',
+                  'amara',
+                  'cassian',
+                ]),
+                'saffron',
+              ]),
+            ),
+          });
+        }
+        const metadata = transaction.table<AppMetadata, string>('appMetadata');
+        await metadata.put({ id: 'schema-seeded', value: 12, updatedAt: now });
+        await metadata.put({ id: 'app-version', value: '5.0.0', updatedAt: now });
       });
   }
 }
@@ -530,6 +563,7 @@ export const TABLE_NAMES = [
   'treasuryWeeks',
   'treasuryChallenges',
   'trainingSessions',
+  'kitchenSessions',
   'sanctuarySessions',
   'appMetadata',
 ] as const;

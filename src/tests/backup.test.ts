@@ -200,9 +200,27 @@ describe('save validation and recovery', () => {
       outcome: 'connected',
       bibleMissionCredited: true,
     });
+    await db.kitchenSessions.put({
+      id: '2026-08-01',
+      date: '2026-08-01',
+      recipeId: 'lemon-chicken-potatoes',
+      status: 'completed',
+      assignmentVariant: 2,
+      rerollUsed: false,
+      assignedAt: now,
+      completedAt: now,
+      ingredientChecks: { chicken: true },
+      stepChecks: { roast: true },
+      servingsPrepared: 4,
+      difficulty: 3,
+      rating: 5,
+      note: 'Archive Shield meal.',
+      rewardApplied: true,
+      updatedAt: now,
+    });
 
     const save = await createSaveFile();
-    expect(save.version).toBe(11);
+    expect(save.version).toBe(12);
     for (const table of [
       'dailyBriefings',
       'campaignArcs',
@@ -211,6 +229,7 @@ describe('save validation and recovery', () => {
       'monthlyCouncils',
       'treasuryTransactions',
       'trainingSessions',
+      'kitchenSessions',
       'sanctuarySessions',
     ]) {
       expect(save.data[table]).toHaveLength(1);
@@ -227,6 +246,7 @@ describe('save validation and recovery', () => {
         db.monthlyCouncils,
         db.treasuryTransactions,
         db.trainingSessions,
+        db.kitchenSessions,
         db.sanctuarySessions,
       ],
       async () => {
@@ -237,6 +257,7 @@ describe('save validation and recovery', () => {
         await db.monthlyCouncils.clear();
         await db.treasuryTransactions.clear();
         await db.trainingSessions.clear();
+        await db.kitchenSessions.clear();
         await db.sanctuarySessions.clear();
       },
     );
@@ -256,6 +277,7 @@ describe('save validation and recovery', () => {
     );
     expect((await db.treasuryTransactions.get('treasury:backup'))?.amountCents).toBe(2450);
     expect((await db.trainingSessions.get('2026-08-01'))?.roundsCompleted).toBe(5);
+    expect((await db.kitchenSessions.get('2026-08-01'))?.servingsPrepared).toBe(4);
     expect((await db.sanctuarySessions.get('sanctuary:backup'))?.prayer).toBe(
       'Help me move toward honest connection.',
     );
@@ -280,16 +302,18 @@ describe('save validation and recovery', () => {
     save.checksum = await digest(save.data);
 
     const prepared = await prepareSaveImport(asFile(save));
-    expect(prepared.save.version).toBe(11);
+    expect(prepared.save.version).toBe(12);
     expect(prepared.save.data.dailyBriefings).toEqual([]);
     const migrated = prepared.save.data.settings[0] as Record<string, unknown>;
     expect(migrated.enabledCompanionIds).toContain('amara');
     expect(migrated.enabledCompanionIds).toContain('cassian');
+    expect(migrated.enabledCompanionIds).toContain('saffron');
     expect(migrated.dailyBriefingEnabled).toBe(true);
     expect(prepared.save.data.treasurySettings).toHaveLength(1);
     expect(prepared.save.data.treasuryTransactions).toEqual([]);
     expect(prepared.save.data.trainingSessions).toEqual([]);
     expect(prepared.save.data.sanctuarySessions).toEqual([]);
+    expect(prepared.save.data.kitchenSessions).toEqual([]);
   });
 
   it('rejects impossible Treasury values even when the checksum matches', async () => {
