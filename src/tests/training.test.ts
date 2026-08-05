@@ -3,6 +3,7 @@ import { db } from '@/db/database';
 import { initializeProfile, seedReferenceData } from '@/db/seed';
 import {
   activateBossExtension,
+  abandonTrainingSession,
   assignGymWorkout,
   assignHomeTraining,
   awardDoubleDeploymentReward,
@@ -13,6 +14,7 @@ import {
   getTrainingDebriefMessage,
   markTrainingTimerComplete,
   pauseTrainingTimer,
+  resetGymWorkoutSelection,
   selectTrainingLocation,
   startTrainingTimer,
 } from '@/game/training';
@@ -116,6 +118,37 @@ describe('Training Hall', () => {
     expect(gym.difficulty).toBe(5);
     expect(gym.gymPersonalRecords).toEqual(['First structured baseline secured']);
     expect((await db.progression.get('primary'))?.totalXp).toBe(0);
+  });
+
+  it('lets an unfinished Gym Deployment change workouts or leave without a failure or reward', async () => {
+    const opened = await selectTrainingLocation(DATE, 'gym');
+    const first = await assignGymWorkout(opened.id, 'vanguard-frame-gym');
+    const firstExercise = Object.keys(first.gymExerciseLogs ?? {})[0];
+
+    await db.trainingSessions.update(first.id, {
+      gymExerciseLogs: {
+        ...first.gymExerciseLogs,
+        [firstExercise]: (first.gymExerciseLogs?.[firstExercise] ?? []).map((set, index) =>
+          index === 0 ? { ...set, weight: 25, reps: 8, completed: true } : set,
+        ),
+      },
+    });
+
+    const reset = await resetGymWorkoutSelection(first.id);
+    expect(reset.status).toBe('assigned');
+    expect(reset.gymWorkoutId).toBeUndefined();
+    expect(reset.gymExerciseLogs).toBeUndefined();
+
+    const changed = await assignGymWorkout(reset.id, 'iron-citadel-gym');
+    expect(changed.gymWorkoutId).toBe('iron-citadel-gym');
+
+    const left = await abandonTrainingSession(changed.id);
+    expect(left?.status).toBe('abandoned');
+    expect((await db.progression.get('primary'))?.totalXp).toBe(0);
+
+    const home = await selectTrainingLocation(DATE, 'home');
+    expect(home.location).toBe('home');
+    expect(home.status).toBe('assigned');
   });
 
   it('awards the Home + Gym Double Deployment surge exactly once', async () => {

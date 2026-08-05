@@ -368,8 +368,12 @@ export function AboutPage() {
             XP. Gym opens four structured Toji Ascension sessions: Vanguard Frame, Iron Citadel,
             Shadow Hunter, and the optional fourth-day Heavenly Restriction session. Rook recommends
             an overdue foundation, every working set is logged, substitutions stay available, and
-            the next appearance of that workout carries forward your previous loads and reps.
-            Conditioning and Recovery remain simple completed-fact logs.
+            the next appearance of that workout carries forward your previous loads and reps. Enter
+            the reps for a working set before tapping its numbered check box. If you choose Gym or a
+            specific workout by accident, use <strong>Change gym workout</strong> or
+            <strong> Leave Gym / choose another path</strong>. Leaving an unfinished choice records
+            no failure, penalty, mission credit, or XP. Conditioning and Recovery remain simple
+            completed-fact logs.
           </p>
           <p>
             You may clear both a Gym Deployment and a Home Circuit on the same day. This awards one

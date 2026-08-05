@@ -1,4 +1,5 @@
 import {
+  ArrowLeft,
   Check,
   CheckCircle2,
   ChevronRight,
@@ -17,6 +18,7 @@ import {
   assignGymWorkout,
   completeGymTraining,
   isGymWorkoutComplete,
+  resetGymWorkoutSelection,
   saveGymProgress,
   type GymWorkoutAvailability,
 } from '@/game/training';
@@ -56,6 +58,8 @@ export function GymDeploymentPanel({
   const [difficulty, setDifficulty] = useState(session.difficulty ?? 3);
   const [note, setNote] = useState(session.note ?? '');
   const [restRemaining, setRestRemaining] = useState(0);
+  const [changePrompt, setChangePrompt] = useState<'workout' | 'path'>();
+  const [interactionHint, setInteractionHint] = useState('');
 
   useEffect(() => {
     setLogs(session.gymExerciseLogs ?? {});
@@ -82,8 +86,14 @@ export function GymDeploymentPanel({
   const complete = isGymWorkoutComplete(preparedSession);
   const completedSetCount = Object.values(logs)
     .flat()
-    .filter((set) => set.completed).length;
+    .filter((set) => set.completed && Number.isFinite(set.reps) && (set.reps ?? 0) >= 1).length;
   const totalSetCount = workout?.exercises.reduce((sum, exercise) => sum + exercise.sets, 0) ?? 0;
+  const remainingSetCount = Math.max(0, totalSetCount - completedSetCount);
+  const hasLoggedProgress =
+    finisherCompleted ||
+    Object.values(logs)
+      .flat()
+      .some((set) => set.completed || set.reps !== undefined || (set.weight ?? 0) > 0);
 
   const run = async (action: () => Promise<TrainingSession | undefined>) => {
     onWorkingChange(true);
@@ -108,6 +118,8 @@ export function GymDeploymentPanel({
       setLogs(next.gymExerciseLogs ?? {});
       setChoices(next.gymExerciseChoices ?? {});
       setFinisherCompleted(false);
+      setChangePrompt(undefined);
+      setInteractionHint('');
     }
   };
 
@@ -116,25 +128,69 @@ export function GymDeploymentPanel({
     nextChoices = choices,
     nextFinisher = finisherCompleted,
   ) => {
-    const next = await saveGymProgress(session.id, {
-      logs: nextLogs,
-      choices: nextChoices,
-      finisherCompleted: nextFinisher,
-    });
-    if (next) onSessionChange(next);
+    try {
+      await saveGymProgress(session.id, {
+        logs: nextLogs,
+        choices: nextChoices,
+        finisherCompleted: nextFinisher,
+      });
+    } catch (caught) {
+      onError(caught instanceof Error ? caught.message : 'Gym progress could not be saved.');
+    }
   };
 
   const updateSet = (exerciseId: string, index: number, patch: Partial<GymExerciseSetLog>) => {
-    setLogs((current) => {
-      const next = {
-        ...current,
-        [exerciseId]: (current[exerciseId] ?? []).map((set, setIndex) =>
-          setIndex === index ? { ...set, ...patch } : set,
-        ),
-      };
-      void persist(next, choices, finisherCompleted);
-      return next;
-    });
+    const next = {
+      ...logs,
+      [exerciseId]: (logs[exerciseId] ?? []).map((set, setIndex) =>
+        setIndex === index ? { ...set, ...patch } : set,
+      ),
+    };
+    setLogs(next);
+    void persist(next, choices, finisherCompleted);
+  };
+
+  const toggleSet = (
+    exerciseId: string,
+    exerciseName: string,
+    index: number,
+    set: GymExerciseSetLog,
+  ) => {
+    if (!set.completed && (!Number.isFinite(set.reps) || (set.reps ?? 0) < 1)) {
+      setInteractionHint(`Enter reps for ${exerciseName}, set ${index + 1}, then tap its number.`);
+      return;
+    }
+    setInteractionHint('');
+    updateSet(exerciseId, index, { completed: !set.completed });
+  };
+
+  const changeWorkout = async () => {
+    const next = await run(() => resetGymWorkoutSelection(session.id));
+    if (!next) return;
+    setChangePrompt(undefined);
+    setInteractionHint('Workout selection reopened. Choose the session you actually want.');
+  };
+
+  const leaveGym = async () => {
+    onWorkingChange(true);
+    onError('');
+    try {
+      await onBack();
+    } catch (caught) {
+      onError(caught instanceof Error ? caught.message : 'The Gym Deployment could not be closed.');
+    } finally {
+      onWorkingChange(false);
+    }
+  };
+
+  const requestChange = (target: 'workout' | 'path') => {
+    setInteractionHint('');
+    if (hasLoggedProgress) {
+      setChangePrompt(target);
+      return;
+    }
+    if (target === 'workout') void changeWorkout();
+    else void leaveGym();
   };
 
   const finish = async () => {
@@ -216,8 +272,8 @@ export function GymDeploymentPanel({
             );
           })}
         </div>
-        <button className="text-button" onClick={() => void onBack()}>
-          Choose another training path
+        <button className="text-button" disabled={working} onClick={() => void leaveGym()}>
+          <ArrowLeft size={16} /> Leave Gym / choose another path
         </button>
       </section>
     );
@@ -267,6 +323,52 @@ export function GymDeploymentPanel({
         </div>
       </section>
 
+      <div className="gym-session-navigation" aria-label="Gym deployment controls">
+        <button
+          className="button button--ghost"
+          disabled={working}
+          onClick={() => requestChange('workout')}
+        >
+          <RotateCcw size={16} /> Change gym workout
+        </button>
+        <button className="text-button" disabled={working} onClick={() => requestChange('path')}>
+          <ArrowLeft size={16} /> Leave Gym / choose another path
+        </button>
+      </div>
+
+      {changePrompt && (
+        <aside className="gym-change-confirmation" role="alert">
+          <ShieldCheck size={21} />
+          <div>
+            <strong>
+              {changePrompt === 'workout'
+                ? 'Change this gym workout?'
+                : 'Leave this Gym Deployment?'}
+            </strong>
+            <p>
+              Your unfinished set entries will be discarded. No mission credit, XP, penalty, or
+              failure will be recorded.
+            </p>
+          </div>
+          <div>
+            <button
+              className="button button--primary"
+              disabled={working}
+              onClick={() => void (changePrompt === 'workout' ? changeWorkout() : leaveGym())}
+            >
+              {changePrompt === 'workout' ? 'Discard entries and change workout' : 'Leave Gym'}
+            </button>
+            <button
+              className="button button--ghost"
+              disabled={working}
+              onClick={() => setChangePrompt(undefined)}
+            >
+              Keep current workout
+            </button>
+          </div>
+        </aside>
+      )}
+
       {restRemaining > 0 && (
         <aside className="gym-rest-dock" aria-live="polite">
           <TimerReset size={19} />
@@ -287,14 +389,24 @@ export function GymDeploymentPanel({
         </header>
         <p className="gym-working-set-note">
           The rows below are working sets. Use sensible ramp-up sets before the first heavy
-          movement; they do not need to be logged. Stop before technique breaks.
+          movement; they do not need to be logged. Enter reps first, then tap the numbered square to
+          check off that set. Stop before technique breaks.
         </p>
+
+        {interactionHint && (
+          <div className="gym-interaction-hint" role="status" aria-live="polite">
+            <ShieldCheck size={17} /> {interactionHint}
+          </div>
+        )}
 
         <div className="gym-exercise-stack">
           {workout.exercises.map((exercise, exerciseIndex) => {
             const exerciseSets = logs[exercise.id] ?? [];
             const exerciseComplete =
-              exerciseSets.length > 0 && exerciseSets.every((set) => set.completed);
+              exerciseSets.length > 0 &&
+              exerciseSets.every(
+                (set) => set.completed && Number.isFinite(set.reps) && (set.reps ?? 0) >= 1,
+              );
             const options = [exercise.name, ...exercise.alternatives];
             return (
               <article key={exercise.id} className={exerciseComplete ? 'is-complete' : ''}>
@@ -326,9 +438,7 @@ export function GymDeploymentPanel({
                     <div key={setIndex} className={set.completed ? 'is-complete' : ''}>
                       <button
                         className="gym-set-check"
-                        onClick={() =>
-                          updateSet(exercise.id, setIndex, { completed: !set.completed })
-                        }
+                        onClick={() => toggleSet(exercise.id, exercise.name, setIndex, set)}
                         aria-label={`${set.completed ? 'Reopen' : 'Complete'} set ${setIndex + 1}`}
                       >
                         {set.completed ? <Check size={16} /> : setIndex + 1}
@@ -433,8 +543,16 @@ export function GymDeploymentPanel({
         <div className="gym-completion-actions">
           <button
             className="button button--primary"
-            disabled={working || !complete || duration < 1}
-            onClick={() => void finish()}
+            disabled={working || duration < 1}
+            onClick={() => {
+              if (!complete) {
+                setInteractionHint(
+                  `${remainingSetCount} working set${remainingSetCount === 1 ? '' : 's'} still need reps and a checkmark.`,
+                );
+                return;
+              }
+              void finish();
+            }}
           >
             <Trophy size={18} /> Clear {workout.name}
           </button>
@@ -446,18 +564,12 @@ export function GymDeploymentPanel({
           <button
             className="button button--ghost"
             disabled={working}
-            onClick={() => {
-              if (
-                window.confirm('Choose a different Gym Deployment? Current set entries will reset.')
-              ) {
-                void chooseWorkout(
-                  availability.find((entry) => entry.status === 'recommended')?.id ??
-                    GYM_WORKOUTS[0].id,
-                );
-              }
-            }}
+            onClick={() => requestChange('workout')}
           >
-            <RotateCcw size={16} /> Reset to Rook’s recommendation
+            <RotateCcw size={16} /> Change gym workout
+          </button>
+          <button className="text-button" disabled={working} onClick={() => requestChange('path')}>
+            <ArrowLeft size={16} /> Leave Gym / choose another path
           </button>
         </div>
       </section>

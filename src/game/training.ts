@@ -380,6 +380,30 @@ export async function assignGymWorkout(sessionId: string, workoutId: GymWorkoutI
   return next;
 }
 
+export async function resetGymWorkoutSelection(sessionId: string) {
+  const session = await db.trainingSessions.get(sessionId);
+  if (!session || session.location !== 'gym' || session.status === 'completed') {
+    throw new Error('Only an unfinished Gym Deployment can return to workout selection.');
+  }
+  const next: TrainingSession = {
+    ...session,
+    gymWorkoutId: undefined,
+    gymFocus: undefined,
+    gymExerciseLogs: undefined,
+    gymExerciseChoices: undefined,
+    gymFinisher: undefined,
+    gymFinisherCompleted: undefined,
+    gymProgressionPrompts: undefined,
+    gymPersonalRecords: undefined,
+    loggedDurationMinutes: undefined,
+    difficulty: undefined,
+    note: undefined,
+    updatedAt: new Date().toISOString(),
+  };
+  await db.trainingSessions.put(next);
+  return next;
+}
+
 function sanitizeGymLogs(logs: Record<string, GymExerciseSetLog[]>) {
   return Object.fromEntries(
     Object.entries(logs).map(([exerciseId, sets]) => [
