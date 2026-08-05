@@ -1,9 +1,12 @@
 import {
   ArrowRight,
+  Archive,
   BookHeart,
   CalendarDays,
+  Castle,
   ChefHat,
   ChevronRight,
+  Crown,
   Dumbbell,
   Map as MapIcon,
   Flame,
@@ -11,10 +14,9 @@ import {
   Shield,
   Sparkles,
   TrendingUp,
-  UtensilsCrossed,
   WalletCards,
 } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { ChallengeCard } from '@/components/ChallengeCard';
 import { ClassEmblem } from '@/components/ClassEmblem';
 import { CompanionRoster } from '@/components/CompanionRoster';
@@ -25,11 +27,12 @@ import { MissionCard } from '@/components/MissionCard';
 import { ProgressBar } from '@/components/ProgressBar';
 import { chooseSystemMessage } from '@/config/messages';
 import { getChallengeTemplate } from '@/config/challenges';
+import { getCompanion, getCompanionImage } from '@/config/companions';
 import { getDashboardHistory } from '@/db/repositories';
 import { calculateRankQualification } from '@/game/rank';
 import { Link } from '@/router';
 import { daySeed, formatLongDate, getCurrentHour } from '@/utils/date';
-import { STAT_LABELS, formatNumber } from '@/utils/format';
+import { STAT_LABELS, formatClassName, formatNumber } from '@/utils/format';
 import { useGameStore } from '@/store/useGameStore';
 import type { DailyReview, StatTransaction, SystemState } from '@/types/game';
 
@@ -83,7 +86,7 @@ export function DashboardPage() {
       ? 'recovery'
       : activeTrial
         ? 'trial'
-        : qualification?.qualified
+        : qualification?.targetRank && qualification.qualified
           ? 'rank-qualified'
           : progression?.recentLevelUp || progression?.recentRankUp
             ? 'ascending'
@@ -110,10 +113,11 @@ export function DashboardPage() {
   const systemStateLabel = systemState === 'rank-qualified' ? 'class ready' : systemState;
 
   if (!profile || !progression || !settings) return null;
+  const snow = getCompanion('snow');
 
   return (
     <div className="page dashboard-page">
-      <section className={`hero-panel hero-panel--${systemState}`}>
+      <section className={`hero-panel headquarters-stage hero-panel--${systemState}`}>
         <div className="hero-panel__scan" />
         <div className="hero-panel__gate" aria-hidden="true">
           <span />
@@ -125,32 +129,80 @@ export function DashboardPage() {
           <span>V6.0</span>
           <b>SYSTEM ASCENSION</b>
         </div>
-        <div className="hero-panel__top">
+        <div className="hero-panel__top headquarters-stage__header">
           <div>
-            <p className="eyebrow">SYSTEM COMMAND · {formatLongDate(systemDate)}</p>
-            <h1>
-              Welcome, <span>{profile.displayName}</span>
-            </h1>
-            <p className="system-message">“{message}”</p>
+            <p className="eyebrow">LIVING SYSTEM · {formatLongDate(systemDate)}</p>
+            <span className="headquarters-stage__link">
+              <i /> COMMAND LINK SYNCHRONIZED
+            </span>
           </div>
           <Link className="icon-button" to="/settings" aria-label="Open settings">
             <SettingsIcon size={20} />
           </Link>
         </div>
-        <div className="identity-strip">
-          <ClassEmblem rank={progression.rank} />
-          <div className="level-block">
-            <div>
-              <span>LEVEL {progression.level}</span>
-              <strong>{profile.systemTitle}</strong>
+
+        <div className="headquarters-stage__chamber">
+          <div className="headquarters-stage__identity">
+            <span className="headquarters-stage__designation">PLAYER RECOGNIZED</span>
+            <h1>
+              Welcome back, <span>{profile.displayName}</span>
+            </h1>
+            <p className="system-message">“{message}”</p>
+            <div className="level-block headquarters-stage__level">
+              <div>
+                <span>LEVEL {progression.level}</span>
+                <strong>{profile.systemTitle}</strong>
+              </div>
+              <ProgressBar value={progression.currentLevelXp} max={progression.xpToNextLevel} />
+              <small>
+                {formatNumber(progression.currentLevelXp)} /{' '}
+                {formatNumber(progression.xpToNextLevel)} XP TO NEXT LEVEL
+              </small>
             </div>
-            <ProgressBar value={progression.currentLevelXp} max={progression.xpToNextLevel} />
+          </div>
+
+          <div className="headquarters-stage__core">
+            <div className="headquarters-stage__orbit" aria-hidden="true">
+              <i />
+              <i />
+              <i />
+            </div>
+            <ClassEmblem rank={progression.rank} />
+            <span>ASCENSION CORE</span>
             <small>
-              {formatNumber(progression.currentLevelXp)} / {formatNumber(progression.xpToNextLevel)}{' '}
-              XP
+              {qualification?.qualified
+                ? 'ADVANCEMENT SIGNAL DETECTED'
+                : qualification?.targetRank
+                  ? `${formatClassName(qualification.targetRank)} PATH ACTIVE`
+                  : 'FINAL CLASSIFICATION ACHIEVED'}
             </small>
           </div>
+
+          <div
+            className="headquarters-stage__companion"
+            style={{ '--companion-accent': snow.accent } as CSSProperties}
+          >
+            <div className="headquarters-stage__portrait">
+              <img src={getCompanionImage(snow.image)} alt="Snow, The Constant" />
+              <span>
+                <i /> LIVE
+              </span>
+            </div>
+            <div>
+              <p className="eyebrow">PRIMARY COMPANION · SNOW</p>
+              <strong>The Constant is beside you.</strong>
+              <small>
+                {pending.length
+                  ? `${pending.length} objectives remain. We only need to choose the next one.`
+                  : 'Every available objective has been answered. Let yourself recognize that.'}
+              </small>
+              <Link to="/party-chat">
+                Open private channel <ArrowRight size={14} />
+              </Link>
+            </div>
+          </div>
         </div>
+
         <div className="hero-metrics">
           <div>
             <Sparkles size={17} />
@@ -174,108 +226,124 @@ export function DashboardPage() {
       <DailyEventCard />
       <DailyBriefingCard />
 
-      <Link
-        to="/training-hall"
-        className={`training-dashboard-card panel is-${workoutRecord?.status ?? 'available'}`}
-      >
-        <span>
-          <Dumbbell size={24} />
-        </span>
-        <div>
-          <p className="eyebrow">TRAINING HALL · ROOK & EMBER</p>
-          <strong>
-            {workoutRecord?.status === 'completed'
-              ? 'Today’s deployment is complete'
-              : 'Enter the Hall and receive today’s assignment'}
-          </strong>
-          <small>
-            Home circuits, gym deployments, conditioning, recovery, records, and the full-party
-            post-raid debrief.
-          </small>
+      <section className="panel realm-command-map">
+        <header className="section-header realm-command-map__header">
+          <div>
+            <p className="eyebrow">DIMENSIONAL ROUTE MAP</p>
+            <h2>Choose where the System opens next.</h2>
+            <p>Each realm carries its own companion link, atmosphere, and purpose.</p>
+          </div>
+          <span className="realm-command-map__live">
+            <i /> 8 LINKS ONLINE
+          </span>
+        </header>
+        <div className="realm-command-map__grid">
+          <Link to="/training-hall" className="realm-portal" data-portal="training">
+            <span className="realm-portal__icon">
+              <Dumbbell size={23} />
+            </span>
+            <span>
+              <small>ROOK & EMBER</small>
+              <strong>Training Hall</strong>
+            </span>
+            <em>
+              {workoutRecord?.status === 'completed' ? 'Deployment complete' : 'Assignment ready'}
+            </em>
+            <ChevronRight size={17} />
+          </Link>
+          <Link to="/sanctuary" className="realm-portal" data-portal="sanctuary">
+            <span className="realm-portal__icon">
+              <BookHeart size={23} />
+            </span>
+            <span>
+              <small>SNOW & SELAH</small>
+              <strong>Scripture Sanctuary</strong>
+            </span>
+            <em>
+              {bibleRecord?.status === 'completed'
+                ? 'Study complete · doors open'
+                : 'Stronghold available'}
+            </em>
+            <ChevronRight size={17} />
+          </Link>
+          <Link to="/kitchen" className="realm-portal" data-portal="kitchen">
+            <span className="realm-portal__icon">
+              <ChefHat size={23} />
+            </span>
+            <span>
+              <small>SAFFRON</small>
+              <strong>Provision Command</strong>
+            </span>
+            <em>Kitchen channel ready</em>
+            <ChevronRight size={17} />
+          </Link>
+          <Link to="/treasury" className="realm-portal" data-portal="treasury">
+            <span className="realm-portal__icon">
+              <WalletCards size={23} />
+            </span>
+            <span>
+              <small>CASSIAN</small>
+              <strong>Treasury Command</strong>
+            </span>
+            <em>
+              {treasuryChallenge?.status === 'active'
+                ? `Directive · +${treasuryChallenge.rewardXp} XP`
+                : 'Ledger secured'}
+            </em>
+            <ChevronRight size={17} />
+          </Link>
+          <Link to="/headquarters" className="realm-portal" data-portal="party">
+            <span className="realm-portal__icon">
+              <Castle size={23} />
+            </span>
+            <span>
+              <small>FULL PARTY</small>
+              <strong>Party Headquarters</strong>
+            </span>
+            <em>Nine companion links</em>
+            <ChevronRight size={17} />
+          </Link>
+          <Link to="/campaigns" className="realm-portal" data-portal="campaign">
+            <span className="realm-portal__icon">
+              <MapIcon size={23} />
+            </span>
+            <span>
+              <small>CIPHER</small>
+              <strong>Campaign Command</strong>
+            </span>
+            <em>{activeWeekly ? 'Active challenge signal' : 'Long-range objectives'}</em>
+            <ChevronRight size={17} />
+          </Link>
+          <Link to="/status" className="realm-portal" data-portal="progression">
+            <span className="realm-portal__icon">
+              <Crown size={23} />
+            </span>
+            <span>
+              <small>ASCENSION CORE</small>
+              <strong>Class Path</strong>
+            </span>
+            <em>
+              {qualification?.qualified
+                ? 'Advancement ready'
+                : qualification?.targetRank
+                  ? `${formatClassName(qualification.targetRank)} signal`
+                  : 'World Class achieved'}
+            </em>
+            <ChevronRight size={17} />
+          </Link>
+          <Link to="/archive" className="realm-portal" data-portal="archive">
+            <span className="realm-portal__icon">
+              <Archive size={23} />
+            </span>
+            <span>
+              <small>HAVEN</small>
+              <strong>Memory Archive</strong>
+            </span>
+            <em>Campaign record intact</em>
+            <ChevronRight size={17} />
+          </Link>
         </div>
-        <ChevronRight size={20} />
-      </Link>
-
-      <Link
-        to="/sanctuary"
-        className={`sanctuary-dashboard-card panel is-${bibleRecord?.status ?? 'available'}`}
-      >
-        <span>
-          <BookHeart size={24} />
-        </span>
-        <div>
-          <p className="eyebrow">SCRIPTURE SANCTUARY · SNOW & SELAH</p>
-          <strong>
-            {bibleRecord?.status === 'completed'
-              ? 'Today’s study is complete—the Sanctuary is still open'
-              : 'Bring what you are feeling into Scripture and prayer'}
-          </strong>
-          <small>
-            Guided Daily Study, immediate Stronghold support, rotating passages, private prayer
-            notes, and counsel from the companion who understands the struggle.
-          </small>
-        </div>
-        <ChevronRight size={20} />
-      </Link>
-
-      <Link
-        to="/treasury"
-        className={`treasury-dashboard-card panel is-${treasuryChallenge?.status ?? 'quiet'}`}
-      >
-        <span>
-          <WalletCards size={23} />
-        </span>
-        <div>
-          <p className="eyebrow">TREASURY COMMAND · CASSIAN</p>
-          <strong>
-            {treasuryChallenge?.status === 'active'
-              ? 'No Eating Out directive active'
-              : treasuryChallenge?.status === 'passed'
-                ? 'Kitchen line held today'
-                : treasuryChallenge?.status === 'failed'
-                  ? 'Recovery protocol available'
-                  : 'Open the private ledger'}
-          </strong>
-          <small>
-            {treasuryChallenge?.status === 'active'
-              ? `Optional · +${treasuryChallenge.rewardXp} XP · clear it before day reset`
-              : 'Paychecks, spending, bills, debt, savings, and the weekly review'}
-          </small>
-        </div>
-        {treasuryChallenge?.status === 'active' ? (
-          <UtensilsCrossed size={20} />
-        ) : (
-          <ChevronRight size={20} />
-        )}
-      </Link>
-
-      <Link to="/kitchen" className="campaign-command-card kitchen-dashboard-card panel">
-        <span>
-          <ChefHat size={23} />
-        </span>
-        <div>
-          <p className="eyebrow">PROVISION COMMAND · SAFFRON</p>
-          <strong>Ask Saffron what we are cooking</strong>
-          <small>
-            Twelve rotating recipes, guided steps, leftovers, and three rewarded orders per week.
-          </small>
-        </div>
-        <ChevronRight size={20} />
-      </Link>
-
-      <Link to="/campaigns" className="campaign-command-card panel">
-        <span>
-          <MapIcon size={23} />
-        </span>
-        <div>
-          <p className="eyebrow">LONG-RANGE COMMAND</p>
-          <strong>Campaign Arcs & Companion Questlines</strong>
-          <small>
-            Build your own milestones or enter one of nine five-chapter party campaigns.
-          </small>
-        </div>
-        <ChevronRight size={20} />
-      </Link>
+      </section>
 
       {recovery && (
         <section className="recovery-banner">

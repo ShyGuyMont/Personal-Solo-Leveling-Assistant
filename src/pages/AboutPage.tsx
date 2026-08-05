@@ -58,7 +58,7 @@ const DESTINATIONS = [
     to: '/',
     icon: CircleGauge,
     title: 'System',
-    text: 'See today’s progress, current class, and quick missions.',
+    text: 'Enter the living Headquarters, view the Ascension Core, and choose the next realm.',
   },
   {
     to: '/missions',
@@ -130,7 +130,7 @@ const DESTINATIONS = [
     to: '/settings',
     icon: Settings,
     title: 'Settings',
-    text: 'Change appearance, companions, missions, privacy, and backups.',
+    text: 'Change immersion, motion, appearance, companions, missions, privacy, and backups.',
   },
   {
     to: '/update-center',

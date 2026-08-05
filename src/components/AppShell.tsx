@@ -11,10 +11,14 @@ import {
   WalletCards,
 } from 'lucide-react';
 import { useEffect, useState, type ReactNode } from 'react';
+import { CompanionPresence, RealmTransition, SystemHud } from '@/components/LivingSystemLayer';
 import { SystemMark } from '@/components/SystemMark';
+import { calculateRankQualification } from '@/game/rank';
+import { getLiveSystemState, getSystemCycle, getSystemRealm } from '@/game/systemExperience';
 import { NavLink } from '@/router';
 import { useRoutePath } from '@/routeState';
 import { useGameStore } from '@/store/useGameStore';
+import { getCurrentHour } from '@/utils/date';
 import { formatClassName } from '@/utils/format';
 
 const NAV = [
@@ -28,25 +32,30 @@ const NAV = [
   { to: '/archive', label: 'Archive', icon: Archive },
 ];
 
-function getRealm(path: string) {
-  if (path.startsWith('/training-hall')) return 'training';
-  if (path.startsWith('/sanctuary')) return 'sanctuary';
-  if (path.startsWith('/kitchen')) return 'kitchen';
-  if (path.startsWith('/treasury')) return 'treasury';
-  if (path.startsWith('/headquarters') || path.startsWith('/party-chat')) return 'party';
-  if (path.startsWith('/campaigns')) return 'campaign';
-  if (path.startsWith('/archive')) return 'archive';
-  if (path.startsWith('/status') || path.startsWith('/challenges')) return 'progression';
-  return 'system';
-}
-
 export function AppShell({ children }: { children: ReactNode }) {
   const path = useRoutePath();
   const settings = useGameStore((state) => state.settings);
   const progression = useGameStore((state) => state.progression);
-  const realm = getRealm(path);
+  const stats = useGameStore((state) => state.stats);
+  const challenges = useGameStore((state) => state.challenges);
+  const realm = getSystemRealm(path);
   const [privacyActive, setPrivacyActive] = useState(false);
   const [online, setOnline] = useState(navigator.onLine);
+  const qualification =
+    progression && stats.length
+      ? calculateRankQualification(progression, stats, challenges)
+      : undefined;
+  const systemState = getLiveSystemState({
+    online,
+    recoveryActive: settings?.recoveryMode.active ?? false,
+    trialActive: challenges.some(
+      (challenge) => challenge.kind === 'rank-trial' && challenge.status === 'active',
+    ),
+    classQualified: Boolean(qualification?.targetRank && qualification.qualified),
+    recentAscension: progression?.recentLevelUp || progression?.recentRankUp || false,
+    xpMultiplier: progression?.xpMultiplier ?? 1,
+  });
+  const cycle = getSystemCycle(getCurrentHour(new Date(), settings?.timeZone));
 
   useEffect(() => {
     const hide = () => setPrivacyActive(true);
@@ -74,7 +83,13 @@ export function AppShell({ children }: { children: ReactNode }) {
     root.dataset.theme = settings?.colorTheme ?? 'abyss';
     root.dataset.interface = settings?.interfaceStyle ?? 'system';
     root.dataset.intensity = settings?.themeIntensity ?? 'standard';
-  }, [settings?.colorTheme, settings?.interfaceStyle, settings?.themeIntensity]);
+    root.dataset.motion = settings?.reducedMotion ? 'reduced' : 'full';
+  }, [
+    settings?.colorTheme,
+    settings?.interfaceStyle,
+    settings?.themeIntensity,
+    settings?.reducedMotion,
+  ]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'auto' });
@@ -86,8 +101,12 @@ export function AppShell({ children }: { children: ReactNode }) {
       data-theme={settings?.colorTheme ?? 'abyss'}
       data-interface={settings?.interfaceStyle ?? 'system'}
       data-intensity={settings?.themeIntensity ?? 'standard'}
+      data-motion={settings?.reducedMotion ? 'reduced' : 'full'}
       data-realm={realm}
+      data-system-state={systemState}
+      data-cycle={cycle}
     >
+      <RealmTransition key={path} realm={realm} />
       <div className="ambient-grid" />
       <div className="ambient-orb ambient-orb--mint" />
       <div className="ambient-orb ambient-orb--purple" />
@@ -126,6 +145,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </span>
         </div>
       </header>
+      <SystemHud realm={realm} state={systemState} />
       <main className="page-container" key={path}>
         {children}
       </main>
@@ -142,6 +162,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </NavLink>
         ))}
       </nav>
+      <CompanionPresence realm={realm} />
       {settings?.privacyScreenEnabled && privacyActive && (
         <div className="privacy-veil" aria-label="Privacy Screen active">
           <SystemMark small />

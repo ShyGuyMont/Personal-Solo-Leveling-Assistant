@@ -1,5 +1,6 @@
 import { Award, ChevronRight, Crown, Sparkles } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { ClassEmblem } from '@/components/ClassEmblem';
 import { FavoriteMessageButton } from '@/components/FavoriteMessageButton';
 import { getCompanion, getCompanionImage } from '@/config/companions';
 import { getMilestoneCelebration, isPartyMilestone } from '@/config/milestoneCelebrations';
@@ -45,18 +46,35 @@ export function ProgressionOverlay() {
   if (!event) return null;
   const Icon = event.kind === 'rank-up' ? Crown : event.kind === 'achievement' ? Award : Sparkles;
   const celebration = isPartyMilestone(event) ? getMilestoneCelebration(event) : undefined;
+  const classKey = progression?.rank.toLowerCase().replaceAll(' ', '-');
 
   return (
     <div
       className={`progression-overlay progression-overlay--${event.kind} ${celebration ? 'progression-overlay--party' : ''}`}
+      data-class={event.kind === 'rank-up' ? classKey : undefined}
       role="dialog"
       aria-modal="true"
     >
       <div className="progression-overlay__rays" />
+      {event.kind === 'rank-up' && (
+        <div className="progression-overlay__ascension-gate" aria-hidden="true">
+          <i />
+          <i />
+          <i />
+          <span />
+        </div>
+      )}
       <section>
         <span className="progression-overlay__icon">
-          <Icon size={40} />
+          {event.kind === 'rank-up' && progression ? (
+            <ClassEmblem rank={progression.rank} compact />
+          ) : (
+            <Icon size={40} />
+          )}
         </span>
+        {event.kind === 'rank-up' && (
+          <strong className="progression-overlay__chapter">A NEW CHAPTER HAS OPENED</strong>
+        )}
         <p className="eyebrow">
           {event.kind === 'rank-up' ? 'CLASSIFICATION ADVANCED' : 'PROGRESSION CONFIRMED'}
         </p>

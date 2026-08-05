@@ -20,11 +20,38 @@ Your data stays in the browser on your device unless you export a backup. The ap
 
 You do not need to use every screen every day.
 
+## What changed in Version 6.0
+
+Version 6.0 makes the app feel like one continuous, living System while keeping ordinary logging
+fast:
+
+- **Living Headquarters:** The System screen is now a command chamber with an Ascension Core, live
+  Snow transmission, Class path, level progress, daily synchronization, and eight connected realms.
+- **Live System HUD:** A compact bar follows you between screens with the current System condition,
+  completion percentage, next pending directive, level, and active realm.
+- **Dimensional travel:** Major destinations briefly open through their own colored portal. This is
+  presentation only and never delays or changes saved work.
+- **Persistent companions:** Each realm automatically links its specialist—such as Rook in Training,
+  Selah in Sanctuary, Saffron in the Kitchen, and Cassian in Treasury. Tap the companion link to open
+  or close the transmission.
+- **Reactive states:** The atmosphere responds to local time, Recovery Mode, active Class Trials,
+  Class readiness, momentum, recent advancement, and offline use.
+- **Cinematic ascension:** A Class advancement now opens a Class-colored Ascension Gate before the
+  existing permanent celebration and companion messages.
+
+Choose **Subtle**, **Standard**, or **Intense** under Settings → Immersion intensity. Clean mode keeps
+the new information structure but removes cinematic layers. Reduced Motion disables portal travel
+and ambient motion directly, even if the device itself does not request reduced motion.
+
 ## Where everything lives
 
 ### System
 
-Your main dashboard. It shows today's completion, class, account level, System state, Snow's Daily Command Briefing, Campaign Command, quick missions, current challenge, recent stat activity, rare events, and your companion roster.
+Your living Headquarters. The central chamber shows today’s completion, Class, account level,
+System state, current ascension path, and a live Snow transmission. The Dimensional Route Map opens
+Training, Sanctuary, Kitchen, Treasury, Party Headquarters, Campaign Command, Status, or the Archive.
+Snow’s Daily Command Briefing, quick missions, current challenge, recent stat activity, rare events,
+and the companion roster remain below the chamber.
 
 ### Missions
 
@@ -157,7 +184,9 @@ Your permanent record. It contains daily reviews, mission history, multi-session
 
 ### Settings
 
-Appearance, Snow's briefing toggle, companion frequency, individual companion controls, mission configuration, Recovery Mode, privacy, sound, vibration, Archive Shield backups, import, and reset tools.
+Appearance, immersion intensity, System tones, Reduced Motion, Snow’s briefing toggle, companion
+frequency, individual companion controls, mission configuration, Recovery Mode, privacy, vibration,
+Archive Shield backups, import, and reset tools.
 
 ### Update Center
 

@@ -10,40 +10,49 @@ export interface ReleaseSection {
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
   {
-    title: 'System Ascension Interface',
-    detail: 'The complete app now inhabits one dimensional, route-aware command system.',
+    title: 'The Living Headquarters',
+    detail: 'The dashboard is now the command chamber at the center of the entire campaign.',
     points: [
-      'Abyssal Hologram atmosphere, Command Chamber structure, and Living Companion Realm accents now work as one visual language.',
-      'Layered gates, tactical depth planes, illuminated surfaces, responsive navigation, and tactile controls make the interface feel spatial without sacrificing clarity.',
-      'Abyss and Daybreak remain distinct lighting palettes, while Clean mode and Reduced Motion preserve a calm, accessible alternative.',
+      'A central Ascension Core, current Class signal, live Snow transmission, level path, daily completion, streak, and System state now share one responsive command stage.',
+      'The former destination stack is now an eight-realm tactical map with live Training, Sanctuary, Kitchen, Treasury, Party, Campaign, progression, and Archive signals.',
+      'The Headquarters reacts to Class readiness, active trials, recovery, momentum, offline use, and recent ascension instead of remaining visually static.',
     ],
   },
   {
-    title: 'Class System',
+    title: 'A System That Stays Alive',
+    detail: 'Essential campaign awareness now follows the player between every destination.',
+    points: [
+      'A persistent live HUD shows System condition, daily synchronization, the next pending directive, current level, and connected realm without hiding routine controls.',
+      'The global atmosphere changes with the player’s local dawn, day, dusk, or night and carries a separate signal for trials, recovery, stagnation, and advancement readiness.',
+      'System and Clean interface styles remain complete experiences, and saved Reduced Motion now directly suppresses portal travel and ambient animation.',
+    ],
+  },
+  {
+    title: 'Companions Beyond Cards',
+    detail: 'The companion responsible for each realm now remains visibly connected to the player.',
+    points: [
+      'Snow, Rook, Selah, Saffron, Cassian, Cipher, and Haven automatically establish the appropriate companion link as the player moves through their realms.',
+      'The expandable transmission carries authored, purpose-specific guidance and a direct action without changing XP, decisions, or saved campaign data.',
+      'Companion frequency and individual companion controls are still honored; muting the party or a specialist removes their persistent presence cleanly.',
+    ],
+  },
+  {
+    title: 'Dimensional Travel & Ascension',
     detail:
-      'The long-term classification is now expressed consistently from F-Class to World Class.',
+      'Important movement and breakthroughs now feel like events instead of ordinary page changes.',
     points: [
-      'The dashboard and Status record share a new animated Class emblem with a distinct energy signature for every classification.',
-      'Class Trials, qualification, achievements, history, celebrations, companion dialogue, help, and save previews now use the same player-facing language.',
-      'The proven internal progression model and every existing save remain compatible; this release changes presentation, not earned advancement.',
+      'Every major route opens through a short realm-colored portal sequence that yields immediately to the destination and never blocks input afterward.',
+      'Class advancement overlays now awaken a Class-colored Ascension Gate and present the new emblem as a genuine chapter transition.',
+      'Subtle, Standard, and Intense immersion settings control the experience, while Clean mode and Reduced Motion remove cinematic layers.',
     ],
   },
   {
-    title: 'Living Companion Realms',
-    detail: 'Every major destination now carries the energy of the companions who guide it.',
+    title: 'The Complete Class System',
+    detail: 'F-Class through World Class now has one consistent identity across the entire app.',
     points: [
-      'Training, Sanctuary, Kitchen, Treasury, Party, Campaign, Archive, and progression spaces each tune the global light, energy, and dimensional grid.',
-      'Snow and the full party now appear inside richer portrait frames and companion-colored command surfaces.',
-      'Mission cards, destination gates, major panels, and milestone overlays respond with deeper motion and lighting while remaining phone-first.',
-    ],
-  },
-  {
-    title: 'Ascension Without Compromise',
-    detail: 'The visual upgrade respects privacy, accessibility, offline use, and the tested game.',
-    points: [
-      'No database migration is required, and Archive Shield 12 continues to protect the full campaign.',
-      'Generated PWA preview output no longer enters source control or lint checks after local development.',
-      'Selected onboarding preferences now announce their state correctly to assistive technology.',
+      'The dashboard, live HUD, Status record, tactical map, Class Trials, celebrations, achievements, history, help, and companion dialogue share the same classification language.',
+      'Every Class carries a distinct visual energy signature, with advancement readiness surfaced as a live System condition.',
+      'No database migration is required. The established progression engine, offline behavior, privacy model, and every existing save remain fully compatible.',
     ],
   },
 ];

@@ -67,10 +67,12 @@ export function SettingsPage() {
     root.dataset.theme = draft.colorTheme;
     root.dataset.interface = draft.interfaceStyle;
     root.dataset.intensity = draft.themeIntensity;
+    root.dataset.motion = draft.reducedMotion ? 'reduced' : 'full';
     return () => {
       root.dataset.theme = settings?.colorTheme ?? 'abyss';
       root.dataset.interface = settings?.interfaceStyle ?? 'system';
       root.dataset.intensity = settings?.themeIntensity ?? 'standard';
+      root.dataset.motion = settings?.reducedMotion ? 'reduced' : 'full';
     };
   }, [draft, settings]);
 
@@ -219,7 +221,7 @@ export function SettingsPage() {
           <header>
             <div>
               <p className="eyebrow">INTERFACE</p>
-              <h2>Feedback and display</h2>
+              <h2>Immersion and feedback</h2>
             </div>
           </header>
           <div className="settings-toggles">
@@ -239,7 +241,7 @@ export function SettingsPage() {
                 >
                   <span className="appearance-preview appearance-preview--system">SYS_01</span>
                   <strong>System</strong>
-                  <small>Digital HUD, scan effects, and game-style typography</small>
+                  <small>Living HUD, companion presence, realm travel, and cinematic depth</small>
                 </button>
                 <button
                   type="button"
@@ -248,7 +250,7 @@ export function SettingsPage() {
                 >
                   <span className="appearance-preview appearance-preview--clean">Aa</span>
                   <strong>Clean</strong>
-                  <small>The original restrained interface with fewer effects</small>
+                  <small>The same complete campaign with quieter transitions and surfaces</small>
                 </button>
               </div>
             </div>
@@ -286,7 +288,7 @@ export function SettingsPage() {
             </div>
             {(
               [
-                ['soundEnabled', 'System tones', 'Brief original interface tones'],
+                ['soundEnabled', 'System tones', 'Brief signals for victories and breakthroughs'],
                 ['vibrationEnabled', 'Vibration', 'Used only when browser support is available'],
                 ['reducedMotion', 'Reduced motion', 'Minimizes cinematic movement and particles'],
                 [
@@ -309,18 +311,21 @@ export function SettingsPage() {
                 <span className="switch" />
               </label>
             ))}
-            <label className="field">
-              <span>Theme intensity</span>
+            <label className="field immersion-field">
+              <span>Immersion intensity</span>
               <select
                 value={draft.themeIntensity}
                 onChange={(event) =>
                   patchSetting('themeIntensity', event.target.value as Settings['themeIntensity'])
                 }
               >
-                <option value="subtle">Subtle</option>
-                <option value="standard">Standard</option>
-                <option value="intense">Intense</option>
+                <option value="subtle">Subtle · quiet atmosphere</option>
+                <option value="standard">Standard · living System</option>
+                <option value="intense">Intense · full cinematic signal</option>
               </select>
+              <small>
+                Controls ambient depth, portal energy, companion glow, and interface motion.
+              </small>
             </label>
             <label className="field">
               <span>Sensitive mission alias</span>

@@ -39,17 +39,22 @@ There is no login, backend, external API, analytics, advertising, tracking, or p
 
 ## Version 6.0 · System Ascension
 
-Version 6.0 evolves the existing layout into one dimensional command interface. **Abyssal
-Hologram** atmosphere establishes the global depth and energy language, **Command Chamber**
-structure gives navigation and information panels tactile presence, and **Living Companion Realms**
-change the ambient light and visual signature around Training, Sanctuary, Kitchen, Treasury, Party,
-Campaign, Archive, and progression spaces.
+Version 6.0 turns the assistant from a themed tracker into a **living System**. Headquarters is now
+a responsive command chamber built around a central Ascension Core, the player’s Class and level,
+a live Snow transmission, daily synchronization, current System condition, and an eight-realm
+tactical route map. The chamber visibly responds to Class readiness, active trials, recovery,
+momentum, offline use, recent breakthroughs, and the player’s local time of day.
 
-The dashboard now opens around a layered System gate, a route-aware tactical atmosphere, and a new
-Class emblem with distinct visual energy for each classification. Command cards, primary controls,
-Party portraits, Status identity records, navigation, and progression celebrations use deeper
-lighting and spatial motion while remaining readable and phone-first. Abyss and Daybreak continue
-as lighting palettes; Clean mode and Reduced Motion retain quieter presentations.
+A persistent live HUD carries the next directive, daily completion, current level, connected realm,
+and System condition between destinations. Moving into Training, Sanctuary, Kitchen, Treasury,
+Party, Campaign, Archive, or progression opens a short realm-colored dimensional transition. The
+specialist responsible for that space establishes an expandable companion transmission with
+authored guidance and a direct route action, so companions feel present beyond static roster cards.
+
+Class advancement is now staged as a true Ascension event with a Class-colored gate and emblem.
+Abyss and Daybreak remain distinct lighting palettes; Subtle, Standard, and Intense now function as
+immersion levels. Clean mode removes the cinematic layers, and the saved Reduced Motion preference
+directly disables portal travel, ambient orbits, and animated companion signals.
 
 Player-facing progression language is now consistent across the complete ladder: **F-Class →
 E-Class → D-Class → C-Class → B-Class → A-Class → S-Class → World Class**. Class Trials,
