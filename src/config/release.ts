@@ -1,4 +1,4 @@
-export const APP_VERSION = '6.0.2';
+export const APP_VERSION = '6.1.0';
 export const DATABASE_SCHEMA_VERSION = 12;
 export const SAVE_FORMAT_VERSION = 12;
 
@@ -9,6 +9,18 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 6.1.0 · System Depth Engine',
+    detail:
+      'The complete living System now occupies dimensional space while preserving its speed, clarity, and accessibility controls.',
+    points: [
+      'Command panels gain layered elevation, realm-colored edge lighting, dimensional typography, and tactile controls without changing their established layout or purpose.',
+      'Pointer-capable devices receive restrained live perspective and surface lighting, while touch devices use lightweight floating layers and immediate physical feedback.',
+      'The Ascension Core is rebuilt as a suspended Class artifact with an energy field, rotating dimensional cage, orbiting signal nodes, and a projected advancement readout.',
+      'Standard and Intense modes scale the depth experience, while Subtle, Clean, Reduced Motion, and device motion preferences remain authoritative.',
+      'Navigation now keeps the System shell visible, prepares primary realms ahead of travel, and avoids duplicate resume work so the richer presentation remains responsive.',
+    ],
+  },
   {
     title: 'Version 6.0.2 · Party Pulse',
     detail:

@@ -29,6 +29,7 @@ import { ProgressBar } from '@/components/ProgressBar';
 import { chooseSystemMessage } from '@/config/messages';
 import { getChallengeTemplate } from '@/config/challenges';
 import { getCompanion, getCompanionImage } from '@/config/companions';
+import { APP_VERSION } from '@/config/release';
 import { getDashboardHistory } from '@/db/repositories';
 import { calculateRankQualification } from '@/game/rank';
 import { Link } from '@/router';
@@ -118,7 +119,10 @@ export function DashboardPage() {
 
   return (
     <div className="page dashboard-page">
-      <section className={`hero-panel headquarters-stage hero-panel--${systemState}`}>
+      <section
+        className={`hero-panel headquarters-stage hero-panel--${systemState}`}
+        data-depth-surface="hero"
+      >
         <div className="hero-panel__scan" />
         <div className="hero-panel__gate" aria-hidden="true">
           <span />
@@ -127,8 +131,8 @@ export function DashboardPage() {
           <i />
         </div>
         <div className="hero-panel__version" aria-hidden="true">
-          <span>V6.0</span>
-          <b>SYSTEM ASCENSION</b>
+          <span>V{APP_VERSION}</span>
+          <b>SYSTEM DEPTH ENGINE</b>
         </div>
         <div className="hero-panel__top headquarters-stage__header">
           <div>
@@ -163,20 +167,35 @@ export function DashboardPage() {
           </div>
 
           <div className="headquarters-stage__core">
+            <div className="ascension-core__field" aria-hidden="true">
+              <i />
+              <i />
+              <i />
+              <i />
+            </div>
             <div className="headquarters-stage__orbit" aria-hidden="true">
               <i />
               <i />
               <i />
             </div>
-            <ClassEmblem rank={progression.rank} />
-            <span>ASCENSION CORE</span>
-            <small>
-              {qualification?.qualified
-                ? 'ADVANCEMENT SIGNAL DETECTED'
-                : qualification?.targetRank
-                  ? `${formatClassName(qualification.targetRank)} PATH ACTIVE`
-                  : 'FINAL CLASSIFICATION ACHIEVED'}
-            </small>
+            <div className="ascension-core__cage" aria-hidden="true">
+              <span />
+              <span />
+              <span />
+            </div>
+            <div className="ascension-core__emblem">
+              <ClassEmblem rank={progression.rank} />
+            </div>
+            <div className="ascension-core__readout">
+              <span>ASCENSION CORE</span>
+              <small>
+                {qualification?.qualified
+                  ? 'ADVANCEMENT SIGNAL DETECTED'
+                  : qualification?.targetRank
+                    ? `${formatClassName(qualification.targetRank)} PATH ACTIVE`
+                    : 'FINAL CLASSIFICATION ACHIEVED'}
+              </small>
+            </div>
           </div>
 
           <div
@@ -228,7 +247,7 @@ export function DashboardPage() {
       <DailyBriefingCard />
       <PartyPulsePanel />
 
-      <section className="panel realm-command-map">
+      <section className="panel realm-command-map" data-depth-surface="panel">
         <header className="section-header realm-command-map__header">
           <div>
             <p className="eyebrow">DIMENSIONAL ROUTE MAP</p>
@@ -364,7 +383,7 @@ export function DashboardPage() {
       )}
 
       <div className="dashboard-grid">
-        <section className="panel mission-command">
+        <section className="panel mission-command" data-depth-surface="panel">
           <header className="section-header">
             <div>
               <p className="eyebrow">TODAY’S DIRECTIVES</p>
@@ -405,7 +424,7 @@ export function DashboardPage() {
           </Link>
         </section>
 
-        <section className="panel challenge-command">
+        <section className="panel challenge-command" data-depth-surface="panel">
           <header className="section-header">
             <div>
               <p className="eyebrow eyebrow--purple">ACTIVE CHALLENGE</p>
@@ -418,7 +437,7 @@ export function DashboardPage() {
           {activeWeekly ? <ChallengeCard progress={activeWeekly} featured /> : null}
         </section>
 
-        <section className="panel recent-growth">
+        <section className="panel recent-growth" data-depth-surface="panel">
           <header className="section-header">
             <div>
               <p className="eyebrow">RECENT GROWTH</p>

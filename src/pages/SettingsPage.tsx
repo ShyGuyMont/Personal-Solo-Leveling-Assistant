@@ -312,7 +312,11 @@ export function SettingsPage() {
               [
                 ['soundEnabled', 'System tones', 'Brief signals for victories and breakthroughs'],
                 ['vibrationEnabled', 'Vibration', 'Used only when browser support is available'],
-                ['reducedMotion', 'Reduced motion', 'Minimizes cinematic movement and particles'],
+                [
+                  'reducedMotion',
+                  'Reduced motion',
+                  'Stops cinematic movement while preserving dimensional styling',
+                ],
                 [
                   'privacyScreenEnabled',
                   'Privacy Screen',
@@ -346,7 +350,8 @@ export function SettingsPage() {
                 <option value="intense">Intense · full cinematic signal</option>
               </select>
               <small>
-                Controls ambient depth, portal energy, companion glow, and interface motion.
+                Controls surface perspective, ambient depth, portal energy, companion glow, and
+                interface motion.
               </small>
             </label>
             <label className="field">

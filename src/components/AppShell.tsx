@@ -10,11 +10,13 @@ import {
   Shield,
   WalletCards,
 } from 'lucide-react';
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { CompanionPresence, RealmTransition, SystemHud } from '@/components/LivingSystemLayer';
 import { SystemMark } from '@/components/SystemMark';
+import { APP_VERSION } from '@/config/release';
 import { calculateRankQualification } from '@/game/rank';
 import { getLiveSystemState, getSystemCycle, getSystemRealm } from '@/game/systemExperience';
+import { useSystemDepth } from '@/hooks/useSystemDepth';
 import { NavLink } from '@/router';
 import { useRoutePath } from '@/routeState';
 import { useGameStore } from '@/store/useGameStore';
@@ -39,6 +41,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const stats = useGameStore((state) => state.stats);
   const challenges = useGameStore((state) => state.challenges);
   const realm = getSystemRealm(path);
+  const shellRef = useRef<HTMLDivElement>(null);
   const [privacyActive, setPrivacyActive] = useState(false);
   const [online, setOnline] = useState(navigator.onLine);
   const qualification =
@@ -56,6 +59,10 @@ export function AppShell({ children }: { children: ReactNode }) {
     xpMultiplier: progression?.xpMultiplier ?? 1,
   });
   const cycle = getSystemCycle(getCurrentHour(new Date(), settings?.timeZone));
+  useSystemDepth(shellRef, {
+    enabled: settings?.interfaceStyle === 'system' && !settings.reducedMotion,
+    intensity: settings?.themeIntensity ?? 'standard',
+  });
 
   useEffect(() => {
     const hide = () => setPrivacyActive(true);
@@ -97,6 +104,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div
+      ref={shellRef}
       className={`app-shell ${settings?.privacyScreenEnabled && privacyActive ? 'privacy-screen-active' : ''}`}
       data-theme={settings?.colorTheme ?? 'abyss'}
       data-interface={settings?.interfaceStyle ?? 'system'}
@@ -119,13 +127,16 @@ export function AppShell({ children }: { children: ReactNode }) {
           <i />
         </span>
         <span className="ascension-atmosphere__signal" />
+        <span className="ascension-atmosphere__shard ascension-atmosphere__shard--one" />
+        <span className="ascension-atmosphere__shard ascension-atmosphere__shard--two" />
+        <span className="ascension-atmosphere__shard ascension-atmosphere__shard--three" />
       </div>
       <header className="app-header">
         <NavLink to="/" className="brand" aria-label="The System home">
           <SystemMark small />
           <span>
             <span className="brand__name">THE SYSTEM</span>
-            <span className="brand__tag">V6.0 · SYSTEM ASCENSION</span>
+            <span className="brand__tag">V{APP_VERSION} · DEPTH ENGINE</span>
           </span>
         </NavLink>
         <div className="app-header__actions">

@@ -11,7 +11,10 @@ export function CompanionRoster({ detailed = false }: { detailed?: boolean }) {
   if (!companions.length || settings?.companionMode === 'off') return null;
 
   return (
-    <section className={`panel companion-roster ${detailed ? 'companion-roster--detailed' : ''}`}>
+    <section
+      className={`panel companion-roster ${detailed ? 'companion-roster--detailed' : ''}`}
+      data-depth-surface="panel"
+    >
       <header className="section-header">
         <div>
           <p className="eyebrow">PARTY HEADQUARTERS</p>

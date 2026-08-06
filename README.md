@@ -37,6 +37,22 @@ The design, writing, interface, icons, animations, and generated tones are origi
 
 There is no login, backend, external API, analytics, advertising, tracking, or paid service.
 
+## Version 6.1.0 · System Depth Engine
+
+Version 6.1 turns the living interface into a coherent dimensional space. Command panels now carry
+layered elevation and realm-colored edge lighting, major headings have restrained physical depth,
+and controls respond like tactile System hardware without changing the app's established layout.
+
+Pointer-capable devices gain efficient live perspective and surface lighting. Touch devices retain
+the same visual hierarchy through lightweight floating layers and immediate press feedback. The
+Ascension Core is now a suspended Class artifact with an energy field, rotating dimensional cage,
+orbiting signal nodes, and projected advancement readout. Standard and Intense modes scale the
+experience, while Subtle, Clean, Reduced Motion, and device motion preferences remain authoritative.
+
+The visual expansion ships alongside a responsiveness pass: primary sections prepare before travel,
+the command shell remains visible while a destination opens, resume refreshes are deduplicated, and
+mobile compositing remains deliberately limited.
+
 ## Version 6.0.2 · Party Pulse
 
 Version 6.0.2 makes the party more observant without making the System harsher. **Party Pulse**
