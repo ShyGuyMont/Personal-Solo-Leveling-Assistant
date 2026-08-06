@@ -38,6 +38,16 @@ import { STAT_LABELS, formatClassName, formatNumber } from '@/utils/format';
 import { useGameStore } from '@/store/useGameStore';
 import type { DailyReview, StatTransaction, SystemState } from '@/types/game';
 
+function RealmVista() {
+  return (
+    <span className="realm-portal__vista" aria-hidden="true">
+      <i />
+      <i />
+      <i />
+    </span>
+  );
+}
+
 export function DashboardPage() {
   const {
     profile,
@@ -132,7 +142,7 @@ export function DashboardPage() {
         </div>
         <div className="hero-panel__version" aria-hidden="true">
           <span>V{APP_VERSION}</span>
-          <b>SYSTEM DEPTH ENGINE</b>
+          <b>SYSTEM TRANSCENDENCE</b>
         </div>
         <div className="hero-panel__top headquarters-stage__header">
           <div>
@@ -166,7 +176,10 @@ export function DashboardPage() {
             </div>
           </div>
 
-          <div className="headquarters-stage__core">
+          <div
+            className="headquarters-stage__core"
+            style={{ '--core-charge': `${Math.round(percentage * 360)}deg` } as CSSProperties}
+          >
             <div className="ascension-core__field" aria-hidden="true">
               <i />
               <i />
@@ -188,6 +201,7 @@ export function DashboardPage() {
             </div>
             <div className="ascension-core__readout">
               <span>ASCENSION CORE</span>
+              <em>{Math.round(percentage * 100)}% DAILY CHARGE</em>
               <small>
                 {qualification?.qualified
                   ? 'ADVANCEMENT SIGNAL DETECTED'
@@ -271,6 +285,7 @@ export function DashboardPage() {
               {workoutRecord?.status === 'completed' ? 'Deployment complete' : 'Assignment ready'}
             </em>
             <ChevronRight size={17} />
+            <RealmVista />
           </Link>
           <Link to="/sanctuary" className="realm-portal" data-portal="sanctuary">
             <span className="realm-portal__icon">
@@ -286,6 +301,7 @@ export function DashboardPage() {
                 : 'Stronghold available'}
             </em>
             <ChevronRight size={17} />
+            <RealmVista />
           </Link>
           <Link to="/kitchen" className="realm-portal" data-portal="kitchen">
             <span className="realm-portal__icon">
@@ -297,6 +313,7 @@ export function DashboardPage() {
             </span>
             <em>Kitchen channel ready</em>
             <ChevronRight size={17} />
+            <RealmVista />
           </Link>
           <Link to="/treasury" className="realm-portal" data-portal="treasury">
             <span className="realm-portal__icon">
@@ -312,6 +329,7 @@ export function DashboardPage() {
                 : 'Ledger secured'}
             </em>
             <ChevronRight size={17} />
+            <RealmVista />
           </Link>
           <Link to="/headquarters" className="realm-portal" data-portal="party">
             <span className="realm-portal__icon">
@@ -323,6 +341,7 @@ export function DashboardPage() {
             </span>
             <em>Nine companion links</em>
             <ChevronRight size={17} />
+            <RealmVista />
           </Link>
           <Link to="/campaigns" className="realm-portal" data-portal="campaign">
             <span className="realm-portal__icon">
@@ -334,6 +353,7 @@ export function DashboardPage() {
             </span>
             <em>{activeWeekly ? 'Active challenge signal' : 'Long-range objectives'}</em>
             <ChevronRight size={17} />
+            <RealmVista />
           </Link>
           <Link to="/status" className="realm-portal" data-portal="progression">
             <span className="realm-portal__icon">
@@ -351,6 +371,7 @@ export function DashboardPage() {
                   : 'World Class achieved'}
             </em>
             <ChevronRight size={17} />
+            <RealmVista />
           </Link>
           <Link to="/archive" className="realm-portal" data-portal="archive">
             <span className="realm-portal__icon">
@@ -362,6 +383,7 @@ export function DashboardPage() {
             </span>
             <em>Campaign record intact</em>
             <ChevronRight size={17} />
+            <RealmVista />
           </Link>
         </div>
       </section>

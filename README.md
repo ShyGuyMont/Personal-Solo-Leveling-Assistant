@@ -9,7 +9,7 @@ The design, writing, interface, icons, animations, and generated tones are origi
 - Six default missions across Faith, Discipline, Physical, Creator, and Character
 - Custom and template missions, weekday schedules, optional completion types, notes, and stable history IDs
 - Daily Review, idempotent rewards, current-day undo, Perfect and Protected Perfect Days, humane momentum/decay, and Recovery Mode
-- System and Clean interface styles, plus Abyss and light Daybreak color themes with selectable visual intensity
+- System and Clean interface styles, five complete color protocols from Abyss to Winter Crown, and selectable visual intensity
 - Nine original chibi companion characters with daily greetings, stat-specific encouragement, shame-free accountability, occasional two-character banter, cinematic milestone celebrations, adjustable frequency, and individual mute controls
 - A private Party Channel with ten-mood Check-Ins, six Direct Support topics, whole-party or one-to-one responses, history-aware dialogue rotation, and locally saved conversations that never affect XP or streaks
 - Full Party Headquarters with the complete roster, support shortcuts, saved-message counts, Ember's Lock-In Protocol, Amara's Heartweaver Protocol, permanent Weekly Campfires, and Monthly Councils
@@ -36,6 +36,24 @@ The design, writing, interface, icons, animations, and generated tones are origi
 - Installable iPhone PWA with safe-area support, offline caching, code-split screens, user-controlled update prompts, and a dedicated Update Center
 
 There is no login, backend, external API, analytics, advertising, tracking, or paid service.
+
+## Version 6.2.0 · System Transcendence
+
+Version 6.2 transforms the dimensional interface into a responsive world. **Winter Crown** joins
+the color protocols as a bright snow-white, glacial-blue, and sovereign-navy environment with
+frosted glass, clear dark text, and its own drifting snowfall. Every other protocol gains an
+equally distinct lightweight atmosphere: Abyss and Daybreak carry energy motes, Blood Moon raises
+embers, and Frostbound suspends ice crystals.
+
+The tactical route map now opens through miniature dimensional windows with layered horizons,
+rotating gate architecture, and realm-colored depth. The Ascension Core has become a larger
+volumetric artifact whose energy field and projected telemetry directly reflect the current day's
+completion. Projected command typography, breakout companion portraits, reactive lighting, and a
+more dramatic Class-advancement space carry the same cinematic language through the complete app.
+
+The atmosphere pauses when the app is not visible, uses a capped mobile particle budget, and is
+fully suppressed by Subtle, Clean, Reduced Motion, and device motion preferences. Navigation,
+progression, saved data, and every established feature remain unchanged.
 
 ## Version 6.1.0 · System Depth Engine
 

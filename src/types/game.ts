@@ -35,7 +35,7 @@ export type DifficultyTier = 'I' | 'II' | 'III' | 'IV' | 'V';
 export type Rarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'ascendant';
 export type RecoveryReason = 'illness' | 'injury' | 'travel' | 'emergency' | 'overload' | 'other';
 export type InterfaceStyle = 'clean' | 'system';
-export type ColorTheme = 'abyss' | 'daybreak' | 'bloodmoon' | 'frostbound';
+export type ColorTheme = 'abyss' | 'daybreak' | 'bloodmoon' | 'frostbound' | 'winter-crown';
 export type CompanionId =
   'snow' | 'rook' | 'selah' | 'cipher' | 'haven' | 'ember' | 'amara' | 'cassian' | 'saffron';
 export type CompanionMode = 'off' | 'quiet' | 'balanced' | 'talkative';

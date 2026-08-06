@@ -1,4 +1,4 @@
-export const APP_VERSION = '6.1.0';
+export const APP_VERSION = '6.2.0';
 export const DATABASE_SCHEMA_VERSION = 12;
 export const SAVE_FORMAT_VERSION = 12;
 
@@ -9,6 +9,18 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 6.2.0 · System Transcendence',
+    detail:
+      'The dimensional System becomes a responsive world of living portals, projected command layers, and theme-aware atmosphere.',
+    points: [
+      'Winter Crown joins the color protocols with a bright snow-white, glacial-blue, and sovereign-navy command environment that remains fully compatible with System and Clean presentation.',
+      'A lightweight adaptive particle field gives every protocol its own atmosphere—energy motes, rising embers, ice crystals, or drifting snow—while pausing off-screen and honoring Subtle and Reduced Motion.',
+      'Realm routes are now miniature dimensional windows with rotating horizon rings and layered vistas that react to System depth without changing navigation or touch targets.',
+      'The Ascension Core grows into a volumetric power artifact whose illuminated charge field directly reflects daily completion, with projected charge telemetry and expanded energy architecture.',
+      'Projected command typography, breakout companion portraits, reactive lighting, and transformed Class-advancement space extend the cinematic language across the app without sacrificing mobile clarity.',
+    ],
+  },
   {
     title: 'Version 6.1.0 · System Depth Engine',
     detail:

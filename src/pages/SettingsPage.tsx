@@ -31,6 +31,7 @@ import { Modal } from '@/components/Modal';
 import { Link } from '@/router';
 import { useGameStore } from '@/store/useGameStore';
 import { formatClassName } from '@/utils/format';
+import { getDocumentTheme } from '@/utils/theme';
 import type {
   BackupSnapshot,
   CompanionId,
@@ -64,12 +65,15 @@ export function SettingsPage() {
   useEffect(() => {
     if (!draft) return;
     const root = document.documentElement;
-    root.dataset.theme = draft.colorTheme;
+    root.dataset.theme = getDocumentTheme(draft.colorTheme);
+    root.dataset.colorProtocol = draft.colorTheme;
     root.dataset.interface = draft.interfaceStyle;
     root.dataset.intensity = draft.themeIntensity;
     root.dataset.motion = draft.reducedMotion ? 'reduced' : 'full';
     return () => {
-      root.dataset.theme = settings?.colorTheme ?? 'abyss';
+      const savedTheme = settings?.colorTheme ?? 'abyss';
+      root.dataset.theme = getDocumentTheme(savedTheme);
+      root.dataset.colorProtocol = savedTheme;
       root.dataset.interface = settings?.interfaceStyle ?? 'system';
       root.dataset.intensity = settings?.themeIntensity ?? 'standard';
       root.dataset.motion = settings?.reducedMotion ? 'reduced' : 'full';
@@ -304,6 +308,17 @@ export function SettingsPage() {
                   <span>
                     <strong>Frostbound</strong>
                     <small>Midnight · glacial blue · silver violet</small>
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  className={draft.colorTheme === 'winter-crown' ? 'is-active' : ''}
+                  onClick={() => patchSetting('colorTheme', 'winter-crown')}
+                >
+                  <span className="theme-swatch theme-swatch--winter-crown" />
+                  <span>
+                    <strong>Winter Crown</strong>
+                    <small>Snow · glacier · sovereign navy</small>
                   </span>
                 </button>
               </div>

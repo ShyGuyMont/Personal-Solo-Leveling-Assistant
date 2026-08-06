@@ -13,6 +13,7 @@ import {
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { CompanionPresence, RealmTransition, SystemHud } from '@/components/LivingSystemLayer';
 import { SystemMark } from '@/components/SystemMark';
+import { SystemParticleField } from '@/components/SystemParticleField';
 import { APP_VERSION } from '@/config/release';
 import { calculateRankQualification } from '@/game/rank';
 import { getLiveSystemState, getSystemCycle, getSystemRealm } from '@/game/systemExperience';
@@ -22,6 +23,7 @@ import { useRoutePath } from '@/routeState';
 import { useGameStore } from '@/store/useGameStore';
 import { getCurrentHour } from '@/utils/date';
 import { formatClassName } from '@/utils/format';
+import { getDocumentTheme } from '@/utils/theme';
 
 const NAV = [
   { to: '/', label: 'System', icon: CircleGauge },
@@ -40,6 +42,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   const progression = useGameStore((state) => state.progression);
   const stats = useGameStore((state) => state.stats);
   const challenges = useGameStore((state) => state.challenges);
+  const colorTheme = settings?.colorTheme ?? 'abyss';
+  const documentTheme = getDocumentTheme(colorTheme);
   const realm = getSystemRealm(path);
   const shellRef = useRef<HTMLDivElement>(null);
   const [privacyActive, setPrivacyActive] = useState(false);
@@ -87,12 +91,14 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const root = document.documentElement;
-    root.dataset.theme = settings?.colorTheme ?? 'abyss';
+    root.dataset.theme = documentTheme;
+    root.dataset.colorProtocol = colorTheme;
     root.dataset.interface = settings?.interfaceStyle ?? 'system';
     root.dataset.intensity = settings?.themeIntensity ?? 'standard';
     root.dataset.motion = settings?.reducedMotion ? 'reduced' : 'full';
   }, [
-    settings?.colorTheme,
+    colorTheme,
+    documentTheme,
     settings?.interfaceStyle,
     settings?.themeIntensity,
     settings?.reducedMotion,
@@ -106,7 +112,8 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div
       ref={shellRef}
       className={`app-shell ${settings?.privacyScreenEnabled && privacyActive ? 'privacy-screen-active' : ''}`}
-      data-theme={settings?.colorTheme ?? 'abyss'}
+      data-theme={documentTheme}
+      data-color-protocol={colorTheme}
       data-interface={settings?.interfaceStyle ?? 'system'}
       data-intensity={settings?.themeIntensity ?? 'standard'}
       data-motion={settings?.reducedMotion ? 'reduced' : 'full'}
@@ -116,6 +123,11 @@ export function AppShell({ children }: { children: ReactNode }) {
     >
       <RealmTransition key={realm} realm={realm} />
       <div className="ambient-grid" />
+      <SystemParticleField
+        theme={colorTheme}
+        intensity={settings?.themeIntensity ?? 'standard'}
+        enabled={settings?.interfaceStyle === 'system' && !settings.reducedMotion}
+      />
       <div className="ambient-orb ambient-orb--mint" />
       <div className="ambient-orb ambient-orb--purple" />
       <div className="ascension-atmosphere" aria-hidden="true">
@@ -136,7 +148,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <SystemMark small />
           <span>
             <span className="brand__name">THE SYSTEM</span>
-            <span className="brand__tag">V{APP_VERSION} · DEPTH ENGINE</span>
+            <span className="brand__tag">V{APP_VERSION} · SYSTEM TRANSCENDENCE</span>
           </span>
         </NavLink>
         <div className="app-header__actions">
