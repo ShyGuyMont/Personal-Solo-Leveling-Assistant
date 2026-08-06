@@ -29,9 +29,11 @@ describe("Saffron's Kitchen", () => {
   });
 
   it('provides a full no-bean, no-pea recipe library built around preferred foods', () => {
-    expect(KITCHEN_RECIPES).toHaveLength(12);
+    expect(KITCHEN_RECIPES).toHaveLength(18);
+    expect(new Set(KITCHEN_RECIPES.map((recipe) => recipe.id)).size).toBe(18);
     expect(KITCHEN_RECIPES.every((recipe) => recipe.ingredients.length >= 8)).toBe(true);
     expect(KITCHEN_RECIPES.every((recipe) => recipe.steps.length >= 5)).toBe(true);
+    expect(KITCHEN_RECIPES.every((recipe) => /°F/.test(recipe.safety))).toBe(true);
     expect(
       KITCHEN_RECIPES.flatMap((recipe) => recipe.ingredients)
         .join(' ')

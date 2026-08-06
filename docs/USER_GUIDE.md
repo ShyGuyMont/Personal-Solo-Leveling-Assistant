@@ -43,6 +43,34 @@ Choose **Subtle**, **Standard**, or **Intense** under Settings → Immersion int
 the new information structure but removes cinematic layers. Reduced Motion disables portal travel
 and ambient motion directly, even if the device itself does not request reduced motion.
 
+Version 6.0.1 adds four complete color protocols under Settings → Color protocol:
+
+- **Abyss:** black, mint, and violet.
+- **Daybreak:** light gray, navy, and sun yellow.
+- **Blood Moon:** obsidian, crimson, and antique gold.
+- **Frostbound:** midnight, glacial blue, and silver violet.
+
+Color protocols change presentation only. They do not change companions, progression, saved data,
+or the meaning of status colors. Version 6.0.1 also keeps the bottom command bar anchored to the
+phone viewport while the page scrolls.
+
+Version 6.0.2 adds **Party Pulse** to Headquarters. When an existing stat has gone at least two
+finalized days without a supporting win—or is already declining at low momentum—the companion who
+owns that path can speak in their own style and offer one direct action. Rook watches Strength,
+Endurance, and Vitality; Selah watches Faith and Wisdom; Cipher watches Discipline, Willpower,
+Focus, and Creativity; Haven watches Character; Amara watches Empathy; and Cassian watches
+Stewardship. A broad slip can call Ember into a small-target re-entry response or ask Snow to widen
+the support around the whole journey. Party Pulse changes no score, reward, streak, Class, or
+mission result. Off hides it; Quiet shows one signal, Balanced up to two, Talkative up to three, and
+individual mute controls are always honored. Reduced Motion removes its pulse animation.
+Recovery Mode holds attention signals and replaces them with Snow’s recovery protection until the
+mode ends.
+
+The same update adds explicit **Training Hall command** and **Sanctuary command** exits to their long
+internal screens. Other sections retain their always-visible tabs, selectors, close buttons, or
+existing channel return controls, so opening a sub-screen never removes the route back to that
+section’s main command view.
+
 ## Where everything lives
 
 ### System
@@ -78,7 +106,7 @@ The Training Hall is motivational recordkeeping, not medical care. Use loads and
 
 ### Saffron’s Kitchen
 
-Saffron, The Flame Chef, runs an optional cooking section designed to make home meals easier than ordering out. Tap **Receive today’s order** and she assigns one of twelve recipes while avoiding the three most recent meals and favoring recipes used least often. The library contains chicken, turkey, beef, salmon and other fish, shrimp, crab, eggs, vegetables, rice, pasta, and potatoes. It intentionally contains no beans or peas.
+Saffron, The Flame Chef, runs an optional cooking section designed to make home meals easier than ordering out. Tap **Receive today’s order** and she assigns one of eighteen recipes while avoiding the three most recent meals and favoring recipes used least often. The library contains chicken, turkey, beef, salmon and other fish, shrimp, crab, eggs, vegetables, rice, pasta, and potatoes. It intentionally contains no beans or peas. Version 6.0.2 adds Blackened Cod Rice Bowls, Turkey Burgers & Smoky Potato Wedges, Creamy Chicken & Spinach Pasta, Ginger Beef, Egg & Vegetable Rice, Garlic Shrimp & Tomato Orzo, and freezer-ready Egg, Turkey Sausage & Potato Breakfast Burritos.
 
 Each order includes:
 

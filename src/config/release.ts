@@ -1,4 +1,4 @@
-export const APP_VERSION = '6.0.0';
+export const APP_VERSION = '6.0.2';
 export const DATABASE_SCHEMA_VERSION = 12;
 export const SAVE_FORMAT_VERSION = 12;
 
@@ -9,6 +9,26 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 6.0.2 · Party Pulse',
+    detail:
+      'Companions now notice neglected paths in character, section exits are clearer, and Saffron gains six new orders.',
+    points: [
+      'Party Pulse watches finalized stat neglect without creating a penalty: the matching specialist responds in their own voice, explains the signal, and offers one direct route back into motion.',
+      'Quiet, Balanced, Talkative, Off, Reduced Motion, and individual companion controls remain authoritative; a broader slip can call Ember into a shame-free re-entry signal while Snow protects the whole journey.',
+      'Long Training Hall and Scripture Sanctuary flows now keep an explicit route back to their own command screen, while the complete section audit confirms persistent tabs, close controls, and return routes everywhere else.',
+      'Saffron’s grimoire expands from twelve to eighteen no-bean, no-pea recipes with new fish, turkey, chicken, beef, shrimp, egg, freezer, safety, substitution, and leftover guidance.',
+    ],
+  },
+  {
+    title: 'Version 6.0.1 · System Optimization',
+    detail: 'The living interface is steadier on mobile and gains two complete color protocols.',
+    points: [
+      'The bottom command bar is now isolated from the scrolling app canvas and anchored directly to the mobile viewport, preventing it from drifting into the middle of the screen.',
+      'Blood Moon adds an obsidian, crimson, and antique-gold command atmosphere; Frostbound adds midnight, glacial blue, and silver-violet energy.',
+      'Touch interactions, reduced-motion behavior, mobile atmosphere layers, and fixed interface compositing are tightened without changing campaign data or progression rules.',
+    ],
+  },
   {
     title: 'The Living Headquarters',
     detail: 'The dashboard is now the command chamber at the center of the entire campaign.',

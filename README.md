@@ -17,7 +17,7 @@ The design, writing, interface, icons, animations, and generated tones are origi
 - Monthly Councils generated after a completed month with nine fact-aware party messages, permanent history, and an optional next-month intention
 - Snow's optional Daily Command Briefing with Low, Steady, and High capacity planning, broad completion targets, and transparent 1×–2.5× scheduled-mission XP outcomes
 - Rook and Ember’s Training Hall with four home circuits, four structured progressive gym sessions, set/load/rep/rest tracking, Conditioning and Recovery logs, a one-time Home + Gym Double Deployment surge, and a full-party post-workout scene
-- Saffron’s Kitchen with twelve rotating no-bean, no-pea recipes, guided ingredients and steps, substitutions, food-safety and leftover guidance, three rewarded weekly orders, and permanent cooking history
+- Saffron’s Kitchen with eighteen rotating no-bean, no-pea recipes, guided ingredients and steps, substitutions, food-safety and leftover guidance, three rewarded weekly orders, and permanent cooking history
 - Snow and Selah’s Scripture Sanctuary with 96 rotating passage paths, twelve emotional and spiritual concerns, guided reflection, deeper prayer structure, private history, and unlimited no-XP Stronghold support
 - User-authored Campaign Arcs with purpose, companion guidance, optional target dates, milestones, pause/resume, completion, and archive states
 - Nine extensive Companion Questlines: 45 authored chapters, 135 tracked or reflective objectives, no failure timers, fixed chapter rewards, and nine unique legendary completion titles
@@ -36,6 +36,39 @@ The design, writing, interface, icons, animations, and generated tones are origi
 - Installable iPhone PWA with safe-area support, offline caching, code-split screens, user-controlled update prompts, and a dedicated Update Center
 
 There is no login, backend, external API, analytics, advertising, tracking, or paid service.
+
+## Version 6.0.2 · Party Pulse
+
+Version 6.0.2 makes the party more observant without making the System harsher. **Party Pulse**
+looks only at the app’s existing finalized stat-neglect and momentum record. Once a path crosses a
+humane attention threshold, its specialist speaks in their own voice and offers one useful route
+back: Rook handles the physical path, Selah the spiritual path, Cipher execution and creative work,
+Haven character, Amara empathy, and Cassian stewardship. If several paths slip together, Ember can
+open a small-target re-entry signal and Snow can widen the support response. These pulses award no
+XP, remove no XP, create no failure, and continue to honor Off, Quiet, Balanced, Talkative,
+individual companion controls, and Reduced Motion.
+Recovery Mode holds attention signals entirely and lets Snow reinforce recovery instead of treating
+protected capacity as neglect.
+
+The section-navigation audit also gives long Training Hall and Scripture Sanctuary flows an obvious
+route back to their own command screen. Sections whose tabs, selectors, modal close controls, or
+existing return actions stay visible keep those established controls. Saffron’s Kitchen expands
+from twelve to **eighteen** recipes with Blackened Cod Rice Bowls, Turkey Burgers & Smoky Potato
+Wedges, Creamy Chicken & Spinach Pasta, Ginger Beef, Egg & Vegetable Rice, Garlic Shrimp & Tomato
+Orzo, and freezer-ready Egg, Turkey Sausage & Potato Breakfast Burritos.
+
+## Version 6.0.1 · System Optimization
+
+Version 6.0.1 hardens the living interface for everyday mobile use. The bottom command bar is
+isolated from the scrolling app canvas and anchored directly to the viewport, preventing it from
+drifting into the middle of the screen. Touch-only devices no longer retain desktop hover movement,
+mobile atmosphere work is reduced outside Intense mode, and the saved Reduced Motion preference
+also suppresses page and companion transitions.
+
+Two new appearance protocols join Abyss and Daybreak: **Blood Moon** combines obsidian, crimson,
+and antique gold; **Frostbound** combines midnight blue, glacial cyan, and silver violet. Every
+protocol works with System or Clean presentation and changes no progression, missions, or saved
+campaign data.
 
 ## Version 6.0 · System Ascension
 
@@ -79,7 +112,7 @@ Daily Command, and stable transaction IDs prevent repeat rewards after refreshes
 
 **Saffron, The Flame Chef** is the ninth companion. She is a theatrical, short-tempered, fiercely
 supportive nutrition-minded chef with warm olive-brown skin, vivid green eyes, dark curls, a white
-chef jacket, forest-green apron, and tangerine System flame. Her Kitchen rotates among twelve meals
+chef jacket, forest-green apron, and tangerine System flame. Her Kitchen rotates among eighteen meals
 built around the user’s preferred proteins, vegetables, potatoes, rice, and pasta—with no beans or
 peas. Each order includes ingredients, guided steps, substitutions, food-safety checkpoints,
 leftover guidance, one swap, a no-penalty decline, and a private result record. The first three

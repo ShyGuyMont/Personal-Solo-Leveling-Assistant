@@ -17,6 +17,7 @@ import {
   REALM_LABELS,
   type SystemRealm,
 } from '@/game/systemExperience';
+import { getPartyPulseSignals } from '@/game/partyPulse';
 import { Link } from '@/router';
 import { useRoutePath } from '@/routeState';
 import { useGameStore } from '@/store/useGameStore';
@@ -91,7 +92,7 @@ export function SystemHud({ realm, state }: { realm: SystemRealm; state: SystemS
 
 export function CompanionPresence({ realm }: { realm: SystemRealm }) {
   const path = useRoutePath();
-  const settings = useGameStore((snapshot) => snapshot.settings);
+  const { settings, stats } = useGameStore();
   const [open, setOpen] = useState(false);
   const desiredCompanionId = REALM_COMPANIONS[realm];
   const enabledIds = settings?.enabledCompanionIds ?? [];
@@ -103,13 +104,16 @@ export function CompanionPresence({ realm }: { realm: SystemRealm }) {
     );
   }, [path, settings?.companionMode]);
 
-  if (!companionId || settings?.companionMode === 'off') return null;
+  if (!settings || !companionId || settings.companionMode === 'off') return null;
   const companion = getCompanion(companionId);
   const presence = REALM_PRESENCE[realm];
+  const pulse = settings.recoveryMode.active
+    ? undefined
+    : getPartyPulseSignals(stats, enabledIds).find((signal) => signal.companionId === companionId);
 
   return (
     <aside
-      className={`companion-presence ${open ? 'is-open' : ''}`}
+      className={`companion-presence ${open ? 'is-open' : ''} ${pulse ? 'has-pulse' : ''}`}
       data-companion={companion.id}
       style={{ '--presence-accent': companion.accent } as CSSProperties}
       aria-label={`${companion.name} companion link`}
@@ -126,7 +130,7 @@ export function CompanionPresence({ realm }: { realm: SystemRealm }) {
         </span>
         <img src={getCompanionImage(companion.image)} alt="" />
         <span className="companion-presence__identity">
-          <small>COMPANION LINK</small>
+          <small>{pulse ? 'PARTY PULSE' : 'COMPANION LINK'}</small>
           <strong>{companion.name}</strong>
         </span>
         {open ? <X size={16} /> : <Sparkles size={16} />}
@@ -134,12 +138,12 @@ export function CompanionPresence({ realm }: { realm: SystemRealm }) {
       <div className="companion-presence__transmission" aria-hidden={!open}>
         <div>
           <span className="companion-presence__live">
-            <i /> LIVE TRANSMISSION
+            <i /> {pulse ? 'ATTENTION PULSE' : 'LIVE TRANSMISSION'}
           </span>
-          <strong>{presence.signal}</strong>
-          <p>“{presence.message}”</p>
-          <Link to={presence.actionPath}>
-            {presence.actionLabel} <ArrowUpRight size={14} />
+          <strong>{pulse?.title ?? presence.signal}</strong>
+          <p>“{pulse?.message ?? presence.message}”</p>
+          <Link to={pulse?.actionPath ?? presence.actionPath}>
+            {pulse?.actionLabel ?? presence.actionLabel} <ArrowUpRight size={14} />
           </Link>
         </div>
       </div>

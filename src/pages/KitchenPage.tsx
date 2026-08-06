@@ -178,8 +178,8 @@ export function KitchenPage() {
             <p className="eyebrow">TODAY'S STOVE IS QUIET</p>
             <h2>Ask Saffron for a Kitchen Order</h2>
             <p>
-              She rotates among twelve practical recipes, avoids your recent meals, and gives you
-              one ingredient swap if the first assignment is not workable.
+              She rotates among {KITCHEN_RECIPES.length} practical recipes, avoids your recent meals,
+              and gives you one ingredient swap if the first assignment is not workable.
             </p>
             <button
               className="button button--primary"
@@ -428,7 +428,7 @@ export function KitchenPage() {
         <header className="section-header">
           <div>
             <p className="eyebrow">SAFFRON'S RECIPE GRIMOIRE</p>
-            <h2>Browse all twelve meals</h2>
+            <h2>Browse all {KITCHEN_RECIPES.length} meals</h2>
             <p>Browse anytime. Only Saffron’s daily assigned order grants Kitchen XP.</p>
           </div>
           <ChefHat size={23} />

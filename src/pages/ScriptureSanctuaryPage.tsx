@@ -7,6 +7,7 @@ import {
   History,
   MessageCircleHeart,
   ShieldAlert,
+  ShieldCheck,
   Sparkles,
   X,
 } from 'lucide-react';
@@ -26,11 +27,7 @@ import {
 } from '@/game/sanctuary';
 import { Link } from '@/router';
 import { useGameStore } from '@/store/useGameStore';
-import type {
-  SanctuaryConcern,
-  SanctuaryMode,
-  SanctuarySession,
-} from '@/types/game';
+import type { SanctuaryConcern, SanctuaryMode, SanctuarySession } from '@/types/game';
 
 const PRAYER_MOVEMENTS = [
   ['Adoration', 'What is true and worthy about God here?'],
@@ -167,14 +164,8 @@ export function ScriptureSanctuaryPage() {
     await reload();
   };
 
-  const passages = useMemo(
-    () => (session ? getSanctuaryPassages(session) : []),
-    [session],
-  );
-  const messages = useMemo(
-    () => (session ? getSanctuaryMessages(session) : []),
-    [session],
-  );
+  const passages = useMemo(() => (session ? getSanctuaryPassages(session) : []), [session]);
+  const messages = useMemo(() => (session ? getSanctuaryMessages(session) : []), [session]);
   const lonelinessIntegrity = session
     ? [session.primaryConcern, session.secondaryConcern].includes('sexual-integrity') &&
       [session.primaryConcern, session.secondaryConcern].includes('loneliness')
@@ -284,7 +275,9 @@ export function ScriptureSanctuaryPage() {
                 >
                   <img src={getCompanionImage(companion.image)} alt="" />
                   <div>
-                    <span>{companion.name} · {companion.title}</span>
+                    <span>
+                      {companion.name} · {companion.title}
+                    </span>
                     <p>“{message.text}”</p>
                   </div>
                 </article>
@@ -319,6 +312,27 @@ export function ScriptureSanctuaryPage() {
     const primary = getSanctuaryConcern(session.primaryConcern);
     return (
       <div className={`page sanctuary-page sanctuary-page--active is-${session.mode}`}>
+        <nav className="section-command-bar" aria-label="Scripture Sanctuary navigation">
+          <button
+            className="text-link"
+            type="button"
+            disabled={working}
+            onClick={() => {
+              if (
+                window.confirm(
+                  'Return to Sanctuary command? This open session will close without being recorded as complete.',
+                )
+              ) {
+                void endWithoutCompleting();
+              }
+            }}
+          >
+            <ArrowLeft size={16} /> Sanctuary command
+          </button>
+          <span>
+            <ShieldCheck size={15} /> Private exit available
+          </span>
+        </nav>
         <header className="page-heading sanctuary-page-heading">
           <div>
             <p className="eyebrow">
@@ -391,7 +405,9 @@ export function ScriptureSanctuaryPage() {
           </header>
           {passages.map((passage, index) => (
             <article key={passage.id} className="panel sanctuary-passage-card">
-              <div className="sanctuary-passage-card__number">{String(index + 1).padStart(2, '0')}</div>
+              <div className="sanctuary-passage-card__number">
+                {String(index + 1).padStart(2, '0')}
+              </div>
               <div>
                 <span>{passage.theme}</span>
                 <h3>{passage.reference}</h3>
@@ -445,7 +461,11 @@ export function ScriptureSanctuaryPage() {
           <header className="section-header">
             <div>
               <p className="eyebrow">PRIVATE RESPONSE · OPTIONAL</p>
-              <h2>{session.mode === 'study' ? 'Stay honest with what surfaced' : 'Record the interruption'}</h2>
+              <h2>
+                {session.mode === 'study'
+                  ? 'Stay honest with what surfaced'
+                  : 'Record the interruption'}
+              </h2>
             </div>
           </header>
           <label className="field field--wide">
@@ -455,9 +475,7 @@ export function ScriptureSanctuaryPage() {
               maxLength={2000}
               value={reflection}
               onChange={(event) => setReflection(event.target.value)}
-              onBlur={() =>
-                void saveSanctuaryDraft(session.id, { reflection, prayer, nextAction })
-              }
+              onBlur={() => void saveSanctuaryDraft(session.id, { reflection, prayer, nextAction })}
               placeholder="Name the emotion, desire, lie, grief, or truth that became clearer…"
             />
           </label>
@@ -482,9 +500,7 @@ export function ScriptureSanctuaryPage() {
               maxLength={500}
               value={nextAction}
               onChange={(event) => setNextAction(event.target.value)}
-              onBlur={() =>
-                void saveSanctuaryDraft(session.id, { reflection, prayer, nextAction })
-              }
+              onBlur={() => void saveSanctuaryDraft(session.id, { reflection, prayer, nextAction })}
               placeholder="For the next ten minutes, I will…"
             />
           </label>
@@ -503,7 +519,11 @@ export function ScriptureSanctuaryPage() {
             </div>
           )}
           <div className="sanctuary-finish-actions">
-            <button className="button button--primary" disabled={working} onClick={() => void finish()}>
+            <button
+              className="button button--primary"
+              disabled={working}
+              onClick={() => void finish()}
+            >
               <Check size={18} />
               {session.mode === 'study' ? 'Complete Scripture study' : 'Close Stronghold session'}
             </button>
@@ -570,25 +590,36 @@ export function ScriptureSanctuaryPage() {
           </header>
           <div className="sanctuary-mode-grid">
             <button onClick={() => setMode('study')}>
-              <span><BookHeart size={25} /></span>
+              <span>
+                <BookHeart size={25} />
+              </span>
               <div>
                 <strong>Daily Scripture Study</strong>
-                <small>Three passages, guided reflection, and a deeper prayer path. Completes today’s Bible mission once.</small>
+                <small>
+                  Three passages, guided reflection, and a deeper prayer path. Completes today’s
+                  Bible mission once.
+                </small>
               </div>
               <ChevronRight size={19} />
             </button>
             <button className="is-stronghold" onClick={() => setMode('stronghold')}>
-              <span><ShieldAlert size={25} /></span>
+              <span>
+                <ShieldAlert size={25} />
+              </span>
               <div>
                 <strong>Stronghold Protocol</strong>
-                <small>Immediate Scripture and practical interruption when an urge or emotion is already loud. Unlimited, no XP.</small>
+                <small>
+                  Immediate Scripture and practical interruption when an urge or emotion is already
+                  loud. Unlimited, no XP.
+                </small>
               </div>
               <ChevronRight size={19} />
             </button>
           </div>
           {completedStudyToday && (
             <div className="sanctuary-today-status">
-              <Check size={17} /> Daily study completed. The Sanctuary remains open as often as you need it.
+              <Check size={17} /> Daily study completed. The Sanctuary remains open as often as you
+              need it.
             </div>
           )}
         </section>
@@ -599,7 +630,9 @@ export function ScriptureSanctuaryPage() {
           </button>
           <header className="section-header">
             <div>
-              <p className="eyebrow">{mode === 'study' ? 'STUDY DIRECTION' : 'STRONGHOLD SIGNAL'}</p>
+              <p className="eyebrow">
+                {mode === 'study' ? 'STUDY DIRECTION' : 'STRONGHOLD SIGNAL'}
+              </p>
               <h2>What feels most present?</h2>
               <p>Choose one primary concern and, if it fits, one connected concern.</p>
             </div>

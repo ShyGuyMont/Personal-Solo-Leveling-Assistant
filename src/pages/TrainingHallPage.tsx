@@ -347,6 +347,25 @@ export function TrainingHallPage() {
     setError('');
   };
 
+  const returnToHallCommand = async () => {
+    if (!session) return;
+    if (['active', 'paused'].includes(session.status)) {
+      if (
+        !window.confirm(
+          'Return to Training Hall command? This active deployment will end without Daily Workout credit.',
+        )
+      ) {
+        return;
+      }
+      await abandonTrainingSession(session.id);
+      setSession(undefined);
+      setError('');
+      await reload();
+      return;
+    }
+    await chooseDifferentPath();
+  };
+
   const recentBest = useMemo(() => {
     if (!session?.circuitId) return undefined;
     return recent
@@ -444,6 +463,14 @@ export function TrainingHallPage() {
   if (session?.status === 'completed') {
     return (
       <div className="page training-hall-page training-hall-page--complete">
+        <nav className="section-command-bar" aria-label="Training Hall navigation">
+          <button className="text-link" type="button" onClick={() => setSession(undefined)}>
+            <ArrowLeft size={16} /> Training Hall command
+          </button>
+          <span>
+            <ShieldCheck size={15} /> Exit route verified
+          </span>
+        </nav>
         <section className={`training-result-hero is-${circuit?.accent ?? session.location}`}>
           <div className="training-result-hero__rays" />
           <Trophy size={35} />
@@ -606,6 +633,21 @@ export function TrainingHallPage() {
 
   return (
     <div className="page training-hall-page">
+      {session && session.status !== 'abandoned' && (
+        <nav className="section-command-bar" aria-label="Training Hall navigation">
+          <button
+            className="text-link"
+            type="button"
+            disabled={working}
+            onClick={() => void returnToHallCommand()}
+          >
+            <ArrowLeft size={16} /> Training Hall command
+          </button>
+          <span>
+            <ShieldCheck size={15} /> Exit route verified
+          </span>
+        </nav>
+      )}
       <header className="page-heading training-page-heading">
         <div>
           <p className="eyebrow">PHYSICAL ASCENSION INTERFACE</p>

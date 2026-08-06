@@ -284,6 +284,28 @@ export function SettingsPage() {
                     <small>Light gray · navy · sun yellow</small>
                   </span>
                 </button>
+                <button
+                  type="button"
+                  className={draft.colorTheme === 'bloodmoon' ? 'is-active' : ''}
+                  onClick={() => patchSetting('colorTheme', 'bloodmoon')}
+                >
+                  <span className="theme-swatch theme-swatch--bloodmoon" />
+                  <span>
+                    <strong>Blood Moon</strong>
+                    <small>Obsidian · crimson · antique gold</small>
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  className={draft.colorTheme === 'frostbound' ? 'is-active' : ''}
+                  onClick={() => patchSetting('colorTheme', 'frostbound')}
+                >
+                  <span className="theme-swatch theme-swatch--frostbound" />
+                  <span>
+                    <strong>Frostbound</strong>
+                    <small>Midnight · glacial blue · silver violet</small>
+                  </span>
+                </button>
               </div>
             </div>
             {(

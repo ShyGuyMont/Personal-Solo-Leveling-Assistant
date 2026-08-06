@@ -24,6 +24,7 @@ import { DailyEventCard } from '@/components/DailyEventCard';
 import { DailyBriefingCard } from '@/components/DailyBriefingCard';
 import { InstallCard } from '@/components/InstallCard';
 import { MissionCard } from '@/components/MissionCard';
+import { PartyPulsePanel } from '@/components/PartyPulsePanel';
 import { ProgressBar } from '@/components/ProgressBar';
 import { chooseSystemMessage } from '@/config/messages';
 import { getChallengeTemplate } from '@/config/challenges';
@@ -225,6 +226,7 @@ export function DashboardPage() {
       <InstallCard />
       <DailyEventCard />
       <DailyBriefingCard />
+      <PartyPulsePanel />
 
       <section className="panel realm-command-map">
         <header className="section-header realm-command-map__header">

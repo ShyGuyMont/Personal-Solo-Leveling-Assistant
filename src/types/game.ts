@@ -35,7 +35,7 @@ export type DifficultyTier = 'I' | 'II' | 'III' | 'IV' | 'V';
 export type Rarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'ascendant';
 export type RecoveryReason = 'illness' | 'injury' | 'travel' | 'emergency' | 'overload' | 'other';
 export type InterfaceStyle = 'clean' | 'system';
-export type ColorTheme = 'abyss' | 'daybreak';
+export type ColorTheme = 'abyss' | 'daybreak' | 'bloodmoon' | 'frostbound';
 export type CompanionId =
   'snow' | 'rook' | 'selah' | 'cipher' | 'haven' | 'ember' | 'amara' | 'cassian' | 'saffron';
 export type CompanionMode = 'off' | 'quiet' | 'balanced' | 'talkative';
@@ -242,7 +242,13 @@ export type KitchenRecipeId =
   | 'turkey-meatball-pasta'
   | 'cajun-shrimp-potato-skillet'
   | 'honey-garlic-chicken-bowls'
-  | 'crab-loaded-potatoes';
+  | 'crab-loaded-potatoes'
+  | 'blackened-cod-rice-bowls'
+  | 'turkey-burger-potato-wedges'
+  | 'chicken-spinach-pasta'
+  | 'beef-egg-rice-skillet'
+  | 'shrimp-tomato-orzo'
+  | 'freezer-breakfast-burritos';
 export type KitchenSessionStatus = 'assigned' | 'completed' | 'declined';
 
 export interface KitchenSession {
