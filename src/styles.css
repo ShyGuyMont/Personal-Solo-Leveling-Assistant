@@ -2938,6 +2938,7 @@ html[data-theme='daybreak'] .headquarters-roster__grid article {
   --warning: #f0b35a;
   --danger: #e76868;
   --success: #43e6c2;
+  --realm-accent: var(--mint);
   --radius: 18px;
   --radius-small: 11px;
   --shadow: 0 22px 70px rgba(0, 0, 0, 0.38);
@@ -9874,12 +9875,12 @@ html[data-interface='system'] .panel::before {
   overflow: hidden;
   background: linear-gradient(
     135deg,
-    color-mix(in srgb, var(--realm-accent) 82%, white),
-    var(--realm-accent)
+    color-mix(in srgb, var(--realm-accent, var(--mint)) 82%, white),
+    var(--realm-accent, var(--mint))
   );
-  border-color: color-mix(in srgb, var(--realm-accent) 72%, white);
+  border-color: color-mix(in srgb, var(--realm-accent, var(--mint)) 72%, white);
   box-shadow:
-    0 11px 30px color-mix(in srgb, var(--realm-accent) 18%, transparent),
+    0 11px 30px color-mix(in srgb, var(--realm-accent, var(--mint)) 18%, transparent),
     inset 0 1px rgba(255, 255, 255, 0.35);
 }
 
@@ -15861,4 +15862,13 @@ html[data-motion='reduced'] .companion-presence.has-pulse .companion-presence__a
     width: 42px;
     height: 42px;
   }
+}
+
+/* Primary actions also render outside the realm-scoped app shell in modal overlays. */
+html .button.button--primary:disabled {
+  color: color-mix(in srgb, var(--white) 82%, var(--muted));
+  background: color-mix(in srgb, var(--realm-accent, var(--mint)) 30%, var(--panel-2));
+  border-color: color-mix(in srgb, var(--realm-accent, var(--mint)) 62%, var(--border));
+  box-shadow: inset 0 0 20px color-mix(in srgb, var(--realm-accent, var(--mint)) 7%, transparent);
+  opacity: 1;
 }
