@@ -1,4 +1,5 @@
 import type { AnchorHTMLAttributes, ReactNode } from 'react';
+import { preloadRoute } from '@/routeModules';
 import { useRoutePath } from '@/routeState';
 
 type LinkProps = Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href'> & {
@@ -6,9 +7,32 @@ type LinkProps = Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href'> & {
   children: ReactNode;
 };
 
-export function Link({ to, children, ...props }: LinkProps) {
+export function Link({
+  to,
+  children,
+  onFocus,
+  onPointerDown,
+  onPointerEnter,
+  ...props
+}: LinkProps) {
+  const prepareRoute = () => void preloadRoute(to);
   return (
-    <a href={`#${to}`} {...props}>
+    <a
+      href={`#${to}`}
+      onFocus={(event) => {
+        prepareRoute();
+        onFocus?.(event);
+      }}
+      onPointerDown={(event) => {
+        prepareRoute();
+        onPointerDown?.(event);
+      }}
+      onPointerEnter={(event) => {
+        prepareRoute();
+        onPointerEnter?.(event);
+      }}
+      {...props}
+    >
       {children}
     </a>
   );

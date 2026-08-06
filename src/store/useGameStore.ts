@@ -72,6 +72,7 @@ interface GameStore extends GameSnapshot {
   rewardNotice?: RewardNotice;
   load: () => Promise<void>;
   refresh: () => Promise<void>;
+  resume: () => Promise<void>;
   initializeProfile: (input: {
     displayName: string;
     systemTitle?: string;
@@ -191,18 +192,39 @@ async function readSnapshot(): Promise<GameSnapshot> {
 
 async function prepareDailySystems(settings: Settings) {
   const date = getSystemDateKey(new Date(), settings.resetTime, settings.timeZone);
-  await ensureDailyEvent(date);
-  await ensureWeeklyCampfireRecap(date, settings.weekStartsOn);
-  await ensureMonthlyCouncil(date);
-  await ensureTreasuryWeek(date, settings.weekStartsOn);
-  await ensureTreasuryChallenge(date);
-  await queueLockInIfNeeded(date);
+  await Promise.all([
+    ensureDailyEvent(date),
+    ensureWeeklyCampfireRecap(date, settings.weekStartsOn),
+    ensureMonthlyCouncil(date),
+    ensureTreasuryWeek(date, settings.weekStartsOn),
+    ensureTreasuryChallenge(date),
+    queueLockInIfNeeded(date),
+  ]);
   if (settings.firstDayGuideCompleted && !settings.dailyBriefingEnabled) {
     await queueCompanionReaction({
       trigger: 'daily-briefing',
       sourceId: `daily-briefing:${date}`,
       companionId: 'snow',
     });
+  }
+}
+
+async function synchronizeSystemSnapshot() {
+  await initializeSystemCycle();
+  const settings = await db.settings.get('primary');
+  if (settings) await prepareDailySystems(settings);
+  return readSnapshot();
+}
+
+let resumeTask: Promise<GameSnapshot> | undefined;
+
+async function getResumeSnapshot() {
+  const task = resumeTask ?? synchronizeSystemSnapshot();
+  resumeTask = task;
+  try {
+    return await task;
+  } finally {
+    if (resumeTask === task) resumeTask = undefined;
   }
 }
 
@@ -228,12 +250,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
   async refresh() {
     try {
-      await initializeSystemCycle();
-      const settings = await db.settings.get('primary');
-      if (settings) {
-        await prepareDailySystems(settings);
-      }
       set({ ...(await readSnapshot()), error: undefined });
+    } catch (error) {
+      set({ error: error instanceof Error ? error.message : 'System refresh failed.' });
+    }
+  },
+  async resume() {
+    try {
+      set({ ...(await getResumeSnapshot()), error: undefined });
     } catch (error) {
       set({ error: error instanceof Error ? error.message : 'System refresh failed.' });
     }
@@ -265,8 +289,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
         details,
         systemDate: get().systemDate,
       });
-      let snapshot = await readSnapshot();
-      const leveledStats = snapshot.stats.filter((stat) => {
+      const [nextStats, nextProgression] = await Promise.all([
+        db.stats.toArray(),
+        db.progression.get('primary'),
+      ]);
+      const leveledStats = nextStats.filter((stat) => {
         const before = previousStats.find((item) => item.id === stat.id);
         return before && stat.level > before.level;
       });
@@ -280,10 +307,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
             level: stat.level,
           });
         }
-        if (snapshot.progression?.rank !== previousRank) {
+        if (nextProgression?.rank !== previousRank) {
           await queueCompanionReaction({
             trigger: 'rank-up',
-            sourceId: `rank:${snapshot.progression?.rank}:${snapshot.progression?.lastRankUpAt ?? ''}`,
+            sourceId: `rank:${nextProgression?.rank}:${nextProgression?.lastRankUpAt ?? ''}`,
             companionId: 'snow',
           });
         } else if (!leveledStats.length && mission) {
@@ -301,7 +328,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
           });
         }
       }
-      snapshot = await readSnapshot();
+      const snapshot = await readSnapshot();
       set({
         ...snapshot,
         rewardNotice: {
@@ -428,8 +455,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const previousStats = get().stats;
       const event = get().dailyEvent;
       const result = await completeEmergencyQuest(get().systemDate);
-      let snapshot = await readSnapshot();
-      const leveledStats = snapshot.stats.filter((stat) => {
+      const nextStats = await db.stats.toArray();
+      const leveledStats = nextStats.filter((stat) => {
         const before = previousStats.find((item) => item.id === stat.id);
         return before && stat.level > before.level;
       });
@@ -448,7 +475,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         sourceId: `daily-event:${get().systemDate}:${event?.templateId ?? 'rare'}`,
         companionId: template?.companionId,
       });
-      snapshot = await readSnapshot();
+      const snapshot = await readSnapshot();
       set({
         ...snapshot,
         rewardNotice: {

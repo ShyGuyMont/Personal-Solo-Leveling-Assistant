@@ -106,7 +106,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       data-system-state={systemState}
       data-cycle={cycle}
     >
-      <RealmTransition key={path} realm={realm} />
+      <RealmTransition key={realm} realm={realm} />
       <div className="ambient-grid" />
       <div className="ambient-orb ambient-orb--mint" />
       <div className="ambient-orb ambient-orb--purple" />
@@ -146,9 +146,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </header>
       <SystemHud realm={realm} state={systemState} />
-      <main className="page-container" key={path}>
-        {children}
-      </main>
+      <main className="page-container">{children}</main>
       <nav className="bottom-nav" aria-label="Primary">
         {NAV.map(({ to, label, icon: Icon }) => (
           <NavLink

@@ -23,7 +23,7 @@ const STEPS = [
 ];
 
 export function FirstDayGuide() {
-  const { settings, refresh } = useGameStore();
+  const { settings, resume } = useGameStore();
   const [step, setStep] = useState(0);
   if (!settings || settings.firstDayGuideCompleted) return null;
   const current = STEPS[step];
@@ -31,7 +31,7 @@ export function FirstDayGuide() {
 
   const finish = async () => {
     await setFirstDayGuideCompleted(true);
-    await refresh();
+    await resume();
   };
 
   return (

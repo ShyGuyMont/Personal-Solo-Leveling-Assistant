@@ -40,7 +40,7 @@ import type {
 } from '@/types/game';
 
 export function SettingsPage() {
-  const { profile, settings, missions, titles, refresh, load } = useGameStore();
+  const { profile, settings, missions, titles, refresh, resume, load } = useGameStore();
   const [displayName, setDisplayName] = useState(profile?.displayName ?? '');
   const [systemTitle, setSystemTitle] = useState(profile?.systemTitle ?? '');
   const [draft, setDraft] = useState<Settings | undefined>(settings);
@@ -114,7 +114,7 @@ export function SettingsPage() {
     });
     setSaved(true);
     window.setTimeout(() => setSaved(false), 1800);
-    await refresh();
+    await resume();
   };
 
   return (

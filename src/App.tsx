@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import { AppShell } from '@/components/AppShell';
 import { DailyReviewModal } from '@/components/DailyReviewModal';
 import { DailyEventOverlay } from '@/components/DailyEventOverlay';
@@ -12,107 +12,91 @@ import { FirstDayGuide } from '@/components/FirstDayGuide';
 import { ProgressionOverlay } from '@/components/ProgressionOverlay';
 import { ErrorToast, RewardToast } from '@/components/Toasts';
 import { UpdatePrompt } from '@/components/UpdatePrompt';
-import { LoadingScreen } from '@/components/LoadingScreen';
+import { LoadingScreen, RouteLoadingScreen } from '@/components/LoadingScreen';
 import { OnboardingPage } from '@/pages/OnboardingPage';
+import { getRoutePage, preloadRoute, PRIMARY_ROUTE_PATHS } from '@/routeModules';
 import { useRoutePath } from '@/routeState';
 import { useGameStore } from '@/store/useGameStore';
+import { createAppResumeController } from '@/utils/appLifecycle';
 
-const DashboardPage = lazy(() =>
-  import('@/pages/DashboardPage').then((module) => ({ default: module.DashboardPage })),
-);
-const MissionsPage = lazy(() =>
-  import('@/pages/MissionsPage').then((module) => ({ default: module.MissionsPage })),
-);
-const StatusPage = lazy(() =>
-  import('@/pages/StatusPage').then((module) => ({ default: module.StatusPage })),
-);
-const ChallengesPage = lazy(() =>
-  import('@/pages/ChallengesPage').then((module) => ({ default: module.ChallengesPage })),
-);
-const ArchivePage = lazy(() =>
-  import('@/pages/ArchivePage').then((module) => ({ default: module.ArchivePage })),
-);
-const SettingsPage = lazy(() =>
-  import('@/pages/SettingsPage').then((module) => ({ default: module.SettingsPage })),
-);
-const PartyChatPage = lazy(() =>
-  import('@/pages/PartyChatPage').then((module) => ({ default: module.PartyChatPage })),
-);
-const HeadquartersPage = lazy(() =>
-  import('@/pages/HeadquartersPage').then((module) => ({ default: module.HeadquartersPage })),
-);
-const AboutPage = lazy(() =>
-  import('@/pages/AboutPage').then((module) => ({ default: module.AboutPage })),
-);
-const CampaignsPage = lazy(() =>
-  import('@/pages/CampaignsPage').then((module) => ({ default: module.CampaignsPage })),
-);
-const UpdateCenterPage = lazy(() =>
-  import('@/pages/UpdateCenterPage').then((module) => ({ default: module.UpdateCenterPage })),
-);
-const TreasuryPage = lazy(() =>
-  import('@/pages/TreasuryPage').then((module) => ({ default: module.TreasuryPage })),
-);
-const TrainingHallPage = lazy(() =>
-  import('@/pages/TrainingHallPage').then((module) => ({ default: module.TrainingHallPage })),
-);
-const ScriptureSanctuaryPage = lazy(() =>
-  import('@/pages/ScriptureSanctuaryPage').then((module) => ({
-    default: module.ScriptureSanctuaryPage,
-  })),
-);
-const KitchenPage = lazy(() =>
-  import('@/pages/KitchenPage').then((module) => ({ default: module.KitchenPage })),
-);
+type IdleWindow = Window & {
+  requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number;
+  cancelIdleCallback?: (handle: number) => void;
+};
 
 export function App() {
-  const { loading, profile, load, refresh } = useGameStore();
+  const loading = useGameStore((state) => state.loading);
+  const profile = useGameStore((state) => state.profile);
+  const load = useGameStore((state) => state.load);
+  const resume = useGameStore((state) => state.resume);
   const path = useRoutePath();
+  const profileReady = Boolean(profile);
 
   useEffect(() => {
     void load();
   }, [load]);
 
   useEffect(() => {
-    const resume = () => {
-      if (document.visibilityState === 'visible') void refresh();
+    const controller = createAppResumeController(() => void resume());
+    const markInactive = () => controller.markInactive();
+    const resumeIfReady = () => controller.resumeIfReady(document.visibilityState === 'visible');
+    const handleVisibility = () => {
+      if (document.visibilityState === 'hidden') markInactive();
+      else resumeIfReady();
     };
-    document.addEventListener('visibilitychange', resume);
-    window.addEventListener('focus', resume);
+    document.addEventListener('visibilitychange', handleVisibility);
+    window.addEventListener('blur', markInactive);
+    window.addEventListener('focus', resumeIfReady);
     return () => {
-      document.removeEventListener('visibilitychange', resume);
-      window.removeEventListener('focus', resume);
+      controller.dispose();
+      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('blur', markInactive);
+      window.removeEventListener('focus', resumeIfReady);
     };
-  }, [refresh]);
+  }, [resume]);
+
+  useEffect(() => {
+    if (!profileReady) return;
+    const connection = (
+      navigator as Navigator & {
+        connection?: { saveData?: boolean; effectiveType?: string };
+      }
+    ).connection;
+    if (connection?.saveData || connection?.effectiveType === '2g') return;
+    const idleWindow = window as IdleWindow;
+    if (!idleWindow.requestIdleCallback) return;
+    let canceled = false;
+    let idleHandle: number | undefined;
+    let routeIndex = 0;
+    const warmNextRoute = () => {
+      if (canceled || routeIndex >= PRIMARY_ROUTE_PATHS.length) return;
+      idleHandle = idleWindow.requestIdleCallback?.(
+        () => {
+          const nextRoute = PRIMARY_ROUTE_PATHS[routeIndex++];
+          void preloadRoute(nextRoute).finally(warmNextRoute);
+        },
+        { timeout: 2_000 },
+      );
+    };
+    const startTimer = window.setTimeout(warmNextRoute, 1_000);
+    return () => {
+      canceled = true;
+      window.clearTimeout(startTimer);
+      if (idleHandle !== undefined) idleWindow.cancelIdleCallback?.(idleHandle);
+    };
+  }, [profileReady]);
 
   if (loading) return <LoadingScreen />;
   if (!profile) return <OnboardingPage />;
-  const RoutePage =
-    {
-      '/': DashboardPage,
-      '/missions': MissionsPage,
-      '/status': StatusPage,
-      '/challenges': ChallengesPage,
-      '/archive': ArchivePage,
-      '/settings': SettingsPage,
-      '/party-chat': PartyChatPage,
-      '/headquarters': HeadquartersPage,
-      '/about': AboutPage,
-      '/campaigns': CampaignsPage,
-      '/update-center': UpdateCenterPage,
-      '/treasury': TreasuryPage,
-      '/training-hall': TrainingHallPage,
-      '/sanctuary': ScriptureSanctuaryPage,
-      '/kitchen': KitchenPage,
-    }[path] ?? DashboardPage;
+  const RoutePage = getRoutePage(path);
 
   return (
     <>
-      <Suspense fallback={<LoadingScreen />}>
-        <AppShell>
+      <AppShell>
+        <Suspense fallback={<RouteLoadingScreen />}>
           <RoutePage />
-        </AppShell>
-      </Suspense>
+        </Suspense>
+      </AppShell>
       <DailyReviewModal />
       <FirstDayGuide />
       <DailyEventOverlay />
