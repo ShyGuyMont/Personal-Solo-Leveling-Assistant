@@ -85,6 +85,20 @@ const MILESTONE_LINES: Record<CompanionId, Record<'rank' | 'level' | 'achievemen
       'Achievement secured. You kept swinging until the outcome had to change.',
     ],
   },
+  mira: {
+    rank: [
+      'A new class. Breathe before you rush toward the next horizon—your whole path is allowed to arrive here with you.',
+      'Classification advanced. Power became more useful because you learned to carry it with range and control.',
+    ],
+    level: [
+      'Another threshold opened. Notice how much more space exists around challenges that once made everything tighten.',
+      'Level milestone confirmed. Quiet, repeated control created a change loud enough for the System to name.',
+    ],
+    achievement: [
+      'Stay in this moment for one full breath. Pride does not need tension to be real.',
+      'Achievement secured. Let the victory soften your shoulders before it sharpens the next plan.',
+    ],
+  },
   amara: {
     rank: [
       'A new class—and you are still allowed to be known beyond what you achieve. Let the people who love you celebrate.',
@@ -152,6 +166,7 @@ export function getMilestoneCelebration(event: ProgressionEvent) {
       'cipher',
       'haven',
       'ember',
+      'mira',
       'amara',
       'cassian',
       'saffron',

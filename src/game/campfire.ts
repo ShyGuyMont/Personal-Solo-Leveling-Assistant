@@ -158,6 +158,22 @@ function amaraLines(metrics: CampfireMetrics) {
   ];
 }
 
+function miraLines(metrics: CampfireMetrics) {
+  const movement = metrics.categoryCompleted.physical ?? 0;
+  if (movement) {
+    return [
+      `${movement} physical mission${movement === 1 ? '' : 's'} reached the record. Next week, give at least one of them a quiet ending: breathe, restore range, and let recovery keep the strength usable.`,
+      `The body answered ${movement} time${movement === 1 ? '' : 's'} this week. Notice where movement feels freer now, and where a patient mobility protocol could create room.`,
+      `${movement} movement signal${movement === 1 ? '' : 's'} cleared. I am proud of the work—and I am reserving one calm session for the joints and core carrying it.`,
+    ];
+  }
+  return [
+    'The physical path was quiet in the finalized record. We can reopen it without impact: one breath-led mobility session, gentle core work, and no demand to be impressive.',
+    'No movement mission reached the record this week. Begin with range, not punishment—ten calm minutes can make the next step feel possible again.',
+    'The body received no logged training signal. Let the next one be an invitation: supported stretching, steady breathing, and a core exercise you can control.',
+  ];
+}
+
 function cassianLines(metrics: CampfireMetrics) {
   const reviews = metrics.treasuryReviews ?? 0;
   const wins = metrics.noEatingOutWins ?? 0;
@@ -243,6 +259,7 @@ export function buildCampfireMessages(
       slot: 'haven',
     },
     { companionId: 'ember', role: 'response', pool: emberLines(metrics), slot: 'ember' },
+    { companionId: 'mira', role: 'response', pool: miraLines(metrics), slot: 'mira' },
     { companionId: 'amara', role: 'response', pool: amaraLines(metrics), slot: 'amara' },
     { companionId: 'cassian', role: 'response', pool: cassianLines(metrics), slot: 'cassian' },
     { companionId: 'saffron', role: 'response', pool: saffronLines(metrics), slot: 'saffron' },

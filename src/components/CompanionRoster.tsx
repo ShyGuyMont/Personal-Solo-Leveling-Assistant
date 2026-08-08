@@ -18,7 +18,7 @@ export function CompanionRoster({ detailed = false }: { detailed?: boolean }) {
       <header className="section-header">
         <div>
           <p className="eyebrow">PARTY HEADQUARTERS</p>
-          <h2>Snow & your eight System companions</h2>
+          <h2>Snow & your nine System companions</h2>
         </div>
         <Link
           to="/headquarters"

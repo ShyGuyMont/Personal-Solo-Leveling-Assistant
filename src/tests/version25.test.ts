@@ -161,7 +161,7 @@ describe('Campaign systems through Version 3.0', () => {
     const second = await ensureMonthlyCouncil('2026-08-01');
     expect(first?.id).toBe('monthly-council:2026-07-01');
     expect(second?.id).toBe(first?.id);
-    expect(first?.messages).toHaveLength(10);
+    expect(first?.messages).toHaveLength(11);
     expect(first?.messages.map((message) => message.companionId)).toEqual([
       'snow',
       'rook',
@@ -169,6 +169,7 @@ describe('Campaign systems through Version 3.0', () => {
       'cipher',
       'haven',
       'ember',
+      'mira',
       'amara',
       'cassian',
       'saffron',

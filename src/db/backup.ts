@@ -1,7 +1,7 @@
 import { db, TABLE_NAMES } from '@/db/database';
 import type { BackupSnapshot, Profile, SaveFile, Settings, AccountProgression } from '@/types/game';
 
-export const SAVE_VERSION = 12;
+export const SAVE_VERSION = 13;
 export const MAX_IMPORT_BYTES = 32 * 1024 * 1024;
 const MAX_SNAPSHOTS = 5;
 const FORBIDDEN_KEYS = new Set(['__proto__', 'prototype', 'constructor']);
@@ -157,6 +157,8 @@ function migrateData(
         version <= 11 && !withCassian.includes('saffron')
           ? [...withCassian, 'saffron']
           : withCassian;
+      const withMira =
+        version <= 12 && !withSaffron.includes('mira') ? [...withSaffron, 'mira'] : withSaffron;
       return {
         privacyScreenEnabled: false,
         sensitiveMissionAlias: 'Integrity Protocol',
@@ -168,7 +170,7 @@ function migrateData(
         companionMode: 'balanced',
         dailyBriefingEnabled: true,
         ...row,
-        enabledCompanionIds: ['snow', ...withSaffron.filter((id) => id !== 'snow')],
+        enabledCompanionIds: ['snow', ...withMira.filter((id) => id !== 'snow')],
       };
     }
     return row;
@@ -361,6 +363,9 @@ function validateData(data: Record<string, unknown[]>) {
     'shadow-hunter-gym',
     'heavenly-restriction-gym',
   ]);
+  const mobilityDisciplines = new Set(['mobility', 'yoga', 'pilates']);
+  const mobilityMoods = new Set(['still-waters', 'open-sky', 'quiet-fire']);
+  const mobilityKinds = new Set(['breath', 'mobility', 'yoga', 'pilates', 'core']);
   for (const row of data.trainingSessions) {
     if (
       !isObject(row) ||
@@ -384,6 +389,47 @@ function validateData(data: Record<string, unknown[]>) {
       typeof row.bossExtensionUsed !== 'boolean'
     ) {
       throw new Error('A Training Hall record contains an impossible value.');
+    }
+    if (
+      (row.mobilityDiscipline !== undefined &&
+        !mobilityDisciplines.has(String(row.mobilityDiscipline))) ||
+      (row.mobilityMoodId !== undefined && !mobilityMoods.has(String(row.mobilityMoodId))) ||
+      (row.mobilityEstimatedMinutes !== undefined &&
+        (![14, 18, 22].includes(Number(row.mobilityEstimatedMinutes)) ||
+          !Number.isInteger(row.mobilityEstimatedMinutes))) ||
+      (row.mobilityCompletedMovementIds !== undefined &&
+        (!Array.isArray(row.mobilityCompletedMovementIds) ||
+          row.mobilityCompletedMovementIds.length > 12 ||
+          row.mobilityCompletedMovementIds.some((id) => typeof id !== 'string' || id.length > 100)))
+    ) {
+      throw new Error('A mobility protocol contains an impossible value.');
+    }
+    if (row.mobilityMovements !== undefined) {
+      if (
+        !Array.isArray(row.mobilityMovements) ||
+        row.mobilityMovements.length < 4 ||
+        row.mobilityMovements.length > 12 ||
+        row.mobilityMovements.some(
+          (movement) =>
+            !isObject(movement) ||
+            typeof movement.id !== 'string' ||
+            movement.id.length > 100 ||
+            typeof movement.name !== 'string' ||
+            movement.name.length > 150 ||
+            !mobilityKinds.has(String(movement.kind)) ||
+            typeof movement.prescription !== 'string' ||
+            !Array.isArray(movement.instructions) ||
+            movement.instructions.length < 1 ||
+            movement.instructions.length > 5 ||
+            movement.instructions.some(
+              (instruction) => typeof instruction !== 'string' || instruction.length > 500,
+            ) ||
+            typeof movement.breathingCue !== 'string' ||
+            movement.breathingCue.length > 500,
+        )
+      ) {
+        throw new Error('A mobility movement contains an impossible value.');
+      }
     }
     if (row.exerciseLoads !== undefined) {
       if (
@@ -493,6 +539,7 @@ function validateData(data: Record<string, unknown[]>) {
     'cipher',
     'haven',
     'ember',
+    'mira',
     'amara',
     'cassian',
     'saffron',

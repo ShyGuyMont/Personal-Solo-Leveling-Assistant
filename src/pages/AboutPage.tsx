@@ -374,15 +374,19 @@ export function AboutPage() {
             the reps for a working set before tapping its numbered check box. If you choose Gym or a
             specific workout by accident, use <strong>Change gym workout</strong> or
             <strong> Leave Gym / choose another path</strong>. Leaving an unfinished choice records
-            no failure, penalty, mission credit, or XP. Conditioning and Recovery remain simple
-            completed-fact logs.
+            no failure, penalty, mission credit, or XP. Conditioning remains an honest
+            completed-fact log. Recovery opens Mira’s Stillpoint Protocol, where her randomized mood
+            selects a guided Mobility, Yoga, or Pilates sequence with exact holds, setup, breathing
+            cues, and core work in every session.
           </p>
           <p>
-            You may clear both a Gym Deployment and a Home Circuit on the same day. This awards one
-            fixed <strong>+{BALANCE.training.doubleDeploymentAccountXp} XP</strong> Double
-            Deployment surge plus its displayed stat rewards. It is never multiplied by Daily
-            Command and can be awarded only once for that date. The second session is optional;
-            recovery and sustainable weekly progress remain more important than chasing the bonus.
+            Each of the four Training Hall paths can be cleared once per day. A second distinct path
+            awards a <strong>+150 XP</strong> Double Deployment surge, a third adds a{' '}
+            <strong>+200 XP</strong> Triple Deployment surge, and all four add a final{' '}
+            <strong>+250 XP</strong> Full Spectrum surge, each with displayed stat rewards. Daily
+            Workout itself still pays once, and the surges are never multiplied by Daily Command.
+            Every additional session is optional; recovery and sustainable progress remain more
+            important than chasing a bonus.
           </p>
           <p>
             There is no readiness quiz and no separate warm-up gate. Choose loads and exercise
@@ -448,8 +452,8 @@ export function AboutPage() {
             Daily missions award the account and stat XP printed on their cards. Daily Workout is
             worth 75 account XP and can be cleared once through any Training Hall path. Perfect
             Days, completed challenges, Class Trials, Companion Quest chapters, Treasury reviews,
-            rewarded Kitchen Orders, Double Deployment surges, and accepted rare events award their
-            own displayed one-time XP. Campaign Arc milestones, emotional check-ins, support
+            rewarded Kitchen Orders, multi-path Training surges, and accepted rare events award
+            their own displayed one-time XP. Campaign Arc milestones, emotional check-ins, support
             conversations, Campfires, Councils, repeat Sanctuary studies, Stronghold sessions, and
             ordinary Training Hall overtime are records or guidance only and do not create hidden
             XP.
@@ -540,11 +544,11 @@ export function AboutPage() {
           <summary>How do Weekly Campfires and Monthly Councils work?</summary>
           <p>
             Campfires summarize a completed week with at least one finalized Daily Review. Monthly
-            Councils assemble all nine companions after a completed calendar month and review
-            mission balance, Perfect Days, levels, classes, titles, Campaign milestones, quest
-            chapters, and relationship actions that were actually recorded. Their commentary is
-            saved in Headquarters and the Archive, and never changes scoring. The Council also gives
-            you an optional place to write one next-month intention.
+            Councils assemble all ten companions after a completed calendar month and review mission
+            balance, Perfect Days, levels, classes, titles, Campaign milestones, quest chapters, and
+            relationship actions that were actually recorded. Their commentary is saved in
+            Headquarters and the Archive, and never changes scoring. The Council also gives you an
+            optional place to write one next-month intention.
           </p>
         </details>
         <details>

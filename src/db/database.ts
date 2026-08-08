@@ -515,6 +515,39 @@ export class SystemDatabase extends Dexie {
         await metadata.put({ id: 'schema-seeded', value: 12, updatedAt: now });
         await metadata.put({ id: 'app-version', value: '5.0.0', updatedAt: now });
       });
+    this.version(13)
+      .stores({
+        trainingSessions:
+          'id,date,location,status,circuitId,gymWorkoutId,[date+location],[date+status]',
+      })
+      .upgrade(async (transaction) => {
+        const now = new Date().toISOString();
+        const settings = transaction.table<Settings, string>('settings');
+        const current = await settings.get('primary');
+        if (current) {
+          await settings.update('primary', {
+            enabledCompanionIds: Array.from(
+              new Set([
+                ...(current.enabledCompanionIds ?? [
+                  'snow',
+                  'rook',
+                  'selah',
+                  'cipher',
+                  'haven',
+                  'ember',
+                  'amara',
+                  'cassian',
+                  'saffron',
+                ]),
+                'mira',
+              ]),
+            ),
+          });
+        }
+        const metadata = transaction.table<AppMetadata, string>('appMetadata');
+        await metadata.put({ id: 'schema-seeded', value: 13, updatedAt: now });
+        await metadata.put({ id: 'app-version', value: '6.3.0', updatedAt: now });
+      });
   }
 }
 

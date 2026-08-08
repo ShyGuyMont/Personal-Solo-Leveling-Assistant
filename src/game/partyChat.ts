@@ -20,6 +20,7 @@ const PARTY_ORDER: Array<{
   { slot: 'cipher', companionId: 'cipher', role: 'response' },
   { slot: 'haven', companionId: 'haven', role: 'response' },
   { slot: 'ember', companionId: 'ember', role: 'response' },
+  { slot: 'mira', companionId: 'mira', role: 'response' },
   { slot: 'amara', companionId: 'amara', role: 'response' },
   { slot: 'cassian', companionId: 'cassian', role: 'response' },
   { slot: 'saffron', companionId: 'saffron', role: 'response' },

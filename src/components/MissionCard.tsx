@@ -181,7 +181,11 @@ export function MissionCard({
         </div>
       </div>
       {expanded && (
-        <div className="mission-card__details">
+        <div
+          className={`mission-card__details ${
+            mission.method === 'day-boundary' ? 'mission-card__details--day-boundary' : ''
+          }`}
+        >
           <header className="mission-detail-header">
             <div>
               <p className="eyebrow">MISSION CONFIRMATION</p>

@@ -7,6 +7,7 @@ import {
   assignGymWorkout,
   assignHomeTraining,
   awardDoubleDeploymentReward,
+  awardMultiPathRewards,
   completeGymTraining,
   completeHomeTraining,
   completeLoggedTraining,
@@ -184,6 +185,33 @@ describe('Training Hall', () => {
     expect(await db.trainingSessions.where('date').equals(DATE).toArray()).toHaveLength(2);
     expect((await awardDoubleDeploymentReward(DATE)).alreadyAwarded).toBe(true);
     expect((await db.progression.get('primary'))?.totalXp).toBe(150);
+
+    const recovery = await selectTrainingLocation(DATE, 'recovery');
+    await completeLoggedTraining({
+      sessionId: recovery.id,
+      date: DATE,
+      location: 'recovery',
+      duration: recovery.mobilityEstimatedMinutes ?? 14,
+      difficulty: 2,
+      mobilityCompletedMovementIds: recovery.mobilityMovements?.map((movement) => movement.id),
+    });
+    expect((await db.progression.get('primary'))?.totalXp).toBe(350);
+    const ladder = await awardMultiPathRewards(DATE);
+    expect(ladder.earnedTiers).toEqual([2, 3]);
+    expect(ladder.newlyAwardedTiers).toEqual([]);
+    expect((await db.progression.get('primary'))?.totalXp).toBe(350);
+
+    const conditioning = await selectTrainingLocation(DATE, 'conditioning');
+    await completeLoggedTraining({
+      sessionId: conditioning.id,
+      date: DATE,
+      location: 'conditioning',
+      duration: 30,
+      difficulty: 3,
+      conditioningType: 'walk-run',
+    });
+    expect((await db.progression.get('primary'))?.totalXp).toBe(600);
+    expect((await awardMultiPathRewards(DATE)).earnedTiers).toEqual([2, 3, 4]);
   });
 
   it('keeps conditioning and recovery as bounded non-gym paths', async () => {
@@ -199,13 +227,33 @@ describe('Training Hall', () => {
     expect(conditioning.difficulty).toBe(5);
 
     const recoveryDate = '2026-08-04' as LocalDateKey;
-    await selectTrainingLocation(recoveryDate, 'recovery');
+    const assignedRecovery = await selectTrainingLocation(recoveryDate, 'recovery');
+    expect(assignedRecovery.mobilityMovements).toHaveLength(
+      assignedRecovery.mobilityMovements?.length ?? 0,
+    );
+    expect(assignedRecovery.mobilityMovements?.length).toBeGreaterThanOrEqual(6);
+    expect(assignedRecovery.mobilityMovements?.length).toBeLessThanOrEqual(8);
+    expect(assignedRecovery.mobilityMovements?.some((movement) => movement.kind === 'core')).toBe(
+      true,
+    );
+    expect(assignedRecovery.mobilityMovements?.some((movement) => movement.kind === 'breath')).toBe(
+      true,
+    );
+    expect(
+      assignedRecovery.mobilityMovements?.every(
+        (movement) => movement.instructions.length > 0 && movement.breathingCue.length > 0,
+      ),
+    ).toBe(true);
     const recovery = await completeLoggedTraining({
+      sessionId: assignedRecovery.id,
       date: recoveryDate,
       location: 'recovery',
       duration: 20,
       difficulty: 2,
       recoveryProtocol: 'PT planks and mobility',
+      mobilityCompletedMovementIds: assignedRecovery.mobilityMovements?.map(
+        (movement) => movement.id,
+      ),
     });
     expect(recovery.recoveryProtocol).toBe('PT planks and mobility');
   });

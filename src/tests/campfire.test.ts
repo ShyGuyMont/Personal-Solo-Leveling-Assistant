@@ -39,6 +39,7 @@ describe('Weekly Campfire Recaps', () => {
       'cipher',
       'haven',
       'ember',
+      'mira',
       'amara',
       'cassian',
       'saffron',

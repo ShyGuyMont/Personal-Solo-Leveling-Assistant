@@ -220,7 +220,7 @@ describe('save validation and recovery', () => {
     });
 
     const save = await createSaveFile();
-    expect(save.version).toBe(12);
+    expect(save.version).toBe(13);
     for (const table of [
       'dailyBriefings',
       'campaignArcs',
@@ -302,12 +302,13 @@ describe('save validation and recovery', () => {
     save.checksum = await digest(save.data);
 
     const prepared = await prepareSaveImport(asFile(save));
-    expect(prepared.save.version).toBe(12);
+    expect(prepared.save.version).toBe(13);
     expect(prepared.save.data.dailyBriefings).toEqual([]);
     const migrated = prepared.save.data.settings[0] as Record<string, unknown>;
     expect(migrated.enabledCompanionIds).toContain('amara');
     expect(migrated.enabledCompanionIds).toContain('cassian');
     expect(migrated.enabledCompanionIds).toContain('saffron');
+    expect(migrated.enabledCompanionIds).toContain('mira');
     expect(migrated.dailyBriefingEnabled).toBe(true);
     expect(prepared.save.data.treasurySettings).toHaveLength(1);
     expect(prepared.save.data.treasuryTransactions).toEqual([]);

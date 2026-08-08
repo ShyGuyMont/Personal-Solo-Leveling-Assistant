@@ -339,7 +339,7 @@ export function DashboardPage() {
               <small>FULL PARTY</small>
               <strong>Party Headquarters</strong>
             </span>
-            <em>Nine companion links</em>
+            <em>Ten companion links</em>
             <ChevronRight size={17} />
             <RealmVista />
           </Link>

@@ -57,7 +57,7 @@ type SupportSpeaker = CompanionId | 'snow-close';
 
 const BASE_SUPPORT_DIALOGUE: Record<
   SupportTopicId,
-  Record<Exclude<SupportSpeaker, 'cassian' | 'saffron'>, readonly string[]>
+  Record<Exclude<SupportSpeaker, 'mira' | 'cassian' | 'saffron'>, readonly string[]>
 > = {
   motivation: {
     snow: [
@@ -379,11 +379,45 @@ const SAFFRON_SUPPORT_DIALOGUE: Record<SupportTopicId, readonly string[]> = {
   ],
 };
 
+const MIRA_SUPPORT_DIALOGUE: Record<SupportTopicId, readonly string[]> = {
+  motivation: [
+    'Begin with one breath you do not rush and one movement you can control. Momentum is allowed to arrive quietly.',
+    'Stand, roll the shoulders once, and notice the space you already created. The next step can grow from that.',
+    'You do not need intensity to prove you started. Give me two calm minutes and let the body change the conversation.',
+  ],
+  'make-a-plan': [
+    'Build breathing room into the plan on purpose: one priority, one support task, and one place where your body gets to reset.',
+    'A workable sequence has transitions. Decide what comes first, then leave one minute to breathe before the next demand.',
+    'Keep the plan mobile. If the day tightens, shorten the task without abandoning the direction.',
+  ],
+  'faith-perspective': [
+    'Be still long enough to remember that your worth is not improved by strain. Receive the breath, then choose the faithful step.',
+    'The body can become a quiet place of gratitude: feet grounded, shoulders open, breath received rather than earned.',
+    'Peace is not the absence of work. It is the center from which the next right movement can begin.',
+  ],
+  'calm-down': [
+    'Let the exhale last two counts longer than the inhale. Do that five times before asking your mind for another answer.',
+    'Put both feet down and release the tongue from the roof of the mouth. We are telling the body this exact moment is survivable.',
+    'No deep stretch while the alarm is loud. Breathe, make the posture comfortable, and let safety arrive before range.',
+  ],
+  recover: [
+    'Recovery does not need to erase what happened. It only needs to make the next healthy movement possible.',
+    'Choose supported positions and a gentle core brace. We rebuild trust with the body before we ask it for output.',
+    'Nothing is gained by forcing a stiff or exhausted body to confess. Listen, adjust, and leave with more room than you entered.',
+  ],
+  celebrate: [
+    'Stay with the victory for one full breathing cycle. Let pride expand the chest without tightening the shoulders.',
+    'The moment is complete even if you do not immediately improve it. Breathe and receive what you accomplished.',
+    'Beautiful work. Give the body a gentle stretch and let celebration become something you can actually feel.',
+  ],
+};
+
 export const SUPPORT_DIALOGUE = Object.fromEntries(
   SUPPORT_TOPICS.map(({ id }) => [
     id,
     {
       ...BASE_SUPPORT_DIALOGUE[id],
+      mira: MIRA_SUPPORT_DIALOGUE[id],
       cassian: CASSIAN_SUPPORT_DIALOGUE[id],
       saffron: SAFFRON_SUPPORT_DIALOGUE[id],
     },

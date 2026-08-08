@@ -7,6 +7,11 @@ import {
   getTrainingCircuit,
 } from '@/config/training';
 import { BALANCE } from '@/config/balance';
+import {
+  generateMobilityProtocol,
+  getMobilityDiscipline,
+  getMobilityMood,
+} from '@/config/mobility';
 import { db } from '@/db/database';
 import { putLevelHistory } from '@/game/engine';
 import { applyStatChange } from '@/game/stats';
@@ -35,6 +40,17 @@ export interface DoubleDeploymentReward {
   accountXp: number;
   alreadyAwarded: boolean;
 }
+
+export type MultiPathRewardTier = 2 | 3 | 4;
+
+export interface MultiPathRewardSummary {
+  completedPathCount: number;
+  earnedTiers: MultiPathRewardTier[];
+  newlyAwardedTiers: MultiPathRewardTier[];
+  totalAccountXp: number;
+}
+
+const MULTI_PATH_TIERS = [2, 3, 4] as const;
 
 function randomUnit() {
   if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
@@ -218,7 +234,7 @@ export async function getTrainingHallData(date: LocalDateKey) {
   );
   const completed = todaySessions.filter((session) => session.status === 'completed');
   const today = open ?? completed.at(-1) ?? todaySessions.at(-1);
-  const [recent, gymAvailability, doubleTransaction] = await Promise.all([
+  const [recent, gymAvailability, rewardTransactions] = await Promise.all([
     db.trainingSessions
       .orderBy('date')
       .reverse()
@@ -226,8 +242,15 @@ export async function getTrainingHallData(date: LocalDateKey) {
       .limit(20)
       .toArray(),
     getGymWorkoutAvailability(date),
-    db.xpTransactions.get(stableId('training', date, 'double-deployment')),
+    Promise.all(
+      MULTI_PATH_TIERS.map((tier) =>
+        db.xpTransactions.get(stableId('training', date, BALANCE.training.multiPathTiers[tier].id)),
+      ),
+    ),
   ]);
+  const multiPathRewardTiers = MULTI_PATH_TIERS.filter((_tier, index) =>
+    Boolean(rewardTransactions[index]),
+  );
   return {
     today,
     todaySessions,
@@ -235,7 +258,8 @@ export async function getTrainingHallData(date: LocalDateKey) {
       (right.completedAt ?? right.updatedAt).localeCompare(left.completedAt ?? left.updatedAt),
     ),
     gymAvailability,
-    doubleDeploymentRewarded: Boolean(doubleTransaction),
+    doubleDeploymentRewarded: multiPathRewardTiers.includes(2),
+    multiPathRewardTiers,
   };
 }
 
@@ -263,18 +287,12 @@ export async function assignHomeTraining(
     }
   }
   if (!existing) {
-    const completed = rows.filter((session) => session.status === 'completed');
     const openOther = rows.find(
       (session) =>
         session.location !== 'home' && ['assigned', 'active', 'paused'].includes(session.status),
     );
     if (openOther) {
       throw new Error('End the active deployment before opening a Home Circuit.');
-    }
-    if (completed.length && !(completed.length === 1 && completed[0].location === 'gym')) {
-      throw new Error(
-        'Today’s recorded deployment is complete. Only a Home + Gym Double Deployment can be added.',
-      );
     }
   }
   const id = existing?.id ?? nextSessionId(date, 'home', rows);
@@ -291,24 +309,37 @@ export async function selectTrainingLocation(date: LocalDateKey, location: Train
   );
   if (completedSamePath) return completedSamePath;
   const open = rows.find((session) => ['assigned', 'active', 'paused'].includes(session.status));
-  if (open && open.location === location) return open;
-  if (open && ['active', 'paused'].includes(open.status)) {
-    throw new Error('End the active timer before switching training paths.');
-  }
-  const completed = rows.filter((session) => session.status === 'completed');
-  if (completed.length) {
-    const pairAllowed =
-      completed.length === 1 && completed[0].location === 'home' && location === 'gym';
-    if (!pairAllowed) {
-      throw new Error(
-        'Today’s recorded deployment is complete. Only a Home + Gym Double Deployment can be added.',
-      );
+  if (open && open.location === location) {
+    if (location === 'recovery' && !open.mobilityMovements?.length) {
+      const mobility = generateMobilityProtocol(randomUnit);
+      const upgraded: TrainingSession = {
+        ...open,
+        mobilityDiscipline: mobility.discipline,
+        mobilityMoodId: mobility.mood.id,
+        mobilityMovements: mobility.movements,
+        mobilityCompletedMovementIds: [],
+        mobilityEstimatedMinutes: mobility.estimatedMinutes,
+        recoveryProtocol: `${getMobilityMood(mobility.mood.id).name} · ${getMobilityDiscipline(mobility.discipline).name}`,
+        updatedAt: new Date().toISOString(),
+      };
+      await db.trainingSessions.put(upgraded);
+      return upgraded;
     }
+    return open;
+  }
+  if (open) {
+    throw new Error('Leave the current deployment before switching training paths.');
   }
   const now = new Date().toISOString();
-  const reusable =
-    open ?? rows.find((session) => session.status === 'abandoned' && !completed.length);
+  const reusable = rows.find(
+    (session) => session.location === location && session.status === 'abandoned',
+  );
+  const mobility =
+    location === 'recovery' && !reusable?.mobilityMovements?.length
+      ? generateMobilityProtocol(randomUnit)
+      : undefined;
   const next: TrainingSession = {
+    ...reusable,
     id: reusable?.id ?? nextSessionId(date, location, rows),
     date,
     location,
@@ -318,6 +349,15 @@ export async function selectTrainingLocation(date: LocalDateKey, location: Train
     rerollUsed: reusable?.rerollUsed ?? false,
     bossExtensionUsed: false,
     assignedAt: reusable?.assignedAt ?? now,
+    mobilityDiscipline: mobility?.discipline ?? reusable?.mobilityDiscipline,
+    mobilityMoodId: mobility?.mood.id ?? reusable?.mobilityMoodId,
+    mobilityMovements: mobility?.movements ?? reusable?.mobilityMovements,
+    mobilityCompletedMovementIds: reusable?.mobilityCompletedMovementIds ?? [],
+    mobilityEstimatedMinutes: mobility?.estimatedMinutes ?? reusable?.mobilityEstimatedMinutes,
+    recoveryProtocol:
+      mobility && location === 'recovery'
+        ? `${getMobilityMood(mobility.mood.id).name} · ${getMobilityDiscipline(mobility.discipline).name}`
+        : reusable?.recoveryProtocol,
     updatedAt: now,
   };
   await db.trainingSessions.put(next);
@@ -532,7 +572,7 @@ export async function completeGymTraining(input: {
     updatedAt: now,
   };
   await db.trainingSessions.put(next);
-  await awardDoubleDeploymentReward(session.date);
+  await awardMultiPathRewards(session.date);
   return next;
 }
 
@@ -688,7 +728,7 @@ export async function completeHomeTraining(input: {
     updatedAt: now,
   };
   await db.trainingSessions.put(next);
-  await awardDoubleDeploymentReward(session.date);
+  await awardMultiPathRewards(session.date);
   return next;
 }
 
@@ -702,6 +742,7 @@ export async function completeLoggedTraining(input: {
   conditioningType?: TrainingSession['conditioningType'];
   distance?: number;
   recoveryProtocol?: string;
+  mobilityCompletedMovementIds?: string[];
   note?: string;
 }) {
   const rows = await sessionsOn(input.date);
@@ -712,8 +753,26 @@ export async function completeLoggedTraining(input: {
   if (input.location === 'gym') {
     throw new Error('Choose and complete one of Rook’s structured Gym Deployments.');
   }
+  if (existing && existing.location !== input.location) {
+    throw new Error('The selected Training Hall path no longer matches this deployment.');
+  }
+  const assignedMobilityIds = existing?.mobilityMovements?.map((movement) => movement.id) ?? [];
+  const mobilityCompletedMovementIds = Array.from(
+    new Set(
+      (input.mobilityCompletedMovementIds ?? existing?.mobilityCompletedMovementIds ?? []).filter(
+        (id) => assignedMobilityIds.includes(id),
+      ),
+    ),
+  );
+  if (
+    input.location === 'recovery' &&
+    assignedMobilityIds.some((id) => !mobilityCompletedMovementIds.includes(id))
+  ) {
+    throw new Error('Complete every assigned Stillpoint movement before recording the protocol.');
+  }
   const now = new Date().toISOString();
   const next: TrainingSession = {
+    ...existing,
     id: existing?.id ?? nextSessionId(input.date, input.location, rows),
     date: input.date,
     location: input.location,
@@ -731,36 +790,38 @@ export async function completeLoggedTraining(input: {
       input.distance && Number.isFinite(input.distance) && input.distance > 0
         ? Math.round(input.distance * 100) / 100
         : undefined,
-    recoveryProtocol: input.recoveryProtocol?.trim() || undefined,
+    recoveryProtocol: input.recoveryProtocol?.trim() || existing?.recoveryProtocol || undefined,
+    mobilityCompletedMovementIds,
     loggedDurationMinutes: Math.max(1, Math.min(1440, Math.round(input.duration))),
     note: input.note?.trim() || undefined,
     durationMinutes: undefined,
     updatedAt: now,
   };
   await db.trainingSessions.put(next);
+  await awardMultiPathRewards(input.date);
   return next;
 }
 
-export async function awardDoubleDeploymentReward(
-  date: LocalDateKey,
-): Promise<DoubleDeploymentReward> {
-  const rewardId = stableId('training', date, 'double-deployment');
-  const existingReward = await db.xpTransactions.get(rewardId);
-  if (existingReward) {
-    return {
-      earned: true,
-      accountXp: existingReward.amount,
-      alreadyAwarded: true,
-    };
-  }
-  const sessions = await sessionsOn(date);
-  const earned = ['home', 'gym'].every((location) =>
-    sessions.some((session) => session.location === location && session.status === 'completed'),
-  );
-  if (!earned) return { earned: false, accountXp: 0, alreadyAwarded: false };
+export async function saveMobilityProgress(sessionId: string, completedMovementIds: string[]) {
+  const session = await db.trainingSessions.get(sessionId);
+  if (!session || session.location !== 'recovery' || session.status === 'completed') return session;
+  const validIds = new Set(session.mobilityMovements?.map((movement) => movement.id) ?? []);
+  const next: TrainingSession = {
+    ...session,
+    mobilityCompletedMovementIds: Array.from(
+      new Set(completedMovementIds.filter((id) => validIds.has(id))),
+    ),
+    updatedAt: new Date().toISOString(),
+  };
+  await db.trainingSessions.put(next);
+  return next;
+}
 
+async function awardMultiPathTier(date: LocalDateKey, tier: MultiPathRewardTier) {
+  const reward = BALANCE.training.multiPathTiers[tier];
+  const rewardId = stableId('training', date, reward.id);
   const now = new Date().toISOString();
-  await db.transaction(
+  return db.transaction(
     'rw',
     [
       db.progression,
@@ -771,13 +832,10 @@ export async function awardDoubleDeploymentReward(
       db.progressionEvents,
     ],
     async () => {
-      if (await db.xpTransactions.get(rewardId)) return;
+      if (await db.xpTransactions.get(rewardId)) return false;
       const progression = await db.progression.get('primary');
       if (!progression) throw new Error('Account progression is unavailable.');
-      const applied = applyAccountXp(
-        progression.totalXp,
-        BALANCE.training.doubleDeploymentAccountXp,
-      );
+      const applied = applyAccountXp(progression.totalXp, reward.accountXp);
       await db.progression.put({
         ...progression,
         ...applied,
@@ -787,17 +845,14 @@ export async function awardDoubleDeploymentReward(
       await db.xpTransactions.put({
         id: rewardId,
         kind: 'training',
-        amount: BALANCE.training.doubleDeploymentAccountXp,
+        amount: reward.accountXp,
         date,
         timestamp: now,
         sourceId: date,
-        note: 'Home + Gym Double Deployment Ascension Surge',
+        note: `${reward.label} Ascension Surge`,
       });
       await putLevelHistory({ ...progression, ...applied }, progression.level, date, rewardId, now);
-      for (const [statName, amount] of Object.entries(BALANCE.training.doubleDeploymentStatXp) as [
-        StatName,
-        number,
-      ][]) {
+      for (const [statName, amount] of Object.entries(reward.statXp) as [StatName, number][]) {
         const stat = await db.stats.get(statName);
         if (!stat) continue;
         const transactionId = stableId(rewardId, statName);
@@ -811,15 +866,49 @@ export async function awardDoubleDeploymentReward(
           date,
           timestamp: now,
           sourceId: date,
-          note: 'Double Deployment Ascension Surge',
+          note: `${reward.label} Ascension Surge`,
         });
       }
+      return true;
     },
   );
+}
+
+export async function awardMultiPathRewards(date: LocalDateKey): Promise<MultiPathRewardSummary> {
+  const sessions = await sessionsOn(date);
+  const completedPathCount = new Set(
+    sessions.filter((session) => session.status === 'completed').map((session) => session.location),
+  ).size;
+  const newlyAwardedTiers: MultiPathRewardTier[] = [];
+  for (const tier of MULTI_PATH_TIERS) {
+    if (completedPathCount < tier) continue;
+    if (await awardMultiPathTier(date, tier)) newlyAwardedTiers.push(tier);
+  }
+  const transactions = await Promise.all(
+    MULTI_PATH_TIERS.map((tier) =>
+      db.xpTransactions.get(stableId('training', date, BALANCE.training.multiPathTiers[tier].id)),
+    ),
+  );
+  const earnedTiers = MULTI_PATH_TIERS.filter((_tier, index) => Boolean(transactions[index]));
   return {
-    earned: true,
-    accountXp: BALANCE.training.doubleDeploymentAccountXp,
-    alreadyAwarded: false,
+    completedPathCount,
+    earnedTiers,
+    newlyAwardedTiers,
+    totalAccountXp: transactions.reduce((sum, transaction) => sum + (transaction?.amount ?? 0), 0),
+  };
+}
+
+export async function awardDoubleDeploymentReward(
+  date: LocalDateKey,
+): Promise<DoubleDeploymentReward> {
+  const rewardId = stableId('training', date, BALANCE.training.multiPathTiers[2].id);
+  const before = await db.xpTransactions.get(rewardId);
+  const summary = await awardMultiPathRewards(date);
+  const existingReward = await db.xpTransactions.get(rewardId);
+  return {
+    earned: summary.earnedTiers.includes(2),
+    accountXp: existingReward?.amount ?? 0,
+    alreadyAwarded: Boolean(before),
   };
 }
 
@@ -850,6 +939,7 @@ export function getTrainingDebriefMessage(session: TrainingSession, companionId:
     'snow',
     'rook',
     'ember',
+    'mira',
     'selah',
     'cipher',
     'haven',

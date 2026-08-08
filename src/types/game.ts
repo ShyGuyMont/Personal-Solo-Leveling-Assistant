@@ -37,7 +37,16 @@ export type RecoveryReason = 'illness' | 'injury' | 'travel' | 'emergency' | 'ov
 export type InterfaceStyle = 'clean' | 'system';
 export type ColorTheme = 'abyss' | 'daybreak' | 'bloodmoon' | 'frostbound' | 'winter-crown';
 export type CompanionId =
-  'snow' | 'rook' | 'selah' | 'cipher' | 'haven' | 'ember' | 'amara' | 'cassian' | 'saffron';
+  | 'snow'
+  | 'rook'
+  | 'selah'
+  | 'cipher'
+  | 'haven'
+  | 'ember'
+  | 'mira'
+  | 'amara'
+  | 'cassian'
+  | 'saffron';
 export type CompanionMode = 'off' | 'quiet' | 'balanced' | 'talkative';
 export type MoodId =
   | 'energized'
@@ -181,6 +190,19 @@ export type TrainingCircuitId =
 export type GymWorkoutId =
   'vanguard-frame-gym' | 'iron-citadel-gym' | 'shadow-hunter-gym' | 'heavenly-restriction-gym';
 export type TrainingSessionStatus = 'assigned' | 'active' | 'paused' | 'completed' | 'abandoned';
+export type MobilityDiscipline = 'mobility' | 'yoga' | 'pilates';
+export type MobilityMoodId = 'still-waters' | 'open-sky' | 'quiet-fire';
+export type MobilityMovementKind = 'breath' | 'mobility' | 'yoga' | 'pilates' | 'core';
+
+export interface MobilityMovementAssignment {
+  id: string;
+  name: string;
+  kind: MobilityMovementKind;
+  prescription: string;
+  instructions: string[];
+  breathingCue: string;
+  safetyCue?: string;
+}
 
 export interface GymExerciseSetLog {
   weight?: number;
@@ -226,6 +248,11 @@ export interface TrainingSession {
   conditioningType?: 'walk' | 'run' | 'walk-run' | 'other';
   distance?: number;
   recoveryProtocol?: string;
+  mobilityDiscipline?: MobilityDiscipline;
+  mobilityMoodId?: MobilityMoodId;
+  mobilityMovements?: MobilityMovementAssignment[];
+  mobilityCompletedMovementIds?: string[];
+  mobilityEstimatedMinutes?: number;
   note?: string;
   updatedAt: string;
 }

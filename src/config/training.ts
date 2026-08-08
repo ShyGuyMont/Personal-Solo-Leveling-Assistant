@@ -851,6 +851,16 @@ export const TRAINING_DEBRIEF_LINES: Record<CompanionId, string[]> = {
     'Next time I might choose thirty again. Rook says I am not allowed to say that while everyone is still on the floor.',
     'The fire was controlled, the target was clear, and now I need several business days to breathe normally.',
   ],
+  mira: [
+    'The room is still again. Keep breathing; the range you earned does not vanish when the protocol ends.',
+    '{minutes} minutes of controlled movement, and not one of them required you to fight your own body. Beautiful work.',
+    'Your core held, your breath stayed honest, and tension gave back a little territory. That is real training.',
+    'Do not hurry to stand. Notice what feels different, then carry that space into the rest of the day.',
+    'Strength likes to pretend it works alone. Today you reminded it that range, control, and breath are part of power.',
+    'The protocol is complete. Move gently for a moment and let your nervous system believe the ending.',
+    'You listened closely enough to adjust without quitting. That is body awareness becoming skill.',
+    'Stillpoint restored. No dramatic finish needed—the proof is in how freely you can leave the floor.',
+  ],
   selah: [
     'Even breathless, I can feel the gratitude in this room. The body was challenged, and it carried us faithfully.',
     'I am stretching before Ember notices I have stopped moving. Receive the work without turning it into another demand.',

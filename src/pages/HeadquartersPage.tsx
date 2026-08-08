@@ -65,7 +65,7 @@ export function HeadquartersPage() {
       </div>
 
       <section className="headquarters-hero panel">
-        <div className="headquarters-hero__portraits" aria-label="Your nine System companions">
+        <div className="headquarters-hero__portraits" aria-label="Your ten System companions">
           {COMPANIONS.map((companion, index) => (
             <img
               key={companion.id}
@@ -73,9 +73,9 @@ export function HeadquartersPage() {
               alt={companion.name}
               style={
                 {
-                  '--portrait-left': `${(index % 3) * 32}%`,
-                  '--portrait-top': `${Math.floor(index / 3) * 30}%`,
-                  '--portrait-angle': `${((index % 3) - 1) * 1.4}deg`,
+                  '--portrait-left': `${(index % 4) * 24}%`,
+                  '--portrait-top': `${Math.floor(index / 4) * 31}%`,
+                  '--portrait-angle': `${((index % 4) - 1.5) * 1.1}deg`,
                   '--companion-accent': companion.accent,
                 } as CSSProperties
               }
@@ -83,7 +83,7 @@ export function HeadquartersPage() {
           ))}
         </div>
         <div>
-          <p className="eyebrow">FULL PARTY HEADQUARTERS · NINE LINKS ONLINE</p>
+          <p className="eyebrow">FULL PARTY HEADQUARTERS · TEN LINKS ONLINE</p>
           <h1>Your people are here, {firstName}.</h1>
           <p>
             Check in, request support, revisit words worth carrying, or gather around the weekly
@@ -237,7 +237,7 @@ export function HeadquartersPage() {
             <p className="eyebrow">MONTHLY COUNCIL</p>
             <h2>The first council is still gathering.</h2>
             <p>
-              After a calendar month with at least one finalized Daily Review, all nine companions
+              After a calendar month with at least one finalized Daily Review, all ten companions
               will assemble with a fact-based review and space for your next intention.
             </p>
           </div>
@@ -286,7 +286,7 @@ export function HeadquartersPage() {
             <p className="eyebrow">WEEKLY CAMPFIRE</p>
             <h2>The first recap is still gathering.</h2>
             <p>
-              After a completed week with at least one finalized Daily Review, all nine companions
+              After a completed week with at least one finalized Daily Review, all ten companions
               will meet here with comments based on the real record.
             </p>
           </div>

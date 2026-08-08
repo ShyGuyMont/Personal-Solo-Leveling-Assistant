@@ -308,6 +308,58 @@ export const COMPANIONS: CompanionDefinition[] = [
     },
   },
   {
+    id: 'mira',
+    name: 'Mira',
+    title: 'The Stillpoint',
+    shortRole: 'Mobility · Flexibility · Breath',
+    description:
+      'Mira commands the restorative path of the Training Hall: mobility, flexibility, yoga, Pilates, breathing, and the quiet core strength that keeps power usable.',
+    appearance:
+      'A fair-skinned white woman with long flowing black hair, luminous purple eyes, and a pearl-white, lavender, and midnight-indigo movement uniform beneath a circular violet System halo.',
+    personality:
+      'Serene, observant, gently playful, and impossible to rush. Her mood changes the shape and length of each protocol, but she never confuses pain with progress or calm with weakness.',
+    accent: '#b995ff',
+    image: 'companions/mira.jpg',
+    categories: [],
+    stats: [],
+    messages: {
+      'daily-briefing': [
+        'Before the day asks you to brace against it, take one full breath and give the body room to move.',
+        'Strength is most useful when it can travel through a calm, mobile frame. We can make a little space today.',
+        'Notice where you are gripping. The Stillpoint Protocol begins with curiosity, not force.',
+      ],
+      mission: [
+        'Beautifully controlled. You did not chase the range; you taught the body it was safe to find it.',
+        'That was quiet work with loud consequences. Breathe, notice the new space, and keep it gentle.',
+        'Mobility recorded. Your strength now has a little more room to become useful.',
+      ],
+      'stat-level': [
+        '{stat} reached level {level}. Growth can be powerful without becoming tense.',
+        'Level {level} {stat}. Keep the strength, and keep enough softness to move it well.',
+      ],
+      'rank-up': [
+        'A new class, received without rushing past the breath that carried you here.',
+        'Classification advanced. Power with range, control, and peace—that is a beautiful evolution.',
+      ],
+      'rare-event': [
+        'The unexpected did not steal your center. You moved, adapted, and stayed present.',
+        'Rare signal cleared. Flexibility is not only in the body; you practiced it in the moment.',
+      ],
+      comeback: [
+        'Return slowly. One breath, one gentle shape, one honest range is enough to reopen the path.',
+        'There is nothing to punish. Let the body feel safe returning before you ask it to perform.',
+      ],
+      'mission-pass': [
+        'Protection is part of intelligent training. Keep the pass for a day when recovery preserves more than force would prove.',
+        'A pause can protect the range you have already earned. Use support without turning it into a judgment.',
+      ],
+      achievement: [
+        'Stay here for one breath before reaching for the next goal. This moment deserves room.',
+        'Achievement confirmed. Receive it with a soft jaw, an open chest, and no need to minimize it.',
+      ],
+    },
+  },
+  {
     id: 'amara',
     name: 'Amara',
     title: 'The Heartweaver',

@@ -18,6 +18,7 @@ const PARTY_ORDER: CompanionId[] = [
   'cipher',
   'haven',
   'ember',
+  'mira',
   'amara',
   'cassian',
   'saffron',

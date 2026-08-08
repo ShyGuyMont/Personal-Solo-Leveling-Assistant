@@ -10,6 +10,7 @@ const PARTY: CompanionId[] = [
   'cipher',
   'haven',
   'ember',
+  'mira',
   'amara',
   'cassian',
   'saffron',

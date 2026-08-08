@@ -42,6 +42,26 @@ export const BALANCE = {
       discipline: 12,
       vitality: 18,
     },
+    multiPathTiers: {
+      2: {
+        id: 'double-deployment',
+        label: 'Double Deployment',
+        accountXp: 150,
+        statXp: { strength: 25, endurance: 25, discipline: 12, vitality: 18 },
+      },
+      3: {
+        id: 'triple-deployment',
+        label: 'Triple Deployment',
+        accountXp: 200,
+        statXp: { strength: 15, endurance: 20, discipline: 18, vitality: 25, focus: 12 },
+      },
+      4: {
+        id: 'full-spectrum-deployment',
+        label: 'Full Spectrum Deployment',
+        accountXp: 250,
+        statXp: { strength: 20, endurance: 25, discipline: 22, vitality: 30, focus: 15 },
+      },
+    },
   },
   kitchen: {
     rewardedOrdersPerWeek: 3,

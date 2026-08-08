@@ -1,6 +1,6 @@
-export const APP_VERSION = '6.2.0';
-export const DATABASE_SCHEMA_VERSION = 12;
-export const SAVE_FORMAT_VERSION = 12;
+export const APP_VERSION = '6.3.0';
+export const DATABASE_SCHEMA_VERSION = 13;
+export const SAVE_FORMAT_VERSION = 13;
 
 export interface ReleaseSection {
   title: string;
@@ -9,6 +9,18 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 6.3.0 · Stillpoint Protocol',
+    detail:
+      'Mira joins the Training Hall with guided mobility, yoga, Pilates, breathing, and a full multi-path deployment ladder.',
+    points: [
+      'Mira, The Stillpoint, becomes the Hall’s third commander with an original portrait, a distinct calm voice, and full companion presence across support, celebrations, recaps, and council scenes.',
+      'Recovery Protocol is rebuilt as a guided movement session: Mira’s randomized mood chooses the discipline, exact sequence, hold lengths, repetitions, and session size while every roll includes breathing and core work.',
+      'Every assigned movement includes beginner-readable setup, breathing guidance, safety cues, and saved completion checks so an interrupted protocol can be resumed honestly.',
+      'Distinct Home, Gym, Conditioning, and Recovery clears can now stack Double, Triple, and Full Spectrum Ascension Surges; Daily Workout mission credit remains strictly once per day.',
+      'The Integrity Protocol confirmation sheet now uses a compact single-column layout instead of leaving a large empty field around the pass/fail controls.',
+    ],
+  },
   {
     title: 'Version 6.2.0 · System Transcendence',
     detail:

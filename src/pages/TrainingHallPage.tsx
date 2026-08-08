@@ -22,6 +22,7 @@ import {
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FavoriteMessageButton } from '@/components/FavoriteMessageButton';
 import { GymDeploymentPanel } from '@/components/GymDeploymentPanel';
+import { MobilityProtocolPanel } from '@/components/MobilityProtocolPanel';
 import { BALANCE } from '@/config/balance';
 import {
   EMBER_DURATION_LINES,
@@ -49,6 +50,7 @@ import {
   selectTrainingLocation,
   startTrainingTimer,
   type GymWorkoutAvailability,
+  type MultiPathRewardTier,
 } from '@/game/training';
 import { useGameStore } from '@/store/useGameStore';
 import type { CompanionId, TrainingLocation, TrainingSession } from '@/types/game';
@@ -79,8 +81,8 @@ const LOCATION_OPTIONS: Array<{
   },
   {
     id: 'recovery',
-    title: 'Recovery Protocol',
-    subtitle: 'Complete deliberate stretching, plank work, mobility, or PT exercises.',
+    title: 'Stillpoint Protocol',
+    subtitle: 'Mira rolls guided mobility, yoga or Pilates—with breath and core in every session.',
     icon: HeartPulse,
   },
 ];
@@ -92,6 +94,7 @@ const POST_TRAINING_STATES: Record<CompanionId, string> = {
   cipher: 'Data secured · dignity unavailable',
   haven: 'Tired · distributing water anyway',
   ember: 'Destroyed · asking for another round',
+  mira: 'Centered · breathing like none of that was difficult',
   amara: 'Disheveled · openly proud',
   cassian: 'Physically insolvent · floor-bound',
   saffron: 'Famished · threatening the recovery meal',
@@ -106,6 +109,7 @@ function formatClock(totalSeconds: number) {
 function trainingLabel(session: TrainingSession) {
   if (session.circuitId) return getTrainingCircuit(session.circuitId).name;
   if (session.gymWorkoutId) return getGymWorkout(session.gymWorkoutId).name;
+  if (session.location === 'recovery' && session.recoveryProtocol) return session.recoveryProtocol;
   return (
     {
       gym: 'Gym Deployment',
@@ -132,7 +136,7 @@ export function TrainingHallPage() {
   const [todaySessions, setTodaySessions] = useState<TrainingSession[]>([]);
   const [recent, setRecent] = useState<TrainingSession[]>([]);
   const [gymAvailability, setGymAvailability] = useState<GymWorkoutAvailability[]>([]);
-  const [doubleDeploymentRewarded, setDoubleDeploymentRewarded] = useState(false);
+  const [multiPathRewardTiers, setMultiPathRewardTiers] = useState<MultiPathRewardTier[]>([]);
   const [loading, setLoading] = useState(true);
   const [working, setWorking] = useState(false);
   const [error, setError] = useState('');
@@ -146,7 +150,6 @@ export function TrainingHallPage() {
   const [conditioningType, setConditioningType] =
     useState<TrainingSession['conditioningType']>('walk-run');
   const [distance, setDistance] = useState('');
-  const [recoveryProtocol, setRecoveryProtocol] = useState('Stretching and plank protocol');
   const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
   const workoutRecord = todayRecords.find((record) => record.missionId === 'workout');
   const workoutCompleted = workoutRecord?.status === 'completed';
@@ -157,7 +160,7 @@ export function TrainingHallPage() {
     setTodaySessions(data.todaySessions);
     setRecent(data.recent);
     setGymAvailability(data.gymAvailability);
-    setDoubleDeploymentRewarded(data.doubleDeploymentRewarded);
+    setMultiPathRewardTiers(data.multiPathRewardTiers);
     if (data.today) {
       setLoads(data.today.exerciseLoads ?? {});
       setRounds(data.today.roundsCompleted ?? 0);
@@ -169,7 +172,6 @@ export function TrainingHallPage() {
       );
       setConditioningType(data.today.conditioningType ?? 'walk-run');
       setDistance(data.today.distance ? String(data.today.distance) : '');
-      setRecoveryProtocol(data.today.recoveryProtocol ?? 'Stretching and plank protocol');
     }
     setLoading(false);
   }, [systemDate]);
@@ -238,7 +240,13 @@ export function TrainingHallPage() {
   const chooseLocation = async (location: TrainingLocation) => {
     const next = await run(() => selectTrainingLocation(systemDate, location));
     if (!next) return;
-    setLoggedDuration(location === 'gym' ? 65 : location === 'conditioning' ? 25 : 15);
+    setLoggedDuration(
+      location === 'gym'
+        ? 65
+        : location === 'conditioning'
+          ? 25
+          : (next.mobilityEstimatedMinutes ?? 15),
+    );
   };
 
   const updateRounds = async (nextRounds: number) => {
@@ -293,7 +301,6 @@ export function TrainingHallPage() {
         difficulty,
         conditioningType: session.location === 'conditioning' ? conditioningType : undefined,
         distance: session.location === 'conditioning' && distance ? Number(distance) : undefined,
-        recoveryProtocol: session.location === 'recovery' ? recoveryProtocol : undefined,
         note,
       }),
     );
@@ -301,11 +308,45 @@ export function TrainingHallPage() {
     try {
       await syncWorkoutMission(completedSession);
       await reload();
+      await refresh();
     } catch (caught) {
       setError(
         caught instanceof Error
           ? `${caught.message} Your session is safe; use Sync mission credit below.`
           : 'The session is safe, but mission credit still needs to be synced.',
+      );
+    }
+  };
+
+  const finishMobility = async (input: {
+    duration: number;
+    difficulty: number;
+    note: string;
+    completedMovementIds: string[];
+  }) => {
+    if (!session || session.location !== 'recovery') return;
+    const completedSession = await run(() =>
+      completeLoggedTraining({
+        sessionId: session.id,
+        date: systemDate,
+        location: 'recovery',
+        duration: input.duration,
+        difficulty: input.difficulty,
+        recoveryProtocol: session.recoveryProtocol,
+        mobilityCompletedMovementIds: input.completedMovementIds,
+        note: input.note,
+      }),
+    );
+    if (!completedSession) return;
+    try {
+      await syncWorkoutMission(completedSession);
+      await reload();
+      await refresh();
+    } catch (caught) {
+      setError(
+        caught instanceof Error
+          ? `${caught.message} Your Stillpoint Protocol is safe; use Sync mission credit below.`
+          : 'The Stillpoint Protocol is safe, but mission credit still needs to be synced.',
       );
     }
   };
@@ -322,19 +363,6 @@ export function TrainingHallPage() {
           : 'The Gym Deployment is safe, but mission credit still needs to be synced.',
       );
     }
-  };
-
-  const beginDoubleDeployment = async (location: 'home' | 'gym') => {
-    const next = await run(() => selectTrainingLocation(systemDate, location));
-    if (!next) return;
-    setLoads(next.exerciseLoads ?? {});
-    setRounds(next.roundsCompleted ?? 0);
-    setPartialReps(next.partialReps ?? 0);
-    setDifficulty(3);
-    setNote('');
-    setLoggedDuration(location === 'gym' ? 65 : 20);
-    await reload();
-    setSession(next);
   };
 
   const chooseDifferentPath = async () => {
@@ -381,12 +409,17 @@ export function TrainingHallPage() {
   const completedLocations = new Set(
     todaySessions.filter((entry) => entry.status === 'completed').map((entry) => entry.location),
   );
-  const doubleDeploymentOption =
-    completedLocations.has('gym') && !completedLocations.has('home')
-      ? ('home' as const)
-      : completedLocations.has('home') && !completedLocations.has('gym')
-        ? ('gym' as const)
-        : undefined;
+  const completedPathCount = completedLocations.size;
+  const availableTrainingPaths = LOCATION_OPTIONS.filter(({ id }) => !completedLocations.has(id));
+  const highestRewardTier = multiPathRewardTiers.at(-1);
+  const nextRewardTier =
+    completedPathCount >= 1 && completedPathCount < 4
+      ? ((completedPathCount + 1) as MultiPathRewardTier)
+      : undefined;
+  const multiPathRewardXp = multiPathRewardTiers.reduce(
+    (sum, tier) => sum + BALANCE.training.multiPathTiers[tier].accountXp,
+    0,
+  );
 
   if (loading) {
     return (
@@ -438,7 +471,7 @@ export function TrainingHallPage() {
           <div>
             <p className="eyebrow">PHYSICAL ASCENSION INTERFACE</p>
             <h1>Training Hall</h1>
-            <p>Rook and Ember command the physical path.</p>
+            <p>Rook, Ember, and Mira command strength, intensity, and restoration.</p>
           </div>
           <span className="page-heading__glyph">
             <Dumbbell size={25} />
@@ -503,33 +536,38 @@ export function TrainingHallPage() {
 
         {error && <div className="training-error">{error}</div>}
 
-        {doubleDeploymentRewarded && (
+        {highestRewardTier && (
           <section className="panel double-deployment-banner is-earned">
             <Flame size={27} />
             <div>
-              <p className="eyebrow">ASCENSION SURGE · DOUBLE DEPLOYMENT</p>
-              <h2>Home + Gym cleared</h2>
+              <p className="eyebrow">ASCENSION SURGE · PATH {highestRewardTier} OF 4</p>
+              <h2>{BALANCE.training.multiPathTiers[highestRewardTier].label} cleared</h2>
               <p>
-                Exceptional effort recorded. +{BALANCE.training.doubleDeploymentAccountXp} account
-                XP plus Strength, Endurance, Discipline, and Vitality growth.
+                {completedPathCount} distinct paths recorded today. The deployment ladder has
+                awarded +{multiPathRewardXp} total bonus account XP plus targeted stat growth.
               </p>
-              <small>This one-time daily reward is never multiplied by Snow’s Daily Command.</small>
+              <small>
+                Each tier is awarded once. These bonuses are never multiplied by Snow’s Daily
+                Command.
+              </small>
             </div>
           </section>
         )}
 
-        {!doubleDeploymentRewarded && doubleDeploymentOption && (
+        {nextRewardTier && availableTrainingPaths.length > 0 && (
           <section className="panel double-deployment-banner">
             <Dumbbell size={27} />
             <div>
               <p className="eyebrow">OPTIONAL · NOT REQUIRED</p>
-              <h2>Double Deployment available</h2>
+              <h2>{BALANCE.training.multiPathTiers[nextRewardTier].label} available</h2>
               <p>
-                {doubleDeploymentOption === 'home'
-                  ? 'The Gym Deployment is complete. You may still accept Rook and Ember’s Home Circuit.'
-                  : 'The Home Circuit is complete. You may still complete a structured Gym Deployment.'}
+                Continue with any unfinished path:{' '}
+                {availableTrainingPaths.map((path) => path.title).join(', ')}.
               </p>
-              <strong>Clear both for an Ascension Surge worth +150 account XP.</strong>
+              <strong>
+                The next distinct clear adds +
+                {BALANCE.training.multiPathTiers[nextRewardTier].accountXp} account XP.
+              </strong>
               <small>
                 This is an exceptional-day bonus, not a daily expectation. Never chase it through
                 pain, broken form, or inadequate recovery.
@@ -538,10 +576,10 @@ export function TrainingHallPage() {
             <button
               className="button button--primary"
               disabled={working}
-              onClick={() => void beginDoubleDeployment(doubleDeploymentOption)}
+              onClick={() => setSession(undefined)}
             >
               <Flame size={17} />
-              {doubleDeploymentOption === 'home' ? 'Accept Home Circuit' : 'Open Gym Deployment'}
+              Choose another training path
             </button>
           </section>
         )}
@@ -652,7 +690,7 @@ export function TrainingHallPage() {
         <div>
           <p className="eyebrow">PHYSICAL ASCENSION INTERFACE</p>
           <h1>Training Hall</h1>
-          <p>Rook chooses the work. Ember sets the clock. The record keeps the truth.</p>
+          <p>Rook builds strength. Ember ignites effort. Mira restores range and control.</p>
         </div>
         <span className="page-heading__glyph">
           <Dumbbell size={25} />
@@ -661,7 +699,7 @@ export function TrainingHallPage() {
 
       <section className="training-commanders panel">
         <div className="training-commanders__portraits">
-          {(['rook', 'ember'] as const).map((id) => {
+          {(['rook', 'ember', 'mira'] as const).map((id) => {
             const companion = getCompanion(id);
             return (
               <img
@@ -679,10 +717,13 @@ export function TrainingHallPage() {
             Rook · The Vanguard
             <br />
             Ember · The Ignition
+            <br />
+            Mira · The Stillpoint
           </h2>
           <p>
-            One Daily Workout mission. Four legitimate deployment paths. Gym sessions build the
-            physique; Home circuits remain available—even after a Gym clear.
+            One Daily Workout mission. Four legitimate deployment paths. Each distinct path can be
+            cleared once, and exceptional multi-path days unlock increasingly powerful Ascension
+            Surges without multiplying mission credit.
           </p>
         </div>
       </section>
@@ -693,24 +734,34 @@ export function TrainingHallPage() {
         <section className="panel training-location-gate">
           <header className="section-header">
             <div>
-              <p className="eyebrow">ROOK · ENTRY CONTROL</p>
+              <p className="eyebrow">TRAINING TRINITY · ENTRY CONTROL</p>
               <h2>Where are you training today?</h2>
             </div>
             <ShieldCheck size={22} />
           </header>
           <div className="training-location-grid">
-            {LOCATION_OPTIONS.map(({ id, title, subtitle, icon: Icon }) => (
-              <button key={id} disabled={working} onClick={() => void chooseLocation(id)}>
-                <span>
-                  <Icon size={23} />
-                </span>
-                <div>
-                  <strong>{title}</strong>
-                  <small>{subtitle}</small>
-                </div>
-                <ChevronRight size={18} />
-              </button>
-            ))}
+            {LOCATION_OPTIONS.map(({ id, title, subtitle, icon: Icon }) => {
+              const pathCompleted = completedLocations.has(id);
+              return (
+                <button
+                  key={id}
+                  disabled={working || pathCompleted}
+                  className={pathCompleted ? 'is-completed' : ''}
+                  onClick={() => void chooseLocation(id)}
+                >
+                  <span>{pathCompleted ? <Check size={23} /> : <Icon size={23} />}</span>
+                  <div>
+                    <strong>{title}</strong>
+                    <small>
+                      {pathCompleted
+                        ? 'Completed today · recorded in the deployment ledger.'
+                        : subtitle}
+                    </small>
+                  </div>
+                  <ChevronRight size={18} />
+                </button>
+              );
+            })}
           </div>
           <p className="training-safety-note">
             Stop for sharp or radiating pain, dizziness, chest discomfort, or unusual breathing.
@@ -976,6 +1027,16 @@ export function TrainingHallPage() {
           onBack={chooseDifferentPath}
           onError={setError}
         />
+      ) : session?.location === 'recovery' ? (
+        <MobilityProtocolPanel
+          key={session.id}
+          session={session}
+          working={working}
+          onComplete={finishMobility}
+          onBack={chooseDifferentPath}
+          onSessionChange={setSession}
+          onError={setError}
+        />
       ) : session ? (
         <section className={`panel training-log is-${session.location}`}>
           <header className="section-header">
@@ -983,11 +1044,7 @@ export function TrainingHallPage() {
               <p className="eyebrow">{session.location.toUpperCase()} DEPLOYMENT</p>
               <h2>{trainingLabel(session)}</h2>
             </div>
-            {session.location === 'conditioning' ? (
-              <Footprints size={23} />
-            ) : (
-              <HeartPulse size={23} />
-            )}
+            <Footprints size={23} />
           </header>
           <div className="training-dialogue training-manual-dialogue">
             <article className="is-rook">
@@ -995,11 +1052,8 @@ export function TrainingHallPage() {
               <div>
                 <span>ROOK · DEPLOYMENT</span>
                 <p>
-                  “
-                  {session.location === 'conditioning'
-                    ? 'Conditioning assignment accepted. Choose a sustainable pace and finish the distance you honestly began.'
-                    : 'Recovery protocol accepted. Deliberate stretching and plank work count when they are actually completed.'}
-                  ”
+                  “ Conditioning assignment accepted. Choose a sustainable pace and finish the
+                  distance you honestly began. ”
                 </p>
               </div>
             </article>
@@ -1008,11 +1062,8 @@ export function TrainingHallPage() {
               <div>
                 <span>EMBER · TERMS</span>
                 <p>
-                  “
-                  {session.location === 'conditioning'
-                    ? 'Good. Pick the pace, keep moving, and bring me the honest time when the work is finished.'
-                    : 'Recovery is still training when you do it on purpose. Complete the protocol; do not just think about it.'}
-                  ”
+                  “ Good. Pick the pace, keep moving, and bring me the honest time when the work is
+                  finished. ”
                 </p>
               </div>
             </article>
@@ -1057,15 +1108,6 @@ export function TrainingHallPage() {
                   />
                 </label>
               </>
-            )}
-            {session.location === 'recovery' && (
-              <label className="field field--wide">
-                <span>Protocol completed</span>
-                <input
-                  value={recoveryProtocol}
-                  onChange={(event) => setRecoveryProtocol(event.target.value)}
-                />
-              </label>
             )}
             <label className="field field--wide">
               <span>Effort · {difficulty}/5</span>

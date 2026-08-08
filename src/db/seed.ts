@@ -48,6 +48,7 @@ export function createDefaultSettings(): Settings {
       'cipher',
       'haven',
       'ember',
+      'mira',
       'amara',
       'cassian',
       'saffron',
@@ -192,9 +193,9 @@ export async function initializeProfile(input: {
         },
       ]);
       await db.appMetadata.bulkPut([
-        { id: 'schema-seeded', value: 12, updatedAt: now },
+        { id: 'schema-seeded', value: 13, updatedAt: now },
         { id: 'last-system-day', value: systemDate, updatedAt: now },
-        { id: 'app-version', value: '6.2.0', updatedAt: now },
+        { id: 'app-version', value: '6.3.0', updatedAt: now },
       ]);
       await ensureRotatingChallenges(systemDate, settings.weekStartsOn);
     },

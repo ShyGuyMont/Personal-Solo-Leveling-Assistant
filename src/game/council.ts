@@ -113,6 +113,20 @@ function amaraCouncil(metrics: MonthlyCouncilMetrics) {
   ];
 }
 
+function miraCouncil(metrics: MonthlyCouncilMetrics) {
+  const movement = categoryCount(metrics, 'physical');
+  if (movement) {
+    return [
+      `${movement} physical missions reached the monthly record. Keep building strength, but let the next cycle include enough mobility and breath work to carry it without unnecessary tension.`,
+      `The body answered ${movement} times this month. The next evolution is not only more output—it is more usable range, calmer control, and recovery you complete on purpose.`,
+      `${movement} movement signals became proof. I recommend one Stillpoint Protocol each week so the frame remains as adaptable as it is determined.`,
+    ];
+  }
+  return [
+    'The physical path was quiet this month. Re-entry can be gentle: one guided mobility protocol, one controlled core sequence, and no attempt to punish the gap.',
+  ];
+}
+
 function cassianCouncil(metrics: MonthlyCouncilMetrics) {
   const reviews = metrics.treasuryReviews ?? 0;
   const wins = metrics.noEatingOutWins ?? 0;
@@ -188,6 +202,7 @@ export function buildMonthlyCouncilMessages(
     { companionId: 'cipher', role: 'response', slot: 'cipher', pool: cipherCouncil(metrics) },
     { companionId: 'haven', role: 'response', slot: 'haven', pool: havenCouncil(metrics) },
     { companionId: 'ember', role: 'response', slot: 'ember', pool: emberCouncil(metrics) },
+    { companionId: 'mira', role: 'response', slot: 'mira', pool: miraCouncil(metrics) },
     { companionId: 'amara', role: 'response', slot: 'amara', pool: amaraCouncil(metrics) },
     { companionId: 'cassian', role: 'response', slot: 'cassian', pool: cassianCouncil(metrics) },
     { companionId: 'saffron', role: 'response', slot: 'saffron', pool: saffronCouncil(metrics) },

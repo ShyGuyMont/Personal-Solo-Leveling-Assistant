@@ -36,6 +36,7 @@ describe('Party Expansion', () => {
         'ember',
         'amara',
         'snow-close',
+        'mira',
         'cassian',
         'saffron',
       ]);
@@ -54,6 +55,7 @@ describe('Party Expansion', () => {
       'cipher',
       'haven',
       'ember',
+      'mira',
       'amara',
       'cassian',
       'saffron',
@@ -122,6 +124,7 @@ describe('Party Expansion', () => {
       'cipher',
       'haven',
       'ember',
+      'mira',
       'amara',
       'cassian',
       'saffron',

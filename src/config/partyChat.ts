@@ -90,13 +90,14 @@ export interface MoodDialogue {
   cipher: string[];
   haven: string[];
   ember: string[];
+  mira: string[];
   amara: string[];
   cassian: string[];
   saffron: string[];
   'snow-close': string[];
 }
 
-const BASE_PARTY_DIALOGUE: Record<MoodId, Omit<MoodDialogue, 'cassian' | 'saffron'>> = {
+const BASE_PARTY_DIALOGUE: Record<MoodId, Omit<MoodDialogue, 'mira' | 'cassian' | 'saffron'>> = {
   energized: {
     snow: [
       'I can feel that energy from here. I am glad you brought it to us—let’s point it somewhere that matters.',
@@ -725,11 +726,75 @@ const SAFFRON_PARTY_DIALOGUE: Record<MoodId, string[]> = {
   ],
 };
 
+const MIRA_PARTY_DIALOGUE: Record<MoodId, string[]> = {
+  energized: [
+    'I can feel the current moving. Give some of it to strength, and save some for a slow stretch afterward so the body can keep the range it earns.',
+    'Beautiful energy. Keep the breath quieter than the ambition and you will be able to use all of it well.',
+    'The body is ready to explore. Use the range you can control today, not the range excitement tries to borrow from tomorrow.',
+    'Open Sky mood confirmed. Move boldly, land softly, and leave enough calm to enjoy the power afterward.',
+  ],
+  proud: [
+    'Let the pride open your posture instead of making you brace for the next demand. You earned room to receive this.',
+    'One slow inhale. One longer exhale. There—now the victory belongs to your body too.',
+    'Your shoulders do not have to carry the achievement like armor. Let them soften; the proof remains.',
+    'I see the pride trying not to take up space. Breathe wider. This moment can hold all of it.',
+  ],
+  good: [
+    'Steady feels spacious. This is a lovely day for an Open Sky flow and enough core work to make Mira quietly smug.',
+    'Good is not a waiting room. Enjoy the ease, move through a comfortable range, and let ordinary wellbeing count.',
+    'A calm system learns beautifully. This is the kind of day when a patient hold becomes new range before you notice.',
+    'Good. Keep some softness around it. We do not need tension to prevent a pleasant day from escaping.',
+  ],
+  okay: [
+    'Okay can be held gently. Unclench the jaw, lower the shoulders, and give the next moment one unhurried breath.',
+    'We do not need to transform the day. A few controlled movements can simply make it easier to inhabit.',
+    'The middle is a real place to stand. Find your feet, lengthen the exhale, and let okay remain enough for now.',
+    'No diagnosis, no grand correction. We notice, we breathe, and we make one small area feel less crowded.',
+  ],
+  tired: [
+    'Then the protocol becomes softer. Supported positions, shorter holds, long exhales—rest and mobility are allowed to cooperate.',
+    'Fatigue does not need to be stretched aggressively. We make space, keep the core work kind, and stop before depletion becomes proof.',
+    'Use the floor, the wall, and every support available. Tired bodies deserve intelligent movement, not a performance.',
+    'Still Waters today. If the breath becomes work, the position becomes easier. That is the rule.',
+  ],
+  stressed: [
+    'Before solving anything, make the exhale longer than the inhale. The plan will still exist when your nervous system is no longer shouting.',
+    'Stress has tightened the room. We can widen it one rib, one hip, and one patient breath at a time.',
+    'Press both feet down. Name five things you can see. Now let the shoulders discover they are not responsible for the entire future.',
+    'We are not forcing calm. We are giving it conditions where it might safely return.',
+  ],
+  frustrated: [
+    'Do not force the range because the day refused to cooperate. Control is the answer here, not punishment.',
+    'Let the movement be precise enough to hold the frustration without becoming another fight.',
+    'Quiet Fire can use this energy. Slow core work, honest range, and absolutely no yanking on a tense joint.',
+    'Frustration wants speed. I want control. Let us see which one leaves you feeling more powerful.',
+  ],
+  discouraged: [
+    'Some progress is simply the place that no longer hurts to reach. Quiet changes still belong in your story.',
+    'We will choose one shape you can control and one breath you can finish. Confidence can return through the body too.',
+    'Do not measure the whole path from the tightest moment. Bodies change through patient evidence, not verdicts.',
+    'Let today’s win be small enough to believe: one position felt safer, one exhale became easier, one promise remained.',
+  ],
+  lonely: [
+    'Stay with us while you breathe. A quiet room does not have to mean you are carrying the feeling alone.',
+    'Put one hand over the ribs and let the breath meet it. The party is here; you do not need to perform for our company.',
+    'We can stretch together without filling every silence. Presence does not become less real because it is gentle.',
+    'Let the floor hold some of your weight and let the party hold some of the evening. You are not outside the circle.',
+  ],
+  unsure: [
+    'Curiosity is enough. Notice what feels tight, what feels easy, and what changes after three slow breaths—no verdict required.',
+    'When the feeling has no name, let the body speak in smaller signals. We can listen without forcing an answer.',
+    'Choose the most comfortable starting position and gather information. Uncertainty becomes less sharp when it does not have to defend itself.',
+    'We can stay between answers. Move gently, breathe normally, and notice which direction creates a little more room.',
+  ],
+};
+
 export const PARTY_DIALOGUE = Object.fromEntries(
   PARTY_MOODS.map(({ id }) => [
     id,
     {
       ...BASE_PARTY_DIALOGUE[id],
+      mira: MIRA_PARTY_DIALOGUE[id],
       cassian: CASSIAN_PARTY_DIALOGUE[id],
       saffron: SAFFRON_PARTY_DIALOGUE[id],
     },
