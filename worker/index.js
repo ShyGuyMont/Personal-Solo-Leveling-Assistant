@@ -18,6 +18,17 @@ export default {
       );
     }
 
-    return env.ASSETS.fetch(request);
+    const response = await env.ASSETS.fetch(request);
+
+    if (
+      response.status === 404 &&
+      request.method === 'GET' &&
+      request.headers.get('accept')?.includes('text/html')
+    ) {
+      const fallbackUrl = new URL('/index.html', request.url);
+      return env.ASSETS.fetch(new Request(fallbackUrl, request));
+    }
+
+    return response;
   },
 };
