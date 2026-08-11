@@ -9,6 +9,7 @@ interface Soulprint {
   identity: string;
   rhythm: string;
   method: string;
+  bonds: string;
   boundary: string;
   performance: string;
 }
@@ -50,6 +51,7 @@ describe('Companion Soulprint intelligence', () => {
         profile.identity,
         profile.rhythm,
         profile.method,
+        profile.bonds,
         profile.boundary,
         profile.performance,
       ]) {
@@ -66,6 +68,9 @@ describe('Companion Soulprint intelligence', () => {
     expect(intelligence.baseInstructions).toContain('recent conversation history');
     expect(intelligence.baseInstructions).toContain('casual conversation');
     expect(intelligence.formatCompanionProfiles()).toContain('Future voice direction:');
+    expect(intelligence.formatCompanionProfiles()).toContain('Relational signature:');
+    expect(intelligence.baseInstructions).toContain('Approved Bond Memory');
+    expect(intelligence.baseInstructions).toContain('memoryCandidates');
   });
 
   it('builds focused solo channels and non-repetitive party councils', () => {
@@ -108,6 +113,7 @@ describe('Companion Soulprint intelligence', () => {
                     text: JSON.stringify({
                       title: 'Quick calculation',
                       replies: [{ companionId: 'rook', message: 'Ten. Clean answer.' }],
+                      memoryCandidates: [],
                     }),
                   },
                 ],
@@ -145,6 +151,7 @@ describe('Companion Soulprint intelligence', () => {
             momentum: [],
             party: { enabledCompanionIds: ['rook'] },
             state: { recoveryActive: false },
+            bondMemory: { enabled: false, approved: [] },
           },
         }),
       }),
@@ -156,9 +163,63 @@ describe('Companion Soulprint intelligence', () => {
     const input = openAiBody?.input as Array<{ role: string; content: string }>;
     expect(input[0].role).toBe('system');
     expect(input[0].content).toContain('Companion soulprints:');
-    expect(input[0].content).toContain('follow only Rook\'s soulprint');
+    expect(input[0].content).toContain("follow only Rook's soulprint");
     expect(input[0].content).toContain('[rook] Rook — The Vanguard');
     expect(input[0].content).not.toContain('[snow] Snow — The Constant');
     expect(input[1].content).toContain('What is 5 + 5?');
+  });
+
+  it('returns local memory suggestions only when Bond Memory is enabled', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        async () =>
+          new Response(
+            JSON.stringify({
+              output: [
+                {
+                  type: 'message',
+                  content: [
+                    {
+                      type: 'output_text',
+                      text: JSON.stringify({
+                        title: 'Training preference',
+                        replies: [{ companionId: 'snow', message: 'That fits you.' }],
+                        memoryCandidates: [
+                          { fact: 'The Hunter prefers morning workouts.', category: 'preference' },
+                        ],
+                      }),
+                    },
+                  ],
+                },
+              ],
+            }),
+            { status: 200, headers: { 'content-type': 'application/json' } },
+          ),
+      ),
+    );
+
+    const makeRequest = (enabled: boolean) =>
+      intelligence.default.fetch(
+        new Request('https://system.test/api/ai/chat', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', origin: 'https://system.test' },
+          body: JSON.stringify({
+            audience: 'snow',
+            message: 'I prefer morning workouts.',
+            history: [],
+            context: {
+              party: { enabledCompanionIds: ['snow'] },
+              bondMemory: { enabled, approved: [] },
+            },
+          }),
+        }),
+        { OPENAI_API_KEY: 'test-key', OPENAI_TEXT_MODEL: 'test-model' },
+      );
+
+    expect((await (await makeRequest(false)).json()).memoryCandidates).toEqual([]);
+    expect((await (await makeRequest(true)).json()).memoryCandidates).toEqual([
+      { fact: 'The Hunter prefers morning workouts.', category: 'preference' },
+    ]);
   });
 });

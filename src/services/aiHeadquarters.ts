@@ -34,6 +34,14 @@ export interface AiProgressContext {
   state: {
     recoveryActive: boolean;
   };
+  bondMemory: {
+    enabled: boolean;
+    approved: Array<{
+      fact: string;
+      category: string;
+      scope: AiConversationAudience;
+    }>;
+  };
 }
 
 export interface AiLinkStatus {
@@ -48,6 +56,10 @@ export interface AiHeadquartersReply {
   replies: Array<{
     companionId: CompanionId;
     message: string;
+  }>;
+  memoryCandidates: Array<{
+    fact: string;
+    category: 'preference' | 'goal' | 'boundary' | 'background' | 'commitment';
   }>;
   usage?: {
     inputTokens: number;
@@ -84,9 +96,7 @@ export async function getAiLinkStatus(): Promise<AiLinkStatus> {
       configured: response.ok && payload?.configured === true,
       model: typeof payload?.model === 'string' ? payload.model : undefined,
       intelligenceVersion:
-        typeof payload?.intelligenceVersion === 'string'
-          ? payload.intelligenceVersion
-          : undefined,
+        typeof payload?.intelligenceVersion === 'string' ? payload.intelligenceVersion : undefined,
     };
   } catch {
     return { ok: false, configured: false };
@@ -139,5 +149,10 @@ export async function requestAiHeadquartersReply(input: {
     throw new AiLinkError('Headquarters returned an unreadable transmission.', 'invalid-response');
   }
 
-  return payload as unknown as AiHeadquartersReply;
+  return {
+    ...(payload as unknown as AiHeadquartersReply),
+    memoryCandidates: Array.isArray(payload.memoryCandidates)
+      ? (payload.memoryCandidates as AiHeadquartersReply['memoryCandidates'])
+      : [],
+  };
 }

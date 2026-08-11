@@ -2,7 +2,7 @@ import { KITCHEN_RECIPES } from '@/config/kitchen';
 import { db, TABLE_NAMES } from '@/db/database';
 import type { BackupSnapshot, Profile, SaveFile, Settings, AccountProgression } from '@/types/game';
 
-export const SAVE_VERSION = 14;
+export const SAVE_VERSION = 15;
 export const MAX_IMPORT_BYTES = 32 * 1024 * 1024;
 const MAX_SNAPSHOTS = 5;
 const FORBIDDEN_KEYS = new Set(['__proto__', 'prototype', 'constructor']);
@@ -117,6 +117,9 @@ function migrateData(
   if (version <= 13) {
     data.aiConversations ??= [];
   }
+  if (version <= 14) {
+    data.aiMemories ??= [];
+  }
   const migrationTime = new Date().toISOString();
   if (!data.treasurySettings.some((row) => isObject(row) && row.id === 'primary')) {
     data.treasurySettings.push({
@@ -176,6 +179,7 @@ function migrateData(
         dailyBriefingEnabled: true,
         aiLinkMode: 'offline',
         aiDataSharingAcknowledged: false,
+        aiRelationshipMemoryEnabled: false,
         ...row,
         enabledCompanionIds: ['snow', ...withMira.filter((id) => id !== 'snow')],
       };
@@ -212,6 +216,9 @@ function validateData(data: Record<string, unknown[]>) {
     !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(settings.resetTime)
   ) {
     throw new Error('The daily reset time is not valid.');
+  }
+  if (typeof settings.aiRelationshipMemoryEnabled !== 'boolean') {
+    throw new Error('The Bond Memory setting is not valid.');
   }
   for (const key of [
     'level',
@@ -275,6 +282,34 @@ function validateData(data: Record<string, unknown[]>) {
       ) {
         throw new Error('An AI Headquarters message contains an impossible value.');
       }
+    }
+  }
+
+  const aiMemoryCategories = new Set([
+    'preference',
+    'goal',
+    'boundary',
+    'background',
+    'commitment',
+  ]);
+  const aiMemoryStatuses = new Set(['pending', 'approved']);
+  for (const row of data.aiMemories) {
+    if (
+      !isObject(row) ||
+      typeof row.fact !== 'string' ||
+      !row.fact.trim() ||
+      row.fact.length > 240 ||
+      !aiMemoryCategories.has(String(row.category)) ||
+      !aiAudiences.has(String(row.scope)) ||
+      !aiMemoryStatuses.has(String(row.status)) ||
+      typeof row.sourceConversationId !== 'string' ||
+      !row.sourceConversationId.trim() ||
+      typeof row.createdAt !== 'string' ||
+      !Number.isFinite(Date.parse(row.createdAt)) ||
+      typeof row.updatedAt !== 'string' ||
+      !Number.isFinite(Date.parse(row.updatedAt))
+    ) {
+      throw new Error('A Bond Memory record contains an impossible value.');
     }
   }
 

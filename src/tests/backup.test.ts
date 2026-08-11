@@ -240,9 +240,19 @@ describe('save validation and recovery', () => {
         },
       ],
     });
+    await db.aiMemories.put({
+      id: 'ai-memory:backup',
+      fact: 'The Hunter prefers morning workouts.',
+      category: 'preference',
+      scope: 'rook',
+      status: 'approved',
+      sourceConversationId: 'ai:backup',
+      createdAt: now,
+      updatedAt: now,
+    });
 
     const save = await createSaveFile();
-    expect(save.version).toBe(14);
+    expect(save.version).toBe(15);
     for (const table of [
       'dailyBriefings',
       'campaignArcs',
@@ -254,6 +264,7 @@ describe('save validation and recovery', () => {
       'kitchenSessions',
       'sanctuarySessions',
       'aiConversations',
+      'aiMemories',
     ]) {
       expect(save.data[table]).toHaveLength(1);
     }
@@ -272,6 +283,7 @@ describe('save validation and recovery', () => {
         db.kitchenSessions,
         db.sanctuarySessions,
         db.aiConversations,
+        db.aiMemories,
       ],
       async () => {
         await db.dailyBriefings.clear();
@@ -284,6 +296,7 @@ describe('save validation and recovery', () => {
         await db.kitchenSessions.clear();
         await db.sanctuarySessions.clear();
         await db.aiConversations.clear();
+        await db.aiMemories.clear();
       },
     );
     await commitPreparedImport(prepared);
@@ -310,6 +323,7 @@ describe('save validation and recovery', () => {
       'Help me move toward honest connection.',
     );
     expect((await db.aiConversations.get('ai:backup'))?.messages[1].companionId).toBe('cipher');
+    expect((await db.aiMemories.get('ai-memory:backup'))?.status).toBe('approved');
   });
 
   it('migrates a Version 2.1 save to Version 4.0 without losing the existing party', async () => {
@@ -331,7 +345,7 @@ describe('save validation and recovery', () => {
     save.checksum = await digest(save.data);
 
     const prepared = await prepareSaveImport(asFile(save));
-    expect(prepared.save.version).toBe(14);
+    expect(prepared.save.version).toBe(15);
     expect(prepared.save.data.dailyBriefings).toEqual([]);
     const migrated = prepared.save.data.settings[0] as Record<string, unknown>;
     expect(migrated.enabledCompanionIds).toContain('amara');
@@ -341,12 +355,14 @@ describe('save validation and recovery', () => {
     expect(migrated.dailyBriefingEnabled).toBe(true);
     expect(migrated.aiLinkMode).toBe('offline');
     expect(migrated.aiDataSharingAcknowledged).toBe(false);
+    expect(migrated.aiRelationshipMemoryEnabled).toBe(false);
     expect(prepared.save.data.treasurySettings).toHaveLength(1);
     expect(prepared.save.data.treasuryTransactions).toEqual([]);
     expect(prepared.save.data.trainingSessions).toEqual([]);
     expect(prepared.save.data.sanctuarySessions).toEqual([]);
     expect(prepared.save.data.kitchenSessions).toEqual([]);
     expect(prepared.save.data.aiConversations).toEqual([]);
+    expect(prepared.save.data.aiMemories).toEqual([]);
   });
 
   it('rejects malformed AI Headquarters messages even when the checksum matches', async () => {

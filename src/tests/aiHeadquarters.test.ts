@@ -4,13 +4,19 @@ import {
   createAiConversation,
   createCompanionMessage,
   createHunterMessage,
+  approveAiRelationshipMemory,
+  forgetAiRelationshipMemory,
+  getAiRelationshipMemories,
+  getRelevantApprovedMemories,
   getRecentAiConversations,
+  saveAiMemoryCandidates,
   saveAiConversation,
 } from '@/game/aiHeadquarters';
 
 describe('AI Headquarters local history', () => {
   beforeEach(async () => {
     await db.aiConversations.clear();
+    await db.aiMemories.clear();
   });
 
   it('stores a party exchange locally and returns the newest conversation first', async () => {
@@ -40,5 +46,25 @@ describe('AI Headquarters local history', () => {
       companionId: 'cipher',
       message: 'We start with one executable step.',
     });
+  });
+
+  it('keeps candidate memories inactive until the Hunter approves them', async () => {
+    const conversation = createAiConversation('rook', '2026-08-11T14:00:00.000Z');
+    const [candidate] = await saveAiMemoryCandidates(
+      [{ fact: 'The Hunter prefers morning workouts.', category: 'preference' }],
+      'rook',
+      conversation.id,
+    );
+
+    expect((await getAiRelationshipMemories())[0].status).toBe('pending');
+    expect(await getRelevantApprovedMemories('rook')).toEqual([]);
+
+    await approveAiRelationshipMemory(candidate.id);
+    expect((await getRelevantApprovedMemories('rook'))[0].fact).toContain('morning workouts');
+    expect(await getRelevantApprovedMemories('snow')).toEqual([]);
+    expect(await getRelevantApprovedMemories('party')).toHaveLength(1);
+
+    await forgetAiRelationshipMemory(candidate.id);
+    expect(await getAiRelationshipMemories()).toEqual([]);
   });
 });

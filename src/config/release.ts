@@ -1,6 +1,6 @@
-export const APP_VERSION = '6.5.0';
-export const DATABASE_SCHEMA_VERSION = 14;
-export const SAVE_FORMAT_VERSION = 14;
+export const APP_VERSION = '6.6.0';
+export const DATABASE_SCHEMA_VERSION = 15;
+export const SAVE_FORMAT_VERSION = 15;
 
 export interface ReleaseSection {
   title: string;
@@ -9,6 +9,18 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 6.6.0 · Living Bonds',
+    detail:
+      'Soulprint II gives every companion a sharper inner life, stronger relationships, and a private memory system the Hunter controls.',
+    points: [
+      'Snow now leads like an unforgettable ride-or-die sister: laid-back, wise, quietly in command, and never required to announce that the room follows her.',
+      'Ember directs her hard-edged aggression at obstacles and excuses instead of the Hunter, while Saffron becomes concentrated culinary pressure whose loudest moments still land as practical care.',
+      'All ten companions gain deeper emotional posture, humor, conflict style, affection style, and relationship-specific chemistry so Party Council can feel like people who genuinely know one another.',
+      'Bond Memory is an optional local ledger: Headquarters may suggest a durable preference, goal, boundary, background fact, or commitment, but nothing crosses conversations until the Hunter approves it.',
+      'Approved memories can be reviewed or forgotten at any time, travel with the full-campaign save, and are injected only in a small relevant slice; pending suggestions and the complete ledger never leave the device.',
+    ],
+  },
   {
     title: 'Version 6.5.0 · Companion Soulprint',
     detail:

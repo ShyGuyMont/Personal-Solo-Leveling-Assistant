@@ -1,5 +1,8 @@
 import {
+  BookmarkCheck,
   BrainCircuit,
+  Check,
+  ChevronDown,
   LoaderCircle,
   LockKeyhole,
   MessageCircleMore,
@@ -8,6 +11,7 @@ import {
   Send,
   ShieldCheck,
   Sparkles,
+  Trash2,
   Users,
   Wifi,
   WifiOff,
@@ -16,10 +20,14 @@ import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties }
 import { COMPANIONS, getCompanion, getCompanionImage } from '@/config/companions';
 import { db } from '@/db/database';
 import {
+  approveAiRelationshipMemory,
   createAiConversation,
   createCompanionMessage,
   createHunterMessage,
+  forgetAiRelationshipMemory,
+  getAiRelationshipMemories,
   getRecentAiConversations,
+  saveAiMemoryCandidates,
   saveAiConversation,
 } from '@/game/aiHeadquarters';
 import {
@@ -31,7 +39,7 @@ import {
 import { useGameStore } from '@/store/useGameStore';
 import { formatClassName } from '@/utils/format';
 import { scrollChatViewportToBottom } from '@/utils/scroll';
-import type { AiConversation, AiConversationAudience } from '@/types/game';
+import type { AiConversation, AiConversationAudience, AiRelationshipMemory } from '@/types/game';
 
 export function AiHeadquartersPanel() {
   const { profile, settings, progression, missions, todayRecords, stats, systemDate, refresh } =
@@ -43,6 +51,8 @@ export function AiHeadquartersPanel() {
   const [statusLoading, setStatusLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [notice, setNotice] = useState('');
+  const [memoryLedger, setMemoryLedger] = useState<AiRelationshipMemory[]>([]);
+  const [memoryOpen, setMemoryOpen] = useState(false);
   const [deviceOnline, setDeviceOnline] = useState(navigator.onLine);
   const messageListRef = useRef<HTMLDivElement>(null);
 
@@ -56,6 +66,10 @@ export function AiHeadquartersPanel() {
     setStatusLoading(true);
     setStatus(await getAiLinkStatus());
     setStatusLoading(false);
+  }, []);
+
+  const refreshMemoryLedger = useCallback(async () => {
+    setMemoryLedger(await getAiRelationshipMemories());
   }, []);
 
   useEffect(() => {
@@ -81,6 +95,10 @@ export function AiHeadquartersPanel() {
   useEffect(() => {
     void refreshStatus();
   }, [refreshStatus]);
+
+  useEffect(() => {
+    void refreshMemoryLedger();
+  }, [refreshMemoryLedger]);
 
   useEffect(() => {
     const update = () => setDeviceOnline(navigator.onLine);
@@ -129,19 +147,50 @@ export function AiHeadquartersPanel() {
   }
 
   async function activateOnlineLink() {
-    await db.settings.update('primary', {
-      aiLinkMode: 'online',
-      aiDataSharingAcknowledged: true,
-    });
-    await refresh();
-    await refreshStatus();
-    setNotice('Online mode activated. No transmission is sent until you press Send.');
+    try {
+      await db.settings.update('primary', {
+        aiLinkMode: 'online',
+        aiDataSharingAcknowledged: true,
+      });
+      await refresh();
+      await refreshStatus();
+      setNotice('Online mode activated. No transmission is sent until you press Send.');
+    } catch (error) {
+      setNotice(
+        error instanceof Error
+          ? `Online mode could not be activated: ${error.message}`
+          : 'Online mode could not be activated on this device.',
+      );
+    }
   }
 
   async function returnOffline() {
     await db.settings.update('primary', { aiLinkMode: 'offline' });
     await refresh();
     setNotice('Offline mode restored. Saved conversations remain available on this device.');
+  }
+
+  async function setBondMemoryEnabled(enabled: boolean) {
+    await db.settings.update('primary', { aiRelationshipMemoryEnabled: enabled });
+    await refresh();
+    setMemoryOpen(true);
+    setNotice(
+      enabled
+        ? 'Bond Memory enabled. Only memories you approve can cross into a future conversation.'
+        : 'Bond Memory paused. The local ledger is intact, but no approved memory will be sent.',
+    );
+  }
+
+  async function approveMemory(id: string) {
+    await approveAiRelationshipMemory(id);
+    await refreshMemoryLedger();
+    setNotice('Bond approved. It can now guide a relevant future conversation.');
+  }
+
+  async function forgetMemory(id: string) {
+    await forgetAiRelationshipMemory(id);
+    await refreshMemoryLedger();
+    setNotice('Bond Memory forgotten from this device.');
   }
 
   async function startConversation(audience: AiConversationAudience = 'party') {
@@ -173,6 +222,15 @@ export function AiHeadquartersPanel() {
         .filter((record) => record.status === 'completed')
         .map((record) => record.missionId),
     );
+    const approvedMemories = memoryLedger
+      .filter(
+        (memory) =>
+          memory.status === 'approved' &&
+          (currentConversation.audience === 'party' ||
+            memory.scope === 'party' ||
+            memory.scope === currentConversation.audience),
+      )
+      .slice(0, 12);
     return {
       hunter: {
         firstName: currentProfile.displayName.trim().split(/\s+/)[0] || 'Hunter',
@@ -202,6 +260,16 @@ export function AiHeadquartersPanel() {
       state: {
         recoveryActive: currentSettings.recoveryMode.active,
       },
+      bondMemory: {
+        enabled: currentSettings.aiRelationshipMemoryEnabled,
+        approved: currentSettings.aiRelationshipMemoryEnabled
+          ? approvedMemories.map((memory) => ({
+              fact: memory.fact,
+              category: memory.category,
+              scope: memory.scope,
+            }))
+          : [],
+      },
     };
   }
 
@@ -226,6 +294,13 @@ export function AiHeadquartersPanel() {
         history: currentConversation.messages,
         context: buildProgressContext(),
       });
+      const memoryAdditions = currentSettings.aiRelationshipMemoryEnabled
+        ? await saveAiMemoryCandidates(
+            result.memoryCandidates,
+            currentConversation.audience,
+            currentConversation.id,
+          )
+        : [];
       const replyTime = new Date().toISOString();
       const completedConversation: AiConversation = {
         ...pendingConversation,
@@ -239,6 +314,13 @@ export function AiHeadquartersPanel() {
         ],
       };
       await updateConversation(completedConversation);
+      if (memoryAdditions.length) {
+        await refreshMemoryLedger();
+        setMemoryOpen(true);
+        setNotice(
+          `${memoryAdditions.length} new Bond Memory suggestion${memoryAdditions.length === 1 ? '' : 's'} awaiting your approval.`,
+        );
+      }
     } catch (error) {
       setNotice(error instanceof Error ? error.message : 'The online link could not respond.');
     } finally {
@@ -266,12 +348,12 @@ export function AiHeadquartersPanel() {
           <i />
         </div>
         <div>
-          <p className="eyebrow">AWAKENED LINK · COMPANION INTELLIGENCE</p>
-          <h2 id="ai-headquarters-title">Every companion now answers as themselves.</h2>
+          <p className="eyebrow">AWAKENED LINK · SOULPRINT II</p>
+          <h2 id="ai-headquarters-title">Ten distinct lives. One party that remembers.</h2>
           <p>
-            Open a living conversation with everyone or call one companion directly. Each soulprint
-            carries its own worldview, rhythm, methods, boundaries, and relationships while your
-            campaign and completed transmissions remain on this device.
+            Call one companion or open the full council. Their sharper identities, history with one
+            another, and optional Hunter-approved Bond Memory create continuity without surrendering
+            control of your private campaign.
           </p>
         </div>
         <span className={`ai-headquarters__readiness ${readiness.className}`}>
@@ -289,7 +371,9 @@ export function AiHeadquartersPanel() {
               <small>
                 When you press Send, only your first name, message, up to 16 recent chat messages,
                 and a compact Class, level, focus, recovery, mission, and stat signal go to OpenAI.
-                Notes, journals, Treasury amounts, and your save file stay local.
+                Notes, journals, Treasury amounts, and your save file stay local. Bond Memory
+                remains off until you enable it, and only memories you approve may be included
+                later.
               </small>
             </span>
           </div>
@@ -306,6 +390,90 @@ export function AiHeadquartersPanel() {
             Return to offline mode
           </button>
         </div>
+      )}
+
+      {(onlineMode || memoryLedger.length > 0) && (
+        <section
+          className={`ai-bond-memory ${currentSettings.aiRelationshipMemoryEnabled ? 'is-enabled' : ''}`}
+        >
+          <div className="ai-bond-memory__header">
+            <button
+              type="button"
+              className="ai-bond-memory__summary"
+              onClick={() => setMemoryOpen((open) => !open)}
+              aria-expanded={memoryOpen}
+            >
+              <span>
+                <BookmarkCheck size={18} />
+              </span>
+              <span>
+                <strong>Bond Memory</strong>
+                <small>
+                  {currentSettings.aiRelationshipMemoryEnabled
+                    ? `${memoryLedger.filter((memory) => memory.status === 'approved').length} approved · ${memoryLedger.filter((memory) => memory.status === 'pending').length} awaiting you`
+                    : 'Paused · nothing crosses conversations'}
+                </small>
+              </span>
+              <ChevronDown className={memoryOpen ? 'is-open' : ''} size={16} />
+            </button>
+            <button
+              className="text-link"
+              type="button"
+              onClick={() => setBondMemoryEnabled(!currentSettings.aiRelationshipMemoryEnabled)}
+            >
+              {currentSettings.aiRelationshipMemoryEnabled ? 'Pause memory' : 'Enable memory'}
+            </button>
+          </div>
+
+          {memoryOpen && (
+            <div className="ai-bond-memory__body">
+              <p>
+                Headquarters can suggest durable facts from what you explicitly say. Suggestions
+                stay local and inactive until you approve them. You can forget any bond at any time.
+              </p>
+              {!memoryLedger.length ? (
+                <div className="ai-bond-memory__empty">
+                  <BrainCircuit size={18} />
+                  <span>
+                    <strong>No bonds recorded yet.</strong>
+                    <small>
+                      Natural preferences, long-term goals, boundaries, and commitments may appear
+                      here after a conversation.
+                    </small>
+                  </span>
+                </div>
+              ) : (
+                <div className="ai-bond-memory__list">
+                  {memoryLedger.map((memory) => (
+                    <article
+                      key={memory.id}
+                      className={memory.status === 'pending' ? 'is-pending' : ''}
+                    >
+                      <div>
+                        <span>
+                          {memory.status === 'pending' ? 'AWAITING APPROVAL' : 'APPROVED BOND'} ·{' '}
+                          {memory.category} ·{' '}
+                          {memory.scope === 'party' ? 'party' : getCompanion(memory.scope).name}
+                        </span>
+                        <p>{memory.fact}</p>
+                      </div>
+                      <div>
+                        {memory.status === 'pending' && (
+                          <button type="button" onClick={() => approveMemory(memory.id)}>
+                            <Check size={14} /> Keep
+                          </button>
+                        )}
+                        <button type="button" onClick={() => forgetMemory(memory.id)}>
+                          <Trash2 size={14} /> Forget
+                        </button>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </section>
       )}
 
       <div className="ai-headquarters__layout">
@@ -395,15 +563,11 @@ export function AiHeadquartersPanel() {
                 </div>
               </div>
               <span>
-                <MessageCircleMore size={14} /> SOULPRINT ACTIVE
+                <MessageCircleMore size={14} /> LIVING BOND ACTIVE
               </span>
             </header>
 
-            <div
-              ref={messageListRef}
-              className="ai-message-stage__messages"
-              aria-live="polite"
-            >
+            <div ref={messageListRef} className="ai-message-stage__messages" aria-live="polite">
               {!activeConversation.messages.length && (
                 <div className="ai-message-stage__empty">
                   <Sparkles size={25} />

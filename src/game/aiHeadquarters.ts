@@ -3,8 +3,15 @@ import type {
   AiConversation,
   AiConversationAudience,
   AiConversationMessage,
+  AiMemoryCategory,
+  AiRelationshipMemory,
   CompanionId,
 } from '@/types/game';
+
+export interface AiMemoryCandidate {
+  fact: string;
+  category: AiMemoryCategory;
+}
 
 export function createAiConversation(
   audience: AiConversationAudience = 'party',
@@ -54,4 +61,65 @@ export async function saveAiConversation(conversation: AiConversation) {
 
 export async function deleteAiConversation(id: string) {
   await db.aiConversations.delete(id);
+}
+
+export async function getAiRelationshipMemories() {
+  return db.aiMemories.orderBy('updatedAt').reverse().toArray();
+}
+
+export async function getRelevantApprovedMemories(audience: AiConversationAudience, limit = 12) {
+  const memories = await db.aiMemories
+    .where('status')
+    .equals('approved')
+    .reverse()
+    .sortBy('updatedAt');
+  return memories
+    .filter(
+      (memory) => audience === 'party' || memory.scope === 'party' || memory.scope === audience,
+    )
+    .slice(0, limit);
+}
+
+export async function saveAiMemoryCandidates(
+  candidates: AiMemoryCandidate[],
+  scope: AiConversationAudience,
+  sourceConversationId: string,
+) {
+  if (!candidates.length) return [];
+  const current = await db.aiMemories.toArray();
+  const known = new Set(
+    current.map((memory) => `${memory.scope}:${memory.fact.trim().toLowerCase()}`),
+  );
+  const pendingCount = current.filter((memory) => memory.status === 'pending').length;
+  const remainingSlots = Math.max(0, 12 - pendingCount);
+  const now = new Date().toISOString();
+  const additions: AiRelationshipMemory[] = [];
+
+  for (const candidate of candidates.slice(0, remainingSlots)) {
+    const fact = candidate.fact.trim().replace(/\s+/g, ' ').slice(0, 240);
+    const key = `${scope}:${fact.toLowerCase()}`;
+    if (!fact || known.has(key)) continue;
+    known.add(key);
+    additions.push({
+      id: crypto.randomUUID(),
+      fact,
+      category: candidate.category,
+      scope,
+      status: 'pending',
+      sourceConversationId,
+      createdAt: now,
+      updatedAt: now,
+    });
+  }
+
+  if (additions.length) await db.aiMemories.bulkPut(additions);
+  return additions;
+}
+
+export async function approveAiRelationshipMemory(id: string) {
+  await db.aiMemories.update(id, { status: 'approved', updatedAt: new Date().toISOString() });
+}
+
+export async function forgetAiRelationshipMemory(id: string) {
+  await db.aiMemories.delete(id);
 }

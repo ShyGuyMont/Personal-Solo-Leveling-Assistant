@@ -3,6 +3,7 @@ import type {
   AccountProgression,
   Achievement,
   AiConversation,
+  AiRelationshipMemory,
   ArcMilestone,
   AuditEntry,
   AppMetadata,
@@ -96,6 +97,7 @@ export class SystemDatabase extends Dexie {
   kitchenSessions!: EntityTable<KitchenSession, 'id'>;
   sanctuarySessions!: EntityTable<SanctuarySession, 'id'>;
   aiConversations!: EntityTable<AiConversation, 'id'>;
+  aiMemories!: EntityTable<AiRelationshipMemory, 'id'>;
   appMetadata!: EntityTable<AppMetadata, 'id'>;
 
   constructor(name = 'the-system-db') {
@@ -568,6 +570,23 @@ export class SystemDatabase extends Dexie {
         await metadata.put({ id: 'schema-seeded', value: 14, updatedAt: now });
         await metadata.put({ id: 'app-version', value: '6.4.0', updatedAt: now });
       });
+    this.version(15)
+      .stores({
+        aiMemories: 'id,status,scope,category,createdAt,updatedAt',
+      })
+      .upgrade(async (transaction) => {
+        const now = new Date().toISOString();
+        const settings = transaction.table<Settings, string>('settings');
+        const current = await settings.get('primary');
+        if (current) {
+          await settings.update('primary', {
+            aiRelationshipMemoryEnabled: current.aiRelationshipMemoryEnabled ?? false,
+          });
+        }
+        const metadata = transaction.table<AppMetadata, string>('appMetadata');
+        await metadata.put({ id: 'schema-seeded', value: 15, updatedAt: now });
+        await metadata.put({ id: 'app-version', value: '6.6.0', updatedAt: now });
+      });
   }
 }
 
@@ -619,6 +638,7 @@ export const TABLE_NAMES = [
   'kitchenSessions',
   'sanctuarySessions',
   'aiConversations',
+  'aiMemories',
   'appMetadata',
 ] as const;
 

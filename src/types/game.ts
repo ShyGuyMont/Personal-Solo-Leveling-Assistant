@@ -138,6 +138,7 @@ export interface Settings {
   dailyBriefingEnabled: boolean;
   aiLinkMode: AiLinkMode;
   aiDataSharingAcknowledged: boolean;
+  aiRelationshipMemoryEnabled: boolean;
 }
 
 export interface StatReward {
@@ -711,6 +712,20 @@ export interface AiConversation {
   createdAt: string;
   updatedAt: string;
   messages: AiConversationMessage[];
+}
+
+export type AiMemoryCategory = 'preference' | 'goal' | 'boundary' | 'background' | 'commitment';
+export type AiMemoryStatus = 'pending' | 'approved';
+
+export interface AiRelationshipMemory {
+  id: string;
+  fact: string;
+  category: AiMemoryCategory;
+  scope: AiConversationAudience;
+  status: AiMemoryStatus;
+  sourceConversationId: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface FavoriteMessage {
