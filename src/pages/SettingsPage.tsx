@@ -895,7 +895,7 @@ export function SettingsPage() {
               <span className="switch" />
             </label>
             <button
-              className="button button--ghost"
+              className="button button--ghost mission-defaults-button"
               onClick={() => setMissionDrafts(DEFAULT_MISSIONS.map((mission) => ({ ...mission })))}
             >
               <RotateCcw size={16} /> Restore mission defaults

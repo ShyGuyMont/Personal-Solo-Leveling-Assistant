@@ -203,7 +203,7 @@ describe('save validation and recovery', () => {
     await db.kitchenSessions.put({
       id: '2026-08-01',
       date: '2026-08-01',
-      recipeId: 'lemon-chicken-potatoes',
+      recipeId: 'freezer-breakfast-burritos',
       status: 'completed',
       assignmentVariant: 2,
       rerollUsed: false,
@@ -278,6 +278,9 @@ describe('save validation and recovery', () => {
     expect((await db.treasuryTransactions.get('treasury:backup'))?.amountCents).toBe(2450);
     expect((await db.trainingSessions.get('2026-08-01'))?.roundsCompleted).toBe(5);
     expect((await db.kitchenSessions.get('2026-08-01'))?.servingsPrepared).toBe(4);
+    expect((await db.kitchenSessions.get('2026-08-01'))?.recipeId).toBe(
+      'freezer-breakfast-burritos',
+    );
     expect((await db.sanctuarySessions.get('sanctuary:backup'))?.prayer).toBe(
       'Help me move toward honest connection.',
     );

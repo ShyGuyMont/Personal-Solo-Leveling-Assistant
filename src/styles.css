@@ -16372,6 +16372,34 @@ html .button.button--primary:disabled {
   opacity: 1;
 }
 
+/* Keep installed mobile navigation and settings actions clear of the device status bar. */
+@media (max-width: 720px) {
+  .app-shell {
+    padding-top: calc(74px + env(safe-area-inset-top));
+  }
+
+  .app-header {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 90;
+    width: 100%;
+    margin: 0;
+  }
+
+  .system-hud {
+    top: calc(74px + env(safe-area-inset-top));
+  }
+
+  .mission-defaults-button {
+    width: 100%;
+    min-height: 52px;
+    padding: 10px 14px;
+    line-height: 1.25;
+    text-align: center;
+    white-space: normal;
+  }
+}
+
 /* Responsiveness pass: preserve the System look while lowering mobile compositing cost. */
 .bottom-nav__item:active {
   transform: scale(0.96);

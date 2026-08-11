@@ -1,3 +1,4 @@
+import { KITCHEN_RECIPES } from '@/config/kitchen';
 import { db, TABLE_NAMES } from '@/db/database';
 import type { BackupSnapshot, Profile, SaveFile, Settings, AccountProgression } from '@/types/game';
 
@@ -5,6 +6,7 @@ export const SAVE_VERSION = 13;
 export const MAX_IMPORT_BYTES = 32 * 1024 * 1024;
 const MAX_SNAPSHOTS = 5;
 const FORBIDDEN_KEYS = new Set(['__proto__', 'prototype', 'constructor']);
+const KITCHEN_RECIPE_IDS = new Set<string>(KITCHEN_RECIPES.map((recipe) => recipe.id));
 
 export interface SavePreview {
   displayName: string;
@@ -467,26 +469,12 @@ function validateData(data: Record<string, unknown[]>) {
     }
   }
 
-  const kitchenRecipes = new Set([
-    'lemon-chicken-potatoes',
-    'garlic-shrimp-rice',
-    'turkey-taco-potato-skillet',
-    'salmon-crispy-potatoes',
-    'steak-bites-potatoes',
-    'breakfast-potato-hash',
-    'chicken-fajita-bowls',
-    'beef-broccoli-stir-fry',
-    'turkey-meatball-pasta',
-    'cajun-shrimp-potato-skillet',
-    'honey-garlic-chicken-bowls',
-    'crab-loaded-potatoes',
-  ]);
   for (const row of data.kitchenSessions) {
     if (
       !isObject(row) ||
       !validDate(row.date) ||
       row.id !== row.date ||
-      !kitchenRecipes.has(String(row.recipeId)) ||
+      !KITCHEN_RECIPE_IDS.has(String(row.recipeId)) ||
       !['assigned', 'completed', 'declined'].includes(String(row.status)) ||
       typeof row.rerollUsed !== 'boolean' ||
       typeof row.rewardApplied !== 'boolean' ||
