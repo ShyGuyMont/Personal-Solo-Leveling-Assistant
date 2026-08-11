@@ -2,6 +2,7 @@ import type {
   AiConversationAudience,
   AiConversationMessage,
   CompanionId,
+  Focus,
   LocalDateKey,
   Rank,
   StatName,
@@ -13,6 +14,7 @@ export interface AiProgressContext {
     systemTitle: string;
     level: number;
     class: Rank;
+    startingFocus: Focus;
   };
   today: {
     date: LocalDateKey;
@@ -29,12 +31,16 @@ export interface AiProgressContext {
   party: {
     enabledCompanionIds: CompanionId[];
   };
+  state: {
+    recoveryActive: boolean;
+  };
 }
 
 export interface AiLinkStatus {
   ok: boolean;
   configured: boolean;
   model?: string;
+  intelligenceVersion?: string;
 }
 
 export interface AiHeadquartersReply {
@@ -77,6 +83,10 @@ export async function getAiLinkStatus(): Promise<AiLinkStatus> {
       ok: response.ok && payload?.ok === true,
       configured: response.ok && payload?.configured === true,
       model: typeof payload?.model === 'string' ? payload.model : undefined,
+      intelligenceVersion:
+        typeof payload?.intelligenceVersion === 'string'
+          ? payload.intelligenceVersion
+          : undefined,
     };
   } catch {
     return { ok: false, configured: false };

@@ -1,4 +1,4 @@
-export const APP_VERSION = '6.4.2';
+export const APP_VERSION = '6.5.0';
 export const DATABASE_SCHEMA_VERSION = 14;
 export const SAVE_FORMAT_VERSION = 14;
 
@@ -9,6 +9,18 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 6.5.0 · Companion Soulprint',
+    detail:
+      'Every online companion gains a complete intelligence identity designed for natural conversation now and individual performance later.',
+    points: [
+      'Snow, Rook, Selah, Cipher, Haven, Ember, Mira, Amara, Cassian, and Saffron now carry distinct worldviews, speech rhythms, response methods, protective boundaries, specialist instincts, and future voice-performance directions.',
+      'Direct channels preserve one companion without generic assistant bleed, while Party Council selects two to four relevant personalities, gives each a different conversational role, rotates casual participation, and permits respectful disagreement and natural banter.',
+      'Simple questions receive direct answers before personality flavor; longer conversations use recent thread history without inventing memories, repeating advice, or claiming access beyond the supplied campaign signal.',
+      'The compact online context now includes starting focus and recovery state so companions can respond more appropriately without transmitting notes, journals, Treasury amounts, the save file, or conversations outside the active thread.',
+      'Soulprint identity guidance is centralized behind the private gateway and versioned so a future voice layer can preserve the same cadence, warmth, intensity, and interpersonal chemistry.',
+    ],
+  },
   {
     title: 'Version 6.4.2 · Steady Focus',
     detail:

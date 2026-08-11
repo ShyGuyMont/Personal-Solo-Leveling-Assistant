@@ -108,6 +108,7 @@ export function AiHeadquartersPanel() {
   const currentProfile = profile;
   const currentProgression = progression;
   const currentConversation = activeConversation;
+  const currentSettings = settings;
 
   const onlineMode = settings.aiLinkMode === 'online' && settings.aiDataSharingAcknowledged;
   const activeCompanion =
@@ -178,6 +179,7 @@ export function AiHeadquartersPanel() {
         systemTitle: currentProfile.systemTitle,
         level: currentProgression.level,
         class: currentProgression.rank,
+        startingFocus: currentProfile.startingFocus,
       },
       today: {
         date: systemDate,
@@ -196,6 +198,9 @@ export function AiHeadquartersPanel() {
       })),
       party: {
         enabledCompanionIds: enabledCompanions.map((companion) => companion.id),
+      },
+      state: {
+        recoveryActive: currentSettings.recoveryMode.active,
       },
     };
   }
@@ -261,12 +266,12 @@ export function AiHeadquartersPanel() {
           <i />
         </div>
         <div>
-          <p className="eyebrow">AWAKENED LINK · ONLINE INTELLIGENCE</p>
-          <h2 id="ai-headquarters-title">The party can finally answer you.</h2>
+          <p className="eyebrow">AWAKENED LINK · COMPANION INTELLIGENCE</p>
+          <h2 id="ai-headquarters-title">Every companion now answers as themselves.</h2>
           <p>
-            Open a living conversation with everyone or call one companion directly. Their words are
-            generated online; your campaign, history, and completed transmissions remain on this
-            device.
+            Open a living conversation with everyone or call one companion directly. Each soulprint
+            carries its own worldview, rhythm, methods, boundaries, and relationships while your
+            campaign and completed transmissions remain on this device.
           </p>
         </div>
         <span className={`ai-headquarters__readiness ${readiness.className}`}>
@@ -282,9 +287,9 @@ export function AiHeadquartersPanel() {
             <span>
               <strong>Online mode is opt-in.</strong>
               <small>
-                When you press Send, only your message, up to 16 recent chat messages, and a compact
-                Class, level, mission, and stat signal go to OpenAI. Notes, journals, Treasury
-                amounts, and your save file stay local.
+                When you press Send, only your first name, message, up to 16 recent chat messages,
+                and a compact Class, level, focus, recovery, mission, and stat signal go to OpenAI.
+                Notes, journals, Treasury amounts, and your save file stay local.
               </small>
             </span>
           </div>
@@ -390,7 +395,7 @@ export function AiHeadquartersPanel() {
                 </div>
               </div>
               <span>
-                <MessageCircleMore size={14} /> AI GENERATED
+                <MessageCircleMore size={14} /> SOULPRINT ACTIVE
               </span>
             </header>
 
