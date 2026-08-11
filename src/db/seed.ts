@@ -60,6 +60,8 @@ export function createDefaultSettings(): Settings {
     firstDayGuideCompleted: false,
     soundVolume: 0.55,
     dailyBriefingEnabled: true,
+    aiLinkMode: 'offline',
+    aiDataSharingAcknowledged: false,
   };
 }
 
@@ -193,9 +195,9 @@ export async function initializeProfile(input: {
         },
       ]);
       await db.appMetadata.bulkPut([
-        { id: 'schema-seeded', value: 13, updatedAt: now },
+        { id: 'schema-seeded', value: 14, updatedAt: now },
         { id: 'last-system-day', value: systemDate, updatedAt: now },
-        { id: 'app-version', value: '6.3.0', updatedAt: now },
+        { id: 'app-version', value: '6.4.0', updatedAt: now },
       ]);
       await ensureRotatingChallenges(systemDate, settings.weekStartsOn);
     },

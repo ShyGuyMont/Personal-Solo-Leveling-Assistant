@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useState, type CSSProperties } from 'react';
 import { CampfireRecapView } from '@/components/CampfireRecapView';
+import { AiHeadquartersPanel } from '@/components/AiHeadquartersPanel';
 import { MonthlyCouncilView } from '@/components/MonthlyCouncilView';
 import { COMPANIONS, getCompanion, getCompanionImage } from '@/config/companions';
 import { APP_VERSION } from '@/config/release';
@@ -92,6 +93,8 @@ export function HeadquartersPage() {
           </p>
         </div>
       </section>
+
+      <AiHeadquartersPanel />
 
       <section className="headquarters-actions">
         <Link to="/party-chat?tab=check-in" className="panel">

@@ -12,7 +12,8 @@ The design, writing, interface, icons, animations, and generated tones are origi
 - System and Clean interface styles, five complete color protocols from Abyss to Winter Crown, and selectable visual intensity
 - Ten original chibi companion characters with daily greetings, stat-specific encouragement, shame-free accountability, occasional two-character banter, cinematic milestone celebrations, adjustable frequency, and individual mute controls
 - A private Party Channel with ten-mood Check-Ins, six Direct Support topics, whole-party or one-to-one responses, history-aware dialogue rotation, and locally saved conversations that never affect XP or streaks
-- Full Party Headquarters with the complete roster, support shortcuts, saved-message counts, Ember's Lock-In Protocol, Amara's Heartweaver Protocol, permanent Weekly Campfires, and Monthly Councils
+- Full Party Headquarters with the complete roster, support shortcuts, saved-message counts, Ember's Lock-In Protocol, Amara's Heartweaver Protocol, permanent Weekly Campfires, Monthly Councils, and an opt-in AI conversation chamber
+- Secure online AI conversations with the full party or any individual companion, local-only conversation history, compact progress context, and an immediate offline fallback
 - Weekly Campfire Recaps generated once per completed week from finalized mission data, with an in-character review from every companion and no hidden rewards or penalties
 - Monthly Councils generated after a completed month with fact-aware commentary from all ten companions, permanent history, and an optional next-month intention
 - Snow's optional Daily Command Briefing with Low, Steady, and High capacity planning, broad completion targets, and transparent 1×–2.5× scheduled-mission XP outcomes
@@ -35,7 +36,25 @@ The design, writing, interface, icons, animations, and generated tones are origi
 - Privacy Screen, sensitive-mission alias, global recovery screen, reduced motion, optional generated tones, and honest notification limitations
 - Installable iPhone PWA with safe-area support, offline caching, code-split screens, user-controlled update prompts, and a dedicated Update Center
 
-There is no login, backend, external API, analytics, advertising, tracking, or paid service.
+The complete progression system works offline and stores campaign data locally. The optional AI
+Headquarters channel uses the private Sites sign-in and a server-side OpenAI connection; it sends
+only the message, limited recent chat context, and a compact progress signal when the user presses
+Send. There is no analytics, advertising, or tracking.
+
+## Version 6.4.0 · Awakened Link
+
+Version 6.4 opens the first secure intelligence channel in Headquarters. The Hunter can speak with
+the full party or call any enabled companion directly, while the established personalities remain
+distinct and the offline System remains authoritative. Party conversations intentionally call only
+the companions relevant to the moment instead of making all ten answer every message.
+
+Online mode is explicit and reversible. The OpenAI credential stays behind the private Sites
+gateway, API requests are not stored by the app server, and the browser receives no secret. Only
+the Hunter's message, up to sixteen recent chat messages, and a compact Class, level, mission, and
+stat signal are transmitted. Notes, journals, Treasury amounts, and the full save remain local.
+Completed AI conversations are stored on-device, included in Archive Shield exports, and readable
+offline. Readiness checks, usage-limit guidance, and failure-safe local saving keep a broken or
+unconfigured online link from affecting the campaign.
 
 ## Version 6.3.0 · Stillpoint Protocol
 

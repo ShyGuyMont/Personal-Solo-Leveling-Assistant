@@ -62,7 +62,7 @@ describe('save validation and recovery', () => {
     expect(await listLocalSnapshots()).toHaveLength(5);
   });
 
-  it('round-trips every Version 4.0 campaign, Treasury, Training, and Sanctuary record through Archive Shield', async () => {
+  it('round-trips campaign, Treasury, Training, Sanctuary, Kitchen, and AI records through Archive Shield', async () => {
     const now = new Date().toISOString();
     await db.dailyBriefings.put({
       id: '2026-08-01',
@@ -218,9 +218,31 @@ describe('save validation and recovery', () => {
       rewardApplied: true,
       updatedAt: now,
     });
+    await db.aiConversations.put({
+      id: 'ai:backup',
+      title: 'A protected council',
+      audience: 'party',
+      createdAt: now,
+      updatedAt: now,
+      messages: [
+        {
+          id: 'ai-message:hunter',
+          role: 'hunter',
+          message: 'Help me plan the next honest move.',
+          createdAt: now,
+        },
+        {
+          id: 'ai-message:cipher',
+          role: 'companion',
+          companionId: 'cipher',
+          message: 'We will reduce it to one executable step.',
+          createdAt: now,
+        },
+      ],
+    });
 
     const save = await createSaveFile();
-    expect(save.version).toBe(13);
+    expect(save.version).toBe(14);
     for (const table of [
       'dailyBriefings',
       'campaignArcs',
@@ -231,6 +253,7 @@ describe('save validation and recovery', () => {
       'trainingSessions',
       'kitchenSessions',
       'sanctuarySessions',
+      'aiConversations',
     ]) {
       expect(save.data[table]).toHaveLength(1);
     }
@@ -248,6 +271,7 @@ describe('save validation and recovery', () => {
         db.trainingSessions,
         db.kitchenSessions,
         db.sanctuarySessions,
+        db.aiConversations,
       ],
       async () => {
         await db.dailyBriefings.clear();
@@ -259,6 +283,7 @@ describe('save validation and recovery', () => {
         await db.trainingSessions.clear();
         await db.kitchenSessions.clear();
         await db.sanctuarySessions.clear();
+        await db.aiConversations.clear();
       },
     );
     await commitPreparedImport(prepared);
@@ -284,6 +309,7 @@ describe('save validation and recovery', () => {
     expect((await db.sanctuarySessions.get('sanctuary:backup'))?.prayer).toBe(
       'Help me move toward honest connection.',
     );
+    expect((await db.aiConversations.get('ai:backup'))?.messages[1].companionId).toBe('cipher');
   });
 
   it('migrates a Version 2.1 save to Version 4.0 without losing the existing party', async () => {
@@ -305,7 +331,7 @@ describe('save validation and recovery', () => {
     save.checksum = await digest(save.data);
 
     const prepared = await prepareSaveImport(asFile(save));
-    expect(prepared.save.version).toBe(13);
+    expect(prepared.save.version).toBe(14);
     expect(prepared.save.data.dailyBriefings).toEqual([]);
     const migrated = prepared.save.data.settings[0] as Record<string, unknown>;
     expect(migrated.enabledCompanionIds).toContain('amara');
@@ -313,11 +339,39 @@ describe('save validation and recovery', () => {
     expect(migrated.enabledCompanionIds).toContain('saffron');
     expect(migrated.enabledCompanionIds).toContain('mira');
     expect(migrated.dailyBriefingEnabled).toBe(true);
+    expect(migrated.aiLinkMode).toBe('offline');
+    expect(migrated.aiDataSharingAcknowledged).toBe(false);
     expect(prepared.save.data.treasurySettings).toHaveLength(1);
     expect(prepared.save.data.treasuryTransactions).toEqual([]);
     expect(prepared.save.data.trainingSessions).toEqual([]);
     expect(prepared.save.data.sanctuarySessions).toEqual([]);
     expect(prepared.save.data.kitchenSessions).toEqual([]);
+    expect(prepared.save.data.aiConversations).toEqual([]);
+  });
+
+  it('rejects malformed AI Headquarters messages even when the checksum matches', async () => {
+    const now = new Date().toISOString();
+    const save = await createSaveFile();
+    save.data.aiConversations = [
+      {
+        id: 'ai:impossible',
+        title: 'Invalid party link',
+        audience: 'party',
+        createdAt: now,
+        updatedAt: now,
+        messages: [
+          {
+            id: 'ai-message:impossible',
+            role: 'companion',
+            companionId: 'unknown-companion',
+            message: 'This identity does not exist.',
+            createdAt: now,
+          },
+        ],
+      },
+    ];
+    save.checksum = await digest(save.data);
+    await expect(prepareSaveImport(asFile(save))).rejects.toThrow(/AI Headquarters message/i);
   });
 
   it('rejects impossible Treasury values even when the checksum matches', async () => {

@@ -2,6 +2,7 @@ import Dexie, { type EntityTable } from 'dexie';
 import type {
   AccountProgression,
   Achievement,
+  AiConversation,
   ArcMilestone,
   AuditEntry,
   AppMetadata,
@@ -94,6 +95,7 @@ export class SystemDatabase extends Dexie {
   trainingSessions!: EntityTable<TrainingSession, 'id'>;
   kitchenSessions!: EntityTable<KitchenSession, 'id'>;
   sanctuarySessions!: EntityTable<SanctuarySession, 'id'>;
+  aiConversations!: EntityTable<AiConversation, 'id'>;
   appMetadata!: EntityTable<AppMetadata, 'id'>;
 
   constructor(name = 'the-system-db') {
@@ -548,6 +550,24 @@ export class SystemDatabase extends Dexie {
         await metadata.put({ id: 'schema-seeded', value: 13, updatedAt: now });
         await metadata.put({ id: 'app-version', value: '6.3.0', updatedAt: now });
       });
+    this.version(14)
+      .stores({
+        aiConversations: 'id,audience,createdAt,updatedAt',
+      })
+      .upgrade(async (transaction) => {
+        const now = new Date().toISOString();
+        const settings = transaction.table<Settings, string>('settings');
+        const current = await settings.get('primary');
+        if (current) {
+          await settings.update('primary', {
+            aiLinkMode: current.aiLinkMode ?? 'offline',
+            aiDataSharingAcknowledged: current.aiDataSharingAcknowledged ?? false,
+          });
+        }
+        const metadata = transaction.table<AppMetadata, string>('appMetadata');
+        await metadata.put({ id: 'schema-seeded', value: 14, updatedAt: now });
+        await metadata.put({ id: 'app-version', value: '6.4.0', updatedAt: now });
+      });
   }
 }
 
@@ -598,6 +618,7 @@ export const TABLE_NAMES = [
   'trainingSessions',
   'kitchenSessions',
   'sanctuarySessions',
+  'aiConversations',
   'appMetadata',
 ] as const;
 

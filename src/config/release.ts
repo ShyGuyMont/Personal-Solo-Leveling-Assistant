@@ -1,6 +1,6 @@
-export const APP_VERSION = '6.3.0';
-export const DATABASE_SCHEMA_VERSION = 13;
-export const SAVE_FORMAT_VERSION = 13;
+export const APP_VERSION = '6.4.0';
+export const DATABASE_SCHEMA_VERSION = 14;
+export const SAVE_FORMAT_VERSION = 14;
 
 export interface ReleaseSection {
   title: string;
@@ -9,6 +9,18 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 6.4.0 · Awakened Link',
+    detail:
+      'Headquarters gains a secure online intelligence channel while the complete campaign remains offline-first and locally owned.',
+    points: [
+      'The new AI Headquarters channel can open a private conversation with the full party or any individual companion, with each response preserving that companion’s established role and personality.',
+      'Online mode is explicit and reversible: only the message, recent conversation context, and a compact progress signal are sent when the Hunter chooses to activate the link.',
+      'OpenAI credentials remain behind the private Sites gateway and are never stored in browser code, local campaign data, exported saves, or conversation history.',
+      'AI conversations are stored on-device, included in full-campaign exports, and remain readable offline after they have been received.',
+      'Connection readiness, offline fallback, retry guidance, limited party responses, and concise context keep the experience resilient and cost-conscious.',
+    ],
+  },
   {
     title: 'Version 6.3.0 · Stillpoint Protocol',
     detail:

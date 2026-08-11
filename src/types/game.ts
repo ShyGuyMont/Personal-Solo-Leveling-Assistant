@@ -48,6 +48,7 @@ export type CompanionId =
   | 'cassian'
   | 'saffron';
 export type CompanionMode = 'off' | 'quiet' | 'balanced' | 'talkative';
+export type AiLinkMode = 'offline' | 'online';
 export type MoodId =
   | 'energized'
   | 'proud'
@@ -135,6 +136,8 @@ export interface Settings {
   firstDayGuideCompleted: boolean;
   soundVolume: number;
   dailyBriefingEnabled: boolean;
+  aiLinkMode: AiLinkMode;
+  aiDataSharingAcknowledged: boolean;
 }
 
 export interface StatReward {
@@ -689,6 +692,25 @@ export interface SupportConversation {
   audience: SupportAudience;
   createdAt: string;
   messages: PartyChatMessage[];
+}
+
+export type AiConversationAudience = 'party' | CompanionId;
+
+export interface AiConversationMessage {
+  id: string;
+  role: 'hunter' | 'companion';
+  companionId?: CompanionId;
+  message: string;
+  createdAt: string;
+}
+
+export interface AiConversation {
+  id: string;
+  title: string;
+  audience: AiConversationAudience;
+  createdAt: string;
+  updatedAt: string;
+  messages: AiConversationMessage[];
 }
 
 export interface FavoriteMessage {

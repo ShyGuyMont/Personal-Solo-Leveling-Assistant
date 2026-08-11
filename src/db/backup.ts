@@ -2,7 +2,7 @@ import { KITCHEN_RECIPES } from '@/config/kitchen';
 import { db, TABLE_NAMES } from '@/db/database';
 import type { BackupSnapshot, Profile, SaveFile, Settings, AccountProgression } from '@/types/game';
 
-export const SAVE_VERSION = 13;
+export const SAVE_VERSION = 14;
 export const MAX_IMPORT_BYTES = 32 * 1024 * 1024;
 const MAX_SNAPSHOTS = 5;
 const FORBIDDEN_KEYS = new Set(['__proto__', 'prototype', 'constructor']);
@@ -114,6 +114,9 @@ function migrateData(
   if (version <= 11) {
     data.kitchenSessions ??= [];
   }
+  if (version <= 13) {
+    data.aiConversations ??= [];
+  }
   const migrationTime = new Date().toISOString();
   if (!data.treasurySettings.some((row) => isObject(row) && row.id === 'primary')) {
     data.treasurySettings.push({
@@ -171,6 +174,8 @@ function migrateData(
         dailyEventsEnabled: true,
         companionMode: 'balanced',
         dailyBriefingEnabled: true,
+        aiLinkMode: 'offline',
+        aiDataSharingAcknowledged: false,
         ...row,
         enabledCompanionIds: ['snow', ...withMira.filter((id) => id !== 'snow')],
       };
@@ -223,6 +228,53 @@ function validateData(data: Record<string, unknown[]>) {
   for (const row of data.stats) {
     if (!isObject(row) || Number(row.level) < 1 || Number(row.totalXp) < 0) {
       throw new Error('A stat contains an impossible value.');
+    }
+  }
+
+  const aiCompanionIds = new Set([
+    'snow',
+    'rook',
+    'selah',
+    'cipher',
+    'haven',
+    'ember',
+    'mira',
+    'amara',
+    'cassian',
+    'saffron',
+  ]);
+  const aiAudiences = new Set(['party', ...aiCompanionIds]);
+  for (const row of data.aiConversations) {
+    if (
+      !isObject(row) ||
+      typeof row.title !== 'string' ||
+      !row.title.trim() ||
+      row.title.length > 120 ||
+      !aiAudiences.has(String(row.audience)) ||
+      typeof row.createdAt !== 'string' ||
+      !Number.isFinite(Date.parse(row.createdAt)) ||
+      typeof row.updatedAt !== 'string' ||
+      !Number.isFinite(Date.parse(row.updatedAt)) ||
+      !Array.isArray(row.messages) ||
+      row.messages.length > 500
+    ) {
+      throw new Error('An AI Headquarters conversation contains an impossible value.');
+    }
+    for (const message of row.messages) {
+      if (
+        !isObject(message) ||
+        typeof message.id !== 'string' ||
+        !message.id.trim() ||
+        (message.role !== 'hunter' && message.role !== 'companion') ||
+        (message.role === 'companion' && !aiCompanionIds.has(String(message.companionId))) ||
+        typeof message.message !== 'string' ||
+        !message.message.trim() ||
+        message.message.length > 8_000 ||
+        typeof message.createdAt !== 'string' ||
+        !Number.isFinite(Date.parse(message.createdAt))
+      ) {
+        throw new Error('An AI Headquarters message contains an impossible value.');
+      }
     }
   }
 
