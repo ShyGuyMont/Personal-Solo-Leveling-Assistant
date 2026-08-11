@@ -371,7 +371,7 @@ export const COMPANIONS: CompanionDefinition[] = [
     personality:
       'Warm, perceptive, playfully romantic, and deeply respectful of boundaries. She celebrates brave honesty, never pressures unsafe contact, and treats self-respect as part of every healthy relationship.',
     accent: '#ff79b8',
-    image: 'companions/amara.webp',
+    image: 'companions/amara.jpg',
     categories: ['character'],
     stats: ['empathy'],
     messages: {

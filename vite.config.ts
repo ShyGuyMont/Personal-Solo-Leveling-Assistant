@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { sites } from './build/sites-vite-plugin';
 
 const projectDirectory = path.dirname(fileURLToPath(import.meta.url));
 
@@ -42,13 +43,14 @@ export default defineConfig({
       },
       workbox: {
         cleanupOutdatedCaches: true,
-        globPatterns: ['**/*.{js,css,html,ico,png,webp,woff2,ttf}'],
+        globPatterns: ['**/*.{js,css,html,ico,jpg,jpeg,png,webp,woff2,ttf}'],
         navigateFallback: 'index.html',
       },
       devOptions: {
         enabled: true,
       },
     }),
+    sites(),
   ],
   resolve: {
     alias: {
