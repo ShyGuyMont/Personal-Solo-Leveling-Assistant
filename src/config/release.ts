@@ -1,4 +1,4 @@
-export const APP_VERSION = '6.4.1';
+export const APP_VERSION = '6.4.2';
 export const DATABASE_SCHEMA_VERSION = 14;
 export const SAVE_FORMAT_VERSION = 14;
 
@@ -9,6 +9,16 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 6.4.2 · Steady Focus',
+    detail:
+      'Mobile typing now holds the System interface steady when the software keyboard enters or leaves the field.',
+    points: [
+      'Editable controls use an iPhone-safe focus size on touch devices, preventing Safari from automatically magnifying the interface when the keyboard opens.',
+      'The AI Headquarters composer gains a stable touch layout that resists accidental field resizing and keeps the conversation chamber anchored during input.',
+      'Normal user-controlled pinch zoom remains available for accessibility while the app avoids the automatic focus zoom that could interrupt an active companion request.',
+    ],
+  },
   {
     title: 'Version 6.4.1 · Stable Link',
     detail:
