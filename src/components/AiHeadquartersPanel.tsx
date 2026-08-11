@@ -30,6 +30,7 @@ import {
 } from '@/services/aiHeadquarters';
 import { useGameStore } from '@/store/useGameStore';
 import { formatClassName } from '@/utils/format';
+import { scrollChatViewportToBottom } from '@/utils/scroll';
 import type { AiConversation, AiConversationAudience } from '@/types/game';
 
 export function AiHeadquartersPanel() {
@@ -43,7 +44,7 @@ export function AiHeadquartersPanel() {
   const [sending, setSending] = useState(false);
   const [notice, setNotice] = useState('');
   const [deviceOnline, setDeviceOnline] = useState(navigator.onLine);
-  const messageEndRef = useRef<HTMLDivElement>(null);
+  const messageListRef = useRef<HTMLDivElement>(null);
 
   const activeConversation = conversations.find((item) => item.id === activeId);
   const enabledCompanions = useMemo(() => {
@@ -92,10 +93,15 @@ export function AiHeadquartersPanel() {
   }, []);
 
   useEffect(() => {
-    messageEndRef.current?.scrollIntoView({
-      behavior: settings?.reducedMotion ? 'auto' : 'smooth',
+    const viewport = messageListRef.current;
+    if (!viewport) return;
+
+    const frame = window.requestAnimationFrame(() => {
+      scrollChatViewportToBottom(viewport, settings?.reducedMotion);
     });
-  }, [activeConversation?.messages.length, settings?.reducedMotion]);
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [activeConversation?.id, activeConversation?.messages.length, settings?.reducedMotion]);
 
   if (!profile || !settings || !progression || !activeConversation) return null;
 
@@ -388,7 +394,11 @@ export function AiHeadquartersPanel() {
               </span>
             </header>
 
-            <div className="ai-message-stage__messages" aria-live="polite">
+            <div
+              ref={messageListRef}
+              className="ai-message-stage__messages"
+              aria-live="polite"
+            >
               {!activeConversation.messages.length && (
                 <div className="ai-message-stage__empty">
                   <Sparkles size={25} />
@@ -432,7 +442,6 @@ export function AiHeadquartersPanel() {
                   <LoaderCircle className="is-spinning" size={17} /> Headquarters is responding…
                 </div>
               )}
-              <div ref={messageEndRef} />
             </div>
 
             {notice && <p className="ai-command-link__notice">{notice}</p>}

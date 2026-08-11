@@ -1,4 +1,4 @@
-export const APP_VERSION = '6.4.0';
+export const APP_VERSION = '6.4.1';
 export const DATABASE_SCHEMA_VERSION = 14;
 export const SAVE_FORMAT_VERSION = 14;
 
@@ -9,6 +9,16 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 6.4.1 · Stable Link',
+    detail:
+      'AI Headquarters now keeps mobile conversations anchored inside the chamber instead of moving the entire System interface.',
+    points: [
+      'New messages and companion replies scroll only the conversation viewport, preventing the full page from jumping when the iPhone keyboard opens or closes.',
+      'The chamber now contains momentum scrolling and overscroll inside the message stream while preserving the established smooth animation and Reduced Motion setting.',
+      'A stable small-screen message viewport protects the fixed command bar and surrounding interface from mobile browser viewport changes without altering AI behavior, history, or campaign data.',
+    ],
+  },
   {
     title: 'Version 6.4.0 · Awakened Link',
     detail:

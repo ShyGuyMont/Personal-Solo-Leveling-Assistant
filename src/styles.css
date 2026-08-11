@@ -2861,6 +2861,7 @@ html[data-theme='daybreak'] .about-rank-grid article {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   min-width: 0;
+  min-height: 0;
 }
 
 .ai-audience {
@@ -2940,6 +2941,7 @@ html[data-theme='daybreak'] .about-rank-grid article {
   display: flex;
   min-height: 0;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .ai-message-stage > header {
@@ -3007,9 +3009,14 @@ html[data-theme='daybreak'] .about-rank-grid article {
   flex-direction: column;
   gap: 10px;
   overflow-y: auto;
+  overscroll-behavior-y: contain;
   padding: 15px;
+  -webkit-overflow-scrolling: touch;
+  overflow-anchor: none;
   scroll-behavior: smooth;
+  scrollbar-gutter: stable;
   scrollbar-width: thin;
+  touch-action: pan-y;
 }
 
 .ai-message-stage__empty {
@@ -3745,6 +3752,7 @@ html[data-theme='daybreak'] .headquarters-roster__grid article {
 
   .ai-headquarters__layout {
     grid-template-columns: 1fr;
+    min-height: 0;
   }
 
   .ai-conversation-list {
@@ -3854,7 +3862,10 @@ html[data-theme='daybreak'] .headquarters-roster__grid article {
   }
 
   .ai-message-stage__messages {
+    height: clamp(310px, 52svh, 520px);
     min-height: 310px;
+    max-height: 520px;
+    flex: 0 1 auto;
     padding: 11px;
   }
 
