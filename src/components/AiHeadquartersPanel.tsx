@@ -520,6 +520,7 @@ export function AiHeadquartersPanel() {
           onSaveProfile={voiceLink.saveProfile}
           onResetProfile={voiceLink.resetProfile}
           onPreview={voiceLink.previewProfile}
+          onTestSpeaker={voiceLink.testSpeakerOutput}
         />
       )}
 

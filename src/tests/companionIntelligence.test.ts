@@ -110,7 +110,7 @@ describe('Companion Soulprint intelligence', () => {
         openAiBody = JSON.parse(String(init.body)) as Record<string, unknown>;
         return new Response(new Uint8Array([1, 2, 3]), {
           status: 200,
-          headers: { 'content-type': 'audio/mpeg' },
+          headers: { 'content-type': 'audio/wav' },
         });
       }),
     );
@@ -139,8 +139,9 @@ describe('Companion Soulprint intelligence', () => {
       model: 'gpt-4o-mini-tts',
       voice: 'nova',
       input: 'One move. Right now.',
-      response_format: 'mp3',
+      response_format: 'wav',
     });
+    expect(response.headers.get('content-type')).toContain('audio/wav');
     expect(String(openAiBody?.instructions)).toContain('Ember, The Ignition');
     expect(String(openAiBody?.instructions)).toContain('without imposing a regional accent');
     expect(JSON.stringify(openAiBody)).not.toContain('test-key');

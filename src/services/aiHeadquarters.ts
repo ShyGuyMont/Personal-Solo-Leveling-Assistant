@@ -248,7 +248,7 @@ export async function requestAiSpeech(input: {
     response = await fetch('/api/ai/speech', {
       method: 'POST',
       headers: {
-        accept: 'audio/mpeg',
+        accept: 'audio/wav',
         'content-type': 'application/json',
       },
       body: JSON.stringify({

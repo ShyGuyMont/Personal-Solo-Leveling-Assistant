@@ -737,7 +737,7 @@ async function requestSpeechAudio(env, model, profile, useFallback = false) {
     model,
     voice: useFallback ? fallbackVoiceMap[profile.voice] || profile.voice : profile.voice,
     input: profile.text,
-    response_format: 'mp3',
+    response_format: 'wav',
   };
   if (useFallback) {
     body.speed = profile.pace;
@@ -828,7 +828,7 @@ async function handleAiSpeech(request, env, url) {
     status: 200,
     headers: {
       'cache-control': 'no-store',
-      'content-type': openAiResponse.headers.get('content-type') || 'audio/mpeg',
+      'content-type': 'audio/wav',
       'x-content-type-options': 'nosniff',
       'x-ai-model': model,
       'x-ai-characters': String(characters),

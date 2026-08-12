@@ -18,6 +18,12 @@ import {
   type AiHeadquartersReply,
 } from '@/services/aiHeadquarters';
 import type { AiConversationMessage, AiVoiceProfile, CompanionId, Settings } from '@/types/game';
+import {
+  AppAudioPlayer,
+  decodeAudioBlob,
+  playSpeakerTest,
+  primeAudioOutput,
+} from '@/utils/audio';
 
 type NoticeHandler = (message: string) => void;
 
@@ -58,10 +64,10 @@ export function useAiVoiceLink(input: {
   const recordingStartedAtRef = useRef(0);
   const recordingTimerRef = useRef<number>();
   const recordingLimitRef = useRef<number>();
-  const audioRef = useRef<HTMLAudioElement>();
+  const audioRef = useRef<AppAudioPlayer>();
   const playbackResolverRef = useRef<() => void>();
   const playbackGenerationRef = useRef(0);
-  const audioCacheRef = useRef(new Map<string, string>());
+  const audioCacheRef = useRef(new Map<string, AudioBuffer>());
 
   const refreshUsage = useCallback(async () => {
     setUsage(await getAiUsageSummary(sessionIdRef.current));
@@ -74,7 +80,7 @@ export function useAiVoiceLink(input: {
 
   const stopPlayback = useCallback(() => {
     playbackGenerationRef.current += 1;
-    audioRef.current?.pause();
+    audioRef.current?.stop();
     audioRef.current = undefined;
     playbackResolverRef.current?.();
     playbackResolverRef.current = undefined;
@@ -92,8 +98,8 @@ export function useAiVoiceLink(input: {
       streamRef.current?.getTracks().forEach((track) => track.stop());
       if (recordingTimerRef.current) window.clearInterval(recordingTimerRef.current);
       if (recordingLimitRef.current) window.clearTimeout(recordingLimitRef.current);
-      audioRef.current?.pause();
-      for (const url of audioCacheRef.current.values()) URL.revokeObjectURL(url);
+      audioRef.current?.stop();
+      audioCacheRef.current.clear();
     },
     [],
   );
@@ -107,6 +113,7 @@ export function useAiVoiceLink(input: {
   );
 
   const enableVoiceOutput = useCallback(async () => {
+    primeAudioOutput();
     await updateVoiceSettings({
       aiVoiceOutputEnabled: true,
       aiVoiceDisclosureAcknowledged: true,
@@ -182,7 +189,7 @@ export function useAiVoiceLink(input: {
     [refreshUsage],
   );
 
-  const getSpeechUrl = useCallback(
+  const getSpeechBuffer = useCallback(
     async (
       companionId: CompanionId,
       text: string,
@@ -194,25 +201,28 @@ export function useAiVoiceLink(input: {
       const profile = profileOverride ?? profiles?.[companionId];
       if (!profile) throw new Error('That companion voice is still initializing.');
       setVoiceBusyMessageId(cacheKey);
-      const result = await requestAiSpeech({ companionId, text, profile });
-      const url = URL.createObjectURL(result.audio);
-      audioCacheRef.current.set(cacheKey, url);
-      await recordAiUsage({
-        kind: 'speech',
-        sessionId: sessionIdRef.current,
-        model: result.model,
-        companionId,
-        inputTokens: 0,
-        outputTokens: 0,
-        totalTokens: 0,
-        characters: result.characters,
-        audioSeconds: result.estimatedAudioSeconds,
-        estimatedCostUsd: result.estimatedCostUsd || estimateSpeechCostUsd(result.characters),
-        exactUsage: false,
-      });
-      await refreshUsage();
-      setVoiceBusyMessageId(undefined);
-      return url;
+      try {
+        const result = await requestAiSpeech({ companionId, text, profile });
+        await recordAiUsage({
+          kind: 'speech',
+          sessionId: sessionIdRef.current,
+          model: result.model,
+          companionId,
+          inputTokens: 0,
+          outputTokens: 0,
+          totalTokens: 0,
+          characters: result.characters,
+          audioSeconds: result.estimatedAudioSeconds,
+          estimatedCostUsd: result.estimatedCostUsd || estimateSpeechCostUsd(result.characters),
+          exactUsage: false,
+        });
+        await refreshUsage();
+        const buffer = await decodeAudioBlob(result.audio);
+        audioCacheRef.current.set(cacheKey, buffer);
+        return buffer;
+      } finally {
+        setVoiceBusyMessageId(undefined);
+      }
     },
     [profiles, refreshUsage],
   );
@@ -224,14 +234,14 @@ export function useAiVoiceLink(input: {
       profileOverride?: AiVoiceProfile,
     ) => {
       if (!message.companionId) return;
-      const url = await getSpeechUrl(
+      const buffer = await getSpeechBuffer(
         message.companionId,
         message.message,
         message.id,
         profileOverride,
       );
       if (generation !== playbackGenerationRef.current) return;
-      const audio = new Audio(url);
+      const audio = new AppAudioPlayer(buffer, () => playbackResolverRef.current?.());
       audioRef.current = audio;
       setPlayingMessageId(message.id);
       setPlaybackPaused(false);
@@ -244,14 +254,13 @@ export function useAiVoiceLink(input: {
           resolve();
         };
         playbackResolverRef.current = finish;
-        audio.addEventListener('ended', finish, { once: true });
-        audio.addEventListener('error', () => reject(new Error('Audio playback failed.')), {
-          once: true,
+        void audio.play().catch((error) => {
+          playbackResolverRef.current = undefined;
+          reject(error);
         });
-        void audio.play().catch(reject);
       });
     },
-    [getSpeechUrl],
+    [getSpeechBuffer],
   );
 
   const playMessages = useCallback(
@@ -263,6 +272,7 @@ export function useAiVoiceLink(input: {
         input.onNotice('Enable Voice Link first. Spoken companion voices are AI-generated.');
         return;
       }
+      primeAudioOutput();
       stopPlayback();
       const generation = playbackGenerationRef.current;
       setRoundtableActive(messages.length > 1);
@@ -289,18 +299,29 @@ export function useAiVoiceLink(input: {
     const audio = audioRef.current;
     if (!audio) return;
     if (audio.paused) {
-      void audio.play();
-      setPlaybackPaused(false);
+      void audio
+        .play()
+        .then(() => setPlaybackPaused(false))
+        .catch(() => input.onNotice('Speaker playback is blocked. Tap Test speaker, then resume.'));
     } else {
       audio.pause();
       setPlaybackPaused(true);
     }
-  }, []);
+  }, [input]);
 
   const skipCurrent = useCallback(() => {
-    audioRef.current?.pause();
+    audioRef.current?.stop();
     playbackResolverRef.current?.();
   }, []);
+
+  const testSpeakerOutput = useCallback(async () => {
+    const ready = await playSpeakerTest(input.settings?.soundVolume ?? 0.7);
+    input.onNotice(
+      ready
+        ? 'Speaker test sent: you should hear three rising System tones.'
+        : 'This browser is still blocking speaker output. Check the phone volume and site sound permission.',
+    );
+  }, [input]);
 
   const previewProfile = useCallback(
     async (profile: AiVoiceProfile) => {
@@ -423,6 +444,7 @@ export function useAiVoiceLink(input: {
     stopPlayback,
     togglePause,
     skipCurrent,
+    testSpeakerOutput,
     startRecording,
     stopRecording,
   };

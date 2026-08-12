@@ -1,4 +1,4 @@
-export const APP_VERSION = '6.7.0';
+export const APP_VERSION = '6.7.1';
 export const DATABASE_SCHEMA_VERSION = 16;
 export const SAVE_FORMAT_VERSION = 16;
 
@@ -9,6 +9,16 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 6.7.1 · Voice Channel Stabilization',
+    detail:
+      'Companion voices and classic System tones now share one mobile-safe speaker channel instead of depending on fragile delayed browser playback.',
+    points: [
+      'Voice Link now decodes phone-friendly WAV audio through a reusable playback engine, resolving the unsupported-operation failure seen on mobile installs.',
+      'A free Test speaker control plays three rising System tones before any paid voice preview, making sound permissions and device volume easy to verify.',
+      'The first tap safely primes the audio channel, paused councils resume from the correct position, and ordinary mission, warning, and ascension tones use the same reliable output path.',
+    ],
+  },
   {
     title: 'Version 6.7.0 · Voice Link',
     detail:

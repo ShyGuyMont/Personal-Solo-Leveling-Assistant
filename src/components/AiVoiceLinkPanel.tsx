@@ -29,6 +29,7 @@ export function AiVoiceLinkPanel({
   onSaveProfile,
   onResetProfile,
   onPreview,
+  onTestSpeaker,
 }: {
   settings: Settings;
   profiles?: Record<CompanionId, AiVoiceProfile>;
@@ -41,6 +42,7 @@ export function AiVoiceLinkPanel({
   onSaveProfile: (profile: AiVoiceProfile) => Promise<AiVoiceProfile>;
   onResetProfile: (companionId: CompanionId) => Promise<AiVoiceProfile>;
   onPreview: (profile: AiVoiceProfile) => Promise<void>;
+  onTestSpeaker: () => Promise<void>;
 }) {
   const [open, setOpen] = useState(false);
   const [forgeId, setForgeId] = useState<CompanionId>('snow');
@@ -195,6 +197,13 @@ export function AiVoiceLinkPanel({
                 <span>
                   <strong>{settings.aiVoiceAutoPlay ? 'Auto voice on' : 'Auto voice off'}</strong>
                   <small>Party replies play in order</small>
+                </span>
+              </button>
+              <button type="button" onClick={onTestSpeaker}>
+                <Volume2 size={17} />
+                <span>
+                  <strong>Test speaker</strong>
+                  <small>Free · three System tones</small>
                 </span>
               </button>
             </div>
