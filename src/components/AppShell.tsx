@@ -4,9 +4,9 @@ import {
   CircleGauge,
   CircleHelp,
   ChefHat,
-  Crown,
   Dumbbell,
   ListChecks,
+  MessagesSquare,
   Shield,
   WalletCards,
 } from 'lucide-react';
@@ -18,11 +18,10 @@ import { APP_VERSION } from '@/config/release';
 import { calculateRankQualification } from '@/game/rank';
 import { getLiveSystemState, getSystemCycle, getSystemRealm } from '@/game/systemExperience';
 import { useSystemDepth } from '@/hooks/useSystemDepth';
-import { NavLink } from '@/router';
+import { Link, NavLink } from '@/router';
 import { useRoutePath } from '@/routeState';
 import { useGameStore } from '@/store/useGameStore';
 import { getCurrentHour } from '@/utils/date';
-import { formatClassName } from '@/utils/format';
 import { getDocumentTheme } from '@/utils/theme';
 
 const NAV = [
@@ -152,12 +151,24 @@ export function AppShell({ children }: { children: ReactNode }) {
           </span>
         </NavLink>
         <div className="app-header__actions">
-          {progression && (
-            <NavLink to="/status" className="header-class-chip">
-              <Crown size={13} aria-hidden="true" />
-              <span>{formatClassName(progression.rank)}</span>
-            </NavLink>
-          )}
+          <Link
+            to="/headquarters?focus=ai"
+            className="header-ai-link"
+            aria-label="Open AI Headquarters"
+            aria-current={path === '/headquarters' ? 'page' : undefined}
+            onClick={(event) => {
+              if (path !== '/headquarters') return;
+              event.preventDefault();
+              document.getElementById('ai-headquarters')?.scrollIntoView({
+                behavior: settings?.reducedMotion ? 'auto' : 'smooth',
+                block: 'start',
+              });
+            }}
+          >
+            <MessagesSquare size={15} aria-hidden="true" />
+            <span>AI HQ</span>
+            <i aria-hidden="true" />
+          </Link>
           <NavLink to="/about" className="header-help" aria-label="About and help">
             <CircleHelp size={20} />
             <span>HELP</span>

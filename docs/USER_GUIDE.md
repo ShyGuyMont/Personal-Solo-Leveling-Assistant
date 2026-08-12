@@ -2,6 +2,8 @@
 
 This guide explains the app without requiring technical knowledge. The same essential information is available inside the app through the **Help** button in the top-right corner.
 
+The **AI HQ** button beside Help opens the intelligent Headquarters conversation chamber directly. The permanent **Status** destination in the bottom command bar remains the fastest route to Class and stat progression.
+
 ## What The System is
 
 The System is a private, phone-first progression game built around real-life actions. You complete missions that matter to you, and the app records the resulting XP, stats, levels, streaks, challenges, achievements, and classes.

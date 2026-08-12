@@ -340,7 +340,11 @@ export function AiHeadquartersPanel() {
   const ReadinessIcon = readiness.icon;
 
   return (
-    <section className="ai-headquarters panel" aria-labelledby="ai-headquarters-title">
+    <section
+      id="ai-headquarters"
+      className="ai-headquarters panel"
+      aria-labelledby="ai-headquarters-title"
+    >
       <header className="ai-headquarters__header">
         <div className="ai-headquarters__sigil" aria-hidden="true">
           <BrainCircuit size={30} />

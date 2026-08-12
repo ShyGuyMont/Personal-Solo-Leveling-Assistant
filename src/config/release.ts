@@ -1,4 +1,4 @@
-export const APP_VERSION = '6.6.0';
+export const APP_VERSION = '6.6.1';
 export const DATABASE_SCHEMA_VERSION = 15;
 export const SAVE_FORMAT_VERSION = 15;
 
@@ -9,6 +9,16 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 6.6.1 · Command Link',
+    detail:
+      'AI Headquarters is now a permanent one-tap destination without crowding the primary navigation.',
+    points: [
+      'The redundant Class crown in the top command bar is replaced by a clearly labeled AI HQ link that jumps directly into the intelligent conversation chamber from every section of the app.',
+      'The shortcut keeps a visible live-link signal, highlights while Headquarters is active, and remains readable on mobile instead of adding a ninth destination to the full bottom bar.',
+      'Status remains one tap away in the primary navigation, while current Class information continues to appear throughout the System dashboard and progression views.',
+    ],
+  },
   {
     title: 'Version 6.6.0 · Living Bonds',
     detail:

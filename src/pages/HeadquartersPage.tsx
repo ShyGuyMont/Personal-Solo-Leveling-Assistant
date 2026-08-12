@@ -49,6 +49,18 @@ export function HeadquartersPage() {
     ]);
   }, []);
 
+  useEffect(() => {
+    const query = window.location.hash.split('?')[1] ?? '';
+    if (new URLSearchParams(query).get('focus') !== 'ai') return;
+    const focusTimer = window.setTimeout(() => {
+      document.getElementById('ai-headquarters')?.scrollIntoView({
+        behavior: 'auto',
+        block: 'start',
+      });
+    }, 0);
+    return () => window.clearTimeout(focusTimer);
+  }, []);
+
   const enabled = new Set(settings?.enabledCompanionIds ?? []);
   const firstName = profile?.displayName.trim().split(/\s+/)[0] || 'Hunter';
   const ember = getCompanion('ember');
