@@ -6,6 +6,7 @@ export type SystemRealm =
   | 'sanctuary'
   | 'kitchen'
   | 'treasury'
+  | 'creator'
   | 'party'
   | 'campaign'
   | 'archive'
@@ -28,6 +29,7 @@ export const REALM_LABELS: Record<SystemRealm, string> = {
   sanctuary: 'Scripture Sanctuary',
   kitchen: 'Provision Command',
   treasury: 'Treasury Command',
+  creator: 'Creator Forge',
   party: 'Party Headquarters',
   campaign: 'Campaign Command',
   archive: 'Memory Archive',
@@ -40,9 +42,10 @@ export const REALM_COMPANIONS: Record<SystemRealm, CompanionId> = {
   sanctuary: 'selah',
   kitchen: 'saffron',
   treasury: 'cassian',
+  creator: 'haven',
   party: 'snow',
   campaign: 'cipher',
-  archive: 'haven',
+  archive: 'snow',
   progression: 'snow',
 };
 
@@ -51,6 +54,7 @@ export function getSystemRealm(path: string): SystemRealm {
   if (path.startsWith('/sanctuary')) return 'sanctuary';
   if (path.startsWith('/kitchen')) return 'kitchen';
   if (path.startsWith('/treasury')) return 'treasury';
+  if (path.startsWith('/creator-forge')) return 'creator';
   if (path.startsWith('/headquarters') || path.startsWith('/party-chat')) return 'party';
   if (path.startsWith('/campaigns')) return 'campaign';
   if (path.startsWith('/archive')) return 'archive';

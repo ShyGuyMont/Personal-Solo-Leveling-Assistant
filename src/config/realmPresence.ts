@@ -43,6 +43,13 @@ export const REALM_PRESENCE: Record<SystemRealm, RealmPresence> = {
     actionLabel: 'Open the Ledger',
     actionPath: '/treasury',
   },
+  creator: {
+    signal: 'Spotlight channel live',
+    message:
+      'Greenroom is open. Give me the audience, the promise, and the smallest production move that makes this idea visible.',
+    actionLabel: 'Open Creator Forge',
+    actionPath: '/creator-forge',
+  },
   party: {
     signal: 'All companion links available',
     message:
@@ -58,7 +65,7 @@ export const REALM_PRESENCE: Record<SystemRealm, RealmPresence> = {
     actionPath: '/campaigns',
   },
   archive: {
-    signal: 'Guardian channel watching',
+    signal: 'Constant archive link secured',
     message:
       'The record is here to reveal your path, not trap you inside yesterday. Study it, then return to the present.',
     actionLabel: 'Review the Archive',

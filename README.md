@@ -111,7 +111,7 @@ Version 6.0.2 makes the party more observant without making the System harsher. 
 looks only at the app’s existing finalized stat-neglect and momentum record. Once a path crosses a
 humane attention threshold, its specialist speaks in their own voice and offers one useful route
 back: Rook handles the physical path, Selah the spiritual path, Cipher execution and creative work,
-Haven character, Amara empathy, and Cassian stewardship. If several paths slip together, Ember can
+Vesper creativity, Amara empathy and character, and Cassian stewardship. If several paths slip together, Ember can
 open a small-target re-entry signal and Snow can widen the support response. These pulses award no
 XP, remove no XP, create no failure, and continue to honor Off, Quiet, Balanced, Talkative,
 individual companion controls, and Reduced Motion.
@@ -230,8 +230,8 @@ Class gates and the development pacing simulator were also rebalanced for the ex
 - **Snow, The Constant** is the primary whole-journey companion. She greets each new System day and supports major milestones, difficult seasons, and victories. She has long black hair, a pearl-white and navy support jacket, and an ice-blue System halo.
 - **Rook, The Vanguard** supports Strength, Endurance, and Vitality. He is bold, competitive, and protective, with graphite-and-gold armor and amber energy.
 - **Selah, The Beacon** supports Faith, Wisdom, and spiritual consistency. She is warm and grounded, with long braids, an ivory-and-navy mantle, and a sun-gold halo.
-- **Cipher, The Strategist** supports Discipline, Focus, Willpower, Creativity, YouTube, and ARC work. They are precise, dryly funny, and demanding, with a navy tech jacket and violet-cyan tactical glyphs.
-- **Haven, The Guardian** supports Character, Recovery, balance, and comebacks. He is patient and quietly humorous, with silver-streaked hair, a teal field coat, and a translucent shield glow.
+- **Cipher, The Strategist** supports Discipline, Focus, Willpower, production systems, and ARC architecture. He is precise, dryly funny, and demanding, with a navy tech jacket and violet-cyan tactical glyphs.
+- **Vesper, The Spotlight** supports Creativity, YouTube, audience strategy, hooks, camera confidence, content packaging, and publishing momentum. She is charismatic, quick-witted, and camera-ready, with warm brown skin, amber-gold eyes, a high curly ponytail, a graphite broadcast jacket, and an electric-chartreuse creator halo.
 - **Ember, The Ignition** supports accountability, re-entry, and locking back in after momentum slips. She is fiery, blunt, and fiercely supportive, with copper-red hair, amber eyes, charcoal-and-crimson gear, and an ember-orange System halo.
 - **Mira, The Stillpoint** supports mobility, flexibility, breath, yoga, Pilates, and calm core control. She is serene, gently playful, and impossible to rush, with fair skin, long black hair, luminous purple eyes, pearl-and-indigo movement gear, and a violet System halo.
 - **Amara, The Heartweaver** supports Empathy, relationships, communication, repair, healthy boundaries, belonging, and shame-free sexual-integrity support in the Sanctuary. She is warm, perceptive, and playfully romantic, with warm olive skin, wavy chestnut hair, luminous pink eyes, rose-and-plum battle attire, and a radiant pink System halo.
@@ -260,7 +260,7 @@ Every companion also has one authored five-chapter questline:
 - Rook — **Tempered Foundation**
 - Selah — **Rooted in Light**
 - Cipher — **Signal to Reality**
-- Haven — **Shelter Without Stagnation**
+- Vesper — **Spotlight Protocol**
 - Ember — **Reignite Protocol**
 - Amara — **The Courage to Connect**
 - Cassian — **The Keeper's Ledger**

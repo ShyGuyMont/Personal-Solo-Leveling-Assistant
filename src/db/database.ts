@@ -16,6 +16,9 @@ import type {
   ChallengeTemplate,
   CosmeticDefinition,
   CosmeticUnlock,
+  CreatorChannelSnapshot,
+  CreatorProject,
+  CreatorSettings,
   DailyMissionRecord,
   DailyCommandBriefing,
   DailyEventRecord,
@@ -102,6 +105,9 @@ export class SystemDatabase extends Dexie {
   aiMemories!: EntityTable<AiRelationshipMemory, 'id'>;
   aiVoiceProfiles!: EntityTable<AiVoiceProfile, 'id'>;
   aiUsageRecords!: EntityTable<AiUsageRecord, 'id'>;
+  creatorSettings!: EntityTable<CreatorSettings, 'id'>;
+  creatorSnapshots!: EntityTable<CreatorChannelSnapshot, 'id'>;
+  creatorProjects!: EntityTable<CreatorProject, 'id'>;
   appMetadata!: EntityTable<AppMetadata, 'id'>;
 
   constructor(name = 'the-system-db') {
@@ -646,6 +652,47 @@ export class SystemDatabase extends Dexie {
         await metadata.put({ id: 'schema-seeded', value: 18, updatedAt: now });
         await metadata.put({ id: 'app-version', value: '7.1.0', updatedAt: now });
       });
+    this.version(19)
+      .stores({
+        creatorSettings: 'id',
+        creatorSnapshots: 'id,capturedAt,source',
+        creatorProjects: 'id,status,platform,updatedAt,publishedAt',
+        aiVoiceProfiles: 'id,voice,accent,updatedAt',
+      })
+      .upgrade(async (transaction) => {
+        const now = new Date().toISOString();
+        const creatorSettings = transaction.table<CreatorSettings, string>('creatorSettings');
+        await creatorSettings.put({
+          id: 'primary',
+          channelName: '',
+          channelHandle: '',
+          channelUrl: '',
+          weeklyUploadTarget: 1,
+          currentArcFocus: '',
+          accountabilityMode: 'direct',
+          createdAt: now,
+          updatedAt: now,
+        });
+        const voiceProfiles = transaction.table<AiVoiceProfile, string>('aiVoiceProfiles');
+        await voiceProfiles.put({
+          id: 'haven',
+          voice: 'fable',
+          accent: 'caribbean',
+          delivery: 'playful',
+          cadence: 'rapid-fire',
+          texture: 'bright',
+          pace: 1.2,
+          warmth: 4,
+          energy: 5,
+          expressiveness: 5,
+          naturalism: 5,
+          pauseDiscipline: 4,
+          updatedAt: now,
+        });
+        const metadata = transaction.table<AppMetadata, string>('appMetadata');
+        await metadata.put({ id: 'schema-seeded', value: 19, updatedAt: now });
+        await metadata.put({ id: 'app-version', value: '7.2.0', updatedAt: now });
+      });
   }
 }
 
@@ -700,6 +747,9 @@ export const TABLE_NAMES = [
   'aiMemories',
   'aiVoiceProfiles',
   'aiUsageRecords',
+  'creatorSettings',
+  'creatorSnapshots',
+  'creatorProjects',
   'appMetadata',
 ] as const;
 

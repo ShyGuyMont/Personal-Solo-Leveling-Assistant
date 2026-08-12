@@ -370,6 +370,56 @@ export interface CustomKitchenRecipe {
   updatedAt: string;
 }
 
+export type CreatorPlatform = 'youtube' | 'youtube-shorts' | 'arc' | 'other';
+export type CreatorContentType =
+  'long-form' | 'short-form' | 'livestream' | 'community-post' | 'arc-project' | 'other';
+export type CreatorProjectStatus =
+  'idea' | 'script' | 'record' | 'edit' | 'thumbnail' | 'scheduled' | 'published' | 'paused';
+export type CreatorSnapshotSource = 'manual' | 'studio-csv' | 'youtube-api';
+
+export interface CreatorSettings {
+  id: 'primary';
+  channelName: string;
+  channelHandle: string;
+  channelUrl: string;
+  weeklyUploadTarget: number;
+  currentArcFocus: string;
+  accountabilityMode: 'supportive' | 'direct' | 'relentless';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreatorChannelSnapshot {
+  id: string;
+  capturedAt: string;
+  source: CreatorSnapshotSource;
+  periodDays: number;
+  subscribers?: number;
+  views?: number;
+  watchHours?: number;
+  impressions?: number;
+  clickThroughRate?: number;
+  averageViewDurationSeconds?: number;
+  uploads?: number;
+  note?: string;
+}
+
+export interface CreatorProject {
+  id: string;
+  title: string;
+  platform: CreatorPlatform;
+  contentType: CreatorContentType;
+  status: CreatorProjectStatus;
+  pillar: string;
+  hook: string;
+  audiencePromise: string;
+  nextAction: string;
+  notes: string;
+  createdAt: string;
+  updatedAt: string;
+  publishedAt?: string;
+}
+
 export type SanctuaryMode = 'study' | 'stronghold';
 export type SanctuaryStatus = 'active' | 'completed' | 'abandoned';
 export type SanctuaryConcern =

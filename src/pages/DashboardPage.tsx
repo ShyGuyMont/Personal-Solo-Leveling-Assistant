@@ -9,6 +9,7 @@ import {
   Crown,
   Dumbbell,
   Map as MapIcon,
+  Radio,
   Flame,
   Settings as SettingsIcon,
   Shield,
@@ -269,7 +270,7 @@ export function DashboardPage() {
             <p>Each realm carries its own companion link, atmosphere, and purpose.</p>
           </div>
           <span className="realm-command-map__live">
-            <i /> 8 LINKS ONLINE
+            <i /> 9 LINKS ONLINE
           </span>
         </header>
         <div className="realm-command-map__grid">
@@ -331,6 +332,18 @@ export function DashboardPage() {
             <ChevronRight size={17} />
             <RealmVista />
           </Link>
+          <Link to="/creator-forge" className="realm-portal" data-portal="creator">
+            <span className="realm-portal__icon">
+              <Radio size={23} />
+            </span>
+            <span>
+              <small>VESPER & CIPHER</small>
+              <strong>Creator Forge</strong>
+            </span>
+            <em>Greenroom signal ready</em>
+            <ChevronRight size={17} />
+            <RealmVista />
+          </Link>
           <Link to="/headquarters" className="realm-portal" data-portal="party">
             <span className="realm-portal__icon">
               <Castle size={23} />
@@ -378,7 +391,7 @@ export function DashboardPage() {
               <Archive size={23} />
             </span>
             <span>
-              <small>HAVEN</small>
+              <small>SNOW</small>
               <strong>Memory Archive</strong>
             </span>
             <em>Campaign record intact</em>

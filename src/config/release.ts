@@ -1,6 +1,6 @@
-export const APP_VERSION = '7.1.0';
-export const DATABASE_SCHEMA_VERSION = 18;
-export const SAVE_FORMAT_VERSION = 18;
+export const APP_VERSION = '7.2.0';
+export const DATABASE_SCHEMA_VERSION = 19;
+export const SAVE_FORMAT_VERSION = 19;
 
 export interface ReleaseSection {
   title: string;
@@ -9,6 +9,18 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 7.2.0 · Creator Awakening',
+    detail:
+      'Vesper takes the spotlight as a complete YouTube and content-creation specialist while Creator Forge turns audience strategy, channel signals, and production momentum into a living offline-first command realm.',
+    points: [
+      'Haven is completely reborn as Vesper, The Spotlight: a charismatic creator and streamer specialist with an original chibi portrait, electric-chartreuse identity, expressive voice canon, complete offline dialogue, and deeply grounded online intelligence.',
+      'Creator Forge · The Greenroom adds a local production pipeline from idea through publish, a creator identity and upload target, channel momentum accountability, and an honest Vesper–Cipher partnership between audience instinct and execution systems.',
+      'YouTube Studio snapshots can be entered manually or imported from a Studio CSV without storing a Google password; views, watch time, impressions, click-through rate, average view duration, uploads, and subscriber signals remain in the full campaign save.',
+      'Vesper can reason from real Creator Forge projects and aggregate channel signals, then prepare a complete content operation for confirmation into the local board without inventing analytics or claiming a release already happened.',
+      'Quick Link is now a real short conversation instead of a one-message transmission: unaddressed follow-ups stay with the active companion, the visible exchange remains intact, and Saffron can gather recipe details across multiple turns before preparing the Grimoire preview.',
+    ],
+  },
   {
     title: 'Version 7.1.0 · Command Ascension',
     detail:

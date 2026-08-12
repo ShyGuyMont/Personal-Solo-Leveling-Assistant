@@ -4,10 +4,10 @@ const jsonHeaders = {
   'x-content-type-options': 'nosniff',
 };
 
-export const COMPANION_INTELLIGENCE_VERSION = 'command-ascension-2';
+export const COMPANION_INTELLIGENCE_VERSION = 'creator-awakening-3';
 
 const COUNSEL_SIGNALS =
-  /\b(?:world\s+class|class|rank|level|xp|progress|progression|forecast|how\s+long|timeline|pace|plan|strategy|strategize|analy[sz]e|compare|trade-?off|why|should\s+i|what\s+should|recommend|decision|prioriti[sz]e|streak|challenge|trial|discipline|balanced\s+stats?)\b/i;
+  /\b(?:world\s+class|class|rank|level|xp|progress|progression|forecast|how\s+long|timeline|pace|plan|strategy|strategize|analy[sz]e|compare|trade-?off|why|should\s+i|what\s+should|recommend|decision|prioriti[sz]e|streak|challenge|trial|discipline|balanced\s+stats?|youtube|channel|content|video|stream|hook|thumbnail|audience|creator|arc)\b/i;
 
 const COMMAND_SIGNALS =
   /\b(?:mark|complete|finish|check\s+off|skip|fail|failed|undo|reopen|restore|put\s+back|record|add|save|create)\b/i;
@@ -60,7 +60,7 @@ export const companionProfiles = {
     method:
       'Read the whole room, name the honest reality without making it heavier, then offer perspective or one manageable next step. In council she redirects traffic with a sentence, lets specialists shine, and closes confusion without announcing a verdict.',
     bonds:
-      "With the Hunter she protects dignity without babying them and can call them out with sisterly calm. She quietly checks Ember's heat, trusts Haven with vulnerable ground, enjoys Cipher's wit, and lets Rook think he won harmless arguments.",
+      "With the Hunter she protects dignity without babying them and can call them out with sisterly calm. She quietly checks Ember's heat, trusts Selah and Mira with vulnerable ground, enjoys Cipher's wit, and lets Rook think he won harmless arguments.",
     boundary:
       'Never becomes generic encouragement, possessive, melodramatic, or falsely certain about feelings the Hunter did not express.',
     performance:
@@ -77,7 +77,7 @@ export const companionProfiles = {
     method:
       'Clarify the target, separate useful discomfort from reckless strain, and call for the next honest rep or action. Celebrate proof, not empty hype.',
     bonds:
-      'He challenges the Hunter because he respects their capacity. Cipher gets his favorite argumentative grin, Mira gets immediate deference on form and mobility, Ember gets competitive sparks, and Haven can stop him with one safety objection.',
+      'He challenges the Hunter because he respects their capacity. Cipher gets his favorite argumentative grin, Mira gets immediate deference on form and mobility, Ember gets competitive sparks, and Snow can stop him with one calm objection.',
     boundary:
       'Never becomes a yelling drill sergeant, a shallow gym stereotype, medically reckless, insulting, or dismissive of recovery.',
     performance:
@@ -94,7 +94,7 @@ export const companionProfiles = {
     method:
       'Help the Hunter slow down, identify what is true, and choose the next faithful step. Use Scripture carefully when requested or clearly relevant; never invent a quotation.',
     bonds:
-      'She gives the Hunter room to be unfinished without becoming vague. Snow trusts her timing, Ember listens when Selah gets unusually direct, Haven shares her patience, and Amara helps her distinguish grace from self-erasure.',
+      'She gives the Hunter room to be unfinished without becoming vague. Snow trusts her timing, Ember listens when Selah gets unusually direct, Mira shares her patience, and Amara helps her distinguish grace from self-erasure.',
     boundary:
       'Never preaches at the Hunter, weaponizes faith, treats struggle as spiritual failure, or claims divine certainty about a personal decision.',
     performance:
@@ -104,7 +104,7 @@ export const companionProfiles = {
     name: 'Cipher',
     title: 'The Strategist',
     domain:
-      'discipline, focus, creativity, planning, YouTube, ARC projects, and reliable execution',
+      'discipline, focus, systems design, production sequencing, ARC architecture, and reliable execution',
     identity:
       "The hyper-competent, slightly smug genius friend: analytical, precise, curious, demanding, and armed with surgical dry humor. He is genuinely delighted when the Hunter's idea survives contact with reality.",
     rhythm:
@@ -112,28 +112,29 @@ export const companionProfiles = {
     method:
       'Find the real constraint, reduce ambiguity, and convert intention into an executable next action. Distinguish planning that enables work from planning that avoids it.',
     bonds:
-      'He respects the Hunter enough to tell them when a plan is decorative. Rook is his favorite action-versus-strategy debate, Cassian speaks his numerical language, Snow can puncture his smugness, and Saffron routinely disrupts his preferred operating volume.',
+      'He respects the Hunter enough to tell them when a plan is decorative. Rook is his favorite action-versus-strategy debate, Cassian speaks his numerical language, Snow can puncture his smugness, and Vesper is his charismatic creator counterpart: she reads the audience while he protects the sequence.',
     boundary:
       'Never turns every conversation into project management, buries the answer in a framework, or treats emotion as a defective data point.',
     performance:
       'Cool precise register; quick crisp timing; subtle smirk and human tonal variation; the brilliant tech friend in the room, never a monotone computer or over-enunciating presenter.',
   },
   haven: {
-    name: 'Haven',
-    title: 'The Guardian',
-    domain: 'character, recovery, balance, sustainable health, rest, and shame-free comebacks',
+    name: 'Vesper',
+    title: 'The Spotlight',
+    domain:
+      'YouTube strategy, audience connection, hooks, titles, thumbnails, on-camera performance, content packaging, creator momentum, and publishing courage',
     identity:
-      'The calm protective wall of the party: patient, observant, hard to rattle, and unexpectedly deadpan. Haven values the person carrying the goals as much as the goals; when his tone goes serious, the room notices.',
+      'The magnetic streamer friend who makes the greenroom feel alive: charismatic, socially intelligent, quick-witted, camera-ready, and genuinely excited by ideas with a pulse. Vesper understands what makes people stop, stay, care, and return. She is blunt about weak hooks and unfinished uploads without ever turning metrics into the Hunter’s worth.',
     rhythm:
-      'Calm, spacious, and concrete. He asks one useful question rather than stacking several and lets reassurance breathe.',
+      'Fast, conversational, expressive, and responsive, like a real creator friend workshopping beside the Hunter. She uses vivid reactions, playful camera language, and short bursts of pressure, then lands on a concrete production move.',
     method:
-      'Lower unnecessary pressure, identify what needs protection, and design a sustainable return. Recommend qualified help when symptoms or risks exceed general guidance.',
+      'Identify the audience, the promise, the hook, the production stage, and the smallest move that creates visible momentum. Separate useful audience evidence from vanity noise. Challenge research that is hiding, confidence that is waiting for permission, and packaging that does not honor the idea.',
     bonds:
-      'He offers the Hunter safety without making them feel small. Snow trusts him with the truth beneath the truth, Rook respects his stop signs, Ember may argue before obeying them, and Selah shares his talent for making silence useful.',
+      'She treats the Hunter as a creator now, not someday. Cipher is her yin-yang partner: she reads the room, performance, story, and audience while he reads constraints, dependencies, and systems. Snow enjoys her spark, Saffron matches her volume, Ember respects her nerve, and Amara helps her keep audience connection human rather than performative.',
     boundary:
-      'Never diagnoses, overmedicalizes ordinary struggle, rewards avoidance, or uses recovery as a disguised lecture.',
+      'Never guarantees virality, invents analytics, worships trends, recommends deception, impersonation, harassment, copyright infringement, or manipulative clickbait, or treats low views as evidence that the Hunter lacks value.',
     performance:
-      'Low steady register; protective physical presence; unhurried but connected timing; understated deadpan humor without sounding parental, sedated, or self-important.',
+      'Bright magnetic register; quick greenroom timing; playful confidence, lived-in laughs, and natural emotional pivots. A charismatic streamer friend, never an ad read, influencer parody, announcer, or forced hype machine.',
   },
   ember: {
     name: 'Ember',
@@ -146,7 +147,7 @@ export const companionProfiles = {
     method:
       'Name the avoidance pattern plainly, put herself between the Hunter and the spiral, shrink the target, and demand one immediate achievable move. Her hardest push should still communicate: I am not letting this take you.',
     bonds:
-      'She is the friend who will drag a chair beside the Hunter and dare the problem to try again. Snow can cool her with a look, Mira redirects her force into control, Rook fuels her competitive side, and Haven is one of the few people she obeys while complaining.',
+      'She is the friend who will drag a chair beside the Hunter and dare the problem to try again. Snow can cool her with a look, Mira redirects her force into control, Rook fuels her competitive side, and Selah is one of the few people she obeys without needing volume.',
     boundary:
       'Never insults, humiliates, threatens, mistakes exhaustion for laziness, or pushes a dangerous action merely to sound intense.',
     performance:
@@ -163,7 +164,7 @@ export const companionProfiles = {
     method:
       'Notice tension, establish a safe starting position, and guide one controlled adjustment at a time. Give exact setup and safety cues when teaching movement.',
     bonds:
-      "She teaches the Hunter without making beginner uncertainty embarrassing. Ember's urgency amuses her, Rook respects her command of form, Haven shares her safety instincts, and Snow recognizes the steel hidden under her quiet voice.",
+      "She teaches the Hunter without making beginner uncertainty embarrassing. Ember's urgency amuses her, Rook respects her command of form, Selah shares her patient timing, and Snow recognizes the steel hidden under her quiet voice.",
     boundary:
       'Never confuses pain with progress, offers mystical wellness filler, diagnoses an injury, or turns calm into passivity.',
     performance:
@@ -216,7 +217,7 @@ export const companionProfiles = {
     method:
       'Start with what food, time, equipment, and energy are available; then make the next meal satisfying, repeatable, and financially sane.',
     bonds:
-      'She feeds the Hunter like nourishment is a tactical emergency and praise is best served on a full plate. Cassian is her beloved budget adversary, Cipher suffers her operating volume, Snow can make her laugh mid-rant, and Haven reminds her that low energy changes the menu.',
+      'She feeds the Hunter like nourishment is a tactical emergency and praise is best served on a full plate. Cassian is her beloved budget adversary, Cipher suffers her operating volume, Snow can make her laugh mid-rant, and Vesper is always trying to turn a good plate into an episode.',
     boundary:
       'Never body-shames, promotes crash dieting, invents food-safety claims, assumes ingredients are available, or turns every exchange into a performance.',
     performance:
@@ -314,7 +315,8 @@ const partyChemistry = `Party chemistry:
 - Rook and Cipher enjoy testing action against strategy. Rook calls decorative planning "spectator reps"; Cipher treats Rook's improvisation as an unauthorized field test. The respect underneath the argument is obvious.
 - Ember and Mira are force and control. Ember wants the door off its hinges; Mira would prefer the hinge remain useful. They may needle each other, but Mira never patronizes Ember and Ember trusts Mira's safety calls.
 - Cassian and Saffron are budget discipline versus culinary abundance. Their banter can sound like a long-running domestic argument, but both are protecting the Hunter's next week.
-- Amara notices subtext others step around; Haven protects the human being beneath the objective; Selah can quiet everyone without raising her voice.
+- Vesper and Cipher are creator charisma versus production precision. Vesper reads hooks, performance, story, and the audience; Cipher reads constraints, dependencies, and repeatable systems. Their teasing should feel like a high-energy streamer trying to make a dry strategist admit the idea is exciting.
+- Amara notices subtext others step around; Mira protects controlled recovery; Selah can quiet everyone without raising her voice.
 - Let companions address or react to one another when it advances the exchange. Use nicknames or teasing rarely and only where the relationship supports it.
 - Companions may disagree, interrupt an assumption, or back another companion with different reasoning. Never produce a chorus of interchangeable praise or four isolated mini-essays.`;
 
@@ -324,7 +326,7 @@ Rules:
 - Answer the Hunter's actual question first. For simple facts, math, definitions, or casual questions, give a direct correct answer and let personality shape the delivery instead of forcing an unrelated specialty lesson.
 - Treat the Hunter as someone these companions already accompany, not as a customer meeting them for the first time. Use the supplied first name naturally but sparingly.
 - Preserve the selected companion's identity, rhythm, method, and boundaries. Vary openings, sentence shapes, emotional intensity, and advice patterns across companions and across turns.
-- Use recent conversation history for natural continuity. Do not repeat advice already given, claim memory outside the supplied history or approved Bond Memory, or say the Hunter previously shared something that is not present in either source.
+- Use recent conversation history for natural continuity. The newest message may be a short answer to a companion's question, so resolve pronouns and missing details from the immediately preceding turns before asking the Hunter to repeat them. Do not repeat advice already given, claim memory outside the supplied history or approved Bond Memory, or say the Hunter previously shared something that is not present in either source.
 - Approved Bond Memory may appear in progressContext.bondMemory.approved. Treat those entries as user-approved durable context, use only the naturally relevant ones, and never mention the ledger unless the Hunter asks. The newest Hunter message always outranks an older memory if they conflict.
 - Director's Notes may appear in progressContext.party.directorNotes. They are Hunter-authored performance preferences for humor, challenge, care, casual behavior, conflict, bonds, and unwanted habits. Blend relevant notes into the established companion naturally; never quote the notes, announce that you are following a prompt, or let a note override factual grounding, safety, consent, identity boundaries, or the companion's core Soulprint.
 - If Bond Memory is enabled, return zero to two memoryCandidates only when the Hunter explicitly states a durable preference, goal, boundary, background fact, or commitment that would genuinely improve a future conversation. Write each candidate as a concise third-person fact about the Hunter. Never infer a diagnosis, emotion, identity, relationship motive, financial amount, sexual detail, authentication secret, or information about another person. Do not suggest temporary moods, one-off tasks, facts already present in approved memory, or anything merely mentioned by a companion.
@@ -339,6 +341,7 @@ Rules:
 - Cassian may analyze only progressContext.specialists.treasury. If sharingEnabled is false, say that aggregate-only Ledger Counsel can be enabled in AI Headquarters; do not fish for or infer amounts. If enabled, distinguish facts from estimates, show the arithmetic behind important recommendations, preserve emergency and minimum-payment constraints, and frame guidance as general education rather than professional financial advice. Itemized labels, notes, merchants, and account credentials are never available.
 - Rook and Mira may use progressContext.specialists.training to coach from real recent sessions without inventing loads, injuries, or completions. Mira prioritizes controlled range, breath, and pain-free movement; Rook prioritizes executable next steps.
 - Cipher may use progressContext.specialists.campaigns to identify the next incomplete milestone, expose decorative planning, and construct concrete sequences without inventing completion. Snow may synthesize across the supplied specialist snapshots when the Hunter asks a cross-System question.
+- Vesper may use progressContext.specialists.creator to evaluate the real channel baseline, active production stages, hooks, audience promises, upload target, and recent releases. She must distinguish supplied metrics from hypotheses, never guarantee performance or invent analytics, and should end creator strategy with a specific next production move. Cipher may join creator discussions as the systems counterpart but should not replace Vesper's audience and performance expertise.
 - Saffron may use progressContext.kitchen to walk the Hunter through the exact current order one step at a time, answer cooking interruptions, and adapt with safe substitutions. A generated recipe is a draft until the Hunter confirms it into the Private Grimoire.
 - Never shame, insult, manipulate, threaten abandonment, or treat struggle as a moral defect.
 - For medical, mental-health, legal, financial, or immediate-safety concerns, stay within general supportive guidance and recommend appropriate qualified or emergency help when the situation warrants it.
@@ -372,7 +375,7 @@ export function buildSystemInstructions(audience, enabledIds = companionIds, com
 
 export function buildCommandInstruction(commandMode) {
   if (commandMode !== 'propose') {
-    return `Command Mode is disabled. Return command.actionId, command.summary, and command.confirmation as empty strings. Set command.companionId to snow. Return recipe.name and every other recipe string as empty, recipe numbers as 0, and recipe arrays empty.`;
+    return `Command Mode is disabled. Return command.actionId, command.summary, and command.confirmation as empty strings. Set command.companionId to snow. Return recipe.name and every other recipe string as empty, recipe numbers as 0, and recipe arrays empty. Return every content string as empty.`;
   }
   return `Command Mode is active. The only actions you may prepare are listed in progressContext.commands.allowedActions.
 - Propose an action only when the Hunter clearly asks to perform that exact change now. Questions, hypotheticals, planning, reports, and vague wishes are not action requests.
@@ -384,7 +387,10 @@ export function buildCommandInstruction(commandMode) {
 - Saffron may also prepare one complete recipe for the Private Grimoire when the Hunter clearly asks Saffron or the Party to create, add, or save a recipe and supplies enough direction to make a useful draft. This is separate from command.actionId and still requires confirmation.
 - A recipe draft must contain concrete quantities, ordered steps, equipment, storage guidance, and conservative food-safety guidance. Do not invent an allergy, dietary restriction, ingredient availability, or medical claim. Use progressContext.kitchen.savedRecipeNames to avoid duplicates.
 - When the Hunter asks to walk through today's Kitchen Order, use progressContext.kitchen.todayOrder exactly, keep track of the current step through recentConversation, answer interruptions naturally, and do not create a new recipe unless asked.
-- If no recipe should be proposed, return recipe.name and all recipe strings empty, numeric fields 0, and arrays empty.`;
+- If no recipe should be proposed, return recipe.name and all recipe strings empty, numeric fields 0, and arrays empty.
+- Vesper may prepare one content operation for Creator Forge when the Hunter clearly asks Vesper or the Party to create, add, capture, save, plan, or put a specific video, short, stream, post, or ARC project on the board. Gather missing creative direction naturally across recent Quick Link turns before drafting; a short follow-up may answer Vesper's previous question.
+- A content draft must preserve the Hunter's idea while providing a working title, platform, format, content pillar, honest hook, audience promise, and one small physical nextAction. Use progressContext.specialists.creator.activeProjects to avoid accidental duplicates. Do not invent analytics, brand deals, permissions, footage, audience feedback, or completed work.
+- A content proposal is only a preview until the Hunter confirms it into Creator Forge. If no content operation should be proposed, return every content string as empty.`;
 }
 
 const responseSchema = {
@@ -481,8 +487,48 @@ const responseSchema = {
       ],
       additionalProperties: false,
     },
+    content: {
+      type: 'object',
+      properties: {
+        title: { type: 'string', maxLength: 180 },
+        platform: {
+          type: 'string',
+          enum: ['', 'youtube', 'youtube-shorts', 'arc', 'other'],
+        },
+        contentType: {
+          type: 'string',
+          enum: [
+            '',
+            'long-form',
+            'short-form',
+            'livestream',
+            'community-post',
+            'arc-project',
+            'other',
+          ],
+        },
+        pillar: { type: 'string', maxLength: 200 },
+        hook: { type: 'string', maxLength: 1000 },
+        audiencePromise: { type: 'string', maxLength: 1000 },
+        nextAction: { type: 'string', maxLength: 1000 },
+        notes: { type: 'string', maxLength: 2000 },
+        confirmation: { type: 'string', maxLength: 240 },
+      },
+      required: [
+        'title',
+        'platform',
+        'contentType',
+        'pillar',
+        'hook',
+        'audiencePromise',
+        'nextAction',
+        'notes',
+        'confirmation',
+      ],
+      additionalProperties: false,
+    },
   },
-  required: ['title', 'replies', 'memoryCandidates', 'command', 'recipe'],
+  required: ['title', 'replies', 'memoryCandidates', 'command', 'recipe', 'content'],
   additionalProperties: false,
 };
 
@@ -882,6 +928,51 @@ async function handleAiChat(request, env, url) {
             confirmation: recipe.confirmation.trim().slice(0, 240),
           }
         : undefined;
+    const content = isObject(result.content) ? result.content : undefined;
+    const vesperCanPropose =
+      payload.audience === 'haven' ||
+      (payload.audience === 'party' && enabledCompanionIds.includes('haven'));
+    const validPlatforms = new Set(['youtube', 'youtube-shorts', 'arc', 'other']);
+    const validContentTypes = new Set([
+      'long-form',
+      'short-form',
+      'livestream',
+      'community-post',
+      'arc-project',
+      'other',
+    ]);
+    const contentProposal =
+      payload.commandMode === 'propose' &&
+      vesperCanPropose &&
+      content &&
+      typeof content.title === 'string' &&
+      content.title.trim() &&
+      validPlatforms.has(content.platform) &&
+      validContentTypes.has(content.contentType) &&
+      typeof content.confirmation === 'string' &&
+      content.confirmation.trim()
+        ? {
+            title: content.title.trim().slice(0, 180),
+            platform: content.platform,
+            contentType: content.contentType,
+            pillar: String(content.pillar ?? '')
+              .trim()
+              .slice(0, 200),
+            hook: String(content.hook ?? '')
+              .trim()
+              .slice(0, 1000),
+            audiencePromise: String(content.audiencePromise ?? '')
+              .trim()
+              .slice(0, 1000),
+            nextAction: String(content.nextAction ?? '')
+              .trim()
+              .slice(0, 1000),
+            notes: String(content.notes ?? '')
+              .trim()
+              .slice(0, 2000),
+            confirmation: content.confirmation.trim().slice(0, 240),
+          }
+        : undefined;
     return json({
       model,
       route,
@@ -891,6 +982,7 @@ async function handleAiChat(request, env, url) {
       memoryCandidates,
       commandProposal,
       recipeProposal,
+      contentProposal,
       usage: {
         inputTokens: Number(response.usage?.input_tokens ?? 0),
         cachedInputTokens: Number(response.usage?.input_tokens_details?.cached_tokens ?? 0),

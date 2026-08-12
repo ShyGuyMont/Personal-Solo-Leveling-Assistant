@@ -14,6 +14,7 @@ import { ALL_STATS, createInitialStat } from '@/game/stats';
 import { getSystemDateKey, startOfMonth, startOfWeek } from '@/utils/date';
 import type {
   AccountProgression,
+  CreatorSettings,
   Focus,
   LocalDateKey,
   Profile,
@@ -80,6 +81,20 @@ export function createDefaultTreasurySettings(now = new Date().toISOString()): T
     challengeEnabled: true,
     challengeChance: 0.75,
     challengeRewardXp: 60,
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+export function createDefaultCreatorSettings(now = new Date().toISOString()): CreatorSettings {
+  return {
+    id: 'primary',
+    channelName: '',
+    channelHandle: '',
+    channelUrl: '',
+    weeklyUploadTarget: 1,
+    currentArcFocus: '',
+    accountabilityMode: 'direct',
     createdAt: now,
     updatedAt: now,
   };
@@ -174,6 +189,7 @@ export async function initializeProfile(input: {
       db.dailyReviews,
       db.cosmeticUnlocks,
       db.treasurySettings,
+      db.creatorSettings,
     ],
     async () => {
       await db.profiles.put(profile);
@@ -181,6 +197,7 @@ export async function initializeProfile(input: {
       await db.progression.put(createDefaultProgression());
       await db.stats.bulkPut(ALL_STATS.map(createInitialStat));
       await db.treasurySettings.put(createDefaultTreasurySettings(now));
+      await db.creatorSettings.put(createDefaultCreatorSettings(now));
       await db.titles.put({
         id: 'newly-awakened',
         titleId: 'newly-awakened',
@@ -202,9 +219,9 @@ export async function initializeProfile(input: {
         },
       ]);
       await db.appMetadata.bulkPut([
-        { id: 'schema-seeded', value: 18, updatedAt: now },
+        { id: 'schema-seeded', value: 19, updatedAt: now },
         { id: 'last-system-day', value: systemDate, updatedAt: now },
-        { id: 'app-version', value: '7.1.0', updatedAt: now },
+        { id: 'app-version', value: '7.2.0', updatedAt: now },
       ]);
       await ensureRotatingChallenges(systemDate, settings.weekStartsOn);
     },
@@ -219,12 +236,14 @@ export async function ensureCoreData() {
   const settings = (await db.settings.get('primary')) ?? createDefaultSettings();
   const progression = await db.progression.get('primary');
   const treasurySettings = await db.treasurySettings.get('primary');
+  const creatorSettings = await db.creatorSettings.get('primary');
   await db.transaction(
     'rw',
     db.settings,
     db.progression,
     db.stats,
     db.treasurySettings,
+    db.creatorSettings,
     async () => {
       if (!(await db.settings.get('primary'))) await db.settings.put(settings);
       if (!progression) await db.progression.put(createDefaultProgression());
@@ -233,6 +252,9 @@ export async function ensureCoreData() {
       if (missingStats.length) await db.stats.bulkPut(missingStats.map(createInitialStat));
       if (!treasurySettings) {
         await db.treasurySettings.put(createDefaultTreasurySettings());
+      }
+      if (!creatorSettings) {
+        await db.creatorSettings.put(createDefaultCreatorSettings());
       }
     },
   );

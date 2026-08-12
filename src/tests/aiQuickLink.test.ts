@@ -19,6 +19,16 @@ describe('Companion Quick Link', () => {
       message: 'What should I focus on today?',
       explicitlyAddressed: false,
     });
+    expect(parseQuickLinkAddress('something with chicken and rice', 'saffron')).toEqual({
+      audience: 'saffron',
+      message: 'something with chicken and rice',
+      explicitlyAddressed: false,
+    });
+    expect(parseQuickLinkAddress('Vesper, help me plan a video')).toEqual({
+      audience: 'haven',
+      message: 'help me plan a video',
+      explicitlyAddressed: true,
+    });
   });
 
   it('opens Party Council for everyone or multiple named companions', () => {
@@ -35,6 +45,10 @@ describe('Companion Quick Link', () => {
     expect(parseQuickNavigationCommand('Open the Kitchen')).toEqual({
       route: '/kitchen',
       label: 'Kitchen',
+    });
+    expect(parseQuickNavigationCommand('Take me to Creator Forge')).toEqual({
+      route: '/creator-forge',
+      label: 'Creator Forge',
     });
     expect(parseQuickNavigationCommand('Tell me about gym recovery')).toBeUndefined();
     expect(navigationAcknowledgement('snow', 'Training Hall')).toContain('Training Hall');

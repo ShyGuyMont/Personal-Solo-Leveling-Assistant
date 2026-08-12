@@ -4,6 +4,7 @@ import {
   LoaderCircle,
   MessageSquareText,
   Mic,
+  Radio,
   Send,
   ShieldCheck,
   Square,
@@ -15,12 +16,13 @@ import { createPortal } from 'react-dom';
 import { COMPANIONS, getCompanion, getCompanionImage } from '@/config/companions';
 import {
   createCompanionMessage,
+  createAiConversation,
   createHunterMessage,
-  getContinuingAiConversation,
   saveAiConversation,
   saveAiMemoryCandidates,
 } from '@/game/aiHeadquarters';
 import { buildAiProgressContext } from '@/game/aiContext';
+import { saveCreatorProject } from '@/game/creatorForge';
 import { saveCustomKitchenRecipe } from '@/game/kitchenGrimoire';
 import {
   buildQuickLinkActionCatalog,
@@ -67,16 +69,18 @@ export function CompanionQuickLink() {
   const [notice, setNotice] = useState('Say a companion’s name, then speak naturally.');
   const [draft, setDraft] = useState('');
   const [sending, setSending] = useState(false);
-  const [transcript, setTranscript] = useState('');
   const [replies, setReplies] = useState<AiConversationMessage[]>([]);
   const [pendingAction, setPendingAction] = useState<PendingQuickLinkAction>();
   const [pendingRecipe, setPendingRecipe] =
     useState<NonNullable<AiHeadquartersReply['recipeProposal']>>();
+  const [pendingContent, setPendingContent] =
+    useState<NonNullable<AiHeadquartersReply['contentProposal']>>();
   const [executingAction, setExecutingAction] = useState(false);
   const [continuityTurns, setContinuityTurns] = useState(0);
   const [activeCompanionId, setActiveCompanionId] = useState<CompanionId>('snow');
   const submitRef = useRef<(text: string) => Promise<void>>(async () => undefined);
   const conversationRef = useRef<AiConversation>();
+  const repliesRef = useRef<HTMLDivElement>(null);
   const enabledCompanions = useMemo(() => {
     const enabled = new Set(settings?.enabledCompanionIds ?? []);
     return COMPANIONS.filter((companion) => enabled.has(companion.id));
@@ -92,6 +96,8 @@ export function CompanionQuickLink() {
     onTranscript: (text) => submitRef.current(text),
     onNotice: setNotice,
   });
+  const voiceLinkRef = useRef(voiceLink);
+  voiceLinkRef.current = voiceLink;
 
   useEffect(() => {
     void getAiLinkStatus().then(setStatus);
@@ -99,9 +105,25 @@ export function CompanionQuickLink() {
     const offline = () => setDeviceOnline(false);
     window.addEventListener('online', online);
     window.addEventListener('offline', offline);
+    const openDirectLink = (event: Event) => {
+      const companionId = (event as CustomEvent<{ companionId?: CompanionId }>).detail?.companionId;
+      if (!companionId) return;
+      voiceLinkRef.current.stopPlayback();
+      conversationRef.current = createAiConversation(companionId);
+      setActiveCompanionId(companionId);
+      setReplies([]);
+      setPendingAction(undefined);
+      setPendingRecipe(undefined);
+      setPendingContent(undefined);
+      setContinuityTurns(0);
+      setNotice(`${getCompanion(companionId).name}'s live channel is ready.`);
+      setOpen(true);
+    };
+    window.addEventListener('system:open-quick-link', openDirectLink);
     return () => {
       window.removeEventListener('online', online);
       window.removeEventListener('offline', offline);
+      window.removeEventListener('system:open-quick-link', openDirectLink);
     };
   }, []);
 
@@ -117,6 +139,12 @@ export function CompanionQuickLink() {
       document.body.style.overflow = previousBodyOverflow;
     };
   }, [open]);
+
+  useEffect(() => {
+    const container = repliesRef.current;
+    if (!open || !container) return;
+    container.scrollTop = container.scrollHeight;
+  }, [open, replies]);
 
   const transmit = useCallback(
     async (raw: string) => {
@@ -141,7 +169,8 @@ export function CompanionQuickLink() {
         return;
       }
 
-      const addressed = parseQuickLinkAddress(text);
+      const fallbackAudience = conversationRef.current?.audience ?? activeCompanionId;
+      const addressed = parseQuickLinkAddress(text, fallbackAudience);
       const addressedCompanion = addressed.audience === 'party' ? 'snow' : addressed.audience;
       if (
         addressed.audience !== 'party' &&
@@ -151,11 +180,10 @@ export function CompanionQuickLink() {
         return;
       }
       setActiveCompanionId(addressedCompanion);
-      setTranscript(text);
       setDraft('');
-      setReplies([]);
       setPendingAction(undefined);
       setPendingRecipe(undefined);
+      setPendingContent(undefined);
       setSending(true);
       setNotice(
         addressed.audience === 'party'
@@ -163,13 +191,15 @@ export function CompanionQuickLink() {
           : `${getCompanion(addressed.audience).name} is thinking…`,
       );
 
-      const conversation =
-        conversationRef.current?.audience === addressed.audience
-          ? conversationRef.current
-          : await getContinuingAiConversation(addressed.audience);
+      const continuing = conversationRef.current?.audience === addressed.audience;
+      const conversation = continuing
+        ? conversationRef.current!
+        : createAiConversation(addressed.audience);
       conversationRef.current = conversation;
+      if (!continuing) setReplies([]);
       setContinuityTurns(conversation.messages.length);
       const hunterMessage = createHunterMessage(addressed.message || text);
+      setReplies((current) => (continuing ? [...current, hunterMessage] : [hunterMessage]));
       const pendingConversation = {
         ...conversation,
         messages: [...conversation.messages, hunterMessage],
@@ -193,7 +223,8 @@ export function CompanionQuickLink() {
           };
           await saveAiConversation(completedConversation);
           conversationRef.current = completedConversation;
-          setReplies([companionMessage]);
+          setReplies((current) => [...current, companionMessage]);
+          setContinuityTurns(completedConversation.messages.length);
           setNotice(`Opening ${navigation.label} — no text intelligence call was needed.`);
           window.dispatchEvent(
             new CustomEvent('system:ai-conversations-changed', {
@@ -244,7 +275,8 @@ export function CompanionQuickLink() {
         };
         await saveAiConversation(completedConversation);
         conversationRef.current = completedConversation;
-        setReplies(responseMessages);
+        setReplies((current) => [...current, ...responseMessages]);
+        setContinuityTurns(completedConversation.messages.length);
         const proposedAction = result.commandProposal
           ? actionCatalog.find((action) => action.actionId === result.commandProposal?.actionId)
           : undefined;
@@ -256,8 +288,12 @@ export function CompanionQuickLink() {
           setPendingRecipe(result.recipeProposal);
           setActiveCompanionId('saffron');
         }
+        if (result.contentProposal) {
+          setPendingContent(result.contentProposal);
+          setActiveCompanionId('haven');
+        }
         setNotice(
-          proposedAction || result.recipeProposal
+          proposedAction || result.recipeProposal || result.contentProposal
             ? 'Command prepared. Nothing changes until you confirm it below.'
             : result.route === 'sovereign'
               ? `${result.model} · Sovereign counsel route`
@@ -280,6 +316,7 @@ export function CompanionQuickLink() {
     [
       challenges,
       actionCatalog,
+      activeCompanionId,
       deviceOnline,
       enabledCompanions,
       missions,
@@ -377,6 +414,36 @@ export function CompanionQuickLink() {
     }
   }
 
+  async function savePendingContent() {
+    if (!pendingContent || executingAction) return;
+    setExecutingAction(true);
+    try {
+      const content = await saveCreatorProject({
+        title: pendingContent.title,
+        platform: pendingContent.platform,
+        contentType: pendingContent.contentType,
+        status: 'idea',
+        pillar: pendingContent.pillar,
+        hook: pendingContent.hook,
+        audiencePromise: pendingContent.audiencePromise,
+        nextAction: pendingContent.nextAction,
+        notes: pendingContent.notes,
+      });
+      await appendLocalAcknowledgement(
+        'haven',
+        `“${content.title}” is on the Creator Forge board now. The spotlight is not asking for perfection—just ${content.nextAction || 'one honest next move'}.`,
+      );
+      setPendingContent(undefined);
+      setNotice('Content operation confirmed · Creator Forge synchronized.');
+    } catch (error) {
+      setNotice(
+        error instanceof Error ? error.message : 'That content operation could not be saved.',
+      );
+    } finally {
+      setExecutingAction(false);
+    }
+  }
+
   async function beginListening() {
     if (
       !deviceOnline ||
@@ -404,16 +471,20 @@ export function CompanionQuickLink() {
     if (sending || voiceLink.transcribing) return;
     voiceLink.stopPlayback();
     setOpen(true);
+    conversationRef.current = undefined;
+    setActiveCompanionId('snow');
     setReplies([]);
     setPendingAction(undefined);
     setPendingRecipe(undefined);
-    setTranscript('');
+    setPendingContent(undefined);
+    setContinuityTurns(0);
     await beginListening();
   }
 
   function close() {
     if (voiceLink.recording) voiceLink.stopRecording();
     voiceLink.stopPlayback();
+    conversationRef.current = undefined;
     setOpen(false);
   }
 
@@ -459,7 +530,9 @@ export function CompanionQuickLink() {
                   <span>
                     <small>COMPANION QUICK LINK</small>
                     <strong id="quick-link-title">
-                      {replies.length > 1 ? 'Party Channel' : activeCompanion.name}
+                      {conversationRef.current?.audience === 'party'
+                        ? 'Party Channel'
+                        : activeCompanion.name}
                     </strong>
                   </span>
                 </div>
@@ -499,25 +572,26 @@ export function CompanionQuickLink() {
                 <p>Try “Snow, take me to the Training Hall” or “Saffron, what should I cook?”</p>
               </div>
 
-              {transcript && (
-                <div className="quick-link__transcript">
-                  <span>YOU</span>
-                  <p>{transcript}</p>
-                </div>
-              )}
-
               {replies.length > 0 && (
-                <div className="quick-link__replies" aria-live="polite">
+                <div ref={repliesRef} className="quick-link__replies" aria-live="polite">
                   {replies.map((message) => {
-                    const companion = getCompanion(message.companionId!);
+                    const companion =
+                      message.role === 'companion' && message.companionId
+                        ? getCompanion(message.companionId)
+                        : undefined;
                     return (
                       <article
                         key={message.id}
-                        style={{ '--companion-accent': companion.accent } as CSSProperties}
+                        className={message.role === 'hunter' ? 'is-hunter' : undefined}
+                        style={
+                          {
+                            '--companion-accent': companion?.accent ?? 'var(--accent)',
+                          } as CSSProperties
+                        }
                       >
-                        <img src={getCompanionImage(companion.image)} alt="" />
+                        {companion && <img src={getCompanionImage(companion.image)} alt="" />}
                         <div>
-                          <span>{companion.name}</span>
+                          <span>{companion?.name ?? 'YOU'}</span>
                           <p>{message.message}</p>
                         </div>
                       </article>
@@ -636,6 +710,67 @@ export function CompanionQuickLink() {
                       onClick={() => {
                         setPendingRecipe(undefined);
                         setNotice('Recipe dismissed. Saffron changed nothing on this device.');
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </section>
+              )}
+
+              {pendingContent && (
+                <section
+                  className="quick-link__command quick-link__content-command"
+                  aria-live="polite"
+                >
+                  <header>
+                    <span>
+                      <Radio size={15} /> VESPER'S CREATOR FORGE
+                    </span>
+                    <small>PREVIEW BEFORE SAVE</small>
+                  </header>
+                  <strong>{pendingContent.title}</strong>
+                  <p>{pendingContent.audiencePromise}</p>
+                  <div className="quick-link__recipe-meta">
+                    <span>{pendingContent.platform.replace('-', ' ')}</span>
+                    <span>{pendingContent.contentType.replace('-', ' ')}</span>
+                    {pendingContent.pillar && <span>{pendingContent.pillar}</span>}
+                  </div>
+                  <dl>
+                    <div>
+                      <dt>HOOK</dt>
+                      <dd>{pendingContent.hook || 'Still to be sharpened with Vesper.'}</dd>
+                    </div>
+                    <div>
+                      <dt>NEXT ACTION</dt>
+                      <dd>{pendingContent.nextAction || 'Define the smallest production move.'}</dd>
+                    </div>
+                    <div>
+                      <dt>COMPANION CHECK</dt>
+                      <dd>{pendingContent.confirmation}</dd>
+                    </div>
+                  </dl>
+                  <div className="quick-link__command-actions">
+                    <button
+                      type="button"
+                      className="button button--primary"
+                      disabled={executingAction}
+                      onClick={() => void savePendingContent()}
+                    >
+                      {executingAction ? (
+                        <LoaderCircle className="is-spinning" size={15} />
+                      ) : (
+                        <Check size={15} />
+                      )}
+                      Add to Creator Forge
+                    </button>
+                    <button
+                      type="button"
+                      className="button button--ghost"
+                      disabled={executingAction}
+                      onClick={() => {
+                        setPendingContent(undefined);
+                        setNotice('Content draft dismissed. Creator Forge was not changed.');
                       }}
                     >
                       Cancel

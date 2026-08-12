@@ -1,0 +1,79 @@
+import { beforeEach, describe, expect, it } from 'vitest';
+import { db } from '@/db/database';
+import { createDefaultCreatorSettings } from '@/db/seed';
+import {
+  getCreatorForgeSummary,
+  parseYouTubeStudioCsv,
+  saveCreatorProject,
+  saveCreatorSnapshot,
+} from '@/game/creatorForge';
+
+describe('Creator Forge', () => {
+  beforeEach(async () => {
+    await db.creatorSettings.clear();
+    await db.creatorSnapshots.clear();
+    await db.creatorProjects.clear();
+    await db.creatorSettings.put(createDefaultCreatorSettings('2026-08-12T12:00:00.000Z'));
+  });
+
+  it('tracks content from idea through publish and reports creator momentum', async () => {
+    await saveCreatorSnapshot({
+      subscribers: 125,
+      views: 2400,
+      watchHours: 81.5,
+      clickThroughRate: 5.4,
+    });
+    const project = await saveCreatorProject({
+      title: 'The ARC Awakens',
+      platform: 'youtube',
+      contentType: 'long-form',
+      status: 'idea',
+      pillar: 'ARC',
+      hook: 'What if progress became a living world?',
+      audiencePromise: 'See how the System turns habits into a story.',
+      nextAction: 'Write the first 30 seconds.',
+      notes: '',
+    });
+    const summary = await getCreatorForgeSummary();
+    expect(summary.latestSnapshot?.views).toBe(2400);
+    expect(summary.activeProjects[0]).toEqual(expect.objectContaining({ id: project.id }));
+    expect(summary.vesperCallout).toContain('The ARC Awakens');
+  });
+
+  it('imports common YouTube Studio analytics columns without credentials', () => {
+    const parsed = parseYouTubeStudioCsv(
+      [
+        'Content,Views,Watch time (hours),Impressions,Impressions click-through rate (%),Average view duration,Subscribers',
+        'Video A,1000,50,10000,5.0,0:03:00,12',
+        'Video B,500,25,5000,8.0,0:02:00,8',
+      ].join('\n'),
+    );
+    expect(parsed.views).toBe(1500);
+    expect(parsed.watchHours).toBe(75);
+    expect(parsed.impressions).toBe(15000);
+    expect(parsed.clickThroughRate).toBeCloseTo(6);
+    expect(parsed.averageViewDurationSeconds).toBe(150);
+    expect(parsed.subscribers).toBe(20);
+  });
+
+  it('uses a Studio total row without counting every video twice', () => {
+    const parsed = parseYouTubeStudioCsv(
+      [
+        'Content,Views,Watch time (hours),Impressions,Impressions click-through rate (%)',
+        'Total,1500,75,15000,6.0',
+        'Video A,1000,50,10000,5.0',
+        'Video B,500,25,5000,8.0',
+      ].join('\n'),
+    );
+    expect(parsed.views).toBe(1500);
+    expect(parsed.watchHours).toBe(75);
+    expect(parsed.impressions).toBe(15000);
+    expect(parsed.clickThroughRate).toBe(6);
+  });
+
+  it('rejects a CSV that does not contain supported Studio metrics', () => {
+    expect(() => parseYouTubeStudioCsv('Content,Published\nVideo A,2026-08-12')).toThrow(
+      'No supported Studio metrics were found',
+    );
+  });
+});

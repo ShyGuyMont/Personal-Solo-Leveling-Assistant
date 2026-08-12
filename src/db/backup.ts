@@ -10,7 +10,7 @@ import type {
   Settings,
 } from '@/types/game';
 
-export const SAVE_VERSION = 18;
+export const SAVE_VERSION = 19;
 export const MAX_IMPORT_BYTES = 32 * 1024 * 1024;
 const MAX_SNAPSHOTS = 5;
 const FORBIDDEN_KEYS = new Set(['__proto__', 'prototype', 'constructor']);
@@ -132,6 +132,11 @@ function migrateData(
     data.aiVoiceProfiles ??= [];
     data.aiUsageRecords ??= [];
   }
+  if (version <= 18) {
+    data.creatorSettings ??= [];
+    data.creatorSnapshots ??= [];
+    data.creatorProjects ??= [];
+  }
   data.aiVoiceProfiles = data.aiVoiceProfiles.map((row) => {
     if (
       !isObject(row) ||
@@ -141,6 +146,7 @@ function migrateData(
       return row;
     }
     const canon = cloneCanonVoiceProfile(row.id as CompanionId);
+    if (version <= 18 && row.id === 'haven') return canon;
     return {
       delivery: canon.delivery,
       cadence: canon.cadence,
@@ -151,6 +157,19 @@ function migrateData(
     };
   });
   const migrationTime = new Date().toISOString();
+  if (!data.creatorSettings.some((row) => isObject(row) && row.id === 'primary')) {
+    data.creatorSettings.push({
+      id: 'primary',
+      channelName: '',
+      channelHandle: '',
+      channelUrl: '',
+      weeklyUploadTarget: 1,
+      currentArcFocus: '',
+      accountabilityMode: 'direct',
+      createdAt: migrationTime,
+      updatedAt: migrationTime,
+    });
+  }
   if (!data.treasurySettings.some((row) => isObject(row) && row.id === 'primary')) {
     data.treasurySettings.push({
       id: 'primary',
@@ -824,6 +843,91 @@ function validateData(data: Record<string, unknown[]>) {
         (typeof row.nextAction !== 'string' || row.nextAction.length > 500))
     ) {
       throw new Error('A Scripture Sanctuary record contains an impossible value.');
+    }
+  }
+
+  const creatorSettings = requiredSingleton<Record<string, unknown>>(data, 'creatorSettings');
+  if (
+    typeof creatorSettings.channelName !== 'string' ||
+    creatorSettings.channelName.length > 160 ||
+    typeof creatorSettings.channelHandle !== 'string' ||
+    creatorSettings.channelHandle.length > 100 ||
+    typeof creatorSettings.channelUrl !== 'string' ||
+    creatorSettings.channelUrl.length > 500 ||
+    !Number.isInteger(creatorSettings.weeklyUploadTarget) ||
+    Number(creatorSettings.weeklyUploadTarget) < 0 ||
+    Number(creatorSettings.weeklyUploadTarget) > 21 ||
+    typeof creatorSettings.currentArcFocus !== 'string' ||
+    creatorSettings.currentArcFocus.length > 500 ||
+    !['supportive', 'direct', 'relentless'].includes(String(creatorSettings.accountabilityMode)) ||
+    typeof creatorSettings.createdAt !== 'string' ||
+    typeof creatorSettings.updatedAt !== 'string'
+  ) {
+    throw new Error('The Creator Forge settings contain an impossible value.');
+  }
+
+  for (const row of data.creatorSnapshots) {
+    if (
+      !isObject(row) ||
+      typeof row.capturedAt !== 'string' ||
+      !['manual', 'studio-csv', 'youtube-api'].includes(String(row.source)) ||
+      !Number.isInteger(row.periodDays) ||
+      Number(row.periodDays) < 1 ||
+      Number(row.periodDays) > 3650 ||
+      [
+        row.subscribers,
+        row.views,
+        row.watchHours,
+        row.impressions,
+        row.averageViewDurationSeconds,
+        row.uploads,
+      ].some((value) => value !== undefined && (!Number.isFinite(value) || Number(value) < 0)) ||
+      (row.clickThroughRate !== undefined &&
+        (!Number.isFinite(row.clickThroughRate) ||
+          Number(row.clickThroughRate) < 0 ||
+          Number(row.clickThroughRate) > 100)) ||
+      (row.note !== undefined && (typeof row.note !== 'string' || row.note.length > 1000))
+    ) {
+      throw new Error('A Creator Forge channel snapshot contains an impossible value.');
+    }
+  }
+
+  const creatorStatuses = new Set([
+    'idea',
+    'script',
+    'record',
+    'edit',
+    'thumbnail',
+    'scheduled',
+    'published',
+    'paused',
+  ]);
+  const creatorPlatforms = new Set(['youtube', 'youtube-shorts', 'arc', 'other']);
+  const creatorContentTypes = new Set([
+    'long-form',
+    'short-form',
+    'livestream',
+    'community-post',
+    'arc-project',
+    'other',
+  ]);
+  for (const row of data.creatorProjects) {
+    if (
+      !isObject(row) ||
+      typeof row.title !== 'string' ||
+      !row.title.trim() ||
+      row.title.length > 180 ||
+      !creatorPlatforms.has(String(row.platform)) ||
+      !creatorContentTypes.has(String(row.contentType)) ||
+      !creatorStatuses.has(String(row.status)) ||
+      [row.pillar, row.hook, row.audiencePromise, row.nextAction, row.notes].some(
+        (value) => typeof value !== 'string' || value.length > 4000,
+      ) ||
+      typeof row.createdAt !== 'string' ||
+      typeof row.updatedAt !== 'string' ||
+      (row.publishedAt !== undefined && typeof row.publishedAt !== 'string')
+    ) {
+      throw new Error('A Creator Forge project contains an impossible value.');
     }
   }
 }

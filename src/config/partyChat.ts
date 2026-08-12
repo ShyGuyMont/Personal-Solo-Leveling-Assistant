@@ -124,10 +124,10 @@ const BASE_PARTY_DIALOGUE: Record<MoodId, Omit<MoodDialogue, 'mira' | 'cassian' 
       'Energy is an advantage, not a strategy. Give me one clear objective and a visible definition of done.',
     ],
     haven: [
-      'Enjoy the lift. You do not have to turn every good feeling into maximum output for it to be worthwhile.',
-      'Let some of that energy become kindness, laughter, or recovery. Progress is bigger than productivity.',
-      'A full cup can pour into good places. Just remember that pacing is how a strong morning becomes a good day.',
-      'I am glad your spirit has room today. Build something, help someone, and keep a little brightness for yourself.',
+      'Oh, that energy is camera-ready. Pick the idea with the clearest audience promise and give it a real production move.',
+      'Greenroom is buzzing. Before you open twelve new drafts, choose the one people would actually remember.',
+      'Use the spark while it is generous: record the rough take, test the hook, or turn one ARC thought into something visible.',
+      'You sound alive today. Let the audience meet that version of you before perfection edits all the personality out.',
     ],
     ember: [
       'Yes. That is fuel. Pick one target before the spark scatters and make the first hit count.',
@@ -174,10 +174,10 @@ const BASE_PARTY_DIALOGUE: Record<MoodId, Omit<MoodDialogue, 'mira' | 'cassian' 
       'I support this conclusion. The plan became output, the output became proof, and the proof is allowed to feel good.',
     ],
     haven: [
-      'I hope you are proud not only of the result, but of the way you treated yourself and others while reaching it.',
-      'Let the victory be warm, not demanding. It does not have to become pressure for the next thing yet.',
-      'You are allowed to enjoy who you were in that moment: capable, persistent, and still fully human.',
-      'Keep this feeling somewhere safe. On a harder day, it can remind you that progress has already been real.',
+      'Yes! Let the win have its close-up. What landed, what felt like you, and what deserves a sequel?',
+      'That is proof the creator is not imaginary. Save the lesson before the celebration turns into another disappearing act.',
+      'Say the achievement clearly. Your audience cannot trust a voice that keeps pretending its own progress is nothing.',
+      'I want the victory reel and the honest behind-the-scenes note. Both belong in your creator story.',
     ],
     ember: [
       'Good. Say it with your whole chest: you earned this. No shrinking the victory to make anyone comfortable.',
@@ -224,10 +224,10 @@ const BASE_PARTY_DIALOGUE: Record<MoodId, Omit<MoodDialogue, 'mira' | 'cassian' 
       'A functional mood is underrated. Convert a portion into focused work and leave the rest unoptimized.',
     ],
     haven: [
-      'Let good be enough. You do not have to scan the horizon for what might ruin it.',
-      'I hope you make room for something nourishing today—music, sunlight, a conversation, or an unhurried meal.',
-      'Steady days help the nervous parts of us remember that not everything is an emergency. Take that in.',
-      'Enjoy the ordinary kindness of feeling okay in your own skin. That is part of the journey too.',
+      'Good energy, clean signal. This is perfect for a low-drama creator win: outline, thumbnail sketch, or first take.',
+      'You do not need chaos to be interesting. Let today’s steady version of you make something clear and useful.',
+      'Nice. The greenroom is calm, which means we can hear the actual idea. What would your audience thank you for making?',
+      'Stable mood, no manufactured urgency. Put one piece of the next release on the board and keep the rest of the day human.',
     ],
     ember: [
       'Steady flame. I respect it. Use the calm to finish one clean objective without manufacturing a crisis.',
@@ -274,10 +274,10 @@ const BASE_PARTY_DIALOGUE: Record<MoodId, Omit<MoodDialogue, 'mira' | 'cassian' 
       'No optimization emergency detected. Select a modest objective and let completion be sufficient.',
     ],
     haven: [
-      'You are not required to be inspiring every day. Existing, tending to yourself, and doing what you can is real life.',
-      'Let your pace match your actual capacity. “Okay” often stays okay when we stop demanding that it become impressive.',
-      'Maybe today needs fewer sharp edges: water, food, a little air, and one kind decision toward yourself.',
-      'We can honor the middle. Not every chapter is a breakthrough or a breakdown; some are simply lived.',
+      'Okay is enough for backstage work. Rename the file, capture the idea, or write the first sentence—keep the signal alive.',
+      'No performance required. Give me the minimum viable creator move and then you can leave the spotlight off.',
+      'Middle gear still edits, outlines, and organizes. One quiet production task counts more than a loud promise.',
+      'We are not forcing charisma today. We are making tomorrow easier for the version of you who has it.',
     ],
     ember: [
       'Okay is workable. Pick one thing small enough to finish and let completion pull the day forward.',
@@ -324,10 +324,10 @@ const BASE_PARTY_DIALOGUE: Record<MoodId, Omit<MoodDialogue, 'mira' | 'cassian' 
       'Capacity has changed; therefore the plan changes. That is competent adaptation, not failure.',
     ],
     haven: [
-      'Before asking what you can still accomplish, ask what would help you feel cared for in the next hour.',
-      'Rest does not need to be justified by collapse. If you can soften the day now, please do.',
-      'Be gentle with the version of you carrying today. They deserve support, not a lecture.',
-      'If all you can do is tend to the basics and make it safely to rest, that is a complete human day.',
+      'Low battery means no camera performance. Capture one voice note or one title idea, then shut the greenroom down cleanly.',
+      'Do not force a brilliant take out of an exhausted brain. Preserve the idea, protect the creator, and rest on purpose.',
+      'Today can be metadata, file organization, or nothing. The channel benefits more from your recovery than a miserable upload.',
+      'We are not confusing burnout footage with dedication. Save the spark somewhere safe and come back with a pulse.',
     ],
     ember: [
       'Low fuel means a smaller fire, not self-destruction. Handle one essential thing and protect the recovery window.',
@@ -374,10 +374,10 @@ const BASE_PARTY_DIALOGUE: Record<MoodId, Omit<MoodDialogue, 'mira' | 'cassian' 
       'Reduce incoming signals, set a timer for one focused block, and define a stop condition before you begin.',
     ],
     haven: [
-      'Your worth is not rising and falling with the task list. You are a person under pressure, not a problem to optimize.',
-      'Can one thing be postponed, shared, or done imperfectly? Relief often enters through permission.',
-      'Give yourself the same calm voice you would offer someone you love. Stress does not need another harsh person in the room.',
-      'Find one safe, simple comfort while you work through this. Support is not a reward reserved for after completion.',
+      'Pressure makes every content decision feel like channel destiny. It is not. Pick one audience, one promise, one next action.',
+      'Close the analytics tab for a minute. Are we making, packaging, or publishing? Choose one room and stay in it.',
+      'A stressed creator does not need fourteen strategy videos. You need the next physical production move.',
+      'The algorithm is not in this room. We are. Shrink the operation until you can move it without abandoning yourself.',
     ],
     ember: [
       'Stop letting every alarm speak at once. Choose the actual fire, close the other doors, and handle one thing.',
@@ -424,10 +424,10 @@ const BASE_PARTY_DIALOGUE: Record<MoodId, Omit<MoodDialogue, 'mira' | 'cassian' 
       'The plan has encountered resistance. Plans are replaceable; your confidence is not required as collateral.',
     ],
     haven: [
-      'You can be frustrated without being cruel to yourself. Let that boundary hold.',
-      'Take a real break, not a break spent rehearsing the problem. Your mind may need room before it can see another door.',
-      'This obstacle is happening to you; it is not revealing something shameful about you.',
-      'Name what hurts underneath the irritation. Sometimes frustration is disappointment asking to be acknowledged.',
+      'Good, the draft is annoying you because you can feel the stronger version hiding in it. Change one variable, not your whole identity.',
+      'If the hook is weak, we fix the hook. We do not hold a funeral for the channel.',
+      'Take ten minutes away from the cut, then return as the audience. Where does your attention actually leave?',
+      'Frustration is useful when it points at the problem. Name it: idea, opening, pacing, packaging, or fear of publishing?',
     ],
     ember: [
       'Good—there is energy in that frustration. Point it at a changed method, not at your own throat.',
@@ -474,10 +474,10 @@ const BASE_PARTY_DIALOGUE: Record<MoodId, Omit<MoodDialogue, 'mira' | 'cassian' 
       'The plan may be behind schedule. You are not ruined. Timelines can be revised without deleting the mission.',
     ],
     haven: [
-      'You deserve kindness before you become encouraged again, not only afterward.',
-      'Let this be a low place, not a permanent address. Rest here briefly and allow someone safe to know you are struggling.',
-      'Your value is intact while motivation is missing. Nothing essential about you has been revoked.',
-      'Maybe the brave thing today is to make life ten percent gentler and keep one small promise.',
+      'A quiet channel is not a dead dream. It is a signal we can restart with one honest piece of work.',
+      'Do not compare your backstage to somebody else’s highlight reel. Open your board and choose one move you can prove today.',
+      'You are not behind every creator on Earth. You are at the next decision in your own story. Make that one.',
+      'No fake hype from me. The numbers may be slow. That still leaves us with a hook to test, a skill to sharpen, and a release to build.',
     ],
     ember: [
       'I am not asking you to feel hopeful first. I am asking for one stubborn act that proves the story is still moving.',
@@ -524,10 +524,10 @@ const BASE_PARTY_DIALOGUE: Record<MoodId, Omit<MoodDialogue, 'mira' | 'cassian' 
       'If direct contact feels too large, choose proximity: a café, library, community space, or shared online room with healthy boundaries.',
     ],
     haven: [
-      'I am sorry you are hurting. You deserve real companionship, and it is okay to name that need plainly.',
-      'Please do something that makes the room feel softer while you decide who might be safe to contact.',
-      'There is no shame in wanting company. If you can, let one trusted person know the day feels lonely.',
-      'Do not punish loneliness with more isolation. Even quiet connection—sitting near life, hearing a familiar voice—can help.',
+      'Creators can feel invisible long before anyone presses play. I hear you—and I still want one real person in your world to hear you too.',
+      'Do not turn the audience into a substitute for connection. Make something if it helps you express the truth, then reach toward someone safe.',
+      'The greenroom has a chair for you, but your life deserves human company beyond a comment section. Send one honest signal outward.',
+      'Loneliness can sharpen a story, but it should not be forced to carry the whole production. Let somebody trustworthy share the room.',
     ],
     ember: [
       'Loneliness does not get to convince you that reaching out is weakness. Send one honest signal to someone safe.',
@@ -574,10 +574,10 @@ const BASE_PARTY_DIALOGUE: Record<MoodId, Omit<MoodDialogue, 'mira' | 'cassian' 
       'Unknown is a legitimate state, not an error. Reduce variables and notice what shifts over the next hour.',
     ],
     haven: [
-      'You do not owe anyone a tidy explanation of your inner world. Curiosity is kinder than pressure here.',
-      'Try asking what would feel supportive right now, even if you cannot explain why you need it.',
-      'Maybe begin with comfort instead of analysis. A calmer body can make emotions easier to hear.',
-      'Let uncertainty have soft edges. You can care for yourself before you understand yourself completely.',
+      'Not sure is fine. Open the creator board and notice which idea makes you lean closer instead of immediately calculating performance.',
+      'Run a tiny audience test: what do you wish somebody had explained, shown, or made entertaining for you this week?',
+      'No grand niche decision tonight. Capture three honest ideas, circle the one with a real promise, and let the signal clarify through motion.',
+      'You do not need the whole content identity before the next upload. Make one piece that sounds like you and study the evidence afterward.',
     ],
     ember: [
       'Fine, no label. We can still move: water, air, food, one small task, then check the signal again.',

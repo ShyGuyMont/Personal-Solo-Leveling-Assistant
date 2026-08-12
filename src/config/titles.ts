@@ -371,11 +371,11 @@ export const TITLE_LIBRARY: TitleDefinition[] = [
   },
   {
     id: 'guardian-of-the-whole',
-    name: 'Guardian of the Whole',
-    description: 'Progress learned to protect the person making it.',
-    condition: 'Complete Shelter Without Stagnation.',
+    name: 'Signal in the Spotlight',
+    description: 'A creator identity became a real, repeatable public signal.',
+    condition: 'Complete Spotlight Protocol.',
     rarity: 'legendary',
-    accent: '#55cbb7',
+    accent: '#d7ff3f',
   },
   {
     id: 'reignited',

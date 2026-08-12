@@ -130,7 +130,7 @@ export const CANON_VOICE_PROFILES: Record<CompanionId, CanonVoiceProfile> = {
     pauseDiscipline: 4,
     updatedAt: CREATED_AT,
     direction:
-      'A real late-night call with the Hunter\'s ride-or-die older sister: relaxed, wise, lightly teasing, and naturally quick. Her authority is effortless; never sleepy, breathy, corporate, or audiobook-like.',
+      "A real late-night call with the Hunter's ride-or-die older sister: relaxed, wise, lightly teasing, and naturally quick. Her authority is effortless; never sleepy, breathy, corporate, or audiobook-like.",
     audition:
       "Okay, first of all, breathe. You don't have to solve the whole week tonight. Tell me the next true thing, and we'll handle it together.",
   },
@@ -193,22 +193,22 @@ export const CANON_VOICE_PROFILES: Record<CompanionId, CanonVoiceProfile> = {
   },
   haven: {
     id: 'haven',
-    voice: 'onyx',
-    accent: 'natural',
-    delivery: 'dry',
-    cadence: 'measured',
-    texture: 'grounded',
-    pace: 0.94,
+    voice: 'fable',
+    accent: 'caribbean',
+    delivery: 'playful',
+    cadence: 'rapid-fire',
+    texture: 'bright',
+    pace: 1.2,
     warmth: 4,
-    energy: 1,
-    expressiveness: 2,
+    energy: 5,
+    expressiveness: 5,
     naturalism: 5,
-    pauseDiscipline: 3,
+    pauseDiscipline: 4,
     updatedAt: CREATED_AT,
     direction:
-      'A low protective presence with understated deadpan humor: unhurried but never dragged, parental, sedated, or self-important.',
+      'A magnetic creator friend live in the greenroom: quick, playful, socially intelligent, camera-ready, and genuinely excited by a strong idea. Use a light natural Caribbean lilt without caricature. Never sound like an ad read, influencer parody, announcer, or forced hype machine.',
     audition:
-      'You are allowed to recover before the damage becomes impressive. Protect tonight, then we build the return properly.',
+      'Okay, that hook has a pulse. Give me the audience promise, the first ten seconds, and the one tiny production move you can finish before fear starts calling itself research.',
   },
   ember: {
     id: 'ember',

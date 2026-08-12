@@ -165,6 +165,44 @@ export interface AiProgressContext {
       }>;
       milestoneNotesExcluded: true;
     };
+    creator: {
+      identity: {
+        channelName: string;
+        channelHandle: string;
+        weeklyUploadTarget: number;
+        currentArcFocus: string;
+        accountabilityMode: string;
+      };
+      latestSnapshot?: {
+        capturedAt: string;
+        periodDays: number;
+        subscribers?: number;
+        views?: number;
+        watchHours?: number;
+        impressions?: number;
+        clickThroughRate?: number;
+        averageViewDurationSeconds?: number;
+        uploads?: number;
+      };
+      activeProjects: Array<{
+        id: string;
+        title: string;
+        platform: string;
+        contentType: string;
+        status: string;
+        pillar: string;
+        hook: string;
+        audiencePromise: string;
+        nextAction: string;
+        updatedAt: string;
+      }>;
+      recentlyPublished: Array<{
+        title: string;
+        platform: string;
+        publishedAt?: string;
+      }>;
+      privateNotesExcluded: true;
+    };
     treasury: {
       sharingEnabled: boolean;
       privacy: string;
@@ -254,6 +292,18 @@ export interface AiHeadquartersReply {
     swaps: string[];
     storage: string;
     safety: string;
+    confirmation: string;
+  };
+  contentProposal?: {
+    title: string;
+    platform: 'youtube' | 'youtube-shorts' | 'arc' | 'other';
+    contentType:
+      'long-form' | 'short-form' | 'livestream' | 'community-post' | 'arc-project' | 'other';
+    pillar: string;
+    hook: string;
+    audiencePromise: string;
+    nextAction: string;
+    notes: string;
     confirmation: string;
   };
   usage?: {
@@ -401,6 +451,10 @@ export async function requestAiHeadquartersReply(input: {
     recipeProposal:
       payload.recipeProposal && typeof payload.recipeProposal === 'object'
         ? (payload.recipeProposal as AiHeadquartersReply['recipeProposal'])
+        : undefined,
+    contentProposal:
+      payload.contentProposal && typeof payload.contentProposal === 'object'
+        ? (payload.contentProposal as AiHeadquartersReply['contentProposal'])
         : undefined,
   };
 }

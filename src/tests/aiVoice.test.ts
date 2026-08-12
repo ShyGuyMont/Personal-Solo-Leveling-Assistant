@@ -18,11 +18,11 @@ describe('Voice Link local profiles and usage', () => {
     await db.aiUsageRecords.clear();
   });
 
-  it('provides ten distinct canon voices without inferring accents from appearance', async () => {
+  it('provides ten distinct canon voices with deliberately authored performance directions', async () => {
     const profiles = await getAiVoiceProfiles();
     expect(Object.keys(profiles)).toHaveLength(10);
     expect(new Set(Object.values(profiles).map((profile) => profile.voice)).size).toBe(10);
-    expect(Object.values(profiles).every((profile) => profile.accent === 'natural')).toBe(true);
+    expect(profiles.haven).toMatchObject({ voice: 'fable', accent: 'caribbean' });
     expect(CANON_VOICE_PROFILES.snow.direction).toMatch(/older sister/i);
     expect(CANON_VOICE_PROFILES.ember.direction).toMatch(/obstacle/i);
     expect(CANON_VOICE_PROFILES.saffron.direction).toMatch(/high-pressure/i);

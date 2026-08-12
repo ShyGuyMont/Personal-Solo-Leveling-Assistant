@@ -429,7 +429,7 @@ export function AboutPage() {
             the concern joins them. Amara addresses the possible connection between pornography and
             loneliness as a longing for closeness that pornography imitates but cannot fulfill. She
             does not excuse the behavior, reduce every urge to loneliness, or use shame as a cure.
-            Ember helps interrupt urges, Cipher examines triggers and attention, and Haven supports
+            Ember helps interrupt urges, Cipher examines triggers and attention, and Snow supports
             recovery from shame, sadness, and emotional overload.
           </p>
           <p>
@@ -562,15 +562,18 @@ export function AboutPage() {
         <details>
           <summary>What do the companions change?</summary>
           <p>
-            Snow, Rook, Selah, Cipher, Haven, Ember, Amara, Cassian, and Saffron provide context,
-            encouragement, check-ins, direct support, banter, milestone celebrations,
+            Snow, Rook, Selah, Cipher, Vesper, Ember, Mira, Amara, Cassian, and Saffron provide
+            context, encouragement, check-ins, direct support, banter, milestone celebrations,
             accountability, weekly Campfires, Monthly Councils, and personal questlines. Amara
             specializes in empathy, relationships, belonging, communication, repair, and healthy
-            boundaries; she never requires unsafe contact. Cassian specializes in budgeting, saving,
-            debt reduction, spending awareness, and shame-free financial recovery. Saffron
-            specializes in practical cooking, training-supportive meals, leftovers, and lowering the
-            friction that makes eating out feel automatic. Companion words never secretly change XP,
-            streaks, mission results, or class requirements.
+            boundaries; she never requires unsafe contact. Vesper specializes in YouTube, creator
+            identity, audience strategy, hooks, camera confidence, packaging, and publishing
+            momentum; Creator Forge gives that journey an offline-first pipeline and channel signal.
+            Cassian specializes in budgeting, saving, debt reduction, spending awareness, and
+            shame-free financial recovery. Saffron specializes in practical cooking,
+            training-supportive meals, leftovers, and lowering the friction that makes eating out
+            feel automatic. Companion words never secretly change XP, streaks, mission results, or
+            class requirements.
           </p>
         </details>
         <details>

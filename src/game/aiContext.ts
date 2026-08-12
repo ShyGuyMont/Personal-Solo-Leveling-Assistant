@@ -73,6 +73,9 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
     treasuryBills,
     treasuryDebts,
     treasurySavingsGoals,
+    creatorSettings,
+    creatorSnapshots,
+    creatorProjects,
   ] = await Promise.all([
     db.dailyReviews.where('date').aboveOrEqual(recentStart).toArray(),
     db.dailyMissions.where('date').aboveOrEqual(recentStart).toArray(),
@@ -93,6 +96,9 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
     treasurySharingAllowed ? db.treasuryBills.toArray() : Promise.resolve([]),
     treasurySharingAllowed ? db.treasuryDebts.toArray() : Promise.resolve([]),
     treasurySharingAllowed ? db.treasurySavingsGoals.toArray() : Promise.resolve([]),
+    db.creatorSettings.get('primary'),
+    db.creatorSnapshots.orderBy('capturedAt').reverse().limit(2).toArray(),
+    db.creatorProjects.orderBy('updatedAt').reverse().limit(30).toArray(),
   ]);
 
   const available = source.missions.filter((mission) => mission.enabled && !mission.archived);
@@ -372,6 +378,52 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
             };
           }),
         milestoneNotesExcluded: true,
+      },
+      creator: {
+        identity: {
+          channelName: creatorSettings?.channelName.slice(0, 160) ?? '',
+          channelHandle: creatorSettings?.channelHandle.slice(0, 100) ?? '',
+          weeklyUploadTarget: creatorSettings?.weeklyUploadTarget ?? 1,
+          currentArcFocus: creatorSettings?.currentArcFocus.slice(0, 500) ?? '',
+          accountabilityMode: creatorSettings?.accountabilityMode ?? 'direct',
+        },
+        latestSnapshot: creatorSnapshots[0]
+          ? {
+              capturedAt: creatorSnapshots[0].capturedAt,
+              periodDays: creatorSnapshots[0].periodDays,
+              subscribers: creatorSnapshots[0].subscribers,
+              views: creatorSnapshots[0].views,
+              watchHours: creatorSnapshots[0].watchHours,
+              impressions: creatorSnapshots[0].impressions,
+              clickThroughRate: creatorSnapshots[0].clickThroughRate,
+              averageViewDurationSeconds: creatorSnapshots[0].averageViewDurationSeconds,
+              uploads: creatorSnapshots[0].uploads,
+            }
+          : undefined,
+        activeProjects: creatorProjects
+          .filter((project) => project.status !== 'published' && project.status !== 'paused')
+          .slice(0, 12)
+          .map((project) => ({
+            id: project.id,
+            title: project.title.slice(0, 180),
+            platform: project.platform,
+            contentType: project.contentType,
+            status: project.status,
+            pillar: project.pillar.slice(0, 200),
+            hook: project.hook.slice(0, 500),
+            audiencePromise: project.audiencePromise.slice(0, 500),
+            nextAction: project.nextAction.slice(0, 500),
+            updatedAt: project.updatedAt,
+          })),
+        recentlyPublished: creatorProjects
+          .filter((project) => project.status === 'published')
+          .slice(0, 8)
+          .map((project) => ({
+            title: project.title.slice(0, 180),
+            platform: project.platform,
+            publishedAt: project.publishedAt,
+          })),
+        privateNotesExcluded: true,
       },
       treasury: treasurySharingAllowed
         ? {

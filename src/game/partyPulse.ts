@@ -26,7 +26,7 @@ const STAT_ACTIONS: Record<StatName, { path: string; label: string }> = {
   discipline: { path: '/missions', label: 'Choose one directive' },
   willpower: { path: '/missions', label: 'Choose one directive' },
   wisdom: { path: '/sanctuary', label: 'Enter the Sanctuary' },
-  creativity: { path: '/campaigns', label: 'Open Campaign Command' },
+  creativity: { path: '/creator-forge', label: 'Open Creator Forge' },
   focus: { path: '/missions', label: 'Choose one directive' },
   vitality: { path: '/training-hall', label: 'Open the Training Hall' },
   character: { path: '/missions', label: 'Choose one good action' },
@@ -56,7 +56,7 @@ function specialistMessage(companionId: CompanionId, label: string, relatedCount
     rook: `${label} is losing ground. No punishment, no heroic comeback workout—give me one honest physical win and reestablish the line.${others}`,
     selah: `${label} has gone quiet. Do not answer that with shame; return to what is true, make a little room, and let one faithful step be enough.${others}`,
     cipher: `${label} is now a measurable execution gap. Fascinating. Choose the smallest useful action, finish it, and deprive the excuse of further funding.${others}`,
-    haven: `${label} needs attention, not a verdict. Make one choice you can respect and let sustainable progress begin there.${others}`,
+    haven: `${label} has gone off-air. No fake rebrand, no thirty-tab research spiral—open Creator Forge, move one real operation, and make the signal argue with the silence.${others}`,
     amara: `${label} is asking for a little more presence. One sincere message, one kind boundary, or one moment of listening can reopen the path.${others}`,
     cassian: `${label} is drifting. Open the record, name the next obligation, and give one resource a purpose. Clarity first; guilt contributes nothing.${others}`,
   };

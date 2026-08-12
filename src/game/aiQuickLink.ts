@@ -6,20 +6,20 @@ import type {
 } from '@/types/game';
 import type { AppRoutePath } from '@/routeModules';
 
-const COMPANION_NAMES: CompanionId[] = [
-  'snow',
-  'rook',
-  'selah',
-  'cipher',
-  'haven',
-  'ember',
-  'mira',
-  'amara',
-  'cassian',
-  'saffron',
-];
-
 const PARTY_NAMES = new Set(['everyone', 'everybody', 'party', 'council', 'all']);
+const COMPANION_ALIASES: Record<string, CompanionId> = {
+  snow: 'snow',
+  rook: 'rook',
+  selah: 'selah',
+  cipher: 'cipher',
+  haven: 'haven',
+  vesper: 'haven',
+  ember: 'ember',
+  mira: 'mira',
+  amara: 'amara',
+  cassian: 'cassian',
+  saffron: 'saffron',
+};
 
 export interface AddressedQuickLink {
   audience: AiConversationAudience;
@@ -62,6 +62,11 @@ const ROUTES: Array<QuickNavigationCommand & { patterns: RegExp[] }> = [
     route: '/treasury',
     label: 'Treasury Command',
     patterns: [/\btreasury\b/i, /\bbudget\b/i, /\bfinances?\b/i],
+  },
+  {
+    route: '/creator-forge',
+    label: 'Creator Forge',
+    patterns: [/\bcreator forge\b/i, /\bgreenroom\b/i, /\bcontent board\b/i, /\byoutube studio\b/i],
   },
   { route: '/missions', label: 'Missions', patterns: [/\bmissions?\b/i, /\bquests?\b/i] },
   {
@@ -124,15 +129,16 @@ export function parseQuickLinkAddress(
   if (first === 'all' && !/^\s*(?:hey\s+)?all\s*[,.:!-]/i.test(trimmed)) {
     return { audience: fallback, message: trimmed, explicitlyAddressed: false };
   }
-  const isCompanion = COMPANION_NAMES.includes(first as CompanionId);
-  const isParty =
-    PARTY_NAMES.has(first) || Boolean(second && COMPANION_NAMES.includes(second as CompanionId));
+  const firstCompanion = COMPANION_ALIASES[first];
+  const secondCompanion = second ? COMPANION_ALIASES[second] : undefined;
+  const isCompanion = Boolean(firstCompanion);
+  const isParty = PARTY_NAMES.has(first) || Boolean(secondCompanion);
   if (!isCompanion && !isParty) {
     return { audience: fallback, message: trimmed, explicitlyAddressed: false };
   }
 
   return {
-    audience: isParty ? 'party' : (first as CompanionId),
+    audience: isParty ? 'party' : firstCompanion,
     message: match[3].trim() || trimmed,
     explicitlyAddressed: true,
   };
@@ -152,7 +158,7 @@ export function navigationAcknowledgement(companionId: CompanionId, destination:
     rook: `${destination}. Good. We’re moving.`,
     selah: `${destination}. I’ll meet you there.`,
     cipher: `${destination} located. Routing you there now.`,
-    haven: `${destination}. Of course—let’s go together.`,
+    haven: `${destination}? Oh, we are moving. Opening the channel now.`,
     ember: `${destination}. Finally. Move.`,
     mira: `${destination}. Easy transition. I’m taking you there now.`,
     amara: `${destination}. Come on, we’ll head there together.`,
