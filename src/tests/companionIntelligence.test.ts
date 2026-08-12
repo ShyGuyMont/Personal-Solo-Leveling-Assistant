@@ -21,6 +21,11 @@ interface CompanionIntelligenceModule {
   companionProfiles: Record<string, Soulprint>;
   aiVoiceNames: string[];
   aiVoiceAccents: Record<string, string>;
+  getRealtimeVoice: (voice: string) => string;
+  buildRealtimeInstructions: (
+    profile: Record<string, unknown>,
+    context: Record<string, unknown>,
+  ) => string;
   baseInstructions: string;
   formatCompanionProfiles: () => string;
   buildAudienceInstruction: (audience: string, enabledIds?: string[]) => string;
@@ -33,7 +38,10 @@ interface CompanionIntelligenceModule {
     payload: { audience: string; message: string },
     env?: Record<string, string>,
   ) => { route: string; model: string; reasoningEffort: string };
-  buildYouTubeAnalyticsWindow: (now?: Date, periodDays?: number) => {
+  buildYouTubeAnalyticsWindow: (
+    now?: Date,
+    periodDays?: number,
+  ) => {
     startDate: string;
     endDate: string;
     periodDays: number;
@@ -136,7 +144,9 @@ describe('Companion Soulprint intelligence', () => {
     const instructions = intelligence.buildSystemInstructions('haven', ['haven'], 'propose');
     expect(instructions).toContain('2 to 4 weeks');
     expect(instructions).toContain('Never return both content and campaign proposals');
-    expect(instructions).toContain('only a preview until the Hunter confirms the entire sequence once');
+    expect(instructions).toContain(
+      'only a preview until the Hunter confirms the entire sequence once',
+    );
   });
 
   it('routes casual direct talk economically and deeper counsel to Terra', () => {
@@ -199,6 +209,7 @@ describe('Companion Soulprint intelligence', () => {
       apexModel: 'test-model',
       speechModel: 'gpt-4o-mini-tts',
       transcriptionModel: 'gpt-4o-transcribe',
+      realtimeModel: 'gpt-realtime-2.1-mini',
     });
   });
 
@@ -227,12 +238,19 @@ describe('Companion Soulprint intelligence', () => {
           delivery: 'intense',
           cadence: 'rapid-fire',
           texture: 'bright',
+          register: 'low-mid',
+          resonance: 'chest',
+          performanceTake: 'dynamic',
           pace: 1.28,
           warmth: 2,
           energy: 5,
           expressiveness: 5,
           naturalism: 5,
           pauseDiscipline: 5,
+          intonation: 4,
+          articulation: 4,
+          emotionalRange: 5,
+          scene: 'accountability',
         }),
       }),
       { OPENAI_API_KEY: 'test-key' },
@@ -245,6 +263,7 @@ describe('Companion Soulprint intelligence', () => {
       voice: 'nova',
       input: 'One move. Right now.',
       response_format: 'wav',
+      speed: 1.28,
     });
     expect(response.headers.get('content-type')).toContain('audio/wav');
     expect(String(openAiBody?.instructions)).toContain('Ember, The Ignition');
@@ -254,10 +273,84 @@ describe('Companion Soulprint intelligence', () => {
     expect(String(openAiBody?.instructions)).toContain('focused emotional pressure');
     expect(String(openAiBody?.instructions)).toContain('minimal dead air');
     expect(String(openAiBody?.instructions)).toContain('crisp energized clarity');
+    expect(String(openAiBody?.instructions)).toContain('rich low-mid register');
+    expect(String(openAiBody?.instructions)).toContain('bold emotional contrast');
+    expect(String(openAiBody?.instructions)).toContain('Challenge the obstacle or avoidance');
     expect(String(openAiBody?.instructions)).toContain('restrained warmth');
     expect(String(openAiBody?.instructions)).toContain('maximum energy');
     expect(String(openAiBody?.instructions)).toContain('no over-enunciation');
     expect(JSON.stringify(openAiBody)).not.toContain('test-key');
+  });
+
+  it('opens a one-on-one WebRTC session with semantic turns and the forged soulprint', async () => {
+    let openAiForm: FormData | undefined;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_url: string, init: RequestInit) => {
+        openAiForm = init.body as FormData;
+        return new Response('v=0\r\no=openai 1 1 IN IP4 127.0.0.1', {
+          status: 200,
+          headers: { 'content-type': 'application/sdp' },
+        });
+      }),
+    );
+    const profile = {
+      companionId: 'haven',
+      voice: 'fable',
+      accent: 'caribbean',
+      delivery: 'playful',
+      cadence: 'rapid-fire',
+      texture: 'bright',
+      register: 'high-mid',
+      resonance: 'forward',
+      performanceTake: 'dynamic',
+      pace: 1.2,
+      warmth: 4,
+      energy: 5,
+      expressiveness: 5,
+      naturalism: 5,
+      pauseDiscipline: 4,
+      intonation: 5,
+      articulation: 4,
+      emotionalRange: 5,
+    };
+    const response = await intelligence.default.fetch(
+      new Request('https://system.test/api/ai/realtime/session', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', origin: 'https://system.test' },
+        body: JSON.stringify({
+          sdp: 'v=0\r\no=hunter 1 1 IN IP4 127.0.0.1',
+          companionId: 'haven',
+          profile,
+          context: { hunter: { firstName: 'Jay' }, party: { directorNotes: [] } },
+        }),
+      }),
+      { OPENAI_API_KEY: 'test-key' },
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('x-ai-model')).toBe('gpt-realtime-2.1-mini');
+    expect(response.headers.get('x-ai-voice')).toBe('verse');
+    const session = JSON.parse(String(openAiForm?.get('session'))) as Record<string, unknown>;
+    expect(session).toMatchObject({
+      type: 'realtime',
+      model: 'gpt-realtime-2.1-mini',
+      output_modalities: ['audio'],
+      audio: {
+        input: {
+          turn_detection: {
+            type: 'semantic_vad',
+            create_response: true,
+            interrupt_response: true,
+          },
+        },
+        output: { voice: 'verse', speed: 1.2 },
+      },
+    });
+    expect(String(session.instructions)).toContain('You are Vesper, The Spotlight');
+    expect(String(session.instructions)).toContain('stop immediately when interrupted');
+    expect(String(session.instructions)).toContain('Command Link can prepare a confirmation');
+    expect(JSON.stringify(session)).not.toContain('test-key');
   });
 
   it('transcribes a bounded microphone recording with app-only usage metadata', async () => {

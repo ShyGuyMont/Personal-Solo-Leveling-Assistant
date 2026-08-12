@@ -16,13 +16,16 @@ import {
   AI_ACCENT_OPTIONS,
   AI_CADENCE_OPTIONS,
   AI_DELIVERY_OPTIONS,
+  AI_PERFORMANCE_TAKE_OPTIONS,
+  AI_REGISTER_OPTIONS,
+  AI_RESONANCE_OPTIONS,
   AI_TEXTURE_OPTIONS,
   AI_VOICE_OPTIONS,
   CANON_VOICE_PROFILES,
 } from '@/config/aiVoices';
 import { COMPANIONS, getCompanionImage } from '@/config/companions';
 import { formatEstimatedSpend, type AiUsageSummary } from '@/game/aiVoice';
-import type { AiVoiceProfile, CompanionId, Settings } from '@/types/game';
+import type { AiVoiceProfile, AiVoiceTake, CompanionId, Settings } from '@/types/game';
 
 export function AiVoiceLinkPanel({
   settings,
@@ -48,7 +51,7 @@ export function AiVoiceLinkPanel({
   onSetWarning: (value: number) => Promise<void>;
   onSaveProfile: (profile: AiVoiceProfile) => Promise<AiVoiceProfile>;
   onResetProfile: (companionId: CompanionId) => Promise<AiVoiceProfile>;
-  onPreview: (profile: AiVoiceProfile) => Promise<void>;
+  onPreview: (profile: AiVoiceProfile, takeOverride?: AiVoiceTake) => Promise<void>;
   onTestSpeaker: () => Promise<void>;
 }) {
   const [open, setOpen] = useState(false);
@@ -68,7 +71,16 @@ export function AiVoiceLinkPanel({
     (usage?.month.estimatedCostUsd ?? 0) >= settings.aiUsageWarningUsd;
   const performanceSliders: Array<{
     label: string;
-    key: 'pace' | 'warmth' | 'energy' | 'expressiveness' | 'naturalism' | 'pauseDiscipline';
+    key:
+      | 'pace'
+      | 'warmth'
+      | 'energy'
+      | 'expressiveness'
+      | 'naturalism'
+      | 'pauseDiscipline'
+      | 'intonation'
+      | 'articulation'
+      | 'emotionalRange';
     min: number;
     max: number;
     step: number;
@@ -121,6 +133,30 @@ export function AiVoiceLinkPanel({
       max: 5,
       step: 1,
       value: (profile) => String(profile.pauseDiscipline),
+    },
+    {
+      label: 'Intonation',
+      key: 'intonation',
+      min: 1,
+      max: 5,
+      step: 1,
+      value: (profile) => String(profile.intonation),
+    },
+    {
+      label: 'Articulation',
+      key: 'articulation',
+      min: 1,
+      max: 5,
+      step: 1,
+      value: (profile) => String(profile.articulation),
+    },
+    {
+      label: 'Emotional range',
+      key: 'emotionalRange',
+      min: 1,
+      max: 5,
+      step: 1,
+      value: (profile) => String(profile.emotionalRange),
     },
   ];
 
@@ -206,6 +242,15 @@ export function AiVoiceLinkPanel({
               audio · <strong>{(usage?.month.characters ?? 0).toLocaleString()}</strong> speech
               characters
             </p>
+            {(usage?.month.audioInputTokens ?? 0) + (usage?.month.audioOutputTokens ?? 0) > 0 && (
+              <p>
+                Live Link · <strong>{(usage?.month.audioInputTokens ?? 0).toLocaleString()}</strong>{' '}
+                audio in ·{' '}
+                <strong>{(usage?.month.cachedAudioInputTokens ?? 0).toLocaleString()}</strong>{' '}
+                cached audio ·{' '}
+                <strong>{(usage?.month.audioOutputTokens ?? 0).toLocaleString()}</strong> audio out
+              </p>
+            )}
             <div className="ai-usage-ledger__models">
               {Object.entries(usage?.byModel ?? {}).map(([model, totals]) => (
                 <span key={model}>
@@ -231,11 +276,11 @@ export function AiVoiceLinkPanel({
             </label>
           </div>
           <p className="ai-usage-ledger__note">
-            Text, cache, reasoning, and transcription token counts come from API responses. Dollar
-            totals apply current model rates locally; generated-speech cost remains an estimate
-            because the speech endpoint returns audio rather than a usage ledger. This never
-            includes API use outside The System, and the OpenAI Usage dashboard remains the billing
-            authority.
+            Text, cache, reasoning, transcription, and Live Link audio token counts come from API
+            responses. Dollar totals apply current model rates locally; generated-speech cost
+            remains an estimate because the speech endpoint returns audio rather than a usage
+            ledger. This never includes API use outside The System, and the OpenAI Usage dashboard
+            remains the billing authority.
           </p>
         </div>
       )}
@@ -297,8 +342,8 @@ export function AiVoiceLinkPanel({
                 <SlidersHorizontal size={18} />
               </span>
               <div>
-                <strong>Voice Forge II · Living Performance</strong>
-                <small>Ten humanized Soulprints · every performance setting remains yours</small>
+                <strong>Voice Forge III · Living Performance</strong>
+                <small>Ten unmistakable Soulprints · scene intelligence · dual-take casting</small>
               </div>
             </header>
 
@@ -422,6 +467,60 @@ export function AiVoiceLinkPanel({
                       ))}
                     </select>
                   </label>
+                  <label>
+                    Vocal register
+                    <select
+                      value={draft.register}
+                      onChange={(event) =>
+                        setDraft({
+                          ...draft,
+                          register: event.target.value as AiVoiceProfile['register'],
+                        })
+                      }
+                    >
+                      {AI_REGISTER_OPTIONS.map((option) => (
+                        <option key={option.id} value={option.id}>
+                          {option.label} · {option.character}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label>
+                    Resonance
+                    <select
+                      value={draft.resonance}
+                      onChange={(event) =>
+                        setDraft({
+                          ...draft,
+                          resonance: event.target.value as AiVoiceProfile['resonance'],
+                        })
+                      }
+                    >
+                      {AI_RESONANCE_OPTIONS.map((option) => (
+                        <option key={option.id} value={option.id}>
+                          {option.label} · {option.character}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label>
+                    Canon performance
+                    <select
+                      value={draft.performanceTake}
+                      onChange={(event) =>
+                        setDraft({
+                          ...draft,
+                          performanceTake: event.target.value as AiVoiceProfile['performanceTake'],
+                        })
+                      }
+                    >
+                      {AI_PERFORMANCE_TAKE_OPTIONS.map((option) => (
+                        <option key={option.id} value={option.id}>
+                          {option.label} · {option.character}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
                 </div>
 
                 <div className="ai-voice-forge__performance-readout">
@@ -430,12 +529,13 @@ export function AiVoiceLinkPanel({
                   </span>
                   <strong>
                     {AI_DELIVERY_OPTIONS.find((option) => option.id === draft.delivery)?.label} ·{' '}
-                    {AI_CADENCE_OPTIONS.find((option) => option.id === draft.cadence)?.label} · ~
+                    {AI_CADENCE_OPTIONS.find((option) => option.id === draft.cadence)?.label} ·{' '}
+                    {AI_REGISTER_OPTIONS.find((option) => option.id === draft.register)?.label} · ~
                     {Math.round(155 * draft.pace)} WPM
                   </strong>
                   <small>
-                    Anti-narrator timing, varied sentence rhythm, and human pause shaping are
-                    active.
+                    The performance now reacts to celebration, support, accountability, instruction,
+                    and strategy scenes while preserving this Soulprint.
                   </small>
                 </div>
 
@@ -460,6 +560,28 @@ export function AiVoiceLinkPanel({
                 </div>
 
                 <blockquote>“{canon.audition}”</blockquote>
+                <div className="ai-voice-forge__casting" aria-label="Compare performance takes">
+                  <span>
+                    <small>CASTING ROOM</small>
+                    <strong>Hear the same line two ways</strong>
+                  </span>
+                  <button
+                    className="button button--secondary"
+                    type="button"
+                    disabled={!settings.aiVoiceOutputEnabled || Boolean(voiceBusyMessageId)}
+                    onClick={() => onPreview(draft, 'grounded')}
+                  >
+                    <Headphones size={15} /> Take A · Grounded
+                  </button>
+                  <button
+                    className="button button--secondary"
+                    type="button"
+                    disabled={!settings.aiVoiceOutputEnabled || Boolean(voiceBusyMessageId)}
+                    onClick={() => onPreview(draft, 'dynamic')}
+                  >
+                    <Sparkles size={15} /> Take B · Dynamic
+                  </button>
+                </div>
                 <div className="ai-voice-forge__actions">
                   <button
                     className="button button--secondary"
@@ -472,7 +594,7 @@ export function AiVoiceLinkPanel({
                     ) : (
                       <Headphones size={16} />
                     )}
-                    Preview voice
+                    Preview saved take
                   </button>
                   <button
                     className="button button--secondary"

@@ -683,12 +683,18 @@ export class SystemDatabase extends Dexie {
           delivery: 'playful',
           cadence: 'rapid-fire',
           texture: 'bright',
+          register: 'high-mid',
+          resonance: 'forward',
+          performanceTake: 'dynamic',
           pace: 1.2,
           warmth: 4,
           energy: 5,
           expressiveness: 5,
           naturalism: 5,
           pauseDiscipline: 4,
+          intonation: 5,
+          articulation: 4,
+          emotionalRange: 5,
           updatedAt: now,
         });
         const metadata = transaction.table<AppMetadata, string>('appMetadata');
@@ -704,6 +710,17 @@ export class SystemDatabase extends Dexie {
         const metadata = transaction.table<AppMetadata, string>('appMetadata');
         await metadata.put({ id: 'schema-seeded', value: 20, updatedAt: now });
         await metadata.put({ id: 'app-version', value: '7.4.0', updatedAt: now });
+      });
+    this.version(21)
+      .stores({
+        aiVoiceProfiles: 'id,voice,accent,updatedAt',
+        aiUsageRecords: 'id,kind,sessionId,createdAt,model,companionId',
+      })
+      .upgrade(async (transaction) => {
+        const now = new Date().toISOString();
+        const metadata = transaction.table<AppMetadata, string>('appMetadata');
+        await metadata.put({ id: 'schema-seeded', value: 21, updatedAt: now });
+        await metadata.put({ id: 'app-version', value: '7.5.0', updatedAt: now });
       });
   }
 }

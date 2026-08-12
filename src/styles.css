@@ -3995,6 +3995,39 @@ html[data-theme='daybreak'] .about-rank-grid article {
   border-radius: 0 8px 8px 0;
 }
 
+.ai-voice-forge__casting {
+  display: grid;
+  grid-template-columns: minmax(150px, 1fr) auto auto;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 10px;
+  padding: 9px;
+  background:
+    radial-gradient(circle at 12% 50%, rgba(167, 139, 250, 0.1), transparent 42%),
+    rgba(255, 255, 255, 0.015);
+  border: 1px solid color-mix(in srgb, var(--violet) 20%, var(--border-soft));
+  border-radius: 9px;
+}
+
+.ai-voice-forge__casting span,
+.ai-voice-forge__casting small,
+.ai-voice-forge__casting strong {
+  display: block;
+}
+
+.ai-voice-forge__casting small {
+  color: var(--violet);
+  font-size: 0.46rem;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+}
+
+.ai-voice-forge__casting strong {
+  margin-top: 2px;
+  color: var(--white);
+  font-size: 0.58rem;
+}
+
 .ai-voice-forge__actions {
   display: flex;
   flex-wrap: wrap;
@@ -4776,6 +4809,14 @@ html[data-theme='daybreak'] .headquarters-roster__grid article {
   .ai-voice-forge__actions {
     display: grid;
     grid-template-columns: 1fr;
+  }
+
+  .ai-voice-forge__casting {
+    grid-template-columns: 1fr;
+  }
+
+  .ai-voice-forge__casting .button {
+    width: 100%;
   }
 
   .ai-voice-forge__actions .button {
@@ -20052,6 +20093,55 @@ html[data-motion='reduced'] .progression-overlay--rank-up > section {
   font-size: 1rem;
 }
 
+.quick-link__modes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  padding: 9px 14px 0;
+}
+
+.quick-link__modes > button {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  color: var(--muted);
+  text-align: left;
+  background: rgba(255, 255, 255, 0.018);
+  border: 1px solid var(--border-soft);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.quick-link__modes > button.is-active {
+  color: var(--mint);
+  background: rgba(67, 230, 194, 0.055);
+  border-color: rgba(67, 230, 194, 0.28);
+  box-shadow: inset 0 -2px rgba(67, 230, 194, 0.42);
+}
+
+.quick-link__modes span,
+.quick-link__modes strong,
+.quick-link__modes small {
+  display: block;
+  min-width: 0;
+}
+
+.quick-link__modes strong {
+  color: var(--white);
+  font:
+    0.58rem 'SystemDisplay',
+    sans-serif;
+  letter-spacing: 0.04em;
+}
+
+.quick-link__modes small {
+  margin-top: 2px;
+  color: var(--muted-2);
+  font-size: 0.48rem;
+}
+
 .quick-link__core {
   display: grid;
   flex: 0 0 auto;
@@ -20107,6 +20197,158 @@ html[data-motion='reduced'] .progression-overlay--rank-up > section {
   color: var(--muted);
   font-size: 0.6rem;
   line-height: 1.5;
+}
+
+.quick-link__live {
+  display: grid;
+  flex: 0 0 auto;
+  gap: 10px;
+  padding: 11px 14px 4px;
+}
+
+.quick-link__live-roster {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 2px 1px 5px;
+  scrollbar-width: none;
+}
+
+.quick-link__live-roster::-webkit-scrollbar {
+  display: none;
+}
+
+.quick-link__live-roster button {
+  display: grid;
+  min-width: 52px;
+  justify-items: center;
+  gap: 3px;
+  padding: 4px;
+  color: var(--muted-2);
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid var(--border-soft);
+  border-radius: 9px;
+  cursor: pointer;
+}
+
+.quick-link__live-roster button.is-active {
+  color: var(--white);
+  background: color-mix(in srgb, var(--companion-accent) 8%, transparent);
+  border-color: color-mix(in srgb, var(--companion-accent) 42%, var(--border-soft));
+  box-shadow: 0 0 14px color-mix(in srgb, var(--companion-accent) 12%, transparent);
+}
+
+.quick-link__live-roster button:disabled:not(.is-active) {
+  opacity: 0.36;
+}
+
+.quick-link__live-roster img {
+  width: 36px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 7px;
+}
+
+.quick-link__live-roster span {
+  max-width: 48px;
+  overflow: hidden;
+  font-size: 0.46rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.quick-link__live-stage {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  overflow: hidden;
+  padding: 15px 12px 12px;
+  text-align: center;
+  background:
+    radial-gradient(circle at 50% 35%, rgba(67, 230, 194, 0.09), transparent 36%),
+    linear-gradient(150deg, rgba(134, 207, 255, 0.025), rgba(151, 111, 255, 0.025));
+  border: 1px solid rgba(67, 230, 194, 0.14);
+  border-radius: 15px;
+}
+
+.quick-link__live-portrait {
+  position: relative;
+  display: grid;
+  width: 108px;
+  height: 108px;
+  place-items: center;
+}
+
+.quick-link__live-portrait img {
+  position: relative;
+  z-index: 2;
+  width: 76px;
+  height: 86px;
+  object-fit: cover;
+  border: 1px solid rgba(134, 207, 255, 0.32);
+  border-radius: 18px 28px 18px 28px;
+  box-shadow: 0 0 28px rgba(67, 230, 194, 0.18);
+}
+
+.quick-link__live-portrait i {
+  position: absolute;
+  inset: 5px;
+  border: 1px solid rgba(67, 230, 194, 0.2);
+  border-radius: 50%;
+}
+
+.quick-link__live-portrait i:last-child {
+  inset: -5px;
+  border-color: rgba(134, 207, 255, 0.1);
+}
+
+.quick-link__live.is-listening .quick-link__live-portrait i,
+.quick-link__live.is-thinking .quick-link__live-portrait i,
+.quick-link__live.is-speaking .quick-link__live-portrait i {
+  animation: quick-link-pulse 1.8s ease-in-out infinite;
+}
+
+.quick-link__live.is-speaking .quick-link__live-portrait i {
+  animation-duration: 0.72s;
+}
+
+.quick-link__live-signal {
+  margin-top: 5px;
+  color: var(--mint);
+  font:
+    0.49rem 'SystemDisplay',
+    sans-serif;
+  letter-spacing: 0.11em;
+}
+
+.quick-link__live-stage > strong {
+  margin-top: 5px;
+  color: var(--white);
+  font:
+    0.77rem 'SystemDisplay',
+    sans-serif;
+}
+
+.quick-link__live-stage > p {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 0.56rem;
+  line-height: 1.5;
+}
+
+.quick-link__live-stage > small {
+  margin-top: 9px;
+  color: var(--muted-2);
+  font-size: 0.46rem;
+  line-height: 1.45;
+}
+
+.quick-link__live-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 7px;
+  margin-top: 11px;
 }
 
 .quick-link__transcript,
@@ -20546,6 +20788,7 @@ html[data-motion='reduced'] .progression-overlay--rank-up > section {
 html[data-motion='reduced'] .quick-link__panel,
 html[data-motion='reduced'] .quick-link__core > button,
 html[data-motion='reduced'] .quick-link__core > button i,
+html[data-motion='reduced'] .quick-link__live-portrait i,
 html[data-motion='reduced'] .header-quick-link > i {
   animation: none;
 }
@@ -20754,7 +20997,11 @@ html[data-motion='reduced'] .header-quick-link > i {
   overflow: hidden;
   border-color: color-mix(in srgb, var(--creator-accent) 44%, var(--panel-border));
   background:
-    linear-gradient(120deg, color-mix(in srgb, var(--creator-accent) 8%, transparent), transparent 48%),
+    linear-gradient(
+      120deg,
+      color-mix(in srgb, var(--creator-accent) 8%, transparent),
+      transparent 48%
+    ),
     var(--panel);
 }
 

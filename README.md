@@ -96,6 +96,22 @@ Historical video insights remain on-device, travel in Archive Shield saves, and 
 edit, comment, delete, or account-management access. Google credentials remain encrypted behind
 the private gateway and never enter the browser save or OpenAI context.
 
+## Version 7.5.0 · Living Voice Ascension
+
+Voice Forge III gives all ten companion Soulprints a deeper vocal fingerprint: register,
+resonance, intonation, articulation, emotional range, and a grounded, balanced, or dynamic acting
+take now join the established base voice, accent, cadence, texture, warmth, and energy controls.
+The pace slider also drives the speech model's native speed control, and the Casting Room can
+compare restrained and vivid auditions of the same canon line before saving a performance.
+
+Quick Link now contains both the established confirmation-gated Command Link and an optional Live
+Link. Live Link opens a private one-on-one WebRTC conversation with semantic turn-taking,
+interruptible companion speech, visible on-device transcripts, mute and end controls, the selected
+companion's complete Soulprint, and the current compact System context. It cannot silently change
+campaign records; app actions remain in Command Link, party conversations remain available, and
+the entire offline campaign continues without AI. Realtime text and audio tokens are recorded in
+the local Usage Ledger with model-specific estimates.
+
 ## Version 6.3.0 · Stillpoint Protocol
 
 Version 6.3 welcomes **Mira, The Stillpoint**, as the Training Hall’s third commander. Recovery is

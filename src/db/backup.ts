@@ -10,7 +10,7 @@ import type {
   Settings,
 } from '@/types/game';
 
-export const SAVE_VERSION = 20;
+export const SAVE_VERSION = 21;
 export const MAX_IMPORT_BYTES = 32 * 1024 * 1024;
 const MAX_SNAPSHOTS = 5;
 const FORBIDDEN_KEYS = new Set(['__proto__', 'prototype', 'constructor']);
@@ -152,8 +152,14 @@ function migrateData(
       delivery: canon.delivery,
       cadence: canon.cadence,
       texture: canon.texture,
+      register: canon.register,
+      resonance: canon.resonance,
+      performanceTake: canon.performanceTake,
       naturalism: canon.naturalism,
       pauseDiscipline: canon.pauseDiscipline,
+      intonation: canon.intonation,
+      articulation: canon.articulation,
+      emotionalRange: canon.emotionalRange,
       ...row,
     };
   });
@@ -435,6 +441,9 @@ function validateData(data: Record<string, unknown[]>) {
   ]);
   const aiVoiceCadences = new Set(['natural', 'clipped', 'flowing', 'measured', 'rapid-fire']);
   const aiVoiceTextures = new Set(['clean', 'smooth', 'airy', 'textured', 'grounded', 'bright']);
+  const aiVoiceRegisters = new Set(['low', 'low-mid', 'mid', 'high-mid', 'high']);
+  const aiVoiceResonances = new Set(['chest', 'balanced', 'forward', 'head']);
+  const aiVoicePerformanceTakes = new Set(['grounded', 'balanced', 'dynamic']);
   for (const row of data.aiVoiceProfiles) {
     if (
       !isObject(row) ||
@@ -444,6 +453,9 @@ function validateData(data: Record<string, unknown[]>) {
       !aiVoiceDeliveries.has(String(row.delivery)) ||
       !aiVoiceCadences.has(String(row.cadence)) ||
       !aiVoiceTextures.has(String(row.texture)) ||
+      !aiVoiceRegisters.has(String(row.register)) ||
+      !aiVoiceResonances.has(String(row.resonance)) ||
+      !aiVoicePerformanceTakes.has(String(row.performanceTake)) ||
       !Number.isFinite(row.pace) ||
       Number(row.pace) < 0.75 ||
       Number(row.pace) > 1.65 ||
@@ -462,6 +474,15 @@ function validateData(data: Record<string, unknown[]>) {
       !Number.isInteger(row.pauseDiscipline) ||
       Number(row.pauseDiscipline) < 1 ||
       Number(row.pauseDiscipline) > 5 ||
+      !Number.isInteger(row.intonation) ||
+      Number(row.intonation) < 1 ||
+      Number(row.intonation) > 5 ||
+      !Number.isInteger(row.articulation) ||
+      Number(row.articulation) < 1 ||
+      Number(row.articulation) > 5 ||
+      !Number.isInteger(row.emotionalRange) ||
+      Number(row.emotionalRange) < 1 ||
+      Number(row.emotionalRange) > 5 ||
       typeof row.updatedAt !== 'string' ||
       !Number.isFinite(Date.parse(row.updatedAt))
     ) {
@@ -469,7 +490,7 @@ function validateData(data: Record<string, unknown[]>) {
     }
   }
 
-  const aiUsageKinds = new Set(['text', 'transcription', 'speech']);
+  const aiUsageKinds = new Set(['text', 'transcription', 'speech', 'realtime']);
   for (const row of data.aiUsageRecords) {
     if (
       !isObject(row) ||
@@ -493,6 +514,12 @@ function validateData(data: Record<string, unknown[]>) {
         (!Number.isFinite(row.cachedInputTokens) || Number(row.cachedInputTokens) < 0)) ||
       (row.reasoningTokens !== undefined &&
         (!Number.isFinite(row.reasoningTokens) || Number(row.reasoningTokens) < 0)) ||
+      (row.audioInputTokens !== undefined &&
+        (!Number.isFinite(row.audioInputTokens) || Number(row.audioInputTokens) < 0)) ||
+      (row.cachedAudioInputTokens !== undefined &&
+        (!Number.isFinite(row.cachedAudioInputTokens) || Number(row.cachedAudioInputTokens) < 0)) ||
+      (row.audioOutputTokens !== undefined &&
+        (!Number.isFinite(row.audioOutputTokens) || Number(row.audioOutputTokens) < 0)) ||
       typeof row.exactUsage !== 'boolean'
     ) {
       throw new Error('An AI usage record contains an impossible value.');

@@ -257,12 +257,18 @@ describe('save validation and recovery', () => {
       delivery: 'conversational',
       cadence: 'flowing',
       texture: 'smooth',
+      register: 'low-mid',
+      resonance: 'balanced',
+      performanceTake: 'balanced',
       pace: 0.95,
       warmth: 5,
       energy: 2,
       expressiveness: 3,
       naturalism: 5,
       pauseDiscipline: 4,
+      intonation: 4,
+      articulation: 4,
+      emotionalRange: 4,
       updatedAt: now,
     });
     await db.aiUsageRecords.put({
@@ -282,7 +288,7 @@ describe('save validation and recovery', () => {
     });
 
     const save = await createSaveFile();
-    expect(save.version).toBe(20);
+    expect(save.version).toBe(21);
     for (const table of [
       'dailyBriefings',
       'campaignArcs',
@@ -383,7 +389,7 @@ describe('save validation and recovery', () => {
     save.checksum = await digest(save.data);
 
     const prepared = await prepareSaveImport(asFile(save));
-    expect(prepared.save.version).toBe(20);
+    expect(prepared.save.version).toBe(21);
     expect(prepared.save.data.dailyBriefings).toEqual([]);
     const migrated = prepared.save.data.settings[0] as Record<string, unknown>;
     expect(migrated.enabledCompanionIds).toContain('amara');

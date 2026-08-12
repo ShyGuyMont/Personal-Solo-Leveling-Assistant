@@ -1,7 +1,9 @@
+import { inferAiVoiceScene } from '@/config/aiVoices';
 import type {
   AiConversationAudience,
   AiConversationMessage,
   AiVoiceProfile,
+  AiVoiceScene,
   CompanionId,
   Focus,
   LocalDateKey,
@@ -274,6 +276,7 @@ export interface AiLinkStatus {
   intelligenceVersion?: string;
   speechModel?: string;
   transcriptionModel?: string;
+  realtimeModel?: string;
 }
 
 export interface AiHeadquartersReply {
@@ -331,12 +334,7 @@ export interface AiHeadquartersReply {
       title: string;
       platform: 'youtube' | 'youtube-shorts' | 'arc' | 'other';
       contentType:
-        | 'long-form'
-        | 'short-form'
-        | 'livestream'
-        | 'community-post'
-        | 'arc-project'
-        | 'other';
+        'long-form' | 'short-form' | 'livestream' | 'community-post' | 'arc-project' | 'other';
       pillar: string;
       hook: string;
       audiencePromise: string;
@@ -411,6 +409,7 @@ export async function getAiLinkStatus(): Promise<AiLinkStatus> {
       speechModel: typeof payload?.speechModel === 'string' ? payload.speechModel : undefined,
       transcriptionModel:
         typeof payload?.transcriptionModel === 'string' ? payload.transcriptionModel : undefined,
+      realtimeModel: typeof payload?.realtimeModel === 'string' ? payload.realtimeModel : undefined,
     };
   } catch {
     return { ok: false, configured: false };
@@ -558,6 +557,7 @@ export async function requestAiSpeech(input: {
   companionId: CompanionId;
   text: string;
   profile: AiVoiceProfile;
+  scene?: AiVoiceScene;
 }): Promise<AiSpeechResult> {
   let response: Response;
   try {
@@ -575,12 +575,19 @@ export async function requestAiSpeech(input: {
         delivery: input.profile.delivery,
         cadence: input.profile.cadence,
         texture: input.profile.texture,
+        register: input.profile.register,
+        resonance: input.profile.resonance,
+        performanceTake: input.profile.performanceTake,
         pace: input.profile.pace,
         warmth: input.profile.warmth,
         energy: input.profile.energy,
         expressiveness: input.profile.expressiveness,
         naturalism: input.profile.naturalism,
         pauseDiscipline: input.profile.pauseDiscipline,
+        intonation: input.profile.intonation,
+        articulation: input.profile.articulation,
+        emotionalRange: input.profile.emotionalRange,
+        scene: input.scene ?? inferAiVoiceScene(input.text),
       }),
     });
   } catch {

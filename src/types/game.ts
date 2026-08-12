@@ -83,6 +83,11 @@ export type AiVoiceDelivery =
   | 'intimate';
 export type AiVoiceCadence = 'natural' | 'clipped' | 'flowing' | 'measured' | 'rapid-fire';
 export type AiVoiceTexture = 'clean' | 'smooth' | 'airy' | 'textured' | 'grounded' | 'bright';
+export type AiVoiceRegister = 'low' | 'low-mid' | 'mid' | 'high-mid' | 'high';
+export type AiVoiceResonance = 'chest' | 'balanced' | 'forward' | 'head';
+export type AiVoiceTake = 'grounded' | 'balanced' | 'dynamic';
+export type AiVoiceScene =
+  'neutral' | 'celebration' | 'support' | 'accountability' | 'instruction' | 'strategy';
 export interface AiSoulprintNotes {
   humor: string;
   challenge: string;
@@ -869,16 +874,22 @@ export interface AiVoiceProfile {
   delivery: AiVoiceDelivery;
   cadence: AiVoiceCadence;
   texture: AiVoiceTexture;
+  register: AiVoiceRegister;
+  resonance: AiVoiceResonance;
+  performanceTake: AiVoiceTake;
   pace: number;
   warmth: number;
   energy: number;
   expressiveness: number;
   naturalism: number;
   pauseDiscipline: number;
+  intonation: number;
+  articulation: number;
+  emotionalRange: number;
   updatedAt: string;
 }
 
-export type AiUsageKind = 'text' | 'transcription' | 'speech';
+export type AiUsageKind = 'text' | 'transcription' | 'speech' | 'realtime';
 
 export interface AiUsageRecord {
   id: string;
@@ -891,6 +902,9 @@ export interface AiUsageRecord {
   cachedInputTokens?: number;
   outputTokens: number;
   reasoningTokens?: number;
+  audioInputTokens?: number;
+  cachedAudioInputTokens?: number;
+  audioOutputTokens?: number;
   totalTokens: number;
   characters: number;
   audioSeconds: number;

@@ -17,7 +17,13 @@ import {
   requestAiTranscription,
   type AiHeadquartersReply,
 } from '@/services/aiHeadquarters';
-import type { AiConversationMessage, AiVoiceProfile, CompanionId, Settings } from '@/types/game';
+import type {
+  AiConversationMessage,
+  AiVoiceProfile,
+  AiVoiceTake,
+  CompanionId,
+  Settings,
+} from '@/types/game';
 import { AppAudioPlayer, decodeAudioBlob, playSpeakerTest, primeAudioOutput } from '@/utils/audio';
 
 type NoticeHandler = (message: string) => void;
@@ -330,26 +336,35 @@ export function useAiVoiceLink(input: {
   }, [input]);
 
   const previewProfile = useCallback(
-    async (profile: AiVoiceProfile) => {
-      const canon = CANON_VOICE_PROFILES[profile.id];
+    async (profile: AiVoiceProfile, takeOverride?: AiVoiceTake) => {
+      const auditionProfile = takeOverride
+        ? { ...profile, performanceTake: takeOverride }
+        : profile;
+      const canon = CANON_VOICE_PROFILES[auditionProfile.id];
       const cacheKey = [
         'preview',
-        profile.id,
-        profile.voice,
-        profile.accent,
-        profile.delivery,
-        profile.cadence,
-        profile.texture,
-        profile.pace,
-        profile.warmth,
-        profile.energy,
-        profile.expressiveness,
-        profile.naturalism,
-        profile.pauseDiscipline,
+        auditionProfile.id,
+        auditionProfile.voice,
+        auditionProfile.accent,
+        auditionProfile.delivery,
+        auditionProfile.cadence,
+        auditionProfile.texture,
+        auditionProfile.register,
+        auditionProfile.resonance,
+        auditionProfile.performanceTake,
+        auditionProfile.pace,
+        auditionProfile.warmth,
+        auditionProfile.energy,
+        auditionProfile.expressiveness,
+        auditionProfile.naturalism,
+        auditionProfile.pauseDiscipline,
+        auditionProfile.intonation,
+        auditionProfile.articulation,
+        auditionProfile.emotionalRange,
       ].join(':');
       await playMessages(
-        [{ id: cacheKey, companionId: profile.id, message: canon.audition }],
-        profile,
+        [{ id: cacheKey, companionId: auditionProfile.id, message: canon.audition }],
+        auditionProfile,
       );
     },
     [playMessages],

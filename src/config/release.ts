@@ -1,6 +1,6 @@
-export const APP_VERSION = '7.4.0';
-export const DATABASE_SCHEMA_VERSION = 20;
-export const SAVE_FORMAT_VERSION = 20;
+export const APP_VERSION = '7.5.0';
+export const DATABASE_SCHEMA_VERSION = 21;
+export const SAVE_FORMAT_VERSION = 21;
 
 export interface ReleaseSection {
   title: string;
@@ -9,6 +9,19 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 7.5.0 · Living Voice Ascension',
+    detail:
+      'Voice Forge III gives every companion a sharper vocal identity while Live Link turns a selected one-on-one channel into a natural, interruptible conversation instead of a chain of recordings.',
+    points: [
+      'Every Soulprint now includes vocal register, resonance, intonation, articulation, emotional range, and a grounded, balanced, or dynamic canon take so Snow, Ember, Saffron, and the full party separate more clearly in sound as well as personality.',
+      'The native speech speed control is now driven directly by the Forge pace slider, while scene intelligence automatically shifts celebration, support, accountability, instruction, and strategy delivery without breaking character.',
+      'A dual-take Casting Room lets the Hunter audition the same canon line as a restrained Grounded take or a vivid Dynamic take before choosing the saved performance.',
+      'Live Link opens an optional one-on-one WebRTC conversation with natural turn detection, interruption, responsive audio, visible local transcripts, mute and end controls, and the current System context available to the selected companion.',
+      'Command Link, Party Council, typed messages, confirmed app actions, and the complete offline campaign remain intact; Live Link cannot silently change campaign data and clearly hands actions back to the confirmation-gated Command Link.',
+      'Realtime text and audio tokens are added to the local Usage Ledger with model-specific estimates while OpenAI remains the billing authority.',
+    ],
+  },
   {
     title: 'Version 7.4.0 · Creator Reawakening',
     detail:

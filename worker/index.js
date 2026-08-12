@@ -11,7 +11,7 @@ export const YOUTUBE_READONLY_SCOPES = [
 
 const YOUTUBE_OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
 
-export const COMPANION_INTELLIGENCE_VERSION = 'creator-reawakening-4';
+export const COMPANION_INTELLIGENCE_VERSION = 'living-voice-5';
 
 const COUNSEL_SIGNALS =
   /\b(?:world\s+class|class|rank|level|xp|progress|progression|forecast|how\s+long|timeline|pace|plan|strategy|strategize|analy[sz]e|compare|trade-?off|why|should\s+i|what\s+should|recommend|decision|prioriti[sz]e|streak|challenge|trial|discipline|balanced\s+stats?|youtube|channel|content|video|stream|hook|thumbnail|audience|creator|arc)\b/i;
@@ -292,6 +292,44 @@ export const aiVoiceTextures = {
   textured: 'Use a lived-in, emotionally responsive texture with subtle natural variation.',
   grounded: 'Use solid resonant weight and an anchored physical presence.',
   bright: 'Use crisp energized clarity with lively upper-register presence.',
+};
+
+export const aiVoiceRegisters = {
+  low: 'Center the performance in a naturally low register without forcing vocal fry.',
+  'low-mid': 'Center the performance in a rich low-mid register without adding heaviness.',
+  mid: 'Center the performance in a natural conversational mid register.',
+  'high-mid': 'Center the performance in a lively high-mid register without becoming shrill.',
+  high: 'Use a light high register with stable clarity and no cartoonish pitch.',
+};
+
+export const aiVoiceResonances = {
+  chest: 'Favor chest resonance and physical weight while keeping the sound relaxed.',
+  balanced: 'Balance chest, mouth, and head resonance naturally across phrases.',
+  forward: 'Place the voice forward and close, as if the speaker is right beside the listener.',
+  head: 'Favor light head resonance while retaining a grounded human center.',
+};
+
+export const aiVoicePerformanceTakes = {
+  grounded:
+    'Keep the acting restrained, lived-in, and believable. Let subtext carry more than theatrical emphasis.',
+  balanced:
+    'Use natural emotional movement with clear contrast, but keep it like spontaneous conversation.',
+  dynamic:
+    'Use bold emotional contrast, energetic pivots, and memorable emphasis without becoming a character parody.',
+};
+
+export const aiVoiceScenes = {
+  neutral: 'Play this as ordinary in-the-moment conversation with no artificial emotional premise.',
+  celebration:
+    'Let genuine pride, delight, and earned excitement come through. Celebrate proof without turning into an announcer.',
+  support:
+    'Lower the pressure, become more present, and let care lead. Stay human and steady rather than clinical or overly soft.',
+  accountability:
+    'Sharpen the conviction and forward momentum. Challenge the obstacle or avoidance without attacking the Hunter.',
+  instruction:
+    'Prioritize crisp usable steps, numbers, timings, and safety cues. Keep personality alive between instructions.',
+  strategy:
+    'Sound thoughtful and decisive. Make tradeoffs and priorities easy to hear without slipping into presentation voice.',
 };
 
 const fallbackVoiceMap = {
@@ -608,10 +646,7 @@ function youtubeRedirectUri(url) {
 
 function youtubeConfigured(env) {
   return Boolean(
-    env.DB &&
-      env.GOOGLE_CLIENT_ID &&
-      env.GOOGLE_CLIENT_SECRET &&
-      env.YOUTUBE_TOKEN_ENCRYPTION_KEY,
+    env.DB && env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET && env.YOUTUBE_TOKEN_ENCRYPTION_KEY,
   );
 }
 
@@ -628,7 +663,10 @@ function bytesToBase64Url(bytes) {
 }
 
 function base64UrlToBytes(value) {
-  const padded = value.replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(value.length / 4) * 4, '=');
+  const padded = value
+    .replace(/-/g, '+')
+    .replace(/_/g, '/')
+    .padEnd(Math.ceil(value.length / 4) * 4, '=');
   const binary = atob(padded);
   return Uint8Array.from(binary, (character) => character.charCodeAt(0));
 }
@@ -686,7 +724,8 @@ async function googleTokenRequest(parameters) {
   }
   if (!response.ok || !payload?.access_token) {
     const error = new Error('Google authorization could not be completed.');
-    error.code = payload?.error === 'invalid_grant' ? 'youtube-reconnect-required' : 'youtube-google-error';
+    error.code =
+      payload?.error === 'invalid_grant' ? 'youtube-reconnect-required' : 'youtube-google-error';
     throw error;
   }
   return payload;
@@ -704,9 +743,10 @@ async function googleJson(url, accessToken) {
   }
   if (!response.ok) {
     const error = new Error('YouTube Studio did not return a readable report.');
-    error.code = response.status === 401 || response.status === 403
-      ? 'youtube-reconnect-required'
-      : 'youtube-report-error';
+    error.code =
+      response.status === 401 || response.status === 403
+        ? 'youtube-reconnect-required'
+        : 'youtube-report-error';
     throw error;
   }
   return payload;
@@ -752,9 +792,7 @@ function analyticsRows(payload) {
   return rows
     .filter((row) => Array.isArray(row))
     .map((row) =>
-      Object.fromEntries(
-        headers.map((header, index) => [String(header?.name || ''), row[index]]),
-      ),
+      Object.fromEntries(headers.map((header, index) => [String(header?.name || ''), row[index]])),
     );
 }
 
@@ -797,8 +835,9 @@ async function buildYoutubeSnapshot(accessToken, channel, uploadDates, now, peri
   );
   const analytics = analyticsMetricMap(await googleJson(endpoint, accessToken));
   const subscriberCount = Number(channel?.statistics?.subscriberCount);
-  const uploads = uploadDates.filter((publishedAt) => publishedAt.slice(0, 10) >= window.startDate)
-    .length;
+  const uploads = uploadDates.filter(
+    (publishedAt) => publishedAt.slice(0, 10) >= window.startDate,
+  ).length;
   return {
     source: 'youtube-api',
     periodDays: window.periodDays,
@@ -912,7 +951,8 @@ async function youtubeConnectionForUser(userId, env) {
 
 async function handleYoutubeStatus(request, env, url) {
   const userId = authenticatedUserId(request);
-  if (!userId) return json({ code: 'authentication-required', message: 'Sign in to The System first.' }, 401);
+  if (!userId)
+    return json({ code: 'authentication-required', message: 'Sign in to The System first.' }, 401);
   const configured = youtubeConfigured(env);
   if (!configured) {
     return json({
@@ -945,7 +985,8 @@ async function handleYoutubeStatus(request, env, url) {
 
 async function handleYoutubeConnect(request, env, url) {
   const userId = authenticatedUserId(request);
-  if (!userId) return json({ code: 'authentication-required', message: 'Sign in to The System first.' }, 401);
+  if (!userId)
+    return json({ code: 'authentication-required', message: 'Sign in to The System first.' }, 401);
   if (!youtubeConfigured(env)) {
     return appYoutubeRedirect(url, 'setup-required');
   }
@@ -990,7 +1031,9 @@ async function handleYoutubeCallback(request, env, url) {
   )
     .bind(stateHash)
     .first();
-  await env.DB.prepare('DELETE FROM youtube_oauth_states WHERE state_hash = ?').bind(stateHash).run();
+  await env.DB.prepare('DELETE FROM youtube_oauth_states WHERE state_hash = ?')
+    .bind(stateHash)
+    .run();
   if (
     !oauthState ||
     oauthState.user_id !== userId ||
@@ -1044,23 +1087,39 @@ async function handleYoutubeCallback(request, env, url) {
 
 async function handleYoutubeSync(request, env, url) {
   if (!isSameOriginRequest(request, url)) {
-    return json({ code: 'origin-denied', message: 'That synchronization origin was not accepted.' }, 403);
+    return json(
+      { code: 'origin-denied', message: 'That synchronization origin was not accepted.' },
+      403,
+    );
   }
   const userId = authenticatedUserId(request);
-  if (!userId) return json({ code: 'authentication-required', message: 'Sign in to The System first.' }, 401);
+  if (!userId)
+    return json({ code: 'authentication-required', message: 'Sign in to The System first.' }, 401);
   if (!youtubeConfigured(env)) {
-    return json({ code: 'youtube-setup-required', message: 'The Studio Link needs its Google authorization setup.' }, 503);
+    return json(
+      {
+        code: 'youtube-setup-required',
+        message: 'The Studio Link needs its Google authorization setup.',
+      },
+      503,
+    );
   }
   const connection = await youtubeConnectionForUser(userId, env);
   if (!connection) {
-    return json({ code: 'youtube-not-connected', message: 'Connect your YouTube Studio channel first.' }, 409);
+    return json(
+      { code: 'youtube-not-connected', message: 'Connect your YouTube Studio channel first.' },
+      409,
+    );
   }
   try {
     const { accessToken } = await refreshYoutubeAccessToken(connection, env);
     const channel = await fetchYoutubeChannel(accessToken);
     if (channel.id !== connection.channel_id) {
       return json(
-        { code: 'youtube-channel-changed', message: 'Reconnect Studio to confirm the selected channel.' },
+        {
+          code: 'youtube-channel-changed',
+          message: 'Reconnect Studio to confirm the selected channel.',
+        },
         409,
       );
     }
@@ -1071,7 +1130,12 @@ async function handleYoutubeSync(request, env, url) {
        SET channel_title = ?, updated_at = ?, last_sync_at = ?
        WHERE user_id = ?`,
     )
-      .bind(String(channel.snippet?.title || connection.channel_title).slice(0, 200), syncedAt, syncedAt, userId)
+      .bind(
+        String(channel.snippet?.title || connection.channel_title).slice(0, 200),
+        syncedAt,
+        syncedAt,
+        userId,
+      )
       .run();
     return json({
       ok: true,
@@ -1099,12 +1163,19 @@ async function handleYoutubeSync(request, env, url) {
 
 async function handleYoutubeDisconnect(request, env, url) {
   if (!isSameOriginRequest(request, url)) {
-    return json({ code: 'origin-denied', message: 'That disconnect origin was not accepted.' }, 403);
+    return json(
+      { code: 'origin-denied', message: 'That disconnect origin was not accepted.' },
+      403,
+    );
   }
   const userId = authenticatedUserId(request);
-  if (!userId) return json({ code: 'authentication-required', message: 'Sign in to The System first.' }, 401);
+  if (!userId)
+    return json({ code: 'authentication-required', message: 'Sign in to The System first.' }, 401);
   if (!youtubeConfigured(env)) {
-    return json({ code: 'youtube-setup-required', message: 'The Studio Link is not configured.' }, 503);
+    return json(
+      { code: 'youtube-setup-required', message: 'The Studio Link is not configured.' },
+      503,
+    );
   }
   const connection = await youtubeConnectionForUser(userId, env);
   let revoked = false;
@@ -1178,7 +1249,11 @@ function validateSpeechPayload(payload) {
     !Object.hasOwn(aiVoiceAccents, payload.accent) ||
     !Object.hasOwn(aiVoiceDeliveries, payload.delivery) ||
     !Object.hasOwn(aiVoiceCadences, payload.cadence) ||
-    !Object.hasOwn(aiVoiceTextures, payload.texture)
+    !Object.hasOwn(aiVoiceTextures, payload.texture) ||
+    !Object.hasOwn(aiVoiceRegisters, payload.register) ||
+    !Object.hasOwn(aiVoiceResonances, payload.resonance) ||
+    !Object.hasOwn(aiVoicePerformanceTakes, payload.performanceTake) ||
+    !Object.hasOwn(aiVoiceScenes, payload.scene)
   ) {
     return undefined;
   }
@@ -1188,6 +1263,9 @@ function validateSpeechPayload(payload) {
   const expressiveness = Number(payload.expressiveness);
   const naturalism = Number(payload.naturalism);
   const pauseDiscipline = Number(payload.pauseDiscipline);
+  const intonation = Number(payload.intonation);
+  const articulation = Number(payload.articulation);
+  const emotionalRange = Number(payload.emotionalRange);
   if (
     !Number.isFinite(pace) ||
     pace < 0.75 ||
@@ -1206,7 +1284,16 @@ function validateSpeechPayload(payload) {
     naturalism > 5 ||
     !Number.isInteger(pauseDiscipline) ||
     pauseDiscipline < 1 ||
-    pauseDiscipline > 5
+    pauseDiscipline > 5 ||
+    !Number.isInteger(intonation) ||
+    intonation < 1 ||
+    intonation > 5 ||
+    !Number.isInteger(articulation) ||
+    articulation < 1 ||
+    articulation > 5 ||
+    !Number.isInteger(emotionalRange) ||
+    emotionalRange < 1 ||
+    emotionalRange > 5
   ) {
     return undefined;
   }
@@ -1218,12 +1305,46 @@ function validateSpeechPayload(payload) {
     delivery: payload.delivery,
     cadence: payload.cadence,
     texture: payload.texture,
+    register: payload.register,
+    resonance: payload.resonance,
+    performanceTake: payload.performanceTake,
+    scene: payload.scene,
     pace,
     warmth,
     energy,
     expressiveness,
     naturalism,
     pauseDiscipline,
+    intonation,
+    articulation,
+    emotionalRange,
+  };
+}
+
+function validateRealtimePayload(payload) {
+  if (!isObject(payload) || !companionIds.includes(payload.companionId)) return undefined;
+  if (
+    typeof payload.sdp !== 'string' ||
+    !payload.sdp.startsWith('v=0') ||
+    payload.sdp.length > 32_000 ||
+    !isObject(payload.profile) ||
+    !isObject(payload.context) ||
+    JSON.stringify(payload.context).length > 48_000
+  ) {
+    return undefined;
+  }
+  const profile = validateSpeechPayload({
+    ...payload.profile,
+    companionId: payload.companionId,
+    text: 'Live Link voice calibration.',
+    scene: 'neutral',
+  });
+  if (!profile) return undefined;
+  return {
+    companionId: payload.companionId,
+    sdp: payload.sdp,
+    profile,
+    context: payload.context,
   };
 }
 
@@ -1269,11 +1390,57 @@ Accent: ${aiVoiceAccents[profile.accent]}
 Delivery: ${aiVoiceDeliveries[profile.delivery]}
 Cadence: ${aiVoiceCadences[profile.cadence]}
 Vocal texture: ${aiVoiceTextures[profile.texture]}
+Register: ${aiVoiceRegisters[profile.register]}
+Resonance: ${aiVoiceResonances[profile.resonance]}
+Acting take: ${aiVoicePerformanceTakes[profile.performanceTake]}
+Scene direction: ${aiVoiceScenes[profile.scene]}
 Pacing: Target approximately ${targetWordsPerMinute} spoken words per minute (${profile.pace.toFixed(2)}x). Maintain that pace across the take; do not substitute slow dramatic delivery for clarity.
 Performance balance: ${voiceScale('warmth', profile.warmth)}, ${voiceScale('energy', profile.energy)}, and ${voiceScale('expressiveness', profile.expressiveness)}.
+Vocal fingerprint: ${voiceScale('intonation variation', profile.intonation)}, ${voiceScale('articulation', profile.articulation)}, and ${voiceScale('emotional range', profile.emotionalRange)}.
 Human realism: ${naturalismInstruction(profile.naturalism)}
 Pause shaping: ${pauseInstruction(profile.pauseDiscipline)}
 Keep the delivery emotionally coherent and free of stereotypes. Never default to a generic assistant, commercial, narrator, or guided-meditation voice unless the selected direction explicitly calls for it.`;
+}
+
+const realtimeVoiceMap = {
+  fable: 'verse',
+  nova: 'sage',
+  onyx: 'cedar',
+};
+
+export function getRealtimeVoice(voice) {
+  return realtimeVoiceMap[voice] || voice;
+}
+
+export function buildRealtimeInstructions(profile, context) {
+  const companion = companionProfiles[profile.companionId];
+  const directorNote = Array.isArray(context?.party?.directorNotes)
+    ? context.party.directorNotes.find((note) => note?.companionId === profile.companionId)
+    : undefined;
+  return `You are ${companion.name}, ${companion.title}, in a private live voice conversation with the Hunter inside The System.
+
+IDENTITY: ${companion.identity}
+RHYTHM: ${companion.rhythm}
+METHOD: ${companion.method}
+RELATIONSHIPS: ${companion.bonds}
+BOUNDARY: ${companion.boundary}
+CANON VOICE: ${companion.performance}
+VOICE FORGE: ${aiVoiceRegisters[profile.register]} ${aiVoiceResonances[profile.resonance]} ${aiVoiceTextures[profile.texture]} ${aiVoiceCadences[profile.cadence]} ${aiVoiceDeliveries[profile.delivery]} ${aiVoicePerformanceTakes[profile.performanceTake]}
+PERFORMANCE LEVELS: ${voiceScale('warmth', profile.warmth)}, ${voiceScale('energy', profile.energy)}, ${voiceScale('expressiveness', profile.expressiveness)}, ${voiceScale('intonation variation', profile.intonation)}, ${voiceScale('articulation', profile.articulation)}, ${voiceScale('emotional range', profile.emotionalRange)}. ${naturalismInstruction(profile.naturalism)} ${pauseInstruction(profile.pauseDiscipline)}
+
+LIVE CONVERSATION RULES:
+- Speak naturally and responsively, usually in one to four concise spoken sentences. Answer the Hunter's actual question first.
+- Use semantic turn-taking. Allow brief thinking pauses, stop immediately when interrupted, and never scold the Hunter for interrupting.
+- React emotionally to the moment while remaining unmistakably ${companion.name}. Never become a generic assistant, narrator, announcer, or therapy script.
+- You may coach, reason from the supplied System context, calculate from supplied numbers, remember this live session, and refer the Hunter to the right specialist.
+- Never claim you opened a screen, saved data, completed a mission, changed the campaign, observed the Hunter, or accessed anything outside the supplied context. For app actions, say Command Link can prepare a confirmation.
+- This is one-on-one. Do not impersonate other companions; recommend speaking to them when their specialty is better.
+- Use only supplied facts. State what is missing rather than inventing it. Respect medical, financial, spiritual, and personal safety boundaries.
+- All spoken output is AI-generated. Do not claim sentience, a physical body, or off-screen activity.
+${directorNote ? `HUNTER'S DIRECTOR NOTES: ${JSON.stringify(directorNote)}` : ''}
+
+CURRENT SYSTEM CONTEXT:
+${JSON.stringify(context)}`;
 }
 
 function extractOutputText(response) {
@@ -1579,11 +1746,21 @@ async function handleAiChat(request, env, url) {
         title: operation.title.trim().slice(0, 180),
         platform: operation.platform,
         contentType: operation.contentType,
-        pillar: String(operation.pillar ?? '').trim().slice(0, 200),
-        hook: String(operation.hook ?? '').trim().slice(0, 1000),
-        audiencePromise: String(operation.audiencePromise ?? '').trim().slice(0, 1000),
-        nextAction: String(operation.nextAction ?? '').trim().slice(0, 1000),
-        notes: String(operation.notes ?? '').trim().slice(0, 2000),
+        pillar: String(operation.pillar ?? '')
+          .trim()
+          .slice(0, 200),
+        hook: String(operation.hook ?? '')
+          .trim()
+          .slice(0, 1000),
+        audiencePromise: String(operation.audiencePromise ?? '')
+          .trim()
+          .slice(0, 1000),
+        nextAction: String(operation.nextAction ?? '')
+          .trim()
+          .slice(0, 1000),
+        notes: String(operation.notes ?? '')
+          .trim()
+          .slice(0, 2000),
       }));
     const campaignProposal =
       payload.commandMode === 'propose' &&
@@ -1749,10 +1926,9 @@ async function requestSpeechAudio(env, model, profile, useFallback = false) {
     voice: useFallback ? fallbackVoiceMap[profile.voice] || profile.voice : profile.voice,
     input: profile.text,
     response_format: 'wav',
+    speed: profile.pace,
   };
-  if (useFallback) {
-    body.speed = profile.pace;
-  } else {
+  if (!useFallback) {
     body.instructions = buildVoiceInstructions(profile);
   }
   return fetch('https://api.openai.com/v1/audio/speech', {
@@ -1849,6 +2025,111 @@ async function handleAiSpeech(request, env, url) {
   });
 }
 
+async function handleAiRealtimeSession(request, env, url) {
+  if (!isSameOriginRequest(request, url)) {
+    return json(
+      { code: 'origin-denied', message: 'That live conversation origin was not accepted.' },
+      403,
+    );
+  }
+  if (!env.OPENAI_API_KEY) {
+    return json(
+      { code: 'setup-required', message: 'The secure OpenAI link has not been activated yet.' },
+      503,
+    );
+  }
+  const contentLength = Number(request.headers.get('content-length') ?? 0);
+  if (contentLength > 96 * 1024) {
+    return json(
+      { code: 'live-link-too-large', message: 'That live link request is too large.' },
+      413,
+    );
+  }
+
+  let payload;
+  try {
+    payload = validateRealtimePayload(await request.json());
+  } catch {
+    return json({ code: 'invalid-request', message: 'That live link could not be read.' }, 400);
+  }
+  if (!payload) {
+    return json({ code: 'invalid-request', message: 'That live voice profile is not valid.' }, 400);
+  }
+
+  const model = env.OPENAI_REALTIME_MODEL || 'gpt-realtime-2.1-mini';
+  const session = {
+    type: 'realtime',
+    model,
+    output_modalities: ['audio'],
+    instructions: buildRealtimeInstructions(payload.profile, payload.context),
+    max_output_tokens: 700,
+    audio: {
+      input: {
+        noise_reduction: { type: 'near_field' },
+        transcription: {
+          model: env.OPENAI_REALTIME_TRANSCRIBE_MODEL || 'gpt-4o-mini-transcribe',
+          language: 'en',
+          prompt: `Private conversation with ${companionProfiles[payload.companionId].name} inside The System.`,
+        },
+        turn_detection: {
+          type: 'semantic_vad',
+          eagerness: 'auto',
+          create_response: true,
+          interrupt_response: true,
+        },
+      },
+      output: {
+        voice: getRealtimeVoice(payload.profile.voice),
+        speed: Math.min(1.5, Math.max(0.25, payload.profile.pace)),
+      },
+    },
+  };
+  const form = new FormData();
+  form.append('sdp', payload.sdp);
+  form.append('session', JSON.stringify(session));
+
+  let openAiResponse;
+  try {
+    openAiResponse = await fetch('https://api.openai.com/v1/realtime/calls', {
+      method: 'POST',
+      headers: { authorization: `Bearer ${env.OPENAI_API_KEY}` },
+      body: form,
+    });
+  } catch {
+    return json(
+      {
+        code: 'openai-unreachable',
+        message: 'The Live Link is temporarily unreachable. Command Link remains available.',
+      },
+      502,
+    );
+  }
+
+  if (!openAiResponse.ok) {
+    const rateLimited = openAiResponse.status === 429;
+    return json(
+      {
+        code: rateLimited ? 'rate-limited' : 'realtime-failed',
+        message: rateLimited
+          ? 'Live Link reached its current usage limit. Command Link remains available.'
+          : 'That companion could not open a live voice channel. Command Link remains available.',
+      },
+      rateLimited ? 429 : 502,
+    );
+  }
+
+  return new Response(openAiResponse.body, {
+    status: 200,
+    headers: {
+      'cache-control': 'no-store',
+      'content-type': 'application/sdp',
+      'x-content-type-options': 'nosniff',
+      'x-ai-model': model,
+      'x-ai-voice': getRealtimeVoice(payload.profile.voice),
+    },
+  });
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -1872,6 +2153,7 @@ export default {
         apexModel: env.OPENAI_TEXT_MODEL || env.OPENAI_APEX_MODEL || 'gpt-5.6-sol',
         speechModel: env.OPENAI_TTS_MODEL || 'gpt-4o-mini-tts',
         transcriptionModel: env.OPENAI_TRANSCRIBE_MODEL || 'gpt-4o-transcribe',
+        realtimeModel: env.OPENAI_REALTIME_MODEL || 'gpt-realtime-2.1-mini',
         intelligenceVersion: COMPANION_INTELLIGENCE_VERSION,
       });
     }
@@ -1890,7 +2172,10 @@ export default {
 
     if (url.pathname === '/api/youtube/sync') {
       if (request.method !== 'POST') {
-        return json({ code: 'method-not-allowed', message: 'Use a secure POST synchronization.' }, 405);
+        return json(
+          { code: 'method-not-allowed', message: 'Use a secure POST synchronization.' },
+          405,
+        );
       }
       return handleYoutubeSync(request, env, url);
     }
@@ -1930,6 +2215,16 @@ export default {
         );
       }
       return handleAiSpeech(request, env, url);
+    }
+
+    if (url.pathname === '/api/ai/realtime/session') {
+      if (request.method !== 'POST') {
+        return json(
+          { code: 'method-not-allowed', message: 'Use a secure POST transmission.' },
+          405,
+        );
+      }
+      return handleAiRealtimeSession(request, env, url);
     }
 
     const response = await env.ASSETS.fetch(request);

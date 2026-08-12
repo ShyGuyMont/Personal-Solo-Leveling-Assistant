@@ -1,15 +1,19 @@
 import {
   ArrowUpRight,
   Check,
+  Headphones,
   LoaderCircle,
   MessageSquareText,
   Mic,
   Radio,
+  RadioTower,
   Send,
   ShieldCheck,
   Sparkles,
   Square,
   Users,
+  Volume2,
+  VolumeX,
   X,
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
@@ -34,6 +38,7 @@ import {
   type QuickLinkAction,
 } from '@/game/aiQuickLink';
 import { useAiVoiceLink } from '@/hooks/useAiVoiceLink';
+import { useAiRealtimeLink } from '@/hooks/useAiRealtimeLink';
 import { Link } from '@/router';
 import {
   getAiLinkStatus,
@@ -65,6 +70,7 @@ export function CompanionQuickLink() {
     undo,
   } = useGameStore();
   const [open, setOpen] = useState(false);
+  const [linkMode, setLinkMode] = useState<'command' | 'live'>('command');
   const [status, setStatus] = useState<AiLinkStatus>();
   const [deviceOnline, setDeviceOnline] = useState(navigator.onLine);
   const [notice, setNotice] = useState('Say a companion’s name, then speak naturally.');
@@ -84,6 +90,7 @@ export function CompanionQuickLink() {
   const submitRef = useRef<(text: string) => Promise<void>>(async () => undefined);
   const conversationRef = useRef<AiConversation>();
   const repliesRef = useRef<HTMLDivElement>(null);
+  const liveWriteQueueRef = useRef(Promise.resolve());
   const enabledCompanions = useMemo(() => {
     const enabled = new Set(settings?.enabledCompanionIds ?? []);
     return COMPANIONS.filter((companion) => enabled.has(companion.id));
@@ -101,6 +108,39 @@ export function CompanionQuickLink() {
   });
   const voiceLinkRef = useRef(voiceLink);
   voiceLinkRef.current = voiceLink;
+  const appendLiveMessage = useCallback(
+    (role: 'hunter' | 'companion', companionId: CompanionId, text: string) => {
+      const operation = liveWriteQueueRef.current.then(async () => {
+        const current =
+          conversationRef.current?.audience === companionId
+            ? conversationRef.current
+            : createAiConversation(companionId);
+        const message =
+          role === 'hunter' ? createHunterMessage(text) : createCompanionMessage(companionId, text);
+        const updated = {
+          ...current,
+          title: `Live Link · ${getCompanion(companionId).name}`,
+          messages: [...current.messages, message],
+          updatedAt: message.createdAt,
+        };
+        conversationRef.current = updated;
+        await saveAiConversation(updated);
+        setReplies((existing) => [...existing, message]);
+        setContinuityTurns(updated.messages.length);
+        window.dispatchEvent(
+          new CustomEvent('system:ai-conversations-changed', { detail: { id: updated.id } }),
+        );
+      });
+      liveWriteQueueRef.current = operation.catch(() => undefined);
+      return operation;
+    },
+    [],
+  );
+  const realtimeLink = useAiRealtimeLink({
+    onHunterTranscript: (text) => appendLiveMessage('hunter', activeCompanionId, text),
+    onCompanionTranscript: (companionId, text) => appendLiveMessage('companion', companionId, text),
+    onNotice: setNotice,
+  });
 
   useEffect(() => {
     void getAiLinkStatus().then(setStatus);
@@ -109,9 +149,8 @@ export function CompanionQuickLink() {
     window.addEventListener('online', online);
     window.addEventListener('offline', offline);
     const openDirectLink = (event: Event) => {
-      const detail = (
-        event as CustomEvent<{ companionId?: CompanionId; initialDraft?: string }>
-      ).detail;
+      const detail = (event as CustomEvent<{ companionId?: CompanionId; initialDraft?: string }>)
+        .detail;
       const companionId = detail?.companionId;
       if (!companionId) return;
       voiceLinkRef.current.stopPlayback();
@@ -124,6 +163,7 @@ export function CompanionQuickLink() {
       setPendingCampaign(undefined);
       setDraft(typeof detail.initialDraft === 'string' ? detail.initialDraft.slice(0, 4_000) : '');
       setContinuityTurns(0);
+      setLinkMode('command');
       setNotice(`${getCompanion(companionId).name}'s live channel is ready.`);
       setOpen(true);
     };
@@ -306,7 +346,10 @@ export function CompanionQuickLink() {
           setActiveCompanionId('haven');
         }
         setNotice(
-          proposedAction || result.recipeProposal || result.contentProposal || result.campaignProposal
+          proposedAction ||
+            result.recipeProposal ||
+            result.contentProposal ||
+            result.campaignProposal
             ? 'Command prepared. Nothing changes until you confirm it below.'
             : result.route === 'sovereign'
               ? `${result.model} · Sovereign counsel route`
@@ -469,7 +512,9 @@ export function CompanionQuickLink() {
       setPendingCampaign(undefined);
       setNotice(`Reawakening confirmed · ${projects.length} operations added to Creator Forge.`);
     } catch (error) {
-      setNotice(error instanceof Error ? error.message : 'That comeback campaign could not be saved.');
+      setNotice(
+        error instanceof Error ? error.message : 'That comeback campaign could not be saved.',
+      );
     } finally {
       setExecutingAction(false);
     }
@@ -494,6 +539,98 @@ export function CompanionQuickLink() {
     await voiceLink.startRecording();
   }
 
+  async function beginLiveConversation() {
+    if (
+      !deviceOnline ||
+      !profile ||
+      !settings ||
+      !progression ||
+      settings.aiLinkMode !== 'online' ||
+      !settings.aiDataSharingAcknowledged ||
+      status?.configured === false
+    ) {
+      setNotice(
+        !deviceOnline
+          ? 'Live Link needs a connection. Your local campaign and Command Link history are safe.'
+          : 'Activate the Secure AI Link in Headquarters before opening Live Link.',
+      );
+      return;
+    }
+    const voiceProfile = voiceLink.profiles?.[activeCompanionId];
+    if (!voiceProfile) {
+      setNotice('That companion’s Soulprint is still initializing. Try again in a moment.');
+      return;
+    }
+    if (!settings.aiVoiceDisclosureAcknowledged || !settings.aiVoiceOutputEnabled) {
+      setNotice('Enable Voice Link in Headquarters first. Every companion voice is AI-generated.');
+      return;
+    }
+    if (voiceLink.recording) voiceLink.stopRecording();
+    voiceLink.stopPlayback();
+    if (conversationRef.current?.audience !== activeCompanionId) {
+      conversationRef.current = createAiConversation(activeCompanionId);
+      setReplies([]);
+      setContinuityTurns(0);
+    }
+    setNotice(`${getCompanion(activeCompanionId).name} is opening a live channel…`);
+    const context = await buildAiProgressContext({
+      audience: activeCompanionId,
+      profile,
+      settings,
+      progression,
+      missions,
+      todayRecords,
+      stats,
+      challenges,
+      systemDate,
+      enabledCompanionIds: enabledCompanions.map((companion) => companion.id),
+    });
+    const started = await realtimeLink.start({
+      companionId: activeCompanionId,
+      profile: voiceProfile,
+      context,
+    });
+    if (started) {
+      setNotice(
+        `${getCompanion(activeCompanionId).name} is here. Speak naturally—you can interrupt at any time.`,
+      );
+    }
+  }
+
+  function endLiveConversation() {
+    realtimeLink.stop();
+    setNotice('Live Link closed. The transcript remains in your private conversation history.');
+  }
+
+  function selectLiveCompanion(companionId: CompanionId) {
+    if (realtimeLink.active) realtimeLink.stop();
+    conversationRef.current = createAiConversation(companionId);
+    setActiveCompanionId(companionId);
+    setReplies([]);
+    setContinuityTurns(0);
+    setNotice(`${getCompanion(companionId).name}'s live channel is ready.`);
+  }
+
+  function changeLinkMode(next: 'command' | 'live') {
+    if (next === linkMode) return;
+    if (voiceLink.recording) voiceLink.stopRecording();
+    voiceLink.stopPlayback();
+    realtimeLink.stop();
+    conversationRef.current = undefined;
+    setReplies([]);
+    setContinuityTurns(0);
+    setPendingAction(undefined);
+    setPendingRecipe(undefined);
+    setPendingContent(undefined);
+    setPendingCampaign(undefined);
+    setLinkMode(next);
+    setNotice(
+      next === 'live'
+        ? 'Choose one companion, then open a continuous voice conversation.'
+        : 'Say a companion’s name, then speak naturally.',
+    );
+  }
+
   async function openAndListen() {
     if (voiceLink.recording) {
       voiceLink.stopRecording();
@@ -501,7 +638,9 @@ export function CompanionQuickLink() {
     }
     if (sending || voiceLink.transcribing) return;
     voiceLink.stopPlayback();
+    realtimeLink.stop();
     setOpen(true);
+    setLinkMode('command');
     conversationRef.current = undefined;
     setActiveCompanionId('snow');
     setReplies([]);
@@ -515,12 +654,14 @@ export function CompanionQuickLink() {
   function close() {
     if (voiceLink.recording) voiceLink.stopRecording();
     voiceLink.stopPlayback();
+    realtimeLink.stop();
     conversationRef.current = undefined;
     setOpen(false);
   }
 
   const activeCompanion = getCompanion(activeCompanionId);
-  const busy = sending || voiceLink.transcribing || executingAction;
+  const busy =
+    sending || voiceLink.transcribing || executingAction || realtimeLink.state === 'connecting';
   const ready =
     deviceOnline &&
     settings?.aiLinkMode === 'online' &&
@@ -572,36 +713,151 @@ export function CompanionQuickLink() {
                 </button>
               </header>
 
-              <div className={`quick-link__core ${voiceLink.recording ? 'is-listening' : ''}`}>
+              <nav className="quick-link__modes" aria-label="Quick Link mode">
                 <button
                   type="button"
-                  onClick={voiceLink.recording ? voiceLink.stopRecording : beginListening}
-                  disabled={busy}
-                  aria-label={voiceLink.recording ? 'Stop recording' : 'Start recording'}
+                  className={linkMode === 'command' ? 'is-active' : ''}
+                  onClick={() => changeLinkMode('command')}
                 >
-                  {busy ? (
-                    <LoaderCircle className="is-spinning" size={30} />
-                  ) : voiceLink.recording ? (
-                    <Square size={27} />
-                  ) : (
-                    <Mic size={31} />
-                  )}
-                  <i />
-                  <i />
+                  <Mic size={15} />
+                  <span>
+                    <strong>Command Link</strong>
+                    <small>Voice command or text</small>
+                  </span>
                 </button>
-                <strong>
-                  {voiceLink.recording
-                    ? `Listening · ${voiceLink.recordingSeconds.toFixed(1)}s`
-                    : voiceLink.transcribing
-                      ? 'Understanding your voice…'
-                      : sending
-                        ? 'Companion link active…'
-                        : ready
-                          ? 'Tap and speak'
-                          : 'Secure link required'}
-                </strong>
-                <p>Try “Snow, take me to the Training Hall” or “Saffron, what should I cook?”</p>
-              </div>
+                <button
+                  type="button"
+                  className={linkMode === 'live' ? 'is-active' : ''}
+                  onClick={() => changeLinkMode('live')}
+                >
+                  <RadioTower size={15} />
+                  <span>
+                    <strong>Live Link</strong>
+                    <small>Continuous one-on-one</small>
+                  </span>
+                </button>
+              </nav>
+
+              {linkMode === 'command' ? (
+                <div className={`quick-link__core ${voiceLink.recording ? 'is-listening' : ''}`}>
+                  <button
+                    type="button"
+                    onClick={voiceLink.recording ? voiceLink.stopRecording : beginListening}
+                    disabled={busy}
+                    aria-label={voiceLink.recording ? 'Stop recording' : 'Start recording'}
+                  >
+                    {busy ? (
+                      <LoaderCircle className="is-spinning" size={30} />
+                    ) : voiceLink.recording ? (
+                      <Square size={27} />
+                    ) : (
+                      <Mic size={31} />
+                    )}
+                    <i />
+                    <i />
+                  </button>
+                  <strong>
+                    {voiceLink.recording
+                      ? `Listening · ${voiceLink.recordingSeconds.toFixed(1)}s`
+                      : voiceLink.transcribing
+                        ? 'Understanding your voice…'
+                        : sending
+                          ? 'Companion link active…'
+                          : ready
+                            ? 'Tap and speak'
+                            : 'Secure link required'}
+                  </strong>
+                  <p>Try “Snow, take me to the Training Hall” or “Saffron, what should I cook?”</p>
+                </div>
+              ) : (
+                <section className={`quick-link__live is-${realtimeLink.state}`}>
+                  <div className="quick-link__live-roster" aria-label="Choose a live companion">
+                    {enabledCompanions.map((companion) => (
+                      <button
+                        key={companion.id}
+                        type="button"
+                        className={companion.id === activeCompanionId ? 'is-active' : ''}
+                        style={{ '--companion-accent': companion.accent } as CSSProperties}
+                        disabled={realtimeLink.active}
+                        onClick={() => selectLiveCompanion(companion.id)}
+                        aria-label={`Open ${companion.name}'s Live Link`}
+                      >
+                        <img src={getCompanionImage(companion.image)} alt="" />
+                        <span>{companion.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                  <div className="quick-link__live-stage">
+                    <div className="quick-link__live-portrait">
+                      <img src={getCompanionImage(activeCompanion.image)} alt="" />
+                      <i />
+                      <i />
+                    </div>
+                    <span className="quick-link__live-signal">
+                      {realtimeLink.state === 'connecting'
+                        ? 'SYNCHRONIZING SOULPRINT'
+                        : realtimeLink.state === 'speaking'
+                          ? `${activeCompanion.name.toUpperCase()} IS SPEAKING`
+                          : realtimeLink.state === 'thinking'
+                            ? `${activeCompanion.name.toUpperCase()} IS THINKING`
+                            : realtimeLink.active
+                              ? 'LISTENING · INTERRUPT ANYTIME'
+                              : 'LIVE CHANNEL STANDBY'}
+                    </span>
+                    <strong>
+                      {activeCompanion.name} · {activeCompanion.title}
+                    </strong>
+                    <p>
+                      {realtimeLink.active
+                        ? `${Math.floor(realtimeLink.elapsedSeconds / 60)}:${Math.floor(
+                            realtimeLink.elapsedSeconds % 60,
+                          )
+                            .toString()
+                            .padStart(2, '0')} · ${realtimeLink.model ?? 'secure realtime route'}`
+                        : 'Natural turn-taking, emotional delivery, and local transcripts. One companion at a time.'}
+                    </p>
+                    <div className="quick-link__live-actions">
+                      {realtimeLink.active ? (
+                        <>
+                          <button
+                            type="button"
+                            className="button button--secondary"
+                            onClick={realtimeLink.toggleMute}
+                          >
+                            {realtimeLink.muted ? <VolumeX size={16} /> : <Volume2 size={16} />}
+                            {realtimeLink.muted ? 'Unmute me' : 'Mute me'}
+                          </button>
+                          <button
+                            type="button"
+                            className="button button--primary"
+                            onClick={endLiveConversation}
+                          >
+                            <Square size={15} /> End Live Link
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          type="button"
+                          className="button button--primary"
+                          disabled={!ready || realtimeLink.state === 'connecting'}
+                          onClick={() => void beginLiveConversation()}
+                        >
+                          {realtimeLink.state === 'connecting' ? (
+                            <LoaderCircle className="is-spinning" size={16} />
+                          ) : (
+                            <Headphones size={16} />
+                          )}
+                          Open Live Link
+                        </button>
+                      )}
+                    </div>
+                    <small>
+                      AI-generated voice · higher-cost realtime model · exact model tokens added to
+                      your local Usage Ledger
+                    </small>
+                  </div>
+                </section>
+              )}
 
               {replies.length > 0 && (
                 <div ref={repliesRef} className="quick-link__replies" aria-live="polite">
@@ -631,7 +887,7 @@ export function CompanionQuickLink() {
                 </div>
               )}
 
-              {pendingAction && (
+              {linkMode === 'command' && pendingAction && (
                 <section className="quick-link__command" aria-live="polite">
                   <header>
                     <span>
@@ -680,7 +936,7 @@ export function CompanionQuickLink() {
                 </section>
               )}
 
-              {pendingRecipe && (
+              {linkMode === 'command' && pendingRecipe && (
                 <section
                   className="quick-link__command quick-link__recipe-command"
                   aria-live="polite"
@@ -749,7 +1005,7 @@ export function CompanionQuickLink() {
                 </section>
               )}
 
-              {pendingContent && (
+              {linkMode === 'command' && pendingContent && (
                 <section
                   className="quick-link__command quick-link__content-command"
                   aria-live="polite"
@@ -810,7 +1066,7 @@ export function CompanionQuickLink() {
                 </section>
               )}
 
-              {pendingCampaign && (
+              {linkMode === 'command' && pendingCampaign && (
                 <section
                   className="quick-link__command quick-link__campaign-command"
                   aria-live="polite"
@@ -843,9 +1099,7 @@ export function CompanionQuickLink() {
                       </li>
                     ))}
                   </ol>
-                  <p className="quick-link__recipe-confirmation">
-                    {pendingCampaign.confirmation}
-                  </p>
+                  <p className="quick-link__recipe-confirmation">{pendingCampaign.confirmation}</p>
                   <div className="quick-link__command-actions">
                     <button
                       type="button"
@@ -877,31 +1131,35 @@ export function CompanionQuickLink() {
 
               <p className="quick-link__notice">{notice}</p>
 
-              <form
-                className="quick-link__fallback"
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  void transmit(draft);
-                }}
-              >
-                <MessageSquareText size={16} aria-hidden="true" />
-                <input
-                  value={draft}
-                  maxLength={4_000}
-                  placeholder="Or type a quick transmission…"
-                  onChange={(event) => setDraft(event.target.value)}
-                />
-                <button type="submit" disabled={!draft.trim() || busy} aria-label="Send">
-                  <Send size={16} />
-                </button>
-              </form>
+              {linkMode === 'command' && (
+                <form
+                  className="quick-link__fallback"
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    void transmit(draft);
+                  }}
+                >
+                  <MessageSquareText size={16} aria-hidden="true" />
+                  <input
+                    value={draft}
+                    maxLength={4_000}
+                    placeholder="Or type a quick transmission…"
+                    onChange={(event) => setDraft(event.target.value)}
+                  />
+                  <button type="submit" disabled={!draft.trim() || busy} aria-label="Send">
+                    <Send size={16} />
+                  </button>
+                </form>
+              )}
 
               <footer>
                 <span>
                   <Users size={14} />{' '}
                   {continuityTurns
                     ? `${continuityTurns} recent messages linked`
-                    : 'Say “Everyone” for Party Council'}
+                    : linkMode === 'live'
+                      ? 'Party Council remains available in Command Link'
+                      : 'Say “Everyone” for Party Council'}
                 </span>
                 <Link to="/headquarters?focus=ai" onClick={close}>
                   Full Headquarters <ArrowUpRight size={14} />
