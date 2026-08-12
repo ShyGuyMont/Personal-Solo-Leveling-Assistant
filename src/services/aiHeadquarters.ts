@@ -184,6 +184,23 @@ export interface AiProgressContext {
         averageViewDurationSeconds?: number;
         uploads?: number;
       };
+      historyWindows: Array<{
+        periodDays: number;
+        views?: number;
+        watchHours?: number;
+        averageViewDurationSeconds?: number;
+        uploads?: number;
+      }>;
+      provenVideos: Array<{
+        title: string;
+        publishedAt?: string;
+        periodDays: number;
+        views?: number;
+        watchHours?: number;
+        averageViewPercentage?: number;
+        likes?: number;
+        comments?: number;
+      }>;
       activeProjects: Array<{
         id: string;
         title: string;
@@ -304,6 +321,28 @@ export interface AiHeadquartersReply {
     audiencePromise: string;
     nextAction: string;
     notes: string;
+    confirmation: string;
+  };
+  campaignProposal?: {
+    name: string;
+    strategy: string;
+    weeks: number;
+    operations: Array<{
+      title: string;
+      platform: 'youtube' | 'youtube-shorts' | 'arc' | 'other';
+      contentType:
+        | 'long-form'
+        | 'short-form'
+        | 'livestream'
+        | 'community-post'
+        | 'arc-project'
+        | 'other';
+      pillar: string;
+      hook: string;
+      audiencePromise: string;
+      nextAction: string;
+      notes: string;
+    }>;
     confirmation: string;
   };
   usage?: {
@@ -455,6 +494,10 @@ export async function requestAiHeadquartersReply(input: {
     contentProposal:
       payload.contentProposal && typeof payload.contentProposal === 'object'
         ? (payload.contentProposal as AiHeadquartersReply['contentProposal'])
+        : undefined,
+    campaignProposal:
+      payload.campaignProposal && typeof payload.campaignProposal === 'object'
+        ? (payload.campaignProposal as AiHeadquartersReply['campaignProposal'])
         : undefined,
   };
 }

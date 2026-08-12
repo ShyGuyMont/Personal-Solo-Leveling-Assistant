@@ -219,9 +219,9 @@ export async function initializeProfile(input: {
         },
       ]);
       await db.appMetadata.bulkPut([
-        { id: 'schema-seeded', value: 19, updatedAt: now },
+        { id: 'schema-seeded', value: 20, updatedAt: now },
         { id: 'last-system-day', value: systemDate, updatedAt: now },
-        { id: 'app-version', value: '7.2.0', updatedAt: now },
+        { id: 'app-version', value: '7.4.0', updatedAt: now },
       ]);
       await ensureRotatingChallenges(systemDate, settings.weekStartsOn);
     },

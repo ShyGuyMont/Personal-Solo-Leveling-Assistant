@@ -77,6 +77,25 @@ channel signals, and the production pipeline one tap away. Status remains fully 
 the restored crown control in the top command row, preserving Class progression without spending a
 primary daily-navigation slot. This is a navigation-only update and changes no campaign data.
 
+## Version 7.4.0 · Creator Reawakening
+
+Creator Forge now sees the channel as a story instead of a single quiet month. The secure read-only
+Studio Link synchronizes 28-day, 90-day, and 365-day analytics windows plus a ranked one-year
+Content Vault of proven videos. History Lens lets the Hunter move between those horizons, and
+Vesper receives the same compact evidence map whenever she is invited into an online creator
+conversation. No new Google permissions are requested.
+
+Vesper's Reawakening Briefing diagnoses whether the channel is dormant, returning, or active;
+separates real evidence from strategy hypotheses; and names one immediate physical move. A
+dedicated Reawakening Council can prepare a complete two-to-four-week campaign with two to eight
+sequenced releases. The entire campaign appears as a preview and reaches the local Creator Forge
+board only after one explicit confirmation. Every proven video can also open the Idea Lab for a
+fresh successor concept without treating the old title as a template.
+
+Historical video insights remain on-device, travel in Archive Shield saves, and never grant upload,
+edit, comment, delete, or account-management access. Google credentials remain encrypted behind
+the private gateway and never enter the browser save or OpenAI context.
+
 ## Version 6.3.0 · Stillpoint Protocol
 
 Version 6.3 welcomes **Mira, The Stillpoint**, as the Training Hall’s third commander. Recovery is

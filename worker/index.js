@@ -11,7 +11,7 @@ export const YOUTUBE_READONLY_SCOPES = [
 
 const YOUTUBE_OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
 
-export const COMPANION_INTELLIGENCE_VERSION = 'creator-awakening-3';
+export const COMPANION_INTELLIGENCE_VERSION = 'creator-reawakening-4';
 
 const COUNSEL_SIGNALS =
   /\b(?:world\s+class|class|rank|level|xp|progress|progression|forecast|how\s+long|timeline|pace|plan|strategy|strategize|analy[sz]e|compare|trade-?off|why|should\s+i|what\s+should|recommend|decision|prioriti[sz]e|streak|challenge|trial|discipline|balanced\s+stats?|youtube|channel|content|video|stream|hook|thumbnail|audience|creator|arc)\b/i;
@@ -382,7 +382,7 @@ export function buildSystemInstructions(audience, enabledIds = companionIds, com
 
 export function buildCommandInstruction(commandMode) {
   if (commandMode !== 'propose') {
-    return `Command Mode is disabled. Return command.actionId, command.summary, and command.confirmation as empty strings. Set command.companionId to snow. Return recipe.name and every other recipe string as empty, recipe numbers as 0, and recipe arrays empty. Return every content string as empty.`;
+    return `Command Mode is disabled. Return command.actionId, command.summary, and command.confirmation as empty strings. Set command.companionId to snow. Return recipe.name and every other recipe string as empty, recipe numbers as 0, and recipe arrays empty. Return every content string as empty. Return campaign.name, campaign.strategy, and campaign.confirmation as empty strings, campaign.weeks as 0, and campaign.operations as an empty array.`;
   }
   return `Command Mode is active. The only actions you may prepare are listed in progressContext.commands.allowedActions.
 - Propose an action only when the Hunter clearly asks to perform that exact change now. Questions, hypotheticals, planning, reports, and vague wishes are not action requests.
@@ -397,7 +397,10 @@ export function buildCommandInstruction(commandMode) {
 - If no recipe should be proposed, return recipe.name and all recipe strings empty, numeric fields 0, and arrays empty.
 - Vesper may prepare one content operation for Creator Forge when the Hunter clearly asks Vesper or the Party to create, add, capture, save, plan, or put a specific video, short, stream, post, or ARC project on the board. Gather missing creative direction naturally across recent Quick Link turns before drafting; a short follow-up may answer Vesper's previous question.
 - A content draft must preserve the Hunter's idea while providing a working title, platform, format, content pillar, honest hook, audience promise, and one small physical nextAction. Use progressContext.specialists.creator.activeProjects to avoid accidental duplicates. Do not invent analytics, brand deals, permissions, footage, audience feedback, or completed work.
-- A content proposal is only a preview until the Hunter confirms it into Creator Forge. If no content operation should be proposed, return every content string as empty.`;
+- A content proposal is only a preview until the Hunter confirms it into Creator Forge. If no content operation should be proposed, return every content string as empty.
+- When the Hunter clearly asks Vesper to build, forge, or prepare a comeback, reawakening, launch, or multi-release campaign, Vesper may prepare one campaign instead of one content operation. Never return both content and campaign proposals.
+- A campaign spans 2 to 4 weeks and contains 2 to 8 distinct operations in a deliberate sequence. Use the supplied 28/90/365-day history, Content Vault, current focus, and active projects as evidence when available. Treat patterns as hypotheses, not guarantees. Every operation needs its own title, platform, format, pillar, honest hook, audience promise, and small physical nextAction. Put timing and sequence notes in notes.
+- If essential direction is missing, ask one natural follow-up and return an empty campaign. A campaign is only a preview until the Hunter confirms the entire sequence once. If no campaign should be proposed, return campaign strings empty, weeks 0, and operations empty.`;
 }
 
 const responseSchema = {
@@ -534,8 +537,60 @@ const responseSchema = {
       ],
       additionalProperties: false,
     },
+    campaign: {
+      type: 'object',
+      properties: {
+        name: { type: 'string', maxLength: 180 },
+        strategy: { type: 'string', maxLength: 1200 },
+        weeks: { type: 'integer', minimum: 0, maximum: 4 },
+        operations: {
+          type: 'array',
+          maxItems: 8,
+          items: {
+            type: 'object',
+            properties: {
+              title: { type: 'string', minLength: 1, maxLength: 180 },
+              platform: {
+                type: 'string',
+                enum: ['youtube', 'youtube-shorts', 'arc', 'other'],
+              },
+              contentType: {
+                type: 'string',
+                enum: [
+                  'long-form',
+                  'short-form',
+                  'livestream',
+                  'community-post',
+                  'arc-project',
+                  'other',
+                ],
+              },
+              pillar: { type: 'string', maxLength: 200 },
+              hook: { type: 'string', maxLength: 1000 },
+              audiencePromise: { type: 'string', maxLength: 1000 },
+              nextAction: { type: 'string', maxLength: 1000 },
+              notes: { type: 'string', maxLength: 2000 },
+            },
+            required: [
+              'title',
+              'platform',
+              'contentType',
+              'pillar',
+              'hook',
+              'audiencePromise',
+              'nextAction',
+              'notes',
+            ],
+            additionalProperties: false,
+          },
+        },
+        confirmation: { type: 'string', maxLength: 240 },
+      },
+      required: ['name', 'strategy', 'weeks', 'operations', 'confirmation'],
+      additionalProperties: false,
+    },
   },
-  required: ['title', 'replies', 'memoryCandidates', 'command', 'recipe', 'content'],
+  required: ['title', 'replies', 'memoryCandidates', 'command', 'recipe', 'content', 'campaign'],
   additionalProperties: false,
 };
 
@@ -675,11 +730,12 @@ function googleDate(date) {
   return date.toISOString().slice(0, 10);
 }
 
-export function buildYouTubeAnalyticsWindow(now = new Date()) {
+export function buildYouTubeAnalyticsWindow(now = new Date(), periodDays = 28) {
+  const safePeriodDays = Math.max(1, Math.min(3650, Math.round(Number(periodDays) || 28)));
   const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
   const start = new Date(end);
-  start.setUTCDate(start.getUTCDate() - 27);
-  return { startDate: googleDate(start), endDate: googleDate(end), periodDays: 28 };
+  start.setUTCDate(start.getUTCDate() - (safePeriodDays - 1));
+  return { startDate: googleDate(start), endDate: googleDate(end), periodDays: safePeriodDays };
 }
 
 function analyticsMetricMap(payload) {
@@ -690,10 +746,22 @@ function analyticsMetricMap(payload) {
   );
 }
 
-async function countRecentUploads(playlistId, accessToken, startDate) {
-  if (!playlistId) return undefined;
+function analyticsRows(payload) {
+  const headers = Array.isArray(payload?.columnHeaders) ? payload.columnHeaders : [];
+  const rows = Array.isArray(payload?.rows) ? payload.rows : [];
+  return rows
+    .filter((row) => Array.isArray(row))
+    .map((row) =>
+      Object.fromEntries(
+        headers.map((header, index) => [String(header?.name || ''), row[index]]),
+      ),
+    );
+}
+
+async function fetchRecentUploadDates(playlistId, accessToken, oldestStartDate) {
+  if (!playlistId) return [];
   let pageToken = '';
-  let uploads = 0;
+  const publishedDates = [];
   let pageCount = 0;
   let reachedOlderVideo = false;
   do {
@@ -705,20 +773,20 @@ async function countRecentUploads(playlistId, accessToken, startDate) {
     const payload = await googleJson(endpoint, accessToken);
     for (const item of Array.isArray(payload?.items) ? payload.items : []) {
       const publishedAt = String(item?.contentDetails?.videoPublishedAt || '');
-      if (publishedAt && publishedAt.slice(0, 10) < startDate) {
+      if (publishedAt && publishedAt.slice(0, 10) < oldestStartDate) {
         reachedOlderVideo = true;
         continue;
       }
-      if (publishedAt) uploads += 1;
+      if (publishedAt) publishedDates.push(publishedAt);
     }
     pageToken = String(payload?.nextPageToken || '');
     pageCount += 1;
   } while (pageToken && !reachedOlderVideo && pageCount < 10);
-  return uploads;
+  return publishedDates;
 }
 
-async function buildYoutubeSnapshot(accessToken, channel, now = new Date()) {
-  const window = buildYouTubeAnalyticsWindow(now);
+async function buildYoutubeSnapshot(accessToken, channel, uploadDates, now, periodDays) {
+  const window = buildYouTubeAnalyticsWindow(now, periodDays);
   const endpoint = new URL('https://youtubeanalytics.googleapis.com/v2/reports');
   endpoint.searchParams.set('ids', 'channel==MINE');
   endpoint.searchParams.set('startDate', window.startDate);
@@ -729,11 +797,8 @@ async function buildYoutubeSnapshot(accessToken, channel, now = new Date()) {
   );
   const analytics = analyticsMetricMap(await googleJson(endpoint, accessToken));
   const subscriberCount = Number(channel?.statistics?.subscriberCount);
-  const uploads = await countRecentUploads(
-    channel?.contentDetails?.relatedPlaylists?.uploads,
-    accessToken,
-    window.startDate,
-  );
+  const uploads = uploadDates.filter((publishedAt) => publishedAt.slice(0, 10) >= window.startDate)
+    .length;
   return {
     source: 'youtube-api',
     periodDays: window.periodDays,
@@ -748,6 +813,79 @@ async function buildYoutubeSnapshot(accessToken, channel, now = new Date()) {
     uploads,
     note: `Read-only YouTube Studio sync for ${window.startDate} through ${window.endDate}. Reach impressions and thumbnail CTR remain manual metrics.`,
   };
+}
+
+async function fetchYoutubeVideoSnippets(accessToken, videoIds) {
+  if (!videoIds.length) return new Map();
+  const endpoint = new URL('https://www.googleapis.com/youtube/v3/videos');
+  endpoint.searchParams.set('part', 'snippet');
+  endpoint.searchParams.set('id', videoIds.slice(0, 50).join(','));
+  endpoint.searchParams.set('maxResults', '50');
+  const payload = await googleJson(endpoint, accessToken);
+  return new Map(
+    (Array.isArray(payload?.items) ? payload.items : [])
+      .filter((item) => item?.id)
+      .map((item) => [String(item.id), item.snippet || {}]),
+  );
+}
+
+async function buildYoutubeContentVault(accessToken, now = new Date()) {
+  const window = buildYouTubeAnalyticsWindow(now, 365);
+  const endpoint = new URL('https://youtubeanalytics.googleapis.com/v2/reports');
+  endpoint.searchParams.set('ids', 'channel==MINE');
+  endpoint.searchParams.set('startDate', window.startDate);
+  endpoint.searchParams.set('endDate', window.endDate);
+  endpoint.searchParams.set('dimensions', 'video');
+  endpoint.searchParams.set(
+    'metrics',
+    'views,estimatedMinutesWatched,averageViewDuration,averageViewPercentage,likes,comments',
+  );
+  endpoint.searchParams.set('sort', '-views');
+  endpoint.searchParams.set('maxResults', '10');
+  const rows = analyticsRows(await googleJson(endpoint, accessToken));
+  const snippets = await fetchYoutubeVideoSnippets(
+    accessToken,
+    rows.map((row) => String(row.video || '')).filter(Boolean),
+  );
+  return rows.map((row) => {
+    const videoId = String(row.video || '');
+    const snippet = snippets.get(videoId) || {};
+    const minutes = Number(row.estimatedMinutesWatched);
+    return {
+      videoId,
+      title: String(snippet.title || 'Untitled video').slice(0, 200),
+      publishedAt: typeof snippet.publishedAt === 'string' ? snippet.publishedAt : undefined,
+      periodDays: window.periodDays,
+      views: Number.isFinite(Number(row.views)) ? Number(row.views) : undefined,
+      watchHours: Number.isFinite(minutes) ? minutes / 60 : undefined,
+      averageViewDurationSeconds: Number.isFinite(Number(row.averageViewDuration))
+        ? Number(row.averageViewDuration)
+        : undefined,
+      averageViewPercentage: Number.isFinite(Number(row.averageViewPercentage))
+        ? Number(row.averageViewPercentage)
+        : undefined,
+      likes: Number.isFinite(Number(row.likes)) ? Number(row.likes) : undefined,
+      comments: Number.isFinite(Number(row.comments)) ? Number(row.comments) : undefined,
+    };
+  });
+}
+
+async function buildYoutubeCreatorIntelligence(accessToken, channel, now = new Date()) {
+  const historicalWindow = buildYouTubeAnalyticsWindow(now, 365);
+  const uploadDates = await fetchRecentUploadDates(
+    channel?.contentDetails?.relatedPlaylists?.uploads,
+    accessToken,
+    historicalWindow.startDate,
+  );
+  const [snapshots, topVideos] = await Promise.all([
+    Promise.all(
+      [28, 90, 365].map((periodDays) =>
+        buildYoutubeSnapshot(accessToken, channel, uploadDates, now, periodDays),
+      ),
+    ),
+    buildYoutubeContentVault(accessToken, now),
+  ]);
+  return { snapshots, topVideos };
 }
 
 async function refreshYoutubeAccessToken(connection, env) {
@@ -926,7 +1064,7 @@ async function handleYoutubeSync(request, env, url) {
         409,
       );
     }
-    const snapshot = await buildYoutubeSnapshot(accessToken, channel);
+    const intelligence = await buildYoutubeCreatorIntelligence(accessToken, channel);
     const syncedAt = new Date().toISOString();
     await env.DB.prepare(
       `UPDATE youtube_connections
@@ -941,7 +1079,9 @@ async function handleYoutubeSync(request, env, url) {
       channelId: channel.id,
       channelTitle: String(channel.snippet?.title || connection.channel_title).slice(0, 200),
       channelUrl: `https://www.youtube.com/channel/${encodeURIComponent(channel.id)}`,
-      snapshot,
+      snapshot: intelligence.snapshots[0],
+      snapshots: intelligence.snapshots,
+      topVideos: intelligence.topVideos,
     });
   } catch (error) {
     const reconnect = error?.code === 'youtube-reconnect-required';
@@ -1422,6 +1562,52 @@ async function handleAiChat(request, env, url) {
             confirmation: content.confirmation.trim().slice(0, 240),
           }
         : undefined;
+    const campaign = isObject(result.campaign) ? result.campaign : undefined;
+    const rawCampaignOperations = Array.isArray(campaign?.operations)
+      ? campaign.operations.slice(0, 8)
+      : [];
+    const campaignOperations = rawCampaignOperations
+      .filter(
+        (operation) =>
+          isObject(operation) &&
+          typeof operation.title === 'string' &&
+          operation.title.trim() &&
+          validPlatforms.has(operation.platform) &&
+          validContentTypes.has(operation.contentType),
+      )
+      .map((operation) => ({
+        title: operation.title.trim().slice(0, 180),
+        platform: operation.platform,
+        contentType: operation.contentType,
+        pillar: String(operation.pillar ?? '').trim().slice(0, 200),
+        hook: String(operation.hook ?? '').trim().slice(0, 1000),
+        audiencePromise: String(operation.audiencePromise ?? '').trim().slice(0, 1000),
+        nextAction: String(operation.nextAction ?? '').trim().slice(0, 1000),
+        notes: String(operation.notes ?? '').trim().slice(0, 2000),
+      }));
+    const campaignProposal =
+      payload.commandMode === 'propose' &&
+      vesperCanPropose &&
+      campaign &&
+      typeof campaign.name === 'string' &&
+      campaign.name.trim() &&
+      typeof campaign.strategy === 'string' &&
+      campaign.strategy.trim() &&
+      Number.isInteger(campaign.weeks) &&
+      campaign.weeks >= 2 &&
+      campaign.weeks <= 4 &&
+      campaignOperations.length >= 2 &&
+      campaignOperations.length === rawCampaignOperations.length &&
+      typeof campaign.confirmation === 'string' &&
+      campaign.confirmation.trim()
+        ? {
+            name: campaign.name.trim().slice(0, 180),
+            strategy: campaign.strategy.trim().slice(0, 1200),
+            weeks: campaign.weeks,
+            operations: campaignOperations,
+            confirmation: campaign.confirmation.trim().slice(0, 240),
+          }
+        : undefined;
     return json({
       model,
       route,
@@ -1431,7 +1617,8 @@ async function handleAiChat(request, env, url) {
       memoryCandidates,
       commandProposal,
       recipeProposal,
-      contentProposal,
+      contentProposal: campaignProposal ? undefined : contentProposal,
+      campaignProposal,
       usage: {
         inputTokens: Number(response.usage?.input_tokens ?? 0),
         cachedInputTokens: Number(response.usage?.input_tokens_details?.cached_tokens ?? 0),

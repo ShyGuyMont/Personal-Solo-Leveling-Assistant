@@ -5,13 +5,26 @@ import type {
   CreatorProject,
   CreatorSettings,
   CreatorSnapshotSource,
+  CreatorVideoInsight,
 } from '@/types/game';
+
+export interface CreatorReawakeningBriefing {
+  state: 'unmapped' | 'dormant' | 'returning' | 'active';
+  headline: string;
+  diagnosis: string;
+  focus: string;
+  nextAction: string;
+  proof: string[];
+}
 import { createId } from '@/utils/id';
 
 export interface CreatorForgeSummary {
   settings: CreatorSettings;
   latestSnapshot?: CreatorChannelSnapshot;
   previousSnapshot?: CreatorChannelSnapshot;
+  snapshotsByPeriod: Partial<Record<28 | 90 | 365, CreatorChannelSnapshot>>;
+  videoInsights: CreatorVideoInsight[];
+  reawakening: CreatorReawakeningBriefing;
   projects: CreatorProject[];
   activeProjects: CreatorProject[];
   publishedLastSevenDays: number;
@@ -116,6 +129,71 @@ export async function saveCreatorSnapshot(input: {
   return snapshot;
 }
 
+type CreatorSnapshotInput = Parameters<typeof saveCreatorSnapshot>[0];
+
+function cleanCreatorSnapshot(input: CreatorSnapshotInput, capturedAt: string) {
+  const snapshot: CreatorChannelSnapshot = {
+    id: createId('creator-snapshot'),
+    capturedAt,
+    source: input.source ?? 'manual',
+    periodDays: Math.max(1, Math.min(3650, Math.round(input.periodDays || 28))),
+    subscribers: cleanOptionalNumber(input.subscribers),
+    views: cleanOptionalNumber(input.views),
+    watchHours: cleanOptionalNumber(input.watchHours),
+    impressions: cleanOptionalNumber(input.impressions),
+    clickThroughRate: cleanOptionalNumber(input.clickThroughRate, 100),
+    averageViewDurationSeconds: cleanOptionalNumber(input.averageViewDurationSeconds),
+    uploads: cleanOptionalNumber(input.uploads),
+    note: cleanText(input.note, 1000) || undefined,
+  };
+  return snapshot;
+}
+
+export async function saveCreatorStudioIntelligence(input: {
+  snapshots: CreatorSnapshotInput[];
+  topVideos: Array<Omit<CreatorVideoInsight, 'id' | 'capturedAt'>>;
+}) {
+  const capturedAt = new Date().toISOString();
+  const snapshots = input.snapshots.slice(0, 3).map((snapshot) =>
+    cleanCreatorSnapshot({ ...snapshot, source: 'youtube-api' }, capturedAt),
+  );
+  if (!snapshots.some((snapshot) => snapshot.periodDays === 28)) {
+    throw new Error('The Studio synchronization did not include its recent channel signal.');
+  }
+  const topVideos: CreatorVideoInsight[] = input.topVideos
+    .filter((video) => cleanText(video.videoId, 100) && cleanText(video.title, 200))
+    .slice(0, 10)
+    .map((video) => ({
+      id: cleanText(video.videoId, 100),
+      videoId: cleanText(video.videoId, 100),
+      title: cleanText(video.title, 200),
+      publishedAt:
+        typeof video.publishedAt === 'string' && Number.isFinite(new Date(video.publishedAt).getTime())
+          ? video.publishedAt
+          : undefined,
+      periodDays: Math.max(1, Math.min(3650, Math.round(video.periodDays || 365))),
+      views: cleanOptionalNumber(video.views),
+      watchHours: cleanOptionalNumber(video.watchHours),
+      averageViewDurationSeconds: cleanOptionalNumber(video.averageViewDurationSeconds),
+      averageViewPercentage: cleanOptionalNumber(video.averageViewPercentage, 100),
+      likes: cleanOptionalNumber(video.likes),
+      comments: cleanOptionalNumber(video.comments),
+      capturedAt,
+    }));
+  await db.transaction(
+    'rw',
+    db.creatorSnapshots,
+    db.creatorVideoInsights,
+    async () => {
+      await db.creatorSnapshots.bulkPut(snapshots);
+      await db.creatorVideoInsights.clear();
+      if (topVideos.length) await db.creatorVideoInsights.bulkPut(topVideos);
+    },
+  );
+  window.dispatchEvent(new CustomEvent('system:creator-forge-changed'));
+  return { snapshots, topVideos };
+}
+
 export async function saveCreatorProject(
   input: Omit<CreatorProject, 'id' | 'createdAt' | 'updatedAt' | 'publishedAt'> & {
     id?: string;
@@ -153,17 +231,127 @@ export async function updateCreatorProjectStatus(id: string, status: CreatorProj
   return saveCreatorProject({ ...project, status });
 }
 
+export async function saveCreatorCampaign(
+  projects: Array<
+    Pick<
+      CreatorProject,
+      | 'title'
+      | 'platform'
+      | 'contentType'
+      | 'pillar'
+      | 'hook'
+      | 'audiencePromise'
+      | 'nextAction'
+      | 'notes'
+    >
+  >,
+) {
+  const candidates = projects.slice(0, 8);
+  if (candidates.length < 2) throw new Error('A comeback campaign needs at least two releases.');
+  const existingTitles = new Set(
+    (await db.creatorProjects.toArray()).map((project) => project.title.trim().toLowerCase()),
+  );
+  const created: CreatorProject[] = [];
+  for (const candidate of candidates) {
+    const normalizedTitle = candidate.title.trim().toLowerCase();
+    if (!normalizedTitle || existingTitles.has(normalizedTitle)) continue;
+    const project = await saveCreatorProject({ ...candidate, status: 'idea' });
+    existingTitles.add(normalizedTitle);
+    created.push(project);
+  }
+  if (!created.length) throw new Error('Every campaign release is already on the Creator Forge board.');
+  return created;
+}
+
+function buildReawakeningBriefing(
+  settings: CreatorSettings,
+  snapshotsByPeriod: CreatorForgeSummary['snapshotsByPeriod'],
+  videoInsights: CreatorVideoInsight[],
+  activeProjects: CreatorProject[],
+): CreatorReawakeningBriefing {
+  const recent = snapshotsByPeriod[28];
+  const quarter = snapshotsByPeriod[90];
+  const year = snapshotsByPeriod[365];
+  const strongest = videoInsights[0];
+  const currentFocus = settings.currentArcFocus || strongest?.title || 'your clearest audience promise';
+  if (!recent) {
+    return {
+      state: 'unmapped',
+      headline: 'The comeback has no evidence map yet.',
+      diagnosis: 'Connect Studio or enter a snapshot so Vesper can separate a quiet season from a weak idea.',
+      focus: `Define the next arc around ${currentFocus}.`,
+      nextAction: 'Synchronize one real channel baseline.',
+      proof: [],
+    };
+  }
+  const proof = [
+    `${recent.uploads ?? 0} upload${recent.uploads === 1 ? '' : 's'} in 28 days`,
+    quarter ? `${quarter.views ?? 0} views across 90 days` : '',
+    year ? `${year.watchHours?.toFixed(1) ?? 0} watch hours across 365 days` : '',
+    strongest ? `Strongest one-year signal: “${strongest.title}”` : '',
+  ].filter(Boolean);
+  const quiet28 = (recent.uploads ?? 0) === 0;
+  const quiet90 = (quarter?.uploads ?? 0) === 0;
+  if (quiet28 && quiet90) {
+    return {
+      state: 'dormant',
+      headline: 'This is a reawakening, not a continuation.',
+      diagnosis:
+        'The recent windows are quiet, so the first win is restoring a repeatable release rhythm—not trying to manufacture a viral comeback.',
+      focus: strongest
+        ? `Recover the audience promise that made “${strongest.title}” move, then express it through ${currentFocus}.`
+        : `Build a clean return around ${currentFocus} and give the audience a reason to come back twice.`,
+      nextAction: activeProjects[0]?.nextAction || 'Choose the first return video and write its opening 30 seconds.',
+      proof,
+    };
+  }
+  if (quiet28) {
+    return {
+      state: 'returning',
+      headline: 'The channel still has heat. It needs a deliberate return.',
+      diagnosis:
+        'The last month cooled, but the longer window gives Vesper enough evidence to build from proven attention instead of starting blind.',
+      focus: `Turn ${currentFocus} into one anchor release and one fast follow-up.`,
+      nextAction: activeProjects[0]?.nextAction || 'Lock the anchor release title and recording date.',
+      proof,
+    };
+  }
+  return {
+    state: 'active',
+    headline: 'The creator signal is already live. Now make it compound.',
+    diagnosis:
+      'Recent publishing activity exists, so the next campaign should tighten the promise and sequence rather than reset the channel identity.',
+    focus: `Build the next two releases around ${currentFocus}.`,
+    nextAction: activeProjects[0]?.nextAction || 'Choose the next release and define its smallest physical move.',
+    proof,
+  };
+}
+
 export async function getCreatorForgeSummary(): Promise<CreatorForgeSummary> {
-  const [settings, snapshots, projects] = await Promise.all([
+  const [settings, snapshots, projects, videoInsights] = await Promise.all([
     getCreatorSettings(),
-    db.creatorSnapshots.orderBy('capturedAt').reverse().limit(2).toArray(),
+    db.creatorSnapshots.orderBy('capturedAt').reverse().limit(30).toArray(),
     db.creatorProjects.orderBy('updatedAt').reverse().toArray(),
+    db.creatorVideoInsights.orderBy('views').reverse().limit(10).toArray(),
   ]);
+  const snapshotsByPeriod: CreatorForgeSummary['snapshotsByPeriod'] = {};
+  for (const periodDays of [28, 90, 365] as const) {
+    snapshotsByPeriod[periodDays] = snapshots.find(
+      (snapshot) => snapshot.periodDays === periodDays,
+    );
+  }
+  const latestSnapshot = snapshotsByPeriod[28] ?? snapshots[0];
+  const previousSnapshot = latestSnapshot
+    ? snapshots.find(
+        (snapshot) =>
+          snapshot.periodDays === latestSnapshot.periodDays && snapshot.id !== latestSnapshot.id,
+      )
+    : undefined;
   const now = new Date().toISOString();
   const activeProjects = projects.filter(
     (project) => project.status !== 'published' && project.status !== 'paused',
   );
-  const lastCreatorAction = [snapshots[0]?.capturedAt, projects[0]?.updatedAt]
+  const lastCreatorAction = [latestSnapshot?.capturedAt, projects[0]?.updatedAt]
     .filter((value): value is string => Boolean(value))
     .sort()
     .at(-1);
@@ -174,7 +362,7 @@ export async function getCreatorForgeSummary(): Promise<CreatorForgeSummary> {
     (project) => project.publishedAt && daysBetween(project.publishedAt, now) <= 7,
   ).length;
   const momentum: CreatorForgeSummary['momentum'] =
-    !projects.length && !snapshots.length
+    !projects.length && !latestSnapshot
       ? 'unclaimed'
       : (daysSinceLastCreatorAction ?? 99) >= 8
         ? 'stalled'
@@ -206,8 +394,16 @@ export async function getCreatorForgeSummary(): Promise<CreatorForgeSummary> {
 
   return {
     settings,
-    latestSnapshot: snapshots[0],
-    previousSnapshot: snapshots[1],
+    latestSnapshot,
+    previousSnapshot,
+    snapshotsByPeriod,
+    videoInsights,
+    reawakening: buildReawakeningBriefing(
+      settings,
+      snapshotsByPeriod,
+      videoInsights,
+      activeProjects,
+    ),
     projects,
     activeProjects,
     publishedLastSevenDays,

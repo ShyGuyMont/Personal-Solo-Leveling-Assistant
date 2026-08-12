@@ -7,6 +7,7 @@ import {
   Radio,
   Send,
   ShieldCheck,
+  Sparkles,
   Square,
   Users,
   X,
@@ -22,7 +23,7 @@ import {
   saveAiMemoryCandidates,
 } from '@/game/aiHeadquarters';
 import { buildAiProgressContext } from '@/game/aiContext';
-import { saveCreatorProject } from '@/game/creatorForge';
+import { saveCreatorCampaign, saveCreatorProject } from '@/game/creatorForge';
 import { saveCustomKitchenRecipe } from '@/game/kitchenGrimoire';
 import {
   buildQuickLinkActionCatalog,
@@ -75,6 +76,8 @@ export function CompanionQuickLink() {
     useState<NonNullable<AiHeadquartersReply['recipeProposal']>>();
   const [pendingContent, setPendingContent] =
     useState<NonNullable<AiHeadquartersReply['contentProposal']>>();
+  const [pendingCampaign, setPendingCampaign] =
+    useState<NonNullable<AiHeadquartersReply['campaignProposal']>>();
   const [executingAction, setExecutingAction] = useState(false);
   const [continuityTurns, setContinuityTurns] = useState(0);
   const [activeCompanionId, setActiveCompanionId] = useState<CompanionId>('snow');
@@ -106,7 +109,10 @@ export function CompanionQuickLink() {
     window.addEventListener('online', online);
     window.addEventListener('offline', offline);
     const openDirectLink = (event: Event) => {
-      const companionId = (event as CustomEvent<{ companionId?: CompanionId }>).detail?.companionId;
+      const detail = (
+        event as CustomEvent<{ companionId?: CompanionId; initialDraft?: string }>
+      ).detail;
+      const companionId = detail?.companionId;
       if (!companionId) return;
       voiceLinkRef.current.stopPlayback();
       conversationRef.current = createAiConversation(companionId);
@@ -115,6 +121,8 @@ export function CompanionQuickLink() {
       setPendingAction(undefined);
       setPendingRecipe(undefined);
       setPendingContent(undefined);
+      setPendingCampaign(undefined);
+      setDraft(typeof detail.initialDraft === 'string' ? detail.initialDraft.slice(0, 4_000) : '');
       setContinuityTurns(0);
       setNotice(`${getCompanion(companionId).name}'s live channel is ready.`);
       setOpen(true);
@@ -184,6 +192,7 @@ export function CompanionQuickLink() {
       setPendingAction(undefined);
       setPendingRecipe(undefined);
       setPendingContent(undefined);
+      setPendingCampaign(undefined);
       setSending(true);
       setNotice(
         addressed.audience === 'party'
@@ -292,8 +301,12 @@ export function CompanionQuickLink() {
           setPendingContent(result.contentProposal);
           setActiveCompanionId('haven');
         }
+        if (result.campaignProposal) {
+          setPendingCampaign(result.campaignProposal);
+          setActiveCompanionId('haven');
+        }
         setNotice(
-          proposedAction || result.recipeProposal || result.contentProposal
+          proposedAction || result.recipeProposal || result.contentProposal || result.campaignProposal
             ? 'Command prepared. Nothing changes until you confirm it below.'
             : result.route === 'sovereign'
               ? `${result.model} · Sovereign counsel route`
@@ -439,6 +452,24 @@ export function CompanionQuickLink() {
       setNotice(
         error instanceof Error ? error.message : 'That content operation could not be saved.',
       );
+    } finally {
+      setExecutingAction(false);
+    }
+  }
+
+  async function savePendingCampaign() {
+    if (!pendingCampaign || executingAction) return;
+    setExecutingAction(true);
+    try {
+      const projects = await saveCreatorCampaign(pendingCampaign.operations);
+      await appendLocalAcknowledgement(
+        'haven',
+        `${pendingCampaign.name} is live on the Creator Forge board: ${projects.length} releases, one sequence, and no disappearing between uploads. We start with ${projects[0]?.nextAction || 'the first physical move'}.`,
+      );
+      setPendingCampaign(undefined);
+      setNotice(`Reawakening confirmed · ${projects.length} operations added to Creator Forge.`);
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : 'That comeback campaign could not be saved.');
     } finally {
       setExecutingAction(false);
     }
@@ -771,6 +802,71 @@ export function CompanionQuickLink() {
                       onClick={() => {
                         setPendingContent(undefined);
                         setNotice('Content draft dismissed. Creator Forge was not changed.');
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </section>
+              )}
+
+              {pendingCampaign && (
+                <section
+                  className="quick-link__command quick-link__campaign-command"
+                  aria-live="polite"
+                >
+                  <header>
+                    <span>
+                      <Sparkles size={15} /> VESPER'S REAWAKENING ARC
+                    </span>
+                    <small>ONE CONFIRMATION · FULL SEQUENCE</small>
+                  </header>
+                  <strong>{pendingCampaign.name}</strong>
+                  <p>{pendingCampaign.strategy}</p>
+                  <div className="quick-link__recipe-meta">
+                    <span>{pendingCampaign.weeks} weeks</span>
+                    <span>{pendingCampaign.operations.length} operations</span>
+                    <span>local board</span>
+                  </div>
+                  <ol className="quick-link__campaign-list">
+                    {pendingCampaign.operations.map((operation, index) => (
+                      <li key={`${operation.title}-${index}`}>
+                        <span>{index + 1}</span>
+                        <div>
+                          <strong>{operation.title}</strong>
+                          <small>
+                            {operation.platform.replace('-', ' ')} ·{' '}
+                            {operation.contentType.replace('-', ' ')}
+                          </small>
+                          <p>{operation.nextAction}</p>
+                        </div>
+                      </li>
+                    ))}
+                  </ol>
+                  <p className="quick-link__recipe-confirmation">
+                    {pendingCampaign.confirmation}
+                  </p>
+                  <div className="quick-link__command-actions">
+                    <button
+                      type="button"
+                      className="button button--primary"
+                      disabled={executingAction}
+                      onClick={() => void savePendingCampaign()}
+                    >
+                      {executingAction ? (
+                        <LoaderCircle className="is-spinning" size={15} />
+                      ) : (
+                        <Check size={15} />
+                      )}
+                      Confirm full campaign
+                    </button>
+                    <button
+                      type="button"
+                      className="button button--ghost"
+                      disabled={executingAction}
+                      onClick={() => {
+                        setPendingCampaign(undefined);
+                        setNotice('Campaign dismissed. Creator Forge was not changed.');
                       }}
                     >
                       Cancel

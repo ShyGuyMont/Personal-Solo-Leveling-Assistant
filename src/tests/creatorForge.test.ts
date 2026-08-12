@@ -6,6 +6,7 @@ import {
   parseYouTubeStudioCsv,
   saveCreatorProject,
   saveCreatorSnapshot,
+  saveCreatorStudioIntelligence,
 } from '@/game/creatorForge';
 
 describe('Creator Forge', () => {
@@ -13,7 +14,37 @@ describe('Creator Forge', () => {
     await db.creatorSettings.clear();
     await db.creatorSnapshots.clear();
     await db.creatorProjects.clear();
+    await db.creatorVideoInsights.clear();
     await db.creatorSettings.put(createDefaultCreatorSettings('2026-08-12T12:00:00.000Z'));
+  });
+
+  it('builds a historical Reawakening map from three Studio windows and proven videos', async () => {
+    await saveCreatorStudioIntelligence({
+      snapshots: [
+        { periodDays: 28, views: 0, watchHours: 0, uploads: 0 },
+        { periodDays: 90, views: 30, watchHours: 2, uploads: 0 },
+        { periodDays: 365, views: 1200, watchHours: 55, uploads: 3 },
+      ],
+      topVideos: [
+        {
+          videoId: 'video-1',
+          title: 'The Old Arc',
+          periodDays: 365,
+          views: 900,
+          watchHours: 42,
+          averageViewPercentage: 58,
+        },
+      ],
+    });
+    const summary = await getCreatorForgeSummary();
+    expect(summary.snapshotsByPeriod[28]?.views).toBe(0);
+    expect(summary.snapshotsByPeriod[365]?.views).toBe(1200);
+    expect(summary.videoInsights[0]?.title).toBe('The Old Arc');
+    expect(summary.reawakening).toMatchObject({
+      state: 'dormant',
+      headline: 'This is a reawakening, not a continuation.',
+    });
+    expect(summary.reawakening.focus).toContain('The Old Arc');
   });
 
   it('tracks content from idea through publish and reports creator momentum', async () => {

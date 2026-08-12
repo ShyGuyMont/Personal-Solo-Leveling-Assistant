@@ -1,4 +1,4 @@
-import type { CreatorSnapshotSource } from '@/types/game';
+import type { CreatorSnapshotSource, CreatorVideoInsight } from '@/types/game';
 
 export interface YouTubeStudioStatus {
   configured: boolean;
@@ -26,6 +26,10 @@ export interface YouTubeStudioSyncResult {
     uploads?: number;
     note?: string;
   };
+  snapshots: Array<YouTubeStudioSyncResult['snapshot']>;
+  topVideos: Array<
+    Omit<CreatorVideoInsight, 'id' | 'capturedAt'>
+  >;
 }
 
 export class YouTubeStudioError extends Error {

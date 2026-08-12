@@ -10,7 +10,7 @@ import type {
   Settings,
 } from '@/types/game';
 
-export const SAVE_VERSION = 19;
+export const SAVE_VERSION = 20;
 export const MAX_IMPORT_BYTES = 32 * 1024 * 1024;
 const MAX_SNAPSHOTS = 5;
 const FORBIDDEN_KEYS = new Set(['__proto__', 'prototype', 'constructor']);
@@ -137,6 +137,7 @@ function migrateData(
     data.creatorSnapshots ??= [];
     data.creatorProjects ??= [];
   }
+  if (version <= 19) data.creatorVideoInsights ??= [];
   data.aiVoiceProfiles = data.aiVoiceProfiles.map((row) => {
     if (
       !isObject(row) ||
@@ -928,6 +929,36 @@ function validateData(data: Record<string, unknown[]>) {
       (row.publishedAt !== undefined && typeof row.publishedAt !== 'string')
     ) {
       throw new Error('A Creator Forge project contains an impossible value.');
+    }
+  }
+
+  for (const row of data.creatorVideoInsights) {
+    if (
+      !isObject(row) ||
+      typeof row.id !== 'string' ||
+      row.id.length > 160 ||
+      typeof row.videoId !== 'string' ||
+      !row.videoId.trim() ||
+      row.videoId.length > 100 ||
+      typeof row.title !== 'string' ||
+      !row.title.trim() ||
+      row.title.length > 200 ||
+      !Number.isInteger(row.periodDays) ||
+      Number(row.periodDays) < 1 ||
+      Number(row.periodDays) > 3650 ||
+      [
+        row.views,
+        row.watchHours,
+        row.averageViewDurationSeconds,
+        row.averageViewPercentage,
+        row.likes,
+        row.comments,
+      ].some((value) => value !== undefined && (!Number.isFinite(value) || Number(value) < 0)) ||
+      (row.averageViewPercentage !== undefined && Number(row.averageViewPercentage) > 100) ||
+      typeof row.capturedAt !== 'string' ||
+      (row.publishedAt !== undefined && typeof row.publishedAt !== 'string')
+    ) {
+      throw new Error('A Creator Forge video insight contains an impossible value.');
     }
   }
 }

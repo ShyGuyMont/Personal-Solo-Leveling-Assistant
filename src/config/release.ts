@@ -1,6 +1,6 @@
-export const APP_VERSION = '7.3.1';
-export const DATABASE_SCHEMA_VERSION = 19;
-export const SAVE_FORMAT_VERSION = 19;
+export const APP_VERSION = '7.4.0';
+export const DATABASE_SCHEMA_VERSION = 20;
+export const SAVE_FORMAT_VERSION = 20;
 
 export interface ReleaseSection {
   title: string;
@@ -9,6 +9,18 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 7.4.0 · Creator Reawakening',
+    detail:
+      'Creator Forge becomes a historical intelligence chamber that helps Vesper understand what the channel has been, diagnose the quiet season, and build the next comeback arc with the Hunter in control.',
+    points: [
+      'The secure read-only Studio Link now synchronizes 28-day, 90-day, and 365-day channel signals plus a ranked one-year Content Vault without adding any Google permissions.',
+      'History Lens lets the Hunter compare recent momentum against the deeper channel story while Vesper receives a compact evidence map of real windows and proven videos instead of guessing from one quiet month.',
+      'The Reawakening Briefing turns upload cadence, active production, and historical standouts into an honest comeback diagnosis, one strategic focus, and one immediate physical move.',
+      'A dedicated Reawakening Council opens Vesper with the live Studio evidence already in context and can prepare a complete two-to-four-week campaign for one visible confirmation before any project reaches the local board.',
+      'The Idea Lab can hand any proven video directly to Vesper for a successor concept while historical insights remain on-device, travel with the full save, and never grant upload, edit, comment, or delete access.',
+    ],
+  },
   {
     title: 'Version 7.3.1 · Creator Route',
     detail:

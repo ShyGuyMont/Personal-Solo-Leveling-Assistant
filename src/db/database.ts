@@ -19,6 +19,7 @@ import type {
   CreatorChannelSnapshot,
   CreatorProject,
   CreatorSettings,
+  CreatorVideoInsight,
   DailyMissionRecord,
   DailyCommandBriefing,
   DailyEventRecord,
@@ -108,6 +109,7 @@ export class SystemDatabase extends Dexie {
   creatorSettings!: EntityTable<CreatorSettings, 'id'>;
   creatorSnapshots!: EntityTable<CreatorChannelSnapshot, 'id'>;
   creatorProjects!: EntityTable<CreatorProject, 'id'>;
+  creatorVideoInsights!: EntityTable<CreatorVideoInsight, 'id'>;
   appMetadata!: EntityTable<AppMetadata, 'id'>;
 
   constructor(name = 'the-system-db') {
@@ -693,6 +695,16 @@ export class SystemDatabase extends Dexie {
         await metadata.put({ id: 'schema-seeded', value: 19, updatedAt: now });
         await metadata.put({ id: 'app-version', value: '7.2.0', updatedAt: now });
       });
+    this.version(20)
+      .stores({
+        creatorVideoInsights: 'id,videoId,capturedAt,views,publishedAt',
+      })
+      .upgrade(async (transaction) => {
+        const now = new Date().toISOString();
+        const metadata = transaction.table<AppMetadata, string>('appMetadata');
+        await metadata.put({ id: 'schema-seeded', value: 20, updatedAt: now });
+        await metadata.put({ id: 'app-version', value: '7.4.0', updatedAt: now });
+      });
   }
 }
 
@@ -750,6 +762,7 @@ export const TABLE_NAMES = [
   'creatorSettings',
   'creatorSnapshots',
   'creatorProjects',
+  'creatorVideoInsights',
   'appMetadata',
 ] as const;
 

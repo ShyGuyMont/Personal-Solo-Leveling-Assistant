@@ -21,6 +21,10 @@ describe('Awakened Intelligence progress context', () => {
       db.treasuryBills.clear(),
       db.treasuryDebts.clear(),
       db.treasurySavingsGoals.clear(),
+      db.creatorSettings.clear(),
+      db.creatorSnapshots.clear(),
+      db.creatorProjects.clear(),
+      db.creatorVideoInsights.clear(),
     ]);
   });
 

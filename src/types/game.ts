@@ -404,6 +404,21 @@ export interface CreatorChannelSnapshot {
   note?: string;
 }
 
+export interface CreatorVideoInsight {
+  id: string;
+  videoId: string;
+  title: string;
+  publishedAt?: string;
+  periodDays: number;
+  views?: number;
+  watchHours?: number;
+  averageViewDurationSeconds?: number;
+  averageViewPercentage?: number;
+  likes?: number;
+  comments?: number;
+  capturedAt: string;
+}
+
 export interface CreatorProject {
   id: string;
   title: string;

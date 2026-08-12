@@ -76,6 +76,7 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
     creatorSettings,
     creatorSnapshots,
     creatorProjects,
+    creatorVideoInsights,
   ] = await Promise.all([
     db.dailyReviews.where('date').aboveOrEqual(recentStart).toArray(),
     db.dailyMissions.where('date').aboveOrEqual(recentStart).toArray(),
@@ -97,11 +98,14 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
     treasurySharingAllowed ? db.treasuryDebts.toArray() : Promise.resolve([]),
     treasurySharingAllowed ? db.treasurySavingsGoals.toArray() : Promise.resolve([]),
     db.creatorSettings.get('primary'),
-    db.creatorSnapshots.orderBy('capturedAt').reverse().limit(2).toArray(),
+    db.creatorSnapshots.orderBy('capturedAt').reverse().limit(30).toArray(),
     db.creatorProjects.orderBy('updatedAt').reverse().limit(30).toArray(),
+    db.creatorVideoInsights.orderBy('views').reverse().limit(10).toArray(),
   ]);
 
   const available = source.missions.filter((mission) => mission.enabled && !mission.archived);
+  const latestCreatorSnapshot =
+    creatorSnapshots.find((snapshot) => snapshot.periodDays === 28) ?? creatorSnapshots[0];
   const commandCatalog = buildQuickLinkActionCatalog(source.missions, source.todayRecords);
   const todayKitchen = kitchen.find((session) => session.date === source.systemDate);
   const todayRecipe = todayKitchen ? getKitchenRecipe(todayKitchen.recipeId) : undefined;
@@ -387,19 +391,41 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
           currentArcFocus: creatorSettings?.currentArcFocus.slice(0, 500) ?? '',
           accountabilityMode: creatorSettings?.accountabilityMode ?? 'direct',
         },
-        latestSnapshot: creatorSnapshots[0]
+        latestSnapshot: latestCreatorSnapshot
           ? {
-              capturedAt: creatorSnapshots[0].capturedAt,
-              periodDays: creatorSnapshots[0].periodDays,
-              subscribers: creatorSnapshots[0].subscribers,
-              views: creatorSnapshots[0].views,
-              watchHours: creatorSnapshots[0].watchHours,
-              impressions: creatorSnapshots[0].impressions,
-              clickThroughRate: creatorSnapshots[0].clickThroughRate,
-              averageViewDurationSeconds: creatorSnapshots[0].averageViewDurationSeconds,
-              uploads: creatorSnapshots[0].uploads,
+              capturedAt: latestCreatorSnapshot.capturedAt,
+              periodDays: latestCreatorSnapshot.periodDays,
+              subscribers: latestCreatorSnapshot.subscribers,
+              views: latestCreatorSnapshot.views,
+              watchHours: latestCreatorSnapshot.watchHours,
+              impressions: latestCreatorSnapshot.impressions,
+              clickThroughRate: latestCreatorSnapshot.clickThroughRate,
+              averageViewDurationSeconds: latestCreatorSnapshot.averageViewDurationSeconds,
+              uploads: latestCreatorSnapshot.uploads,
             }
           : undefined,
+        historyWindows: ([28, 90, 365] as const)
+          .map((periodDays) =>
+            creatorSnapshots.find((snapshot) => snapshot.periodDays === periodDays),
+          )
+          .filter((snapshot): snapshot is NonNullable<typeof snapshot> => Boolean(snapshot))
+          .map((snapshot) => ({
+            periodDays: snapshot.periodDays,
+            views: snapshot.views,
+            watchHours: snapshot.watchHours,
+            averageViewDurationSeconds: snapshot.averageViewDurationSeconds,
+            uploads: snapshot.uploads,
+          })),
+        provenVideos: creatorVideoInsights.map((video) => ({
+          title: video.title.slice(0, 200),
+          publishedAt: video.publishedAt,
+          periodDays: video.periodDays,
+          views: video.views,
+          watchHours: video.watchHours,
+          averageViewPercentage: video.averageViewPercentage,
+          likes: video.likes,
+          comments: video.comments,
+        })),
         activeProjects: creatorProjects
           .filter((project) => project.status !== 'published' && project.status !== 'paused')
           .slice(0, 12)

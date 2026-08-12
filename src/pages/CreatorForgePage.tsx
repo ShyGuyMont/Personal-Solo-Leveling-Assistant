@@ -27,6 +27,7 @@ import {
   saveCreatorProject,
   saveCreatorSettings,
   saveCreatorSnapshot,
+  saveCreatorStudioIntelligence,
   updateCreatorProjectStatus,
   type CreatorForgeSummary,
 } from '@/game/creatorForge';
@@ -83,6 +84,7 @@ export function CreatorForgePage() {
   const [studioLink, setStudioLink] = useState<YouTubeStudioStatus>();
   const [showSnapshotForm, setShowSnapshotForm] = useState(false);
   const [showProjectForm, setShowProjectForm] = useState(false);
+  const [historyPeriod, setHistoryPeriod] = useState<28 | 90 | 365>(28);
   const [snapshot, setSnapshot] = useState({
     subscribers: '',
     views: '',
@@ -252,7 +254,10 @@ export function CreatorForgePage() {
     setStudioAction(true);
     try {
       const result = await syncYouTubeStudio();
-      await saveCreatorSnapshot(result.snapshot);
+      await saveCreatorStudioIntelligence({
+        snapshots: result.snapshots?.length ? result.snapshots : [result.snapshot],
+        topVideos: result.topVideos ?? [],
+      });
       if (!summary.settings.channelName || !summary.settings.channelUrl) {
         await saveCreatorSettings({
           ...summary.settings,
@@ -261,7 +266,7 @@ export function CreatorForgePage() {
         });
       }
       setNotice(
-        `${result.channelTitle} synchronized securely. Vesper can use the new 28-day signal immediately.`,
+        `${result.channelTitle} synchronized securely. History Lens, the Content Vault, and Vesper's evidence map are current.`,
       );
       await Promise.all([refresh(), refreshStudioLink()]);
     } catch (error) {
@@ -316,9 +321,11 @@ export function CreatorForgePage() {
     }
   }
 
-  function openVesperLink() {
+  function openVesperLink(initialDraft?: string) {
     window.dispatchEvent(
-      new CustomEvent('system:open-quick-link', { detail: { companionId: 'haven' } }),
+      new CustomEvent('system:open-quick-link', {
+        detail: { companionId: 'haven', initialDraft },
+      }),
     );
   }
 
@@ -327,6 +334,7 @@ export function CreatorForgePage() {
   }
 
   const latest = summary.latestSnapshot;
+  const historySnapshot = summary.snapshotsByPeriod[historyPeriod] ?? latest;
   return (
     <div className="page creator-forge-page">
       <Link to="/" className="back-link">
@@ -348,7 +356,7 @@ export function CreatorForgePage() {
             the sequence. Together they keep YouTube and ARC work from becoming decorative plans.
           </p>
           <div className="creator-hero__actions">
-            <button type="button" className="primary-button" onClick={openVesperLink}>
+            <button type="button" className="primary-button" onClick={() => openVesperLink()}>
               <MessageCircle size={18} /> Talk to Vesper
             </button>
             <button
@@ -388,51 +396,110 @@ export function CreatorForgePage() {
         </article>
       </section>
 
+      <section
+        className={`panel creator-reawakening creator-reawakening--${summary.reawakening.state}`}
+        data-depth-surface="hero"
+      >
+        <header className="section-header">
+          <div>
+            <p className="eyebrow">VESPER'S REAWAKENING BRIEFING</p>
+            <h2>{summary.reawakening.headline}</h2>
+            <p>{summary.reawakening.diagnosis}</p>
+          </div>
+          <span className="creator-reawakening__state">{summary.reawakening.state}</span>
+        </header>
+        <div className="creator-reawakening__grid">
+          <article>
+            <small>STRATEGIC FOCUS</small>
+            <strong>{summary.reawakening.focus}</strong>
+          </article>
+          <article>
+            <small>FIRST PHYSICAL MOVE</small>
+            <strong>{summary.reawakening.nextAction}</strong>
+          </article>
+        </div>
+        {summary.reawakening.proof.length > 0 && (
+          <div className="creator-reawakening__proof">
+            {summary.reawakening.proof.map((signal) => (
+              <span key={signal}>{signal}</span>
+            ))}
+          </div>
+        )}
+        <div className="creator-reawakening__actions">
+          <button
+            type="button"
+            className="primary-button"
+            onClick={() =>
+              openVesperLink(
+                'Vesper, build me a realistic four-week Creator Reawakening campaign from my Studio history, proven videos, active pipeline, and current focus. Ask one necessary question if my direction is missing; otherwise prepare the complete campaign for one confirmation.',
+              )
+            }
+          >
+            <Sparkles size={18} /> Enter Reawakening Council
+          </button>
+          <small>Vesper can advise freely. Nothing reaches the board until you confirm it.</small>
+        </div>
+      </section>
+
       <section className="panel creator-analytics" data-depth-surface="panel">
         <header className="section-header">
           <div>
-            <p className="eyebrow">STUDIO SIGNAL · LAST {latest?.periodDays ?? 28} DAYS</p>
+            <p className="eyebrow">HISTORY LENS · LAST {historySnapshot?.periodDays ?? 28} DAYS</p>
             <h2>{summary.settings.channelName || 'Channel command board'}</h2>
             <p>
-              {latest
-                ? `Last synchronized ${new Date(latest.capturedAt).toLocaleString()}.`
+              {historySnapshot
+                ? `Last synchronized ${new Date(historySnapshot.capturedAt).toLocaleString()}.`
                 : 'Add a manual snapshot or import a YouTube Studio CSV to establish a baseline.'}
             </p>
           </div>
           <span className="creator-source-badge">
-            {latest ? formatSnapshotSource(latest.source) : 'awaiting sync'}
+            {historySnapshot ? formatSnapshotSource(historySnapshot.source) : 'awaiting sync'}
           </span>
         </header>
+        <div className="creator-history-tabs" role="group" aria-label="Channel history period">
+          {([28, 90, 365] as const).map((period) => (
+            <button
+              key={period}
+              type="button"
+              className={historyPeriod === period ? 'is-active' : undefined}
+              disabled={!summary.snapshotsByPeriod[period]}
+              onClick={() => setHistoryPeriod(period)}
+            >
+              <strong>{period}</strong>
+              <span>DAYS</span>
+            </button>
+          ))}
+        </div>
         <div className="creator-metric-grid">
           <article>
             <Users size={18} />
             <span>Subscribers</span>
-            <strong>{formatMetric(latest?.subscribers)}</strong>
+            <strong>{formatMetric(historySnapshot?.subscribers)}</strong>
           </article>
           <article>
             <CirclePlay size={18} />
             <span>Views</span>
-            <strong>{formatMetric(latest?.views)}</strong>
+            <strong>{formatMetric(historySnapshot?.views)}</strong>
           </article>
           <article>
             <TrendingUp size={18} />
             <span>Watch hours</span>
-            <strong>{formatMetric(latest?.watchHours)}</strong>
+            <strong>{formatMetric(historySnapshot?.watchHours)}</strong>
           </article>
           <article>
             <BarChart3 size={18} />
             <span>Impressions</span>
-            <strong>{formatMetric(latest?.impressions)}</strong>
+            <strong>{formatMetric(historySnapshot?.impressions)}</strong>
           </article>
           <article>
             <Target size={18} />
             <span>CTR</span>
-            <strong>{formatMetric(latest?.clickThroughRate, '%')}</strong>
+            <strong>{formatMetric(historySnapshot?.clickThroughRate, '%')}</strong>
           </article>
           <article>
             <Video size={18} />
             <span>Avg. view</span>
-            <strong>{formatDuration(latest?.averageViewDurationSeconds)}</strong>
+            <strong>{formatDuration(historySnapshot?.averageViewDurationSeconds)}</strong>
           </article>
         </div>
         <section
@@ -602,6 +669,75 @@ export function CreatorForgePage() {
               <Save size={18} /> Synchronize signal
             </button>
           </form>
+        )}
+      </section>
+
+      <section className="panel creator-vault" data-depth-surface="panel">
+        <header className="section-header">
+          <div>
+            <p className="eyebrow">CONTENT VAULT · PROVEN SIGNALS</p>
+            <h2>Your strongest videos from the last 365 days.</h2>
+            <p>
+              These are evidence, not orders. Vesper can study what earned attention without
+              pretending the next release must copy the past.
+            </p>
+          </div>
+          <span className="creator-source-badge">READ ONLY</span>
+        </header>
+        {summary.videoInsights.length ? (
+          <div className="creator-vault__list">
+            {summary.videoInsights.map((video, index) => (
+              <article key={video.id} className="creator-vault__item">
+                <span className="creator-vault__rank">#{index + 1}</span>
+                <div className="creator-vault__copy">
+                  <h3>{video.title}</h3>
+                  <p>
+                    {formatMetric(video.views)} views · {formatMetric(video.watchHours)} watch hours
+                    {video.averageViewPercentage !== undefined
+                      ? ` · ${formatMetric(video.averageViewPercentage, '%')} viewed`
+                      : ''}
+                  </p>
+                  <small>
+                    {video.publishedAt
+                      ? `Published ${new Date(video.publishedAt).toLocaleDateString()}`
+                      : 'Publication date unavailable'}
+                  </small>
+                </div>
+                <div className="creator-vault__actions">
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    onClick={() =>
+                      openVesperLink(
+                        `Vesper, open the Idea Lab on “${video.title}.” Use its real one-year signal as evidence, tell me what audience promise may have worked, and help me design a fresh successor without copying it.`,
+                      )
+                    }
+                  >
+                    <Sparkles size={16} /> Idea Lab
+                  </button>
+                  <a
+                    className="text-link"
+                    href={`https://www.youtube.com/watch?v=${encodeURIComponent(video.videoId)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    View <ChevronRight size={15} />
+                  </a>
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div className="creator-vault__empty">
+            <CirclePlay size={26} />
+            <div>
+              <strong>The Content Vault is waiting for a secure Studio sync.</strong>
+              <p>
+                If the last year has no eligible video activity, the empty vault is still an honest
+                signal—and Vesper will build the comeback from your current focus instead.
+              </p>
+            </div>
+          </div>
         )}
       </section>
 

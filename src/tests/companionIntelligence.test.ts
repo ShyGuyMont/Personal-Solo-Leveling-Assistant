@@ -33,7 +33,7 @@ interface CompanionIntelligenceModule {
     payload: { audience: string; message: string },
     env?: Record<string, string>,
   ) => { route: string; model: string; reasoningEffort: string };
-  buildYouTubeAnalyticsWindow: (now?: Date) => {
+  buildYouTubeAnalyticsWindow: (now?: Date, periodDays?: number) => {
     startDate: string;
     endDate: string;
     periodDays: number;
@@ -70,6 +70,16 @@ describe('Companion Soulprint intelligence', () => {
       startDate: '2026-07-16',
       endDate: '2026-08-12',
       periodDays: 28,
+    });
+  });
+
+  it('builds the inclusive one-year History Lens window without changing permissions', () => {
+    expect(
+      intelligence.buildYouTubeAnalyticsWindow(new Date('2026-08-12T23:59:59.000Z'), 365),
+    ).toEqual({
+      startDate: '2025-08-13',
+      endDate: '2026-08-12',
+      periodDays: 365,
     });
   });
 
@@ -120,6 +130,13 @@ describe('Companion Soulprint intelligence', () => {
     expect(intelligence.baseInstructions).toContain('classification roadmap');
     expect(intelligence.baseInstructions).toContain('Selah may recommend Bible passages');
     expect(intelligence.baseInstructions).toContain('Cassian may analyze only');
+  });
+
+  it('requires one visible confirmation for a complete Reawakening campaign', () => {
+    const instructions = intelligence.buildSystemInstructions('haven', ['haven'], 'propose');
+    expect(instructions).toContain('2 to 4 weeks');
+    expect(instructions).toContain('Never return both content and campaign proposals');
+    expect(instructions).toContain('only a preview until the Hunter confirms the entire sequence once');
   });
 
   it('routes casual direct talk economically and deeper counsel to Terra', () => {
