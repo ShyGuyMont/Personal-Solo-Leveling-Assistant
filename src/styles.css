@@ -12063,10 +12063,40 @@ html[data-motion='reduced'] .realm-portal:focus-visible {
   letter-spacing: 0.1em;
 }
 
+.header-status-link {
+  display: inline-grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  place-items: center;
+  color: var(--muted);
+  background: color-mix(in srgb, var(--realm-accent) 5%, rgba(5, 9, 13, 0.72));
+  border: 1px solid color-mix(in srgb, var(--realm-accent) 19%, transparent);
+  border-radius: 50%;
+  transition:
+    color 160ms ease,
+    background 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
 .header-help:hover,
+.header-status-link:hover,
+.header-status-link[aria-current='page'],
 .header-ai-link:hover,
 .header-ai-link[aria-current='page'] {
   color: var(--realm-accent);
+}
+
+.header-status-link:hover,
+.header-status-link:focus-visible,
+.header-status-link[aria-current='page'] {
+  background: color-mix(in srgb, var(--realm-accent) 13%, rgba(5, 9, 13, 0.82));
+  border-color: color-mix(in srgb, var(--realm-accent) 48%, transparent);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--realm-accent) 13%, transparent);
+  outline: none;
+  transform: translateY(-1px);
 }
 
 .header-ai-link:hover,

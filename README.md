@@ -70,6 +70,13 @@ upload, edit, delete, comment, or manage the channel, and a visible disconnect a
 link while preserving already-synchronized local snapshots. Manual entry and CSV import remain
 available for reach impressions, thumbnail click-through rate, and fully offline tracking.
 
+## Version 7.3.1 · Creator Route
+
+Creator Forge now occupies the persistent Creator slot in the bottom navigation, making Vesper,
+channel signals, and the production pipeline one tap away. Status remains fully available through
+the restored crown control in the top command row, preserving Class progression without spending a
+primary daily-navigation slot. This is a navigation-only update and changes no campaign data.
+
 ## Version 6.3.0 · Stillpoint Protocol
 
 Version 6.3 welcomes **Mira, The Stillpoint**, as the Training Hall’s third commander. Recovery is

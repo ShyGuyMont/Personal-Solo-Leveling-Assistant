@@ -4,12 +4,13 @@ import {
   CircleGauge,
   CircleHelp,
   ChefHat,
+  Crown,
   Dumbbell,
   ListChecks,
   MessagesSquare,
   Mic,
-  Shield,
   WalletCards,
+  Video,
 } from 'lucide-react';
 import { lazy, Suspense, useEffect, useRef, useState, type ReactNode } from 'react';
 import { CompanionPresence, RealmTransition, SystemHud } from '@/components/LivingSystemLayer';
@@ -29,7 +30,7 @@ import { primeAudioOutput } from '@/utils/audio';
 const NAV = [
   { to: '/', label: 'System', icon: CircleGauge },
   { to: '/missions', label: 'Missions', icon: ListChecks },
-  { to: '/status', label: 'Status', icon: Shield },
+  { to: '/creator-forge', label: 'Creator', icon: Video },
   { to: '/training-hall', label: 'Training', icon: Dumbbell },
   { to: '/sanctuary', label: 'Sanctuary', icon: BookHeart },
   { to: '/kitchen', label: 'Kitchen', icon: ChefHat },
@@ -197,6 +198,15 @@ export function AppShell({ children }: { children: ReactNode }) {
           >
             <CompanionQuickLink />
           </Suspense>
+          <NavLink
+            to="/status"
+            className="header-status-link"
+            aria-label="Open Status and Class progression"
+            title="Status and Class progression"
+          >
+            <Crown size={19} strokeWidth={1.8} aria-hidden="true" />
+            <span className="sr-only">Status</span>
+          </NavLink>
           <NavLink to="/about" className="header-help" aria-label="About and help">
             <CircleHelp size={20} />
             <span>HELP</span>

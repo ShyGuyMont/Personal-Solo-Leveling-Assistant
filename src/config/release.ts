@@ -1,4 +1,4 @@
-export const APP_VERSION = '7.3.0';
+export const APP_VERSION = '7.3.1';
 export const DATABASE_SCHEMA_VERSION = 19;
 export const SAVE_FORMAT_VERSION = 19;
 
@@ -9,6 +9,16 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 7.3.1 · Creator Route',
+    detail:
+      'Creator Forge becomes a primary daily destination while Status returns to the compact crown control in the top command row.',
+    points: [
+      'Creator Forge replaces Status in the persistent bottom navigation so channel signals, production operations, and Vesper are always one tap away.',
+      'The crown returns as a compact top Status and Class-progression control that remains clear without overcrowding the mobile header.',
+      'Every destination, progression record, Studio connection, and offline campaign behavior remains unchanged; this patch only improves navigation priority.',
+    ],
+  },
   {
     title: 'Version 7.3.0 · Studio Link',
     detail:

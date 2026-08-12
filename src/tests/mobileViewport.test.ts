@@ -26,6 +26,9 @@ describe('mobile keyboard viewport safety', () => {
   it('keeps AI Headquarters beside the separate Quick Link control', () => {
     expect(appShell).toContain('Open AI Headquarters');
     expect(appShell).toContain('<CompanionQuickLink />');
+    expect(appShell).toContain('Open Status and Class progression');
+    expect(appShell).toContain("{ to: '/creator-forge', label: 'Creator', icon: Video }");
+    expect(appShell).not.toContain("{ to: '/status', label: 'Status'");
   });
 
   it('mounts the voice sheet above the sticky header with its own touch scrolling', () => {
@@ -36,6 +39,6 @@ describe('mobile keyboard viewport safety', () => {
   });
 
   it('never lets the offline navigation fallback intercept secure API routes', () => {
-    expect(viteConfig).toContain("navigateFallbackDenylist: [/^\\/api\\//]");
+    expect(viteConfig).toContain('navigateFallbackDenylist: [/^\\/api\\//]');
   });
 });
