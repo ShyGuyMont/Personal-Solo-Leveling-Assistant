@@ -2,7 +2,7 @@ import { KITCHEN_RECIPES } from '@/config/kitchen';
 import { db, TABLE_NAMES } from '@/db/database';
 import type { BackupSnapshot, Profile, SaveFile, Settings, AccountProgression } from '@/types/game';
 
-export const SAVE_VERSION = 15;
+export const SAVE_VERSION = 16;
 export const MAX_IMPORT_BYTES = 32 * 1024 * 1024;
 const MAX_SNAPSHOTS = 5;
 const FORBIDDEN_KEYS = new Set(['__proto__', 'prototype', 'constructor']);
@@ -120,6 +120,10 @@ function migrateData(
   if (version <= 14) {
     data.aiMemories ??= [];
   }
+  if (version <= 15) {
+    data.aiVoiceProfiles ??= [];
+    data.aiUsageRecords ??= [];
+  }
   const migrationTime = new Date().toISOString();
   if (!data.treasurySettings.some((row) => isObject(row) && row.id === 'primary')) {
     data.treasurySettings.push({
@@ -180,6 +184,10 @@ function migrateData(
         aiLinkMode: 'offline',
         aiDataSharingAcknowledged: false,
         aiRelationshipMemoryEnabled: false,
+        aiVoiceOutputEnabled: false,
+        aiVoiceAutoPlay: false,
+        aiVoiceDisclosureAcknowledged: false,
+        aiUsageWarningUsd: 5,
         ...row,
         enabledCompanionIds: ['snow', ...withMira.filter((id) => id !== 'snow')],
       };
@@ -219,6 +227,16 @@ function validateData(data: Record<string, unknown[]>) {
   }
   if (typeof settings.aiRelationshipMemoryEnabled !== 'boolean') {
     throw new Error('The Bond Memory setting is not valid.');
+  }
+  if (
+    typeof settings.aiVoiceOutputEnabled !== 'boolean' ||
+    typeof settings.aiVoiceAutoPlay !== 'boolean' ||
+    typeof settings.aiVoiceDisclosureAcknowledged !== 'boolean' ||
+    !Number.isFinite(settings.aiUsageWarningUsd) ||
+    settings.aiUsageWarningUsd < 0 ||
+    settings.aiUsageWarningUsd > 1_000
+  ) {
+    throw new Error('The Voice Link setting is not valid.');
   }
   for (const key of [
     'level',
@@ -310,6 +328,82 @@ function validateData(data: Record<string, unknown[]>) {
       !Number.isFinite(Date.parse(row.updatedAt))
     ) {
       throw new Error('A Bond Memory record contains an impossible value.');
+    }
+  }
+
+  const aiVoiceNames = new Set([
+    'alloy',
+    'ash',
+    'ballad',
+    'coral',
+    'echo',
+    'fable',
+    'nova',
+    'onyx',
+    'sage',
+    'shimmer',
+    'verse',
+    'marin',
+    'cedar',
+  ]);
+  const aiVoiceAccents = new Set([
+    'natural',
+    'general-american',
+    'british',
+    'irish',
+    'australian',
+    'caribbean',
+    'west-african',
+    'southern-us',
+  ]);
+  for (const row of data.aiVoiceProfiles) {
+    if (
+      !isObject(row) ||
+      !aiCompanionIds.has(String(row.id)) ||
+      !aiVoiceNames.has(String(row.voice)) ||
+      !aiVoiceAccents.has(String(row.accent)) ||
+      !Number.isFinite(row.pace) ||
+      Number(row.pace) < 0.8 ||
+      Number(row.pace) > 1.2 ||
+      !Number.isInteger(row.warmth) ||
+      Number(row.warmth) < 1 ||
+      Number(row.warmth) > 5 ||
+      !Number.isInteger(row.energy) ||
+      Number(row.energy) < 1 ||
+      Number(row.energy) > 5 ||
+      !Number.isInteger(row.expressiveness) ||
+      Number(row.expressiveness) < 1 ||
+      Number(row.expressiveness) > 5 ||
+      typeof row.updatedAt !== 'string' ||
+      !Number.isFinite(Date.parse(row.updatedAt))
+    ) {
+      throw new Error('A Voice Forge profile contains an impossible value.');
+    }
+  }
+
+  const aiUsageKinds = new Set(['text', 'transcription', 'speech']);
+  for (const row of data.aiUsageRecords) {
+    if (
+      !isObject(row) ||
+      !aiUsageKinds.has(String(row.kind)) ||
+      typeof row.sessionId !== 'string' ||
+      !row.sessionId.trim() ||
+      typeof row.createdAt !== 'string' ||
+      !Number.isFinite(Date.parse(row.createdAt)) ||
+      typeof row.model !== 'string' ||
+      !row.model.trim() ||
+      (row.companionId !== undefined && !aiCompanionIds.has(String(row.companionId))) ||
+      [
+        row.inputTokens,
+        row.outputTokens,
+        row.totalTokens,
+        row.characters,
+        row.audioSeconds,
+        row.estimatedCostUsd,
+      ].some((value) => !Number.isFinite(value) || Number(value) < 0) ||
+      typeof row.exactUsage !== 'boolean'
+    ) {
+      throw new Error('An AI usage record contains an impossible value.');
     }
   }
 

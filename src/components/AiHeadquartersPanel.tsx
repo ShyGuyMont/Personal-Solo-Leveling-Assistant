@@ -3,20 +3,27 @@ import {
   BrainCircuit,
   Check,
   ChevronDown,
+  Headphones,
   LoaderCircle,
   LockKeyhole,
   MessageCircleMore,
+  Mic,
+  Pause,
+  Play,
   Plus,
   Radio,
   Send,
   ShieldCheck,
+  SkipForward,
   Sparkles,
+  Square,
   Trash2,
   Users,
   Wifi,
   WifiOff,
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { AiVoiceLinkPanel } from '@/components/AiVoiceLinkPanel';
 import { COMPANIONS, getCompanion, getCompanionImage } from '@/config/companions';
 import { db } from '@/db/database';
 import {
@@ -37,6 +44,7 @@ import {
   type AiProgressContext,
 } from '@/services/aiHeadquarters';
 import { useGameStore } from '@/store/useGameStore';
+import { useAiVoiceLink } from '@/hooks/useAiVoiceLink';
 import { formatClassName } from '@/utils/format';
 import { scrollChatViewportToBottom } from '@/utils/scroll';
 import type { AiConversation, AiConversationAudience, AiRelationshipMemory } from '@/types/game';
@@ -55,6 +63,13 @@ export function AiHeadquartersPanel() {
   const [memoryOpen, setMemoryOpen] = useState(false);
   const [deviceOnline, setDeviceOnline] = useState(navigator.onLine);
   const messageListRef = useRef<HTMLDivElement>(null);
+  const voiceLink = useAiVoiceLink({
+    settings,
+    refresh,
+    onTranscript: (text) =>
+      setDraft((current) => `${current.trim()}${current.trim() ? ' ' : ''}${text}`.slice(0, 4_000)),
+    onNotice: setNotice,
+  });
 
   const activeConversation = conversations.find((item) => item.id === activeId);
   const enabledCompanions = useMemo(() => {
@@ -127,6 +142,16 @@ export function AiHeadquartersPanel() {
   const currentProgression = progression;
   const currentConversation = activeConversation;
   const currentSettings = settings;
+  let latestHunterIndex = -1;
+  for (let index = currentConversation.messages.length - 1; index >= 0; index -= 1) {
+    if (currentConversation.messages[index].role === 'hunter') {
+      latestHunterIndex = index;
+      break;
+    }
+  }
+  const latestCompanionMessages = currentConversation.messages
+    .slice(latestHunterIndex + 1)
+    .filter((message) => message.role === 'companion' && message.companionId);
 
   const onlineMode = settings.aiLinkMode === 'online' && settings.aiDataSharingAcknowledged;
   const activeCompanion =
@@ -294,6 +319,7 @@ export function AiHeadquartersPanel() {
         history: currentConversation.messages,
         context: buildProgressContext(),
       });
+      void voiceLink.trackTextUsage(result).catch(() => undefined);
       const memoryAdditions = currentSettings.aiRelationshipMemoryEnabled
         ? await saveAiMemoryCandidates(
             result.memoryCandidates,
@@ -302,18 +328,19 @@ export function AiHeadquartersPanel() {
           )
         : [];
       const replyTime = new Date().toISOString();
+      const replyMessages = result.replies.map((reply) =>
+        createCompanionMessage(reply.companionId, reply.message, replyTime),
+      );
       const completedConversation: AiConversation = {
         ...pendingConversation,
         title: result.title,
         updatedAt: replyTime,
-        messages: [
-          ...pendingConversation.messages,
-          ...result.replies.map((reply) =>
-            createCompanionMessage(reply.companionId, reply.message, replyTime),
-          ),
-        ],
+        messages: [...pendingConversation.messages, ...replyMessages],
       };
       await updateConversation(completedConversation);
+      if (currentSettings.aiVoiceOutputEnabled && currentSettings.aiVoiceAutoPlay) {
+        void voiceLink.playMessages(replyMessages);
+      }
       if (memoryAdditions.length) {
         await refreshMemoryLedger();
         setMemoryOpen(true);
@@ -480,6 +507,22 @@ export function AiHeadquartersPanel() {
         </section>
       )}
 
+      {onlineMode && (
+        <AiVoiceLinkPanel
+          settings={currentSettings}
+          profiles={voiceLink.profiles}
+          usage={voiceLink.usage}
+          voiceBusyMessageId={voiceLink.voiceBusyMessageId}
+          onEnable={voiceLink.enableVoiceOutput}
+          onToggleOutput={voiceLink.setVoiceOutputEnabled}
+          onToggleAutoPlay={voiceLink.setAutoPlay}
+          onSetWarning={voiceLink.setUsageWarning}
+          onSaveProfile={voiceLink.saveProfile}
+          onResetProfile={voiceLink.resetProfile}
+          onPreview={voiceLink.previewProfile}
+        />
+      )}
+
       <div className="ai-headquarters__layout">
         <aside className="ai-conversation-list" aria-label="AI conversation history">
           <button
@@ -550,7 +593,7 @@ export function AiHeadquartersPanel() {
 
           <div className="ai-message-stage">
             <header>
-              <div>
+              <div className="ai-message-stage__identity">
                 {activeCompanion ? (
                   <img src={getCompanionImage(activeCompanion.image)} alt="" />
                 ) : (
@@ -566,9 +609,37 @@ export function AiHeadquartersPanel() {
                   </small>
                 </div>
               </div>
-              <span>
-                <MessageCircleMore size={14} /> LIVING BOND ACTIVE
-              </span>
+              <div className="ai-message-stage__signals">
+                <span>
+                  <MessageCircleMore size={14} /> LIVING BOND ACTIVE
+                </span>
+                {latestCompanionMessages.length > 0 && currentSettings.aiVoiceOutputEnabled && (
+                  <div className="ai-roundtable-controls">
+                    {voiceLink.roundtableActive ? (
+                      <>
+                        <button type="button" onClick={voiceLink.togglePause}>
+                          {voiceLink.playbackPaused ? <Play size={14} /> : <Pause size={14} />}
+                          {voiceLink.playbackPaused ? 'Resume' : 'Pause'}
+                        </button>
+                        <button type="button" onClick={voiceLink.skipCurrent}>
+                          <SkipForward size={14} /> Skip
+                        </button>
+                        <button type="button" onClick={voiceLink.stopPlayback}>
+                          <Square size={13} /> Stop
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => voiceLink.playMessages(latestCompanionMessages)}
+                      >
+                        <Headphones size={14} />
+                        {latestCompanionMessages.length > 1 ? 'Play council' : 'Play reply'}
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
             </header>
 
             <div ref={messageListRef} className="ai-message-stage__messages" aria-live="polite">
@@ -606,6 +677,34 @@ export function AiHeadquartersPanel() {
                     <div>
                       <span>{companion?.name ?? profile.displayName}</span>
                       <p>{message.message}</p>
+                      {companion && currentSettings.aiVoiceOutputEnabled && (
+                        <button
+                          className="ai-message__voice"
+                          type="button"
+                          onClick={() =>
+                            voiceLink.playingMessageId === message.id
+                              ? voiceLink.stopPlayback()
+                              : voiceLink.playMessages([message])
+                          }
+                          disabled={
+                            Boolean(voiceLink.voiceBusyMessageId) &&
+                            voiceLink.voiceBusyMessageId !== message.id
+                          }
+                        >
+                          {voiceLink.voiceBusyMessageId === message.id ? (
+                            <LoaderCircle className="is-spinning" size={14} />
+                          ) : voiceLink.playingMessageId === message.id ? (
+                            <Square size={12} />
+                          ) : (
+                            <Play size={13} />
+                          )}
+                          {voiceLink.voiceBusyMessageId === message.id
+                            ? 'Forging voice…'
+                            : voiceLink.playingMessageId === message.id
+                              ? 'Stop'
+                              : 'Play voice'}
+                        </button>
+                      )}
                     </div>
                   </article>
                 );
@@ -652,7 +751,29 @@ export function AiHeadquartersPanel() {
                 aria-label="Message Headquarters"
               />
               <div>
-                <small>{draft.length.toLocaleString()} / 4,000 · Stored locally</small>
+                <small>
+                  {voiceLink.recording
+                    ? `Listening · ${voiceLink.recordingSeconds.toFixed(1)}s / 60s`
+                    : voiceLink.transcribing
+                      ? 'Transcribing voice…'
+                      : `${draft.length.toLocaleString()} / 4,000 · Stored locally`}
+                </small>
+                <button
+                  className={`ai-composer__mic ${voiceLink.recording ? 'is-recording' : ''}`}
+                  type="button"
+                  onClick={voiceLink.recording ? voiceLink.stopRecording : voiceLink.startRecording}
+                  disabled={!linkReady || sending || voiceLink.transcribing}
+                  aria-label={voiceLink.recording ? 'Stop recording' : 'Speak message'}
+                >
+                  {voiceLink.transcribing ? (
+                    <LoaderCircle className="is-spinning" size={17} />
+                  ) : voiceLink.recording ? (
+                    <Square size={14} />
+                  ) : (
+                    <Mic size={17} />
+                  )}
+                  {voiceLink.recording ? 'Stop' : 'Speak'}
+                </button>
                 <button
                   className="button button--primary"
                   type="button"

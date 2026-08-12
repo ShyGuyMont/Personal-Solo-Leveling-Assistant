@@ -1,6 +1,6 @@
-export const APP_VERSION = '6.6.1';
-export const DATABASE_SCHEMA_VERSION = 15;
-export const SAVE_FORMAT_VERSION = 15;
+export const APP_VERSION = '6.7.0';
+export const DATABASE_SCHEMA_VERSION = 16;
+export const SAVE_FORMAT_VERSION = 16;
 
 export interface ReleaseSection {
   title: string;
@@ -9,6 +9,18 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 6.7.0 · Voice Link',
+    detail:
+      'The ten living Soulprints can now listen, speak, perform a full Party Council, and show the Hunter exactly how this System is using the online link.',
+    points: [
+      'Tap-to-record speech is securely transcribed into the normal editable composer, so the Hunter always reviews the words before choosing to send them.',
+      'Every companion receives a distinct canon voice, audition line, performance direction, pace, warmth, energy, and expression profile; Voice Forge can adjust the base voice and accent or restore the original Soulprint at any time.',
+      'Direct replies and full Party Council exchanges can be voiced in sequence with replay, pause, skip, stop, manual playback, or optional automatic playback while all text remains visible.',
+      'A local usage ledger shows session, daily, and monthly app-only call, token, speech, and transcription estimates with a configurable warning line; OpenAI remains the authoritative billing source.',
+      'Voice output is separately opt-in with a clear AI-generated-voice disclosure, credentials remain behind the private gateway, and the complete offline campaign continues working without the voice layer.',
+    ],
+  },
   {
     title: 'Version 6.6.1 · Command Link',
     detail:

@@ -18,6 +18,8 @@ interface CompanionIntelligenceModule {
   COMPANION_INTELLIGENCE_VERSION: string;
   companionIds: string[];
   companionProfiles: Record<string, Soulprint>;
+  aiVoiceNames: string[];
+  aiVoiceAccents: Record<string, string>;
   baseInstructions: string;
   formatCompanionProfiles: () => string;
   buildAudienceInstruction: (audience: string, enabledIds?: string[]) => string;
@@ -60,6 +62,8 @@ describe('Companion Soulprint intelligence', () => {
       performances.add(profile.performance);
     }
     expect(performances.size).toBe(10);
+    expect(intelligence.aiVoiceNames).toHaveLength(13);
+    expect(intelligence.aiVoiceAccents.natural).toMatch(/without imposing/i);
   });
 
   it('keeps factual answers direct while preserving continuity and casual personality', () => {
@@ -93,7 +97,95 @@ describe('Companion Soulprint intelligence', () => {
       ok: true,
       configured: true,
       intelligenceVersion: intelligence.COMPANION_INTELLIGENCE_VERSION,
+      speechModel: 'gpt-4o-mini-tts',
+      transcriptionModel: 'gpt-4o-transcribe',
     });
+  });
+
+  it('forges speech from the selected soulprint without exposing the API key', async () => {
+    let openAiBody: Record<string, unknown> | undefined;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_url: string, init: RequestInit) => {
+        openAiBody = JSON.parse(String(init.body)) as Record<string, unknown>;
+        return new Response(new Uint8Array([1, 2, 3]), {
+          status: 200,
+          headers: { 'content-type': 'audio/mpeg' },
+        });
+      }),
+    );
+
+    const response = await intelligence.default.fetch(
+      new Request('https://system.test/api/ai/speech', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', origin: 'https://system.test' },
+        body: JSON.stringify({
+          companionId: 'ember',
+          text: 'One move. Right now.',
+          voice: 'nova',
+          accent: 'natural',
+          pace: 1.1,
+          warmth: 2,
+          energy: 5,
+          expressiveness: 5,
+        }),
+      }),
+      { OPENAI_API_KEY: 'test-key' },
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('x-ai-model')).toBe('gpt-4o-mini-tts');
+    expect(openAiBody).toMatchObject({
+      model: 'gpt-4o-mini-tts',
+      voice: 'nova',
+      input: 'One move. Right now.',
+      response_format: 'mp3',
+    });
+    expect(String(openAiBody?.instructions)).toContain('Ember, The Ignition');
+    expect(String(openAiBody?.instructions)).toContain('without imposing a regional accent');
+    expect(JSON.stringify(openAiBody)).not.toContain('test-key');
+  });
+
+  it('transcribes a bounded microphone recording with app-only usage metadata', async () => {
+    let openAiForm: FormData | undefined;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_url: string, init: RequestInit) => {
+        openAiForm = init.body as FormData;
+        return new Response(
+          JSON.stringify({
+            text: 'How is everyone doing?',
+            usage: { input_tokens: 120, output_tokens: 8, total_tokens: 128 },
+          }),
+          { status: 200, headers: { 'content-type': 'application/json' } },
+        );
+      }),
+    );
+    const form = new FormData();
+    form.append(
+      'audio',
+      new File([new Uint8Array([1, 2, 3])], 'voice.webm', { type: 'audio/webm' }),
+    );
+    form.append('durationSeconds', '3.5');
+
+    const transcriptionRequest = {
+      url: 'https://system.test/api/ai/transcribe',
+      method: 'POST',
+      headers: new Headers({ origin: 'https://system.test' }),
+      formData: async () => form,
+    } as Request;
+    const response = await intelligence.default.fetch(transcriptionRequest, {
+      OPENAI_API_KEY: 'test-key',
+    });
+    const payload = (await response.json()) as Record<string, unknown>;
+    expect(response.status).toBe(200);
+    expect(payload).toMatchObject({
+      text: 'How is everyone doing?',
+      model: 'gpt-4o-transcribe',
+      audioSeconds: 3.5,
+    });
+    expect(openAiForm?.get('model')).toBe('gpt-4o-transcribe');
+    expect(payload.usage).toMatchObject({ totalTokens: 128, exact: true });
   });
 
   it('places the selected soulprint above the Hunter message in the OpenAI request', async () => {

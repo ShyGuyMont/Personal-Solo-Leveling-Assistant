@@ -1,6 +1,7 @@
 import type {
   AiConversationAudience,
   AiConversationMessage,
+  AiVoiceProfile,
   CompanionId,
   Focus,
   LocalDateKey,
@@ -49,9 +50,12 @@ export interface AiLinkStatus {
   configured: boolean;
   model?: string;
   intelligenceVersion?: string;
+  speechModel?: string;
+  transcriptionModel?: string;
 }
 
 export interface AiHeadquartersReply {
+  model: string;
   title: string;
   replies: Array<{
     companionId: CompanionId;
@@ -66,6 +70,27 @@ export interface AiHeadquartersReply {
     outputTokens: number;
     totalTokens: number;
   };
+}
+
+export interface AiTranscriptionResult {
+  text: string;
+  model: string;
+  audioSeconds: number;
+  estimatedCostUsd: number;
+  usage: {
+    inputTokens: number;
+    outputTokens: number;
+    totalTokens: number;
+    exact: boolean;
+  };
+}
+
+export interface AiSpeechResult {
+  audio: Blob;
+  model: string;
+  characters: number;
+  estimatedAudioSeconds: number;
+  estimatedCostUsd: number;
 }
 
 export class AiLinkError extends Error {
@@ -97,6 +122,9 @@ export async function getAiLinkStatus(): Promise<AiLinkStatus> {
       model: typeof payload?.model === 'string' ? payload.model : undefined,
       intelligenceVersion:
         typeof payload?.intelligenceVersion === 'string' ? payload.intelligenceVersion : undefined,
+      speechModel: typeof payload?.speechModel === 'string' ? payload.speechModel : undefined,
+      transcriptionModel:
+        typeof payload?.transcriptionModel === 'string' ? payload.transcriptionModel : undefined,
     };
   } catch {
     return { ok: false, configured: false };
@@ -151,8 +179,109 @@ export async function requestAiHeadquartersReply(input: {
 
   return {
     ...(payload as unknown as AiHeadquartersReply),
+    model: typeof payload.model === 'string' ? payload.model : 'unknown',
     memoryCandidates: Array.isArray(payload.memoryCandidates)
       ? (payload.memoryCandidates as AiHeadquartersReply['memoryCandidates'])
       : [],
+  };
+}
+
+export async function requestAiTranscription(input: {
+  audio: Blob;
+  fileName: string;
+  audioSeconds: number;
+}): Promise<AiTranscriptionResult> {
+  const form = new FormData();
+  form.append('audio', input.audio, input.fileName);
+  form.append('durationSeconds', String(input.audioSeconds));
+  let response: Response;
+  try {
+    response = await fetch('/api/ai/transcribe', {
+      method: 'POST',
+      headers: { accept: 'application/json' },
+      body: form,
+    });
+  } catch {
+    throw new AiLinkError(
+      'The microphone recording is safe, but the transcription link could not be reached.',
+      'network',
+    );
+  }
+
+  const payload = await readJson(response);
+  if (!response.ok) {
+    throw new AiLinkError(
+      typeof payload?.message === 'string'
+        ? payload.message
+        : 'The voice transmission could not be transcribed.',
+      typeof payload?.code === 'string' ? payload.code : 'transcription-failed',
+    );
+  }
+  if (!payload || typeof payload.text !== 'string' || !payload.text.trim()) {
+    throw new AiLinkError('No clear speech was detected in that recording.', 'empty-transcript');
+  }
+  const usage =
+    payload.usage && typeof payload.usage === 'object'
+      ? (payload.usage as Record<string, unknown>)
+      : {};
+  return {
+    text: payload.text.trim(),
+    model: typeof payload.model === 'string' ? payload.model : 'gpt-4o-transcribe',
+    audioSeconds: Number(payload.audioSeconds ?? input.audioSeconds) || input.audioSeconds,
+    estimatedCostUsd: Number(payload.estimatedCostUsd ?? 0) || 0,
+    usage: {
+      inputTokens: Number(usage.inputTokens ?? 0) || 0,
+      outputTokens: Number(usage.outputTokens ?? 0) || 0,
+      totalTokens: Number(usage.totalTokens ?? 0) || 0,
+      exact: usage.exact === true,
+    },
+  };
+}
+
+export async function requestAiSpeech(input: {
+  companionId: CompanionId;
+  text: string;
+  profile: AiVoiceProfile;
+}): Promise<AiSpeechResult> {
+  let response: Response;
+  try {
+    response = await fetch('/api/ai/speech', {
+      method: 'POST',
+      headers: {
+        accept: 'audio/mpeg',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        companionId: input.companionId,
+        text: input.text.slice(0, 4_000),
+        voice: input.profile.voice,
+        accent: input.profile.accent,
+        pace: input.profile.pace,
+        warmth: input.profile.warmth,
+        energy: input.profile.energy,
+        expressiveness: input.profile.expressiveness,
+      }),
+    });
+  } catch {
+    throw new AiLinkError('The companion voice link could not be reached.', 'network');
+  }
+
+  if (!response.ok) {
+    const payload = await readJson(response);
+    throw new AiLinkError(
+      typeof payload?.message === 'string'
+        ? payload.message
+        : 'That companion could not open their voice channel.',
+      typeof payload?.code === 'string' ? payload.code : 'speech-failed',
+    );
+  }
+  const audio = await response.blob();
+  if (!audio.size) throw new AiLinkError('The voice channel returned no audio.', 'empty-audio');
+  return {
+    audio,
+    model: response.headers.get('x-ai-model') ?? 'unknown',
+    characters: Number(response.headers.get('x-ai-characters') ?? input.text.length),
+    estimatedAudioSeconds: Number(response.headers.get('x-ai-audio-seconds') ?? 0),
+    estimatedCostUsd: Number(response.headers.get('x-ai-estimated-cost-usd') ?? 0),
   };
 }

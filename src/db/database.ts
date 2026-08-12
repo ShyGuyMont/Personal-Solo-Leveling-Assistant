@@ -4,6 +4,8 @@ import type {
   Achievement,
   AiConversation,
   AiRelationshipMemory,
+  AiUsageRecord,
+  AiVoiceProfile,
   ArcMilestone,
   AuditEntry,
   AppMetadata,
@@ -98,6 +100,8 @@ export class SystemDatabase extends Dexie {
   sanctuarySessions!: EntityTable<SanctuarySession, 'id'>;
   aiConversations!: EntityTable<AiConversation, 'id'>;
   aiMemories!: EntityTable<AiRelationshipMemory, 'id'>;
+  aiVoiceProfiles!: EntityTable<AiVoiceProfile, 'id'>;
+  aiUsageRecords!: EntityTable<AiUsageRecord, 'id'>;
   appMetadata!: EntityTable<AppMetadata, 'id'>;
 
   constructor(name = 'the-system-db') {
@@ -587,6 +591,27 @@ export class SystemDatabase extends Dexie {
         await metadata.put({ id: 'schema-seeded', value: 15, updatedAt: now });
         await metadata.put({ id: 'app-version', value: '6.6.0', updatedAt: now });
       });
+    this.version(16)
+      .stores({
+        aiVoiceProfiles: 'id,voice,accent,updatedAt',
+        aiUsageRecords: 'id,kind,sessionId,createdAt,model,companionId',
+      })
+      .upgrade(async (transaction) => {
+        const now = new Date().toISOString();
+        const settings = transaction.table<Settings, string>('settings');
+        const current = await settings.get('primary');
+        if (current) {
+          await settings.update('primary', {
+            aiVoiceOutputEnabled: current.aiVoiceOutputEnabled ?? false,
+            aiVoiceAutoPlay: current.aiVoiceAutoPlay ?? false,
+            aiVoiceDisclosureAcknowledged: current.aiVoiceDisclosureAcknowledged ?? false,
+            aiUsageWarningUsd: current.aiUsageWarningUsd ?? 5,
+          });
+        }
+        const metadata = transaction.table<AppMetadata, string>('appMetadata');
+        await metadata.put({ id: 'schema-seeded', value: 16, updatedAt: now });
+        await metadata.put({ id: 'app-version', value: '6.7.0', updatedAt: now });
+      });
   }
 }
 
@@ -639,6 +664,8 @@ export const TABLE_NAMES = [
   'sanctuarySessions',
   'aiConversations',
   'aiMemories',
+  'aiVoiceProfiles',
+  'aiUsageRecords',
   'appMetadata',
 ] as const;
 

@@ -4,7 +4,7 @@ const jsonHeaders = {
   'x-content-type-options': 'nosniff',
 };
 
-export const COMPANION_INTELLIGENCE_VERSION = 'living-bonds-2';
+export const COMPANION_INTELLIGENCE_VERSION = 'voice-link-3';
 
 export const companionIds = [
   'snow',
@@ -195,6 +195,40 @@ export const companionProfiles = {
   },
 };
 
+export const aiVoiceNames = [
+  'alloy',
+  'ash',
+  'ballad',
+  'coral',
+  'echo',
+  'fable',
+  'nova',
+  'onyx',
+  'sage',
+  'shimmer',
+  'verse',
+  'marin',
+  'cedar',
+];
+
+export const aiVoiceAccents = {
+  natural: 'Use the base voice naturally without imposing a regional accent.',
+  'general-american': 'Use a natural, contemporary General American accent.',
+  british: 'Use a natural modern British accent.',
+  irish: 'Use a natural modern Irish accent.',
+  australian: 'Use a natural modern Australian accent.',
+  caribbean: 'Use a light, natural Caribbean English accent without caricature.',
+  'west-african': 'Use a light, natural West African English accent without caricature.',
+  'southern-us': 'Use a light, contemporary Southern U.S. accent without caricature.',
+};
+
+const fallbackVoiceMap = {
+  ballad: 'nova',
+  marin: 'alloy',
+  cedar: 'onyx',
+  verse: 'echo',
+};
+
 export function formatCompanionProfiles(ids = companionIds) {
   return ids
     .map((id) => {
@@ -348,6 +382,67 @@ function validateChatPayload(payload) {
     history: payload.history,
     context: payload.context,
   };
+}
+
+function validateSpeechPayload(payload) {
+  if (!isObject(payload) || !companionIds.includes(payload.companionId)) return undefined;
+  if (
+    typeof payload.text !== 'string' ||
+    !payload.text.trim() ||
+    payload.text.length > 4_000 ||
+    !aiVoiceNames.includes(payload.voice) ||
+    !Object.hasOwn(aiVoiceAccents, payload.accent)
+  ) {
+    return undefined;
+  }
+  const pace = Number(payload.pace);
+  const warmth = Number(payload.warmth);
+  const energy = Number(payload.energy);
+  const expressiveness = Number(payload.expressiveness);
+  if (
+    !Number.isFinite(pace) ||
+    pace < 0.8 ||
+    pace > 1.2 ||
+    !Number.isInteger(warmth) ||
+    warmth < 1 ||
+    warmth > 5 ||
+    !Number.isInteger(energy) ||
+    energy < 1 ||
+    energy > 5 ||
+    !Number.isInteger(expressiveness) ||
+    expressiveness < 1 ||
+    expressiveness > 5
+  ) {
+    return undefined;
+  }
+  return {
+    companionId: payload.companionId,
+    text: payload.text.trim(),
+    voice: payload.voice,
+    accent: payload.accent,
+    pace,
+    warmth,
+    energy,
+    expressiveness,
+  };
+}
+
+function voiceScale(label, value) {
+  if (value <= 1) return `very low ${label}`;
+  if (value === 2) return `restrained ${label}`;
+  if (value === 3) return `balanced ${label}`;
+  if (value === 4) return `strong ${label}`;
+  return `maximum ${label} without caricature`;
+}
+
+function buildVoiceInstructions(profile) {
+  const companion = companionProfiles[profile.companionId];
+  return `Perform the supplied text exactly as written. Do not add, remove, paraphrase, announce, or explain anything.
+Character: ${companion.name}, ${companion.title}. ${companion.performance}
+Accent: ${aiVoiceAccents[profile.accent]}
+Pacing: ${profile.pace < 0.95 ? 'deliberate' : profile.pace > 1.05 ? 'brisk' : 'natural'} at approximately ${profile.pace.toFixed(2)}x.
+Performance balance: ${voiceScale('warmth', profile.warmth)}, ${voiceScale('energy', profile.energy)}, and ${voiceScale('expressiveness', profile.expressiveness)}.
+Keep the delivery natural, emotionally coherent, and free of stereotypes.`;
 }
 
 function extractOutputText(response) {
@@ -514,6 +609,7 @@ async function handleAiChat(request, env, url) {
           }))
       : [];
     return json({
+      model,
       title: result.title.slice(0, 80),
       replies: result.replies.slice(0, payload.audience === 'party' ? 4 : 1),
       memoryCandidates,
@@ -534,6 +630,214 @@ async function handleAiChat(request, env, url) {
   }
 }
 
+async function handleAiTranscription(request, env, url) {
+  if (!isSameOriginRequest(request, url)) {
+    return json(
+      { code: 'origin-denied', message: 'That transmission origin was not accepted.' },
+      403,
+    );
+  }
+  if (!env.OPENAI_API_KEY) {
+    return json(
+      { code: 'setup-required', message: 'The secure OpenAI link has not been activated yet.' },
+      503,
+    );
+  }
+  const contentLength = Number(request.headers.get('content-length') ?? 0);
+  if (contentLength > 12 * 1024 * 1024) {
+    return json({ code: 'audio-too-large', message: 'That recording is too large.' }, 413);
+  }
+
+  let audio;
+  let durationSeconds;
+  try {
+    const form = await request.formData();
+    audio = form.get('audio');
+    durationSeconds = Math.min(60, Math.max(0.2, Number(form.get('durationSeconds') ?? 0)));
+  } catch {
+    return json({ code: 'invalid-audio', message: 'That recording could not be read.' }, 400);
+  }
+  if (
+    !audio ||
+    typeof audio !== 'object' ||
+    !Number.isFinite(audio.size) ||
+    audio.size <= 0 ||
+    audio.size > 10 * 1024 * 1024 ||
+    !Number.isFinite(durationSeconds)
+  ) {
+    return json({ code: 'invalid-audio', message: 'That recording is not valid.' }, 400);
+  }
+
+  const model = env.OPENAI_TRANSCRIBE_MODEL || 'gpt-4o-transcribe';
+  const upstreamForm = new FormData();
+  upstreamForm.append('file', audio, String(audio.name || 'hunter-voice.webm').slice(0, 80));
+  upstreamForm.append('model', model);
+  upstreamForm.append('response_format', 'json');
+
+  let openAiResponse;
+  try {
+    openAiResponse = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+      method: 'POST',
+      headers: { authorization: `Bearer ${env.OPENAI_API_KEY}` },
+      body: upstreamForm,
+    });
+  } catch {
+    return json(
+      {
+        code: 'openai-unreachable',
+        message: 'The transcription link is temporarily unreachable. Try again shortly.',
+      },
+      502,
+    );
+  }
+
+  if (!openAiResponse.ok) {
+    const rateLimited = openAiResponse.status === 429;
+    return json(
+      {
+        code: rateLimited ? 'rate-limited' : 'transcription-failed',
+        message: rateLimited
+          ? 'The voice link has reached its current usage limit. Try again shortly.'
+          : 'The voice transmission could not be transcribed. Your local campaign is safe.',
+      },
+      rateLimited ? 429 : 502,
+    );
+  }
+
+  try {
+    const result = await openAiResponse.json();
+    const text = String(result.text ?? '').trim();
+    if (!text) throw new Error('Empty transcript');
+    const inputTokens = Number(result.usage?.input_tokens ?? 0);
+    const outputTokens = Number(result.usage?.output_tokens ?? 0);
+    const totalTokens = Number(result.usage?.total_tokens ?? inputTokens + outputTokens);
+    const hasTokenUsage = inputTokens > 0 || outputTokens > 0 || totalTokens > 0;
+    return json({
+      text: text.slice(0, 4_000),
+      model,
+      audioSeconds: durationSeconds,
+      estimatedCostUsd: Number(((durationSeconds / 60) * 0.006).toFixed(8)),
+      usage: {
+        inputTokens,
+        outputTokens,
+        totalTokens,
+        exact: hasTokenUsage,
+      },
+    });
+  } catch {
+    return json(
+      { code: 'invalid-response', message: 'The transcription link returned no clear speech.' },
+      502,
+    );
+  }
+}
+
+async function requestSpeechAudio(env, model, profile, useFallback = false) {
+  const body = {
+    model,
+    voice: useFallback ? fallbackVoiceMap[profile.voice] || profile.voice : profile.voice,
+    input: profile.text,
+    response_format: 'mp3',
+  };
+  if (useFallback) {
+    body.speed = profile.pace;
+  } else {
+    body.instructions = buildVoiceInstructions(profile);
+  }
+  return fetch('https://api.openai.com/v1/audio/speech', {
+    method: 'POST',
+    headers: {
+      authorization: `Bearer ${env.OPENAI_API_KEY}`,
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+}
+
+async function handleAiSpeech(request, env, url) {
+  if (!isSameOriginRequest(request, url)) {
+    return json(
+      { code: 'origin-denied', message: 'That transmission origin was not accepted.' },
+      403,
+    );
+  }
+  if (!env.OPENAI_API_KEY) {
+    return json(
+      { code: 'setup-required', message: 'The secure OpenAI link has not been activated yet.' },
+      503,
+    );
+  }
+  const contentLength = Number(request.headers.get('content-length') ?? 0);
+  if (contentLength > 16 * 1024) {
+    return json(
+      { code: 'speech-too-large', message: 'That voice transmission is too large.' },
+      413,
+    );
+  }
+
+  let profile;
+  try {
+    profile = validateSpeechPayload(await request.json());
+  } catch {
+    return json({ code: 'invalid-request', message: 'That voice request could not be read.' }, 400);
+  }
+  if (!profile) {
+    return json({ code: 'invalid-request', message: 'That voice profile is not valid.' }, 400);
+  }
+
+  const requestedModel = env.OPENAI_TTS_MODEL || 'gpt-4o-mini-tts';
+  let model = requestedModel;
+  let openAiResponse;
+  try {
+    openAiResponse = await requestSpeechAudio(env, requestedModel, profile);
+    if (
+      !openAiResponse.ok &&
+      (openAiResponse.status === 400 || openAiResponse.status === 404) &&
+      !env.OPENAI_TTS_MODEL
+    ) {
+      model = env.OPENAI_TTS_FALLBACK_MODEL || 'tts-1-hd';
+      openAiResponse = await requestSpeechAudio(env, model, profile, true);
+    }
+  } catch {
+    return json(
+      {
+        code: 'openai-unreachable',
+        message: 'The companion voice link is temporarily unreachable. Try again shortly.',
+      },
+      502,
+    );
+  }
+
+  if (!openAiResponse.ok) {
+    const rateLimited = openAiResponse.status === 429;
+    return json(
+      {
+        code: rateLimited ? 'rate-limited' : 'speech-failed',
+        message: rateLimited
+          ? 'The voice link has reached its current usage limit. Try again shortly.'
+          : 'That companion could not open their voice channel. Text Mode remains available.',
+      },
+      rateLimited ? 429 : 502,
+    );
+  }
+
+  const characters = profile.text.length;
+  const estimatedAudioSeconds = Math.max(1, characters / (14.5 * profile.pace));
+  const estimatedCostUsd = (characters / 1_000_000) * 15;
+  return new Response(openAiResponse.body, {
+    status: 200,
+    headers: {
+      'cache-control': 'no-store',
+      'content-type': openAiResponse.headers.get('content-type') || 'audio/mpeg',
+      'x-content-type-options': 'nosniff',
+      'x-ai-model': model,
+      'x-ai-characters': String(characters),
+      'x-ai-audio-seconds': estimatedAudioSeconds.toFixed(2),
+      'x-ai-estimated-cost-usd': estimatedCostUsd.toFixed(8),
+    },
+  });
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -551,6 +855,8 @@ export default {
         ok: true,
         configured: Boolean(env.OPENAI_API_KEY),
         model: env.OPENAI_TEXT_MODEL || 'gpt-5.6-luna',
+        speechModel: env.OPENAI_TTS_MODEL || 'gpt-4o-mini-tts',
+        transcriptionModel: env.OPENAI_TRANSCRIBE_MODEL || 'gpt-4o-transcribe',
         intelligenceVersion: COMPANION_INTELLIGENCE_VERSION,
       });
     }
@@ -563,6 +869,26 @@ export default {
         );
       }
       return handleAiChat(request, env, url);
+    }
+
+    if (url.pathname === '/api/ai/transcribe') {
+      if (request.method !== 'POST') {
+        return json(
+          { code: 'method-not-allowed', message: 'Use a secure POST transmission.' },
+          405,
+        );
+      }
+      return handleAiTranscription(request, env, url);
+    }
+
+    if (url.pathname === '/api/ai/speech') {
+      if (request.method !== 'POST') {
+        return json(
+          { code: 'method-not-allowed', message: 'Use a secure POST transmission.' },
+          405,
+        );
+      }
+      return handleAiSpeech(request, env, url);
     }
 
     const response = await env.ASSETS.fetch(request);

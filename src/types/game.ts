@@ -49,6 +49,29 @@ export type CompanionId =
   | 'saffron';
 export type CompanionMode = 'off' | 'quiet' | 'balanced' | 'talkative';
 export type AiLinkMode = 'offline' | 'online';
+export type AiVoiceName =
+  | 'alloy'
+  | 'ash'
+  | 'ballad'
+  | 'coral'
+  | 'echo'
+  | 'fable'
+  | 'nova'
+  | 'onyx'
+  | 'sage'
+  | 'shimmer'
+  | 'verse'
+  | 'marin'
+  | 'cedar';
+export type AiVoiceAccent =
+  | 'natural'
+  | 'general-american'
+  | 'british'
+  | 'irish'
+  | 'australian'
+  | 'caribbean'
+  | 'west-african'
+  | 'southern-us';
 export type MoodId =
   | 'energized'
   | 'proud'
@@ -139,6 +162,10 @@ export interface Settings {
   aiLinkMode: AiLinkMode;
   aiDataSharingAcknowledged: boolean;
   aiRelationshipMemoryEnabled: boolean;
+  aiVoiceOutputEnabled: boolean;
+  aiVoiceAutoPlay: boolean;
+  aiVoiceDisclosureAcknowledged: boolean;
+  aiUsageWarningUsd: number;
 }
 
 export interface StatReward {
@@ -726,6 +753,35 @@ export interface AiRelationshipMemory {
   sourceConversationId: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface AiVoiceProfile {
+  id: CompanionId;
+  voice: AiVoiceName;
+  accent: AiVoiceAccent;
+  pace: number;
+  warmth: number;
+  energy: number;
+  expressiveness: number;
+  updatedAt: string;
+}
+
+export type AiUsageKind = 'text' | 'transcription' | 'speech';
+
+export interface AiUsageRecord {
+  id: string;
+  kind: AiUsageKind;
+  sessionId: string;
+  createdAt: string;
+  model: string;
+  companionId?: CompanionId;
+  inputTokens: number;
+  outputTokens: number;
+  totalTokens: number;
+  characters: number;
+  audioSeconds: number;
+  estimatedCostUsd: number;
+  exactUsage: boolean;
 }
 
 export interface FavoriteMessage {

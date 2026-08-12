@@ -63,6 +63,10 @@ export function createDefaultSettings(): Settings {
     aiLinkMode: 'offline',
     aiDataSharingAcknowledged: false,
     aiRelationshipMemoryEnabled: false,
+    aiVoiceOutputEnabled: false,
+    aiVoiceAutoPlay: false,
+    aiVoiceDisclosureAcknowledged: false,
+    aiUsageWarningUsd: 5,
   };
 }
 
@@ -198,7 +202,7 @@ export async function initializeProfile(input: {
       await db.appMetadata.bulkPut([
         { id: 'schema-seeded', value: 15, updatedAt: now },
         { id: 'last-system-day', value: systemDate, updatedAt: now },
-        { id: 'app-version', value: '6.6.1', updatedAt: now },
+        { id: 'app-version', value: '6.7.0', updatedAt: now },
       ]);
       await ensureRotatingChallenges(systemDate, settings.weekStartsOn);
     },

@@ -250,9 +250,34 @@ describe('save validation and recovery', () => {
       createdAt: now,
       updatedAt: now,
     });
+    await db.aiVoiceProfiles.put({
+      id: 'snow',
+      voice: 'verse',
+      accent: 'irish',
+      pace: 0.95,
+      warmth: 5,
+      energy: 2,
+      expressiveness: 3,
+      updatedAt: now,
+    });
+    await db.aiUsageRecords.put({
+      id: 'ai-usage:backup',
+      kind: 'speech',
+      sessionId: 'session:backup',
+      createdAt: now,
+      model: 'gpt-4o-mini-tts',
+      companionId: 'snow',
+      inputTokens: 0,
+      outputTokens: 0,
+      totalTokens: 0,
+      characters: 120,
+      audioSeconds: 8,
+      estimatedCostUsd: 0.0018,
+      exactUsage: false,
+    });
 
     const save = await createSaveFile();
-    expect(save.version).toBe(15);
+    expect(save.version).toBe(16);
     for (const table of [
       'dailyBriefings',
       'campaignArcs',
@@ -265,6 +290,8 @@ describe('save validation and recovery', () => {
       'sanctuarySessions',
       'aiConversations',
       'aiMemories',
+      'aiVoiceProfiles',
+      'aiUsageRecords',
     ]) {
       expect(save.data[table]).toHaveLength(1);
     }
@@ -284,6 +311,8 @@ describe('save validation and recovery', () => {
         db.sanctuarySessions,
         db.aiConversations,
         db.aiMemories,
+        db.aiVoiceProfiles,
+        db.aiUsageRecords,
       ],
       async () => {
         await db.dailyBriefings.clear();
@@ -297,6 +326,8 @@ describe('save validation and recovery', () => {
         await db.sanctuarySessions.clear();
         await db.aiConversations.clear();
         await db.aiMemories.clear();
+        await db.aiVoiceProfiles.clear();
+        await db.aiUsageRecords.clear();
       },
     );
     await commitPreparedImport(prepared);
@@ -324,6 +355,8 @@ describe('save validation and recovery', () => {
     );
     expect((await db.aiConversations.get('ai:backup'))?.messages[1].companionId).toBe('cipher');
     expect((await db.aiMemories.get('ai-memory:backup'))?.status).toBe('approved');
+    expect((await db.aiVoiceProfiles.get('snow'))?.accent).toBe('irish');
+    expect((await db.aiUsageRecords.get('ai-usage:backup'))?.characters).toBe(120);
   });
 
   it('migrates a Version 2.1 save to Version 4.0 without losing the existing party', async () => {
@@ -345,7 +378,7 @@ describe('save validation and recovery', () => {
     save.checksum = await digest(save.data);
 
     const prepared = await prepareSaveImport(asFile(save));
-    expect(prepared.save.version).toBe(15);
+    expect(prepared.save.version).toBe(16);
     expect(prepared.save.data.dailyBriefings).toEqual([]);
     const migrated = prepared.save.data.settings[0] as Record<string, unknown>;
     expect(migrated.enabledCompanionIds).toContain('amara');
@@ -356,6 +389,10 @@ describe('save validation and recovery', () => {
     expect(migrated.aiLinkMode).toBe('offline');
     expect(migrated.aiDataSharingAcknowledged).toBe(false);
     expect(migrated.aiRelationshipMemoryEnabled).toBe(false);
+    expect(migrated.aiVoiceOutputEnabled).toBe(false);
+    expect(migrated.aiVoiceAutoPlay).toBe(false);
+    expect(migrated.aiVoiceDisclosureAcknowledged).toBe(false);
+    expect(migrated.aiUsageWarningUsd).toBe(5);
     expect(prepared.save.data.treasurySettings).toHaveLength(1);
     expect(prepared.save.data.treasuryTransactions).toEqual([]);
     expect(prepared.save.data.trainingSessions).toEqual([]);
@@ -363,6 +400,8 @@ describe('save validation and recovery', () => {
     expect(prepared.save.data.kitchenSessions).toEqual([]);
     expect(prepared.save.data.aiConversations).toEqual([]);
     expect(prepared.save.data.aiMemories).toEqual([]);
+    expect(prepared.save.data.aiVoiceProfiles).toEqual([]);
+    expect(prepared.save.data.aiUsageRecords).toEqual([]);
   });
 
   it('rejects malformed AI Headquarters messages even when the checksum matches', async () => {
