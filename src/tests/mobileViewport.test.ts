@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest';
 const styles = readFileSync(resolve(process.cwd(), 'src/styles.css'), 'utf8');
 const documentShell = readFileSync(resolve(process.cwd(), 'index.html'), 'utf8');
 const appShell = readFileSync(resolve(process.cwd(), 'src/components/AppShell.tsx'), 'utf8');
+const viteConfig = readFileSync(resolve(process.cwd(), 'vite.config.ts'), 'utf8');
 const quickLink = readFileSync(
   resolve(process.cwd(), 'src/components/CompanionQuickLink.tsx'),
   'utf8',
@@ -32,5 +33,9 @@ describe('mobile keyboard viewport safety', () => {
     expect(quickLink).toContain('Listening now. Tap the square when you finish speaking.');
     expect(styles).toMatch(/\.quick-link__panel\s*{[^}]*overflow-y: auto;/s);
     expect(styles).toMatch(/\.quick-link__panel > header\s*{[^}]*position: sticky;/s);
+  });
+
+  it('never lets the offline navigation fallback intercept secure API routes', () => {
+    expect(viteConfig).toContain("navigateFallbackDenylist: [/^\\/api\\//]");
   });
 });
