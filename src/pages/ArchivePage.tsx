@@ -29,7 +29,7 @@ import { getMoodDefinition } from '@/config/partyChat';
 import { getSupportTopic } from '@/config/support';
 import { getQuestline } from '@/config/questlines';
 import { getSanctuaryConcern } from '@/config/scripture';
-import { getKitchenRecipe } from '@/config/kitchen';
+import { resolveKitchenSessionRecipe } from '@/game/kitchen';
 import { getGymWorkout, getTrainingCircuit } from '@/config/training';
 import { getArchiveData } from '@/db/repositories';
 import { getSanctuaryPassages } from '@/game/sanctuary';
@@ -762,7 +762,9 @@ export function ArchivePage() {
                   <div key={`kitchen:${entry.id}`} className="archive-row">
                     <CookingPot size={17} />
                     <div>
-                      <strong>{getKitchenRecipe(entry.recipeId).name}</strong>
+                      <strong>
+                        {resolveKitchenSessionRecipe(entry)?.name ?? 'Archived recipe'}
+                      </strong>
                       <small>
                         {formatLongDate(entry.date)} · {entry.status}
                         {entry.servingsPrepared ? ` · ${entry.servingsPrepared} servings` : ''}

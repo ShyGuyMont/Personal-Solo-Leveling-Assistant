@@ -203,7 +203,27 @@ describe('save validation and recovery', () => {
     await db.kitchenSessions.put({
       id: '2026-08-01',
       date: '2026-08-01',
-      recipeId: 'freezer-breakfast-burritos',
+      recipeId: 'custom-recipe:backup',
+      customRecipeSnapshot: {
+        id: 'custom-recipe:backup',
+        name: 'Archive Shield Skillet',
+        codename: 'PORTABLE PROVISION',
+        servings: 4,
+        prepMinutes: 10,
+        cookMinutes: 20,
+        costTier: '$',
+        equipment: 'Skillet',
+        plate: 'Chicken, rice, and vegetables.',
+        ingredients: ['1 lb chicken', '2 cups rice', '2 cups vegetables'],
+        steps: ['Cook chicken to 165°F.', 'Cook vegetables.', 'Serve over rice.'],
+        swaps: ['Use turkey.'],
+        storage: 'Refrigerate promptly.',
+        safety: 'Chicken must reach 165°F.',
+        dailyRotationEnabled: true,
+        sourceCompanionId: 'saffron',
+        createdAt: now,
+        updatedAt: now,
+      },
       status: 'completed',
       assignmentVariant: 2,
       rerollUsed: false,
@@ -288,7 +308,7 @@ describe('save validation and recovery', () => {
     });
 
     const save = await createSaveFile();
-    expect(save.version).toBe(21);
+    expect(save.version).toBe(22);
     for (const table of [
       'dailyBriefings',
       'campaignArcs',
@@ -358,9 +378,7 @@ describe('save validation and recovery', () => {
     expect((await db.treasuryTransactions.get('treasury:backup'))?.amountCents).toBe(2450);
     expect((await db.trainingSessions.get('2026-08-01'))?.roundsCompleted).toBe(5);
     expect((await db.kitchenSessions.get('2026-08-01'))?.servingsPrepared).toBe(4);
-    expect((await db.kitchenSessions.get('2026-08-01'))?.recipeId).toBe(
-      'freezer-breakfast-burritos',
-    );
+    expect((await db.kitchenSessions.get('2026-08-01'))?.recipeId).toBe('custom-recipe:backup');
     expect((await db.sanctuarySessions.get('sanctuary:backup'))?.prayer).toBe(
       'Help me move toward honest connection.',
     );
@@ -389,7 +407,7 @@ describe('save validation and recovery', () => {
     save.checksum = await digest(save.data);
 
     const prepared = await prepareSaveImport(asFile(save));
-    expect(prepared.save.version).toBe(21);
+    expect(prepared.save.version).toBe(22);
     expect(prepared.save.data.dailyBriefings).toEqual([]);
     const migrated = prepared.save.data.settings[0] as Record<string, unknown>;
     expect(migrated.enabledCompanionIds).toContain('amara');

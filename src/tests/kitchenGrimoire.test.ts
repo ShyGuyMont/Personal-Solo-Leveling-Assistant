@@ -4,6 +4,7 @@ import {
   deleteCustomKitchenRecipe,
   getCustomKitchenRecipes,
   saveCustomKitchenRecipe,
+  setCustomKitchenRecipeRotation,
 } from '@/game/kitchenGrimoire';
 
 describe("Saffron's Private Grimoire", () => {
@@ -32,7 +33,9 @@ describe("Saffron's Private Grimoire", () => {
       safety: 'Verify the thickest chicken pieces reach 165°F.',
     });
 
-    expect(await getCustomKitchenRecipes()).toEqual([expect.objectContaining({ id: saved.id })]);
+    expect(await getCustomKitchenRecipes()).toEqual([
+      expect.objectContaining({ id: saved.id, dailyRotationEnabled: true }),
+    ]);
     await deleteCustomKitchenRecipe(saved.id);
     expect(await getCustomKitchenRecipes()).toEqual([]);
   });
@@ -55,5 +58,30 @@ describe("Saffron's Private Grimoire", () => {
     };
     await saveCustomKitchenRecipe(recipe);
     await expect(saveCustomKitchenRecipe(recipe)).rejects.toThrow(/already in/i);
+  });
+
+  it('lets the Hunter include or remove a personal recipe from Daily Rotation', async () => {
+    const saved = await saveCustomKitchenRecipe({
+      name: 'Quiet Flame Salmon',
+      codename: 'CALM HEAT',
+      servings: 2,
+      prepMinutes: 5,
+      cookMinutes: 15,
+      costTier: '$$',
+      equipment: 'Sheet pan',
+      plate: 'Salmon, potatoes, and greens.',
+      ingredients: ['2 salmon fillets', '2 cups potatoes', '2 cups spinach'],
+      steps: ['Roast the potatoes.', 'Cook salmon to 145°F.', 'Serve with spinach.'],
+      swaps: [],
+      storage: 'Refrigerate promptly.',
+      safety: 'Cook fish to 145°F.',
+    });
+
+    await setCustomKitchenRecipeRotation(saved.id, false);
+    expect((await getCustomKitchenRecipes())[0]).toEqual(
+      expect.objectContaining({ id: saved.id, dailyRotationEnabled: false }),
+    );
+    await setCustomKitchenRecipeRotation(saved.id, true);
+    expect((await getCustomKitchenRecipes())[0].dailyRotationEnabled).toBe(true);
   });
 });

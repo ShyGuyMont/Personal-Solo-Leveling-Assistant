@@ -10,7 +10,7 @@ import type {
   Settings,
 } from '@/types/game';
 
-export const SAVE_VERSION = 21;
+export const SAVE_VERSION = 22;
 export const MAX_IMPORT_BYTES = 32 * 1024 * 1024;
 const MAX_SNAPSHOTS = 5;
 const FORBIDDEN_KEYS = new Set(['__proto__', 'prototype', 'constructor']);
@@ -59,6 +59,32 @@ async function readFileText(file: File) {
 
 function isObject(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+}
+
+function isValidCustomKitchenRecipe(value: unknown) {
+  if (!isObject(value)) return false;
+  const strings = ['id', 'name', 'codename', 'equipment', 'plate', 'storage', 'safety'];
+  const lists = ['ingredients', 'steps', 'swaps'];
+  return (
+    strings.every((key) => typeof value[key] === 'string') &&
+    lists.every(
+      (key) =>
+        Array.isArray(value[key]) &&
+        (value[key] as unknown[]).every((item) => typeof item === 'string'),
+    ) &&
+    (value.costTier === '$' || value.costTier === '$$' || value.costTier === '$$$') &&
+    Number.isInteger(value.servings) &&
+    Number(value.servings) >= 1 &&
+    Number(value.servings) <= 20 &&
+    Number.isInteger(value.prepMinutes) &&
+    Number(value.prepMinutes) >= 0 &&
+    Number(value.prepMinutes) <= 240 &&
+    Number.isInteger(value.cookMinutes) &&
+    Number(value.cookMinutes) >= 0 &&
+    Number(value.cookMinutes) <= 480 &&
+    typeof value.dailyRotationEnabled === 'boolean' &&
+    value.sourceCompanionId === 'saffron'
+  );
 }
 
 function requiredSingleton<T>(data: Record<string, unknown[]>, table: string, id = 'primary') {
@@ -770,11 +796,18 @@ function validateData(data: Record<string, unknown[]>) {
   }
 
   for (const row of data.kitchenSessions) {
+    const hasBuiltInRecipe = isObject(row) && KITCHEN_RECIPE_IDS.has(String(row.recipeId));
+    const hasCustomRecipe =
+      isObject(row) &&
+      isValidCustomKitchenRecipe(row.customRecipeSnapshot) &&
+      (row.customRecipeSnapshot as Record<string, unknown>).id === row.recipeId;
     if (
       !isObject(row) ||
       !validDate(row.date) ||
       row.id !== row.date ||
-      !KITCHEN_RECIPE_IDS.has(String(row.recipeId)) ||
+      (!hasBuiltInRecipe && !hasCustomRecipe) ||
+      (row.customRecipeSnapshot !== undefined &&
+        !isValidCustomKitchenRecipe(row.customRecipeSnapshot)) ||
       !['assigned', 'completed', 'declined'].includes(String(row.status)) ||
       typeof row.rerollUsed !== 'boolean' ||
       typeof row.rewardApplied !== 'boolean' ||

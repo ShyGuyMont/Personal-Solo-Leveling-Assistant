@@ -722,6 +722,16 @@ export class SystemDatabase extends Dexie {
         await metadata.put({ id: 'schema-seeded', value: 21, updatedAt: now });
         await metadata.put({ id: 'app-version', value: '7.5.0', updatedAt: now });
       });
+    this.version(22)
+      .stores({
+        kitchenSessions: 'id,date,status,recipeId,[date+status]',
+      })
+      .upgrade(async (transaction) => {
+        const now = new Date().toISOString();
+        const metadata = transaction.table<AppMetadata, string>('appMetadata');
+        await metadata.put({ id: 'schema-seeded', value: 22, updatedAt: now });
+        await metadata.put({ id: 'app-version', value: '7.6.0', updatedAt: now });
+      });
   }
 }
 

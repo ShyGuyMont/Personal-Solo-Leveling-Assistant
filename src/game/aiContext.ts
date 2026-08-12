@@ -4,7 +4,7 @@ import { getRelevantApprovedMemories } from '@/game/aiHeadquarters';
 import { calculateRankQualification } from '@/game/rank';
 import { buildQuickLinkActionCatalog } from '@/game/aiQuickLink';
 import { getCustomKitchenRecipes } from '@/game/kitchenGrimoire';
-import { getKitchenRecipe } from '@/config/kitchen';
+import { resolveKitchenSessionRecipe } from '@/game/kitchen';
 import { accountXpForLevel, totalXpAtLevel } from '@/game/xp';
 import type { AiProgressContext } from '@/services/aiHeadquarters';
 import type {
@@ -108,7 +108,7 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
     creatorSnapshots.find((snapshot) => snapshot.periodDays === 28) ?? creatorSnapshots[0];
   const commandCatalog = buildQuickLinkActionCatalog(source.missions, source.todayRecords);
   const todayKitchen = kitchen.find((session) => session.date === source.systemDate);
-  const todayRecipe = todayKitchen ? getKitchenRecipe(todayKitchen.recipeId) : undefined;
+  const todayRecipe = resolveKitchenSessionRecipe(todayKitchen);
   const completedToday = new Set(
     source.todayRecords
       .filter((record) => record.status === 'completed')

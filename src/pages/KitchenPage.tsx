@@ -1,5 +1,6 @@
 import {
   BookMarked,
+  CalendarDays,
   Check,
   ChefHat,
   Clock3,
@@ -7,6 +8,7 @@ import {
   CookingPot,
   Flame,
   History,
+  Play,
   RotateCcw,
   ShieldCheck,
   ShoppingBasket,
@@ -20,17 +22,22 @@ import {
   KITCHEN_RECIPES,
   SAFFRON_ASSIGNMENT_LINES,
   SAFFRON_COMPLETION_LINES,
-  getKitchenRecipe,
 } from '@/config/kitchen';
 import { getCompanion, getCompanionImage } from '@/config/companions';
 import {
   assignKitchenOrder,
+  assignSpecificKitchenOrder,
   completeKitchenOrder,
   declineKitchenOrder,
   getKitchenData,
+  resolveKitchenSessionRecipe,
   saveKitchenProgress,
 } from '@/game/kitchen';
-import { deleteCustomKitchenRecipe, getCustomKitchenRecipes } from '@/game/kitchenGrimoire';
+import {
+  deleteCustomKitchenRecipe,
+  getCustomKitchenRecipes,
+  setCustomKitchenRecipeRotation,
+} from '@/game/kitchenGrimoire';
 import { useGameStore } from '@/store/useGameStore';
 import type { CustomKitchenRecipe, KitchenSession } from '@/types/game';
 
@@ -70,8 +77,8 @@ export function KitchenPage() {
     setCustomRecipes(savedRecipes);
     setSession(next.today);
     if (next.today) {
-      const recipe = getKitchenRecipe(next.today.recipeId);
-      setServings(next.today.servingsPrepared ?? recipe.servings);
+      const recipe = resolveKitchenSessionRecipe(next.today);
+      setServings(next.today.servingsPrepared ?? recipe?.servings ?? 4);
       setDifficulty(next.today.difficulty ?? 3);
       setRating(next.today.rating ?? 4);
       setNote(next.today.note ?? '');
@@ -101,7 +108,9 @@ export function KitchenPage() {
     }
   };
 
-  const recipe = session ? getKitchenRecipe(session.recipeId) : undefined;
+  const recipe = resolveKitchenSessionRecipe(session);
+  const rotationRecipeCount =
+    KITCHEN_RECIPES.length + customRecipes.filter((item) => item.dailyRotationEnabled).length;
   const completedSteps = useMemo(
     () => recipe?.steps.filter((step) => session?.stepChecks?.[step]).length ?? 0,
     [recipe, session?.stepChecks],
@@ -132,6 +141,26 @@ export function KitchenPage() {
     if (!confirmed) return;
     await deleteCustomKitchenRecipe(recipe.id);
     await reload();
+  }
+
+  function cookWithSaffron(recipeId: string, recipeName: string) {
+    if (
+      session?.status === 'assigned' &&
+      session.recipeId !== recipeId &&
+      !window.confirm(
+        `Replace today's current Kitchen Order with ${recipeName}? The current checklist progress will be cleared.`,
+      )
+    ) {
+      return;
+    }
+    void act(async () => {
+      await assignSpecificKitchenOrder(systemDate, recipeId);
+      window.setTimeout(
+        () =>
+          document.querySelector('.kitchen-order-briefing')?.scrollIntoView({ behavior: 'smooth' }),
+        80,
+      );
+    });
   }
 
   if (!data) {
@@ -201,8 +230,8 @@ export function KitchenPage() {
             <p className="eyebrow">TODAY'S STOVE IS QUIET</p>
             <h2>Ask Saffron for a Kitchen Order</h2>
             <p>
-              She rotates among {KITCHEN_RECIPES.length} practical recipes, avoids your recent
-              meals, and gives you one ingredient swap if the first assignment is not workable.
+              She rotates among {rotationRecipeCount} practical recipes, avoids your recent meals,
+              and gives you one ingredient swap if the first assignment is not workable.
             </p>
             <button
               className="button button--primary"
@@ -238,7 +267,11 @@ export function KitchenPage() {
               <div>
                 <p className="eyebrow">{recipe.codename}</p>
                 <h2>{recipe.name}</h2>
-                <p>{recipe.saffronFavorite}</p>
+                <p>
+                  {'saffronFavorite' in recipe
+                    ? recipe.saffronFavorite
+                    : "You forged this one with me. I saved every ingredient and every step—now let's cook it properly!"}
+                </p>
               </div>
               <div className="kitchen-recipe-meta">
                 <span>
@@ -474,6 +507,9 @@ export function KitchenPage() {
                       {item.prepMinutes + item.cookMinutes} min · {item.servings} servings ·{' '}
                       {item.costTier}
                     </small>
+                    <small className={item.dailyRotationEnabled ? 'is-in-rotation' : ''}>
+                      {item.dailyRotationEnabled ? 'Daily Rotation active' : 'Saved only'}
+                    </small>
                   </span>
                   <CookingPot size={18} />
                 </summary>
@@ -494,13 +530,40 @@ export function KitchenPage() {
                   <ShieldCheck size={15} /> {item.safety}
                 </p>
                 <p>{item.storage}</p>
-                <button
-                  type="button"
-                  className="text-button kitchen-private-grimoire__delete"
-                  onClick={() => void removeCustomRecipe(item)}
-                >
-                  <Trash2 size={14} /> Remove recipe
-                </button>
+                <div className="kitchen-private-grimoire__actions">
+                  <button
+                    type="button"
+                    className="button button--primary"
+                    disabled={busy}
+                    onClick={() => cookWithSaffron(item.id, item.name)}
+                  >
+                    <Play size={15} />
+                    {session?.status === 'assigned' && session.recipeId === item.id
+                      ? 'Resume with Saffron'
+                      : 'Cook with Saffron'}
+                  </button>
+                  <button
+                    type="button"
+                    className="button button--secondary"
+                    disabled={busy}
+                    aria-pressed={item.dailyRotationEnabled}
+                    onClick={() =>
+                      void act(() =>
+                        setCustomKitchenRecipeRotation(item.id, !item.dailyRotationEnabled),
+                      )
+                    }
+                  >
+                    <CalendarDays size={15} />
+                    {item.dailyRotationEnabled ? 'In Daily Rotation' : 'Add to Daily Rotation'}
+                  </button>
+                  <button
+                    type="button"
+                    className="text-button kitchen-private-grimoire__delete"
+                    onClick={() => void removeCustomRecipe(item)}
+                  >
+                    <Trash2 size={14} /> Remove recipe
+                  </button>
+                </div>
               </details>
             ))}
           </div>
@@ -551,6 +614,17 @@ export function KitchenPage() {
               <p className="kitchen-library__safety">
                 <ShieldCheck size={15} /> {item.safety}
               </p>
+              <button
+                type="button"
+                className="button button--secondary kitchen-library__cook"
+                disabled={busy}
+                onClick={() => cookWithSaffron(item.id, item.name)}
+              >
+                <Play size={15} />
+                {session?.status === 'assigned' && session.recipeId === item.id
+                  ? 'Resume with Saffron'
+                  : 'Cook with Saffron'}
+              </button>
             </details>
           ))}
         </div>
@@ -578,7 +652,7 @@ export function KitchenPage() {
                   )}
                 </span>
                 <div>
-                  <strong>{getKitchenRecipe(entry.recipeId).name}</strong>
+                  <strong>{resolveKitchenSessionRecipe(entry)?.name ?? 'Archived recipe'}</strong>
                   <small>
                     {entry.date} ·{' '}
                     {entry.status === 'completed'

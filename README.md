@@ -96,6 +96,20 @@ Historical video insights remain on-device, travel in Archive Shield saves, and 
 edit, comment, delete, or account-management access. Google credentials remain encrypted behind
 the private gateway and never enter the browser save or OpenAI context.
 
+## Version 7.6.0 · Living Grimoire
+
+Saffron’s Private Grimoire is now part of the working Kitchen instead of a static recipe shelf.
+Every confirmed personal creation joins Daily Rotation by default, with an individual control to
+keep it saved but out of surprise assignments. **Cook with Saffron** can turn any personal or canon
+recipe into today’s guided Kitchen Order, including ingredient gathering checks, numbered method
+checks, saved progress, serving and effort review, completion reactions, weekly reward limits, and
+the normal Provision Archive.
+
+Each personal order carries a protected recipe snapshot so its instructions and history remain
+readable even if the source entry is later removed from the Grimoire. The Kitchen’s visible
+rotation count, XP ledger notes, archives, and AI context all understand the combined canon and
+personal recipe pool.
+
 ## Version 7.5.0 · Living Voice Ascension
 
 Voice Forge III gives all ten companion Soulprints a deeper vocal fingerprint: register,

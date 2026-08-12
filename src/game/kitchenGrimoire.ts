@@ -43,6 +43,7 @@ function parseRecipe(value: unknown): CustomKitchenRecipe | undefined {
     swaps: cleanList(record.swaps, 8, 240),
     storage: cleanText(record.storage, 400),
     safety: cleanText(record.safety, 400),
+    dailyRotationEnabled: record.dailyRotationEnabled !== false,
     sourceCompanionId: 'saffron',
     createdAt: cleanText(record.createdAt, 40) || new Date().toISOString(),
     updatedAt: cleanText(record.updatedAt, 40) || new Date().toISOString(),
@@ -60,7 +61,10 @@ export async function getCustomKitchenRecipes() {
 }
 
 export async function saveCustomKitchenRecipe(
-  input: Omit<CustomKitchenRecipe, 'id' | 'sourceCompanionId' | 'createdAt' | 'updatedAt'>,
+  input: Omit<
+    CustomKitchenRecipe,
+    'id' | 'dailyRotationEnabled' | 'sourceCompanionId' | 'createdAt' | 'updatedAt'
+  > & { dailyRotationEnabled?: boolean },
 ) {
   const now = new Date().toISOString();
   const recipe = parseRecipe({
@@ -94,4 +98,21 @@ export async function deleteCustomKitchenRecipe(id: string) {
     updatedAt: new Date().toISOString(),
   });
   window.dispatchEvent(new CustomEvent('system:kitchen-grimoire-changed'));
+}
+
+export async function setCustomKitchenRecipeRotation(id: string, enabled: boolean) {
+  const current = await getCustomKitchenRecipes();
+  const recipe = current.find((item) => item.id === id);
+  if (!recipe) throw new Error("That recipe is no longer in Saffron's Private Grimoire.");
+  const now = new Date().toISOString();
+  const recipes = current.map((item) =>
+    item.id === id ? { ...item, dailyRotationEnabled: enabled, updatedAt: now } : item,
+  );
+  await db.appMetadata.put({
+    id: GRIMOIRE_METADATA_ID,
+    value: { recipes } as unknown as Record<string, unknown>,
+    updatedAt: now,
+  });
+  window.dispatchEvent(new CustomEvent('system:kitchen-grimoire-changed'));
+  return recipes.find((item) => item.id === id)!;
 }

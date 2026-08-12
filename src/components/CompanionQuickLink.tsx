@@ -459,10 +459,10 @@ export function CompanionQuickLink() {
       await saveCustomKitchenRecipe(recipe);
       await appendLocalAcknowledgement(
         'saffron',
-        `${recipe.name} is in my Private Grimoire now. Your recipe, your device, and nobody touched it before you confirmed.`,
+        `${recipe.name} is in my Private Grimoire and Daily Rotation now. Open the Kitchen whenever you want to cook it with me step by step. Your recipe, your device, and nobody touched it before you confirmed.`,
       );
       setPendingRecipe(undefined);
-      setNotice('Recipe confirmed · Saffron’s Private Grimoire updated.');
+      setNotice('Recipe confirmed · Private Grimoire and Daily Rotation updated.');
     } catch (error) {
       setNotice(error instanceof Error ? error.message : 'That recipe could not be saved.');
     } finally {

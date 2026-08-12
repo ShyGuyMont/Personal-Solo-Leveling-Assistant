@@ -10132,8 +10132,30 @@ html[data-theme='daybreak'] .bottom-nav {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  margin-top: 8px;
   color: var(--danger);
+}
+
+.kitchen-private-grimoire summary small.is-in-rotation {
+  color: var(--kitchen-green);
+}
+
+.kitchen-private-grimoire__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.kitchen-private-grimoire__actions .button,
+.kitchen-library__cook {
+  min-height: 40px;
+  padding: 8px 12px;
+  font-size: 0.72rem;
+}
+
+.kitchen-library__cook {
+  margin-top: 10px;
 }
 
 .kitchen-history__list {
@@ -10266,6 +10288,9 @@ html[data-theme='daybreak'] .kitchen-hero {
   .double-deployment-banner .button,
   .kitchen-order-actions,
   .kitchen-order-actions .button,
+  .kitchen-private-grimoire__actions,
+  .kitchen-private-grimoire__actions .button,
+  .kitchen-library__cook,
   .kitchen-clear-button {
     width: 100%;
   }

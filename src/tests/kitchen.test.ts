@@ -5,10 +5,14 @@ import { db } from '@/db/database';
 import { initializeProfile, seedReferenceData } from '@/db/seed';
 import {
   assignKitchenOrder,
+  assignSpecificKitchenOrder,
   completeKitchenOrder,
   declineKitchenOrder,
   getKitchenData,
+  resolveKitchenSessionRecipe,
+  saveKitchenProgress,
 } from '@/game/kitchen';
+import { saveCustomKitchenRecipe } from '@/game/kitchenGrimoire';
 import type { LocalDateKey } from '@/types/game';
 
 const DATE = '2026-08-03' as LocalDateKey;
@@ -86,5 +90,82 @@ describe("Saffron's Kitchen", () => {
       }),
     ).rejects.toThrow(/No active Kitchen Order/i);
     expect((await db.progression.get('primary'))?.totalXp).toBe(120);
+  });
+
+  it('can turn a personal Grimoire recipe into the guided order with saved checklist progress', async () => {
+    const custom = await saveCustomKitchenRecipe({
+      name: 'Saffron Test Skillet',
+      codename: 'GUIDED FLAME',
+      servings: 3,
+      prepMinutes: 8,
+      cookMinutes: 17,
+      costTier: '$',
+      equipment: 'Skillet',
+      plate: 'Chicken, rice, and vegetables.',
+      ingredients: ['1 lb chicken', '2 cups rice', '2 cups vegetables'],
+      steps: ['Cook chicken to 165°F.', 'Add vegetables.', 'Serve over rice.'],
+      swaps: ['Use turkey.'],
+      storage: 'Refrigerate promptly.',
+      safety: 'Chicken must reach 165°F.',
+    });
+
+    const assigned = await assignSpecificKitchenOrder(DATE, custom.id);
+    expect(assigned.customRecipeSnapshot).toEqual(
+      expect.objectContaining({ id: custom.id, name: custom.name }),
+    );
+    expect(resolveKitchenSessionRecipe(assigned)?.name).toBe(custom.name);
+    await saveKitchenProgress(DATE, {
+      ingredientChecks: { '1 lb chicken': true },
+      stepChecks: { 'Cook chicken to 165°F.': true },
+    });
+    expect((await db.kitchenSessions.get(DATE))?.stepChecks?.['Cook chicken to 165°F.']).toBe(true);
+
+    await completeKitchenOrder({
+      date: DATE,
+      servingsPrepared: 3,
+      difficulty: 2,
+      rating: 5,
+    });
+    expect((await db.xpTransactions.where('kind').equals('kitchen').first())?.note).toContain(
+      custom.name,
+    );
+  });
+
+  it("includes eligible personal recipes in Saffron's balanced Daily Rotation", async () => {
+    const custom = await saveCustomKitchenRecipe({
+      name: 'Rotation Candidate Bowl',
+      codename: 'PERSONAL ROTATION',
+      servings: 4,
+      prepMinutes: 10,
+      cookMinutes: 20,
+      costTier: '$',
+      equipment: 'Skillet',
+      plate: 'Chicken, rice, and vegetables.',
+      ingredients: ['1 lb chicken', '2 cups rice', '2 cups vegetables'],
+      steps: ['Cook chicken to 165°F.', 'Cook vegetables.', 'Build bowls.'],
+      swaps: [],
+      storage: 'Refrigerate promptly.',
+      safety: 'Chicken must reach 165°F.',
+    });
+    const historyDates = Array.from(
+      { length: KITCHEN_RECIPES.length },
+      (_, index) => `2026-07-${String(index + 1).padStart(2, '0')}`,
+    ) as LocalDateKey[];
+    await db.kitchenSessions.bulkPut(
+      KITCHEN_RECIPES.map((recipe, index) => ({
+        id: historyDates[index],
+        date: historyDates[index],
+        recipeId: recipe.id,
+        status: 'completed' as const,
+        assignmentVariant: 0,
+        rerollUsed: false,
+        assignedAt: new Date().toISOString(),
+        completedAt: new Date().toISOString(),
+        rewardApplied: false,
+        updatedAt: new Date().toISOString(),
+      })),
+    );
+
+    expect((await assignKitchenOrder(DATE)).recipeId).toBe(custom.id);
   });
 });

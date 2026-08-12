@@ -1,6 +1,6 @@
-export const APP_VERSION = '7.5.0';
-export const DATABASE_SCHEMA_VERSION = 21;
-export const SAVE_FORMAT_VERSION = 21;
+export const APP_VERSION = '7.6.0';
+export const DATABASE_SCHEMA_VERSION = 22;
+export const SAVE_FORMAT_VERSION = 22;
 
 export interface ReleaseSection {
   title: string;
@@ -9,6 +9,18 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 7.6.0 · Living Grimoire',
+    detail:
+      "Saffron's personal recipes become complete Kitchen Orders instead of static notes, joining her Daily Rotation and opening into the same guided cooking console as every canon meal.",
+    points: [
+      'Every confirmed Saffron creation now enters Daily Rotation automatically, while a visible per-recipe control can keep any personal meal saved without allowing it to appear as a surprise order.',
+      'Cook with Saffron can launch any personal or canon Grimoire recipe as today’s active order, with a clear warning before replacing unfinished checklist progress.',
+      'Personal orders inherit ingredient gathering checks, numbered method checks, on-device progress persistence, serving and effort review, completion reactions, weekly reward limits, and Kitchen history.',
+      'A protected recipe snapshot travels with each personal order so its name, ingredients, method, safety guidance, and archive record survive even if the original Grimoire entry is later removed.',
+      'The rotation counter now reflects the real combined pool of canon meals and enabled personal creations, while completed custom orders use the recipe’s true name in the XP ledger and AI System context.',
+    ],
+  },
   {
     title: 'Version 7.5.0 · Living Voice Ascension',
     detail:

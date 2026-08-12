@@ -339,7 +339,8 @@ export type KitchenSessionStatus = 'assigned' | 'completed' | 'declined';
 export interface KitchenSession {
   id: LocalDateKey;
   date: LocalDateKey;
-  recipeId: KitchenRecipeId;
+  recipeId: string;
+  customRecipeSnapshot?: CustomKitchenRecipe;
   status: KitchenSessionStatus;
   assignmentVariant: number;
   rerollUsed: boolean;
@@ -370,6 +371,7 @@ export interface CustomKitchenRecipe {
   swaps: string[];
   storage: string;
   safety: string;
+  dailyRotationEnabled: boolean;
   sourceCompanionId: 'saffron';
   createdAt: string;
   updatedAt: string;
