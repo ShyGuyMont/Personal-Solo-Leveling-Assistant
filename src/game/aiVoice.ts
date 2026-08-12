@@ -1,4 +1,8 @@
-import { CANON_VOICE_PROFILES, cloneCanonVoiceProfile } from '@/config/aiVoices';
+import {
+  CANON_VOICE_PROFILES,
+  cloneCanonVoiceProfile,
+  normalizeAiVoiceProfile,
+} from '@/config/aiVoices';
 import { db } from '@/db/database';
 import type { AiUsageKind, AiUsageRecord, AiVoiceProfile, CompanionId } from '@/types/game';
 
@@ -56,7 +60,10 @@ export async function getAiVoiceProfiles() {
   return Object.keys(CANON_VOICE_PROFILES).reduce<Record<CompanionId, AiVoiceProfile>>(
     (profiles, id) => {
       const companionId = id as CompanionId;
-      profiles[companionId] = saved.get(companionId) ?? cloneCanonVoiceProfile(companionId);
+      profiles[companionId] = normalizeAiVoiceProfile(
+        companionId,
+        saved.get(companionId) as Partial<AiVoiceProfile> | undefined,
+      );
       return profiles;
     },
     {} as Record<CompanionId, AiVoiceProfile>,
@@ -64,14 +71,10 @@ export async function getAiVoiceProfiles() {
 }
 
 export async function saveAiVoiceProfile(profile: AiVoiceProfile) {
-  const saved: AiVoiceProfile = {
+  const saved = normalizeAiVoiceProfile(profile.id, {
     ...profile,
-    pace: Math.min(1.2, Math.max(0.8, Number(profile.pace.toFixed(2)))),
-    warmth: Math.min(5, Math.max(1, Math.round(profile.warmth))),
-    energy: Math.min(5, Math.max(1, Math.round(profile.energy))),
-    expressiveness: Math.min(5, Math.max(1, Math.round(profile.expressiveness))),
     updatedAt: new Date().toISOString(),
-  };
+  });
   await db.aiVoiceProfiles.put(saved);
   return saved;
 }

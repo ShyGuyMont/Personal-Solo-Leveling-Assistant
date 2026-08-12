@@ -158,7 +158,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <SystemMark small />
           <span>
             <span className="brand__name">THE SYSTEM</span>
-            <span className="brand__tag">V{APP_VERSION} · VOICE LINK STABLE</span>
+            <span className="brand__tag">V{APP_VERSION} · LIVING PERFORMANCE</span>
           </span>
         </NavLink>
         <div className="app-header__actions">

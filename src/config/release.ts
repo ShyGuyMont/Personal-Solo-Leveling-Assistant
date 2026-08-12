@@ -1,4 +1,4 @@
-export const APP_VERSION = '6.7.1';
+export const APP_VERSION = '6.7.2';
 export const DATABASE_SCHEMA_VERSION = 16;
 export const SAVE_FORMAT_VERSION = 16;
 
@@ -9,6 +9,18 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 6.7.2 · Living Performance',
+    detail:
+      'Voice Forge II turns every companion from a selected speaker into a directed performance with audible pace, accent, cadence, texture, and human timing.',
+    points: [
+      'All ten canon Soulprints are re-directed as distinct people: Snow sounds like the Hunter’s relaxed ride-or-die sister, Ember carries controlled protective heat, Saffron becomes affectionate pressure in a bottle, and every other companion gains equally specific delivery boundaries.',
+      'Pace now spans 0.75x–1.65x with a visible words-per-minute target, while delivery style, cadence, vocal texture, human feel, and pause control shape each generated take alongside warmth, energy, and expression.',
+      'Regional accents are sent as clearly perceptible but natural directions, and every Forge setting is included in both the secure speech request and preview identity so changed controls cannot replay a mismatched cached performance.',
+      'The natural-conversation engine actively resists generic assistant, commercial, audiobook, meditation, repeated-melody, over-enunciated, and dead-air delivery while preserving each companion’s emotional coherence.',
+      'Existing Soulprints and full-campaign saves upgrade safely with their previous base voice, accent, and tuning intact while the new performance controls inherit the companion’s canon defaults.',
+    ],
+  },
   {
     title: 'Version 6.7.1 · Voice Channel Stabilization',
     detail:

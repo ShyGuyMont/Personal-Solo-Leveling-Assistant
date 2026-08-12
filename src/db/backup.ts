@@ -1,6 +1,14 @@
 import { KITCHEN_RECIPES } from '@/config/kitchen';
+import { CANON_VOICE_PROFILES, cloneCanonVoiceProfile } from '@/config/aiVoices';
 import { db, TABLE_NAMES } from '@/db/database';
-import type { BackupSnapshot, Profile, SaveFile, Settings, AccountProgression } from '@/types/game';
+import type {
+  AccountProgression,
+  BackupSnapshot,
+  CompanionId,
+  Profile,
+  SaveFile,
+  Settings,
+} from '@/types/game';
 
 export const SAVE_VERSION = 16;
 export const MAX_IMPORT_BYTES = 32 * 1024 * 1024;
@@ -124,6 +132,24 @@ function migrateData(
     data.aiVoiceProfiles ??= [];
     data.aiUsageRecords ??= [];
   }
+  data.aiVoiceProfiles = data.aiVoiceProfiles.map((row) => {
+    if (
+      !isObject(row) ||
+      typeof row.id !== 'string' ||
+      !Object.hasOwn(CANON_VOICE_PROFILES, row.id)
+    ) {
+      return row;
+    }
+    const canon = cloneCanonVoiceProfile(row.id as CompanionId);
+    return {
+      delivery: canon.delivery,
+      cadence: canon.cadence,
+      texture: canon.texture,
+      naturalism: canon.naturalism,
+      pauseDiscipline: canon.pauseDiscipline,
+      ...row,
+    };
+  });
   const migrationTime = new Date().toISOString();
   if (!data.treasurySettings.some((row) => isObject(row) && row.id === 'primary')) {
     data.treasurySettings.push({
@@ -356,15 +382,37 @@ function validateData(data: Record<string, unknown[]>) {
     'west-african',
     'southern-us',
   ]);
+  const aiVoiceDeliveries = new Set([
+    'conversational',
+    'cinematic',
+    'playful',
+    'intense',
+    'soothing',
+    'commanding',
+    'dry',
+    'intimate',
+  ]);
+  const aiVoiceCadences = new Set(['natural', 'clipped', 'flowing', 'measured', 'rapid-fire']);
+  const aiVoiceTextures = new Set([
+    'clean',
+    'smooth',
+    'airy',
+    'textured',
+    'grounded',
+    'bright',
+  ]);
   for (const row of data.aiVoiceProfiles) {
     if (
       !isObject(row) ||
       !aiCompanionIds.has(String(row.id)) ||
       !aiVoiceNames.has(String(row.voice)) ||
       !aiVoiceAccents.has(String(row.accent)) ||
+      !aiVoiceDeliveries.has(String(row.delivery)) ||
+      !aiVoiceCadences.has(String(row.cadence)) ||
+      !aiVoiceTextures.has(String(row.texture)) ||
       !Number.isFinite(row.pace) ||
-      Number(row.pace) < 0.8 ||
-      Number(row.pace) > 1.2 ||
+      Number(row.pace) < 0.75 ||
+      Number(row.pace) > 1.65 ||
       !Number.isInteger(row.warmth) ||
       Number(row.warmth) < 1 ||
       Number(row.warmth) > 5 ||
@@ -374,6 +422,12 @@ function validateData(data: Record<string, unknown[]>) {
       !Number.isInteger(row.expressiveness) ||
       Number(row.expressiveness) < 1 ||
       Number(row.expressiveness) > 5 ||
+      !Number.isInteger(row.naturalism) ||
+      Number(row.naturalism) < 1 ||
+      Number(row.naturalism) > 5 ||
+      !Number.isInteger(row.pauseDiscipline) ||
+      Number(row.pauseDiscipline) < 1 ||
+      Number(row.pauseDiscipline) > 5 ||
       typeof row.updatedAt !== 'string' ||
       !Number.isFinite(Date.parse(row.updatedAt))
     ) {

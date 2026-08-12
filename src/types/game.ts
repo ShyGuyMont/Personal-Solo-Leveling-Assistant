@@ -72,6 +72,17 @@ export type AiVoiceAccent =
   | 'caribbean'
   | 'west-african'
   | 'southern-us';
+export type AiVoiceDelivery =
+  | 'conversational'
+  | 'cinematic'
+  | 'playful'
+  | 'intense'
+  | 'soothing'
+  | 'commanding'
+  | 'dry'
+  | 'intimate';
+export type AiVoiceCadence = 'natural' | 'clipped' | 'flowing' | 'measured' | 'rapid-fire';
+export type AiVoiceTexture = 'clean' | 'smooth' | 'airy' | 'textured' | 'grounded' | 'bright';
 export type MoodId =
   | 'energized'
   | 'proud'
@@ -759,10 +770,15 @@ export interface AiVoiceProfile {
   id: CompanionId;
   voice: AiVoiceName;
   accent: AiVoiceAccent;
+  delivery: AiVoiceDelivery;
+  cadence: AiVoiceCadence;
+  texture: AiVoiceTexture;
   pace: number;
   warmth: number;
   energy: number;
   expressiveness: number;
+  naturalism: number;
+  pauseDiscipline: number;
   updatedAt: string;
 }
 

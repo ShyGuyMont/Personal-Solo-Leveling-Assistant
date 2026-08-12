@@ -123,11 +123,16 @@ describe('Companion Soulprint intelligence', () => {
           companionId: 'ember',
           text: 'One move. Right now.',
           voice: 'nova',
-          accent: 'natural',
-          pace: 1.1,
+          accent: 'british',
+          delivery: 'intense',
+          cadence: 'rapid-fire',
+          texture: 'bright',
+          pace: 1.28,
           warmth: 2,
           energy: 5,
           expressiveness: 5,
+          naturalism: 5,
+          pauseDiscipline: 5,
         }),
       }),
       { OPENAI_API_KEY: 'test-key' },
@@ -143,7 +148,15 @@ describe('Companion Soulprint intelligence', () => {
     });
     expect(response.headers.get('content-type')).toContain('audio/wav');
     expect(String(openAiBody?.instructions)).toContain('Ember, The Ignition');
-    expect(String(openAiBody?.instructions)).toContain('without imposing a regional accent');
+    expect(String(openAiBody?.instructions)).toContain('clearly perceptible modern British');
+    expect(String(openAiBody?.instructions)).toContain('approximately 198 spoken words per minute');
+    expect(String(openAiBody?.instructions)).toContain('tough-skinned heat aimed at the obstacle');
+    expect(String(openAiBody?.instructions)).toContain('focused emotional pressure');
+    expect(String(openAiBody?.instructions)).toContain('minimal dead air');
+    expect(String(openAiBody?.instructions)).toContain('crisp energized clarity');
+    expect(String(openAiBody?.instructions)).toContain('restrained warmth');
+    expect(String(openAiBody?.instructions)).toContain('maximum energy');
+    expect(String(openAiBody?.instructions)).toContain('no over-enunciation');
     expect(JSON.stringify(openAiBody)).not.toContain('test-key');
   });
 

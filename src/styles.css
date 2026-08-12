@@ -3818,7 +3818,7 @@ html[data-theme='daybreak'] .about-rank-grid article {
 
 .ai-voice-forge__selectors {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
 }
 
@@ -3847,9 +3847,47 @@ html[data-theme='daybreak'] .about-rank-grid article {
   line-height: 1.4;
 }
 
+.ai-voice-forge__performance-readout {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 4px 10px;
+  margin-top: 10px;
+  padding: 9px 10px;
+  background:
+    linear-gradient(110deg, rgba(45, 226, 177, 0.065), transparent 48%),
+    rgba(167, 139, 250, 0.025);
+  border: 1px solid rgba(45, 226, 177, 0.15);
+  border-radius: 9px;
+}
+
+.ai-voice-forge__performance-readout span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--mint);
+  font-family: 'SystemDisplay', sans-serif;
+  font-size: 0.54rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.ai-voice-forge__performance-readout strong {
+  justify-self: end;
+  color: var(--white);
+  font-size: 0.58rem;
+}
+
+.ai-voice-forge__performance-readout small {
+  grid-column: 1 / -1;
+  color: var(--muted-2);
+  font-size: 0.49rem;
+  line-height: 1.45;
+}
+
 .ai-voice-forge__sliders {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
   margin-top: 10px;
 }

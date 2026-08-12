@@ -256,10 +256,15 @@ export async function requestAiSpeech(input: {
         text: input.text.slice(0, 4_000),
         voice: input.profile.voice,
         accent: input.profile.accent,
+        delivery: input.profile.delivery,
+        cadence: input.profile.cadence,
+        texture: input.profile.texture,
         pace: input.profile.pace,
         warmth: input.profile.warmth,
         energy: input.profile.energy,
         expressiveness: input.profile.expressiveness,
+        naturalism: input.profile.naturalism,
+        pauseDiscipline: input.profile.pauseDiscipline,
       }),
     });
   } catch {

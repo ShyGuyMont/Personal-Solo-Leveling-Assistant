@@ -10,6 +10,7 @@ import {
   resetAiVoiceProfile,
   saveAiVoiceProfile,
 } from '@/game/aiVoice';
+import type { AiVoiceProfile } from '@/types/game';
 
 describe('Voice Link local profiles and usage', () => {
   beforeEach(async () => {
@@ -22,7 +23,7 @@ describe('Voice Link local profiles and usage', () => {
     expect(Object.keys(profiles)).toHaveLength(10);
     expect(new Set(Object.values(profiles).map((profile) => profile.voice)).size).toBe(10);
     expect(Object.values(profiles).every((profile) => profile.accent === 'natural')).toBe(true);
-    expect(CANON_VOICE_PROFILES.snow.direction).toMatch(/older-sister/i);
+    expect(CANON_VOICE_PROFILES.snow.direction).toMatch(/older sister/i);
     expect(CANON_VOICE_PROFILES.ember.direction).toMatch(/obstacle/i);
     expect(CANON_VOICE_PROFILES.saffron.direction).toMatch(/high-pressure/i);
   });
@@ -36,12 +37,43 @@ describe('Voice Link local profiles and usage', () => {
       pace: 1.5,
       warmth: 20,
     });
-    expect(saved).toMatchObject({ voice: 'verse', accent: 'irish', pace: 1.2, warmth: 5 });
+    expect(saved).toMatchObject({
+      voice: 'verse',
+      accent: 'irish',
+      pace: 1.5,
+      warmth: 5,
+      naturalism: 5,
+      pauseDiscipline: 4,
+    });
     expect((await getAiVoiceProfiles()).snow.voice).toBe('verse');
 
     const reset = await resetAiVoiceProfile('snow');
     expect(reset.voice).toBe(CANON_VOICE_PROFILES.snow.voice);
     expect((await getAiVoiceProfiles()).snow.accent).toBe('natural');
+  });
+
+  it('upgrades a legacy saved soulprint with the full living-performance controls', async () => {
+    await db.aiVoiceProfiles.put({
+      id: 'snow',
+      voice: 'verse',
+      accent: 'british',
+      pace: 1.2,
+      warmth: 4,
+      energy: 3,
+      expressiveness: 4,
+      updatedAt: '2026-08-11T14:00:00.000Z',
+    } as AiVoiceProfile);
+
+    const profile = (await getAiVoiceProfiles()).snow;
+    expect(profile).toMatchObject({
+      voice: 'verse',
+      accent: 'british',
+      delivery: CANON_VOICE_PROFILES.snow.delivery,
+      cadence: CANON_VOICE_PROFILES.snow.cadence,
+      texture: CANON_VOICE_PROFILES.snow.texture,
+      naturalism: CANON_VOICE_PROFILES.snow.naturalism,
+      pauseDiscipline: CANON_VOICE_PROFILES.snow.pauseDiscipline,
+    });
   });
 
   it('separates session, daily, and monthly usage while keeping spend clearly estimated', async () => {

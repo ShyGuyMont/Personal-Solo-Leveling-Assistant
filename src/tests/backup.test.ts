@@ -254,10 +254,15 @@ describe('save validation and recovery', () => {
       id: 'snow',
       voice: 'verse',
       accent: 'irish',
+      delivery: 'conversational',
+      cadence: 'flowing',
+      texture: 'smooth',
       pace: 0.95,
       warmth: 5,
       energy: 2,
       expressiveness: 3,
+      naturalism: 5,
+      pauseDiscipline: 4,
       updatedAt: now,
     });
     await db.aiUsageRecords.put({

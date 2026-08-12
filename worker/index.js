@@ -4,7 +4,7 @@ const jsonHeaders = {
   'x-content-type-options': 'nosniff',
 };
 
-export const COMPANION_INTELLIGENCE_VERSION = 'voice-link-3';
+export const COMPANION_INTELLIGENCE_VERSION = 'voice-link-4';
 
 export const companionIds = [
   'snow',
@@ -35,7 +35,7 @@ export const companionProfiles = {
     boundary:
       'Never becomes generic encouragement, possessive, melodramatic, or falsely certain about feelings the Hunter did not express.',
     performance:
-      'Warm low-mid register; calm pacing; soft humor; reassurance that sounds earned rather than automatic.',
+      "Natural low-mid register with a relaxed sisterly smile; easy contemporary pace; dry little laughs and lived-in warmth; like a late-night call with the Hunter's ride-or-die, never a coach, narrator, or guided meditation.",
   },
   rook: {
     name: 'Rook',
@@ -52,7 +52,7 @@ export const companionProfiles = {
     boundary:
       'Never becomes a yelling drill sergeant, a shallow gym stereotype, medically reckless, insulting, or dismissive of recovery.',
     performance:
-      'Strong resonant register; energetic but controlled; dry grin in the delivery; intensity without shouting.',
+      'Strong resonant register; athletic in-room presence; quick clipped challenges with a dry grin; competitive intensity without shouting, announcing, or drill-sergeant theater.',
   },
   selah: {
     name: 'Selah',
@@ -69,7 +69,7 @@ export const companionProfiles = {
     boundary:
       'Never preaches at the Hunter, weaponizes faith, treats struggle as spiritual failure, or claims divine certainty about a personal decision.',
     performance:
-      'Clear gentle register; measured pauses; grounded warmth; conviction without theatricality.',
+      'Clear gentle register with grounded warmth; spiritually present and quietly alive; plainspoken conviction without whispering, preaching, or solemn church-narrator theater.',
   },
   cipher: {
     name: 'Cipher',
@@ -87,7 +87,7 @@ export const companionProfiles = {
     boundary:
       'Never turns every conversation into project management, buries the answer in a framework, or treats emotion as a defective data point.',
     performance:
-      'Cool precise register; quick timing; subtle amusement; confidence built from clarity rather than volume.',
+      'Cool precise register; quick crisp timing; subtle smirk and human tonal variation; the brilliant tech friend in the room, never a monotone computer or over-enunciating presenter.',
   },
   haven: {
     name: 'Haven',
@@ -104,7 +104,7 @@ export const companionProfiles = {
     boundary:
       'Never diagnoses, overmedicalizes ordinary struggle, rewards avoidance, or uses recovery as a disguised lecture.',
     performance:
-      'Steady soft register; deliberate pace; understated humor; protective without sounding parental.',
+      'Low steady register; protective physical presence; unhurried but connected timing; understated deadpan humor without sounding parental, sedated, or self-important.',
   },
   ember: {
     name: 'Ember',
@@ -121,7 +121,7 @@ export const companionProfiles = {
     boundary:
       'Never insults, humiliates, threatens, mistakes exhaustion for laziness, or pushes a dangerous action merely to sound intense.',
     performance:
-      'Bright forceful register; quick pace; sparks of humor; sharp edges wrapped around unmistakable loyalty.',
+      'Bright forceful register; rapid controlled pace; sharp humor and tough-skinned heat aimed at the obstacle; unmistakable loyalty without screaming or villain performance.',
   },
   mira: {
     name: 'Mira',
@@ -138,7 +138,7 @@ export const companionProfiles = {
     boundary:
       'Never confuses pain with progress, offers mystical wellness filler, diagnoses an injury, or turns calm into passivity.',
     performance:
-      'Soft centered register; smooth pacing; gentle playfulness; precise movement cues with room between them.',
+      'Soft centered register; embodied calm and smooth connected timing; gentle mischief; precise movement cues with usable space, never sleepy, mystical, breathy, or ASMR-like.',
   },
   amara: {
     name: 'Amara',
@@ -156,7 +156,7 @@ export const companionProfiles = {
     boundary:
       "Never pressures contact, romanticizes unsafe behavior, assumes another person's motives, encourages dependency, or treats loneliness as weakness.",
     performance:
-      'Warm expressive register; graceful pacing; playful lightness when appropriate; firmness becomes clearer rather than louder.',
+      'Warm emotionally responsive register; natural conversational turns, laughter, softness, and boldness; intimate but grounded, with firmness becoming clearer rather than louder.',
   },
   cassian: {
     name: 'Cassian',
@@ -173,7 +173,7 @@ export const companionProfiles = {
     boundary:
       'Never moralizes money, invents financial facts, promises returns, gives individualized professional advice, or recommends punishing austerity.',
     performance:
-      'Controlled polished register; even tempo; dry wit; authority that feels protective rather than superior.',
+      'Controlled polished register with believable human variation; exact measured tempo; raised-eyebrow dry wit; protective authority without stiffness, superiority, or automation.',
   },
   saffron: {
     name: 'Saffron',
@@ -191,7 +191,7 @@ export const companionProfiles = {
     boundary:
       'Never body-shames, promotes crash dieting, invents food-safety claims, assumes ingredients are available, or turns every exchange into a performance.',
     performance:
-      'Rich animated register; lively tempo; expressive warmth; theatrical peaks followed by crisp practical instructions.',
+      'Rich animated register; rapid high-pressure tempo; affectionate theatrical peaks, quick pivots, and crisp practical instructions; a real expressive friend, never a commercial narrator.',
   },
 };
 
@@ -213,13 +213,48 @@ export const aiVoiceNames = [
 
 export const aiVoiceAccents = {
   natural: 'Use the base voice naturally without imposing a regional accent.',
-  'general-american': 'Use a natural, contemporary General American accent.',
-  british: 'Use a natural modern British accent.',
-  irish: 'Use a natural modern Irish accent.',
-  australian: 'Use a natural modern Australian accent.',
-  caribbean: 'Use a light, natural Caribbean English accent without caricature.',
-  'west-african': 'Use a light, natural West African English accent without caricature.',
-  'southern-us': 'Use a light, contemporary Southern U.S. accent without caricature.',
+  'general-american':
+    'Use a clearly perceptible, contemporary General American accent while keeping it natural.',
+  british:
+    'Use a clearly perceptible modern British English accent consistently across the full take; keep it natural and never caricatured.',
+  irish:
+    'Use a clearly perceptible modern Irish English accent consistently across the full take; keep it natural and never caricatured.',
+  australian:
+    'Use a clearly perceptible modern Australian English accent consistently across the full take; keep it natural and never caricatured.',
+  caribbean:
+    'Use a clearly perceptible light Caribbean English accent consistently across the full take, without imitation or caricature.',
+  'west-african':
+    'Use a clearly perceptible light West African English accent consistently across the full take, without imitation or caricature.',
+  'southern-us':
+    'Use a clearly perceptible contemporary Southern U.S. accent consistently across the full take, without caricature.',
+};
+
+export const aiVoiceDeliveries = {
+  conversational: 'Sound like a real person speaking naturally during a relaxed phone call.',
+  cinematic: 'Use a cinematic emotional arc while keeping the personhood believable.',
+  playful: 'Let wit, smiles, and lively emotional turns color the delivery.',
+  intense: 'Apply focused emotional pressure and urgency without shouting or losing control.',
+  soothing: 'Create grounded calm and reassurance without whispering, dragging, or sedation.',
+  commanding: 'Use decisive, effortless authority without a drill-sergeant or announcer voice.',
+  dry: 'Use restrained deadpan timing with subtle human amusement.',
+  intimate: 'Sound close, private, emotionally present, and personally invested.',
+};
+
+export const aiVoiceCadences = {
+  natural: 'Use varied everyday rhythm and avoid repeating the same sentence contour.',
+  clipped: 'Keep phrases short, crisp, decisive, and connected without abrupt robotic gaps.',
+  flowing: 'Connect thoughts fluidly with easy transitions and natural momentum.',
+  measured: 'Be deliberate and clear, but do not stretch words or leave theatrical silences.',
+  'rapid-fire': 'Move quickly with controlled momentum, clean articulation, and minimal dead air.',
+};
+
+export const aiVoiceTextures = {
+  clean: 'Keep the vocal texture clear, direct, and uncolored without sounding synthetic.',
+  smooth: 'Use rounded, easy resonance with a relaxed natural finish.',
+  airy: 'Use a light open texture, but do not whisper or become breathy.',
+  textured: 'Use a lived-in, emotionally responsive texture with subtle natural variation.',
+  grounded: 'Use solid resonant weight and an anchored physical presence.',
+  bright: 'Use crisp energized clarity with lively upper-register presence.',
 };
 
 const fallbackVoiceMap = {
@@ -391,7 +426,10 @@ function validateSpeechPayload(payload) {
     !payload.text.trim() ||
     payload.text.length > 4_000 ||
     !aiVoiceNames.includes(payload.voice) ||
-    !Object.hasOwn(aiVoiceAccents, payload.accent)
+    !Object.hasOwn(aiVoiceAccents, payload.accent) ||
+    !Object.hasOwn(aiVoiceDeliveries, payload.delivery) ||
+    !Object.hasOwn(aiVoiceCadences, payload.cadence) ||
+    !Object.hasOwn(aiVoiceTextures, payload.texture)
   ) {
     return undefined;
   }
@@ -399,10 +437,12 @@ function validateSpeechPayload(payload) {
   const warmth = Number(payload.warmth);
   const energy = Number(payload.energy);
   const expressiveness = Number(payload.expressiveness);
+  const naturalism = Number(payload.naturalism);
+  const pauseDiscipline = Number(payload.pauseDiscipline);
   if (
     !Number.isFinite(pace) ||
-    pace < 0.8 ||
-    pace > 1.2 ||
+    pace < 0.75 ||
+    pace > 1.65 ||
     !Number.isInteger(warmth) ||
     warmth < 1 ||
     warmth > 5 ||
@@ -411,7 +451,13 @@ function validateSpeechPayload(payload) {
     energy > 5 ||
     !Number.isInteger(expressiveness) ||
     expressiveness < 1 ||
-    expressiveness > 5
+    expressiveness > 5 ||
+    !Number.isInteger(naturalism) ||
+    naturalism < 1 ||
+    naturalism > 5 ||
+    !Number.isInteger(pauseDiscipline) ||
+    pauseDiscipline < 1 ||
+    pauseDiscipline > 5
   ) {
     return undefined;
   }
@@ -420,10 +466,15 @@ function validateSpeechPayload(payload) {
     text: payload.text.trim(),
     voice: payload.voice,
     accent: payload.accent,
+    delivery: payload.delivery,
+    cadence: payload.cadence,
+    texture: payload.texture,
     pace,
     warmth,
     energy,
     expressiveness,
+    naturalism,
+    pauseDiscipline,
   };
 }
 
@@ -435,14 +486,44 @@ function voiceScale(label, value) {
   return `maximum ${label} without caricature`;
 }
 
+function naturalismInstruction(value) {
+  if (value <= 1) {
+    return 'Keep a polished studio finish, but preserve natural emphasis and avoid synthetic timing.';
+  }
+  if (value === 2) {
+    return 'Favor a clean performance with subtle human variation in emphasis and phrase shape.';
+  }
+  if (value === 3) {
+    return 'Balance polish with natural conversational variation and responsive emphasis.';
+  }
+  if (value === 4) {
+    return 'Sound distinctly human and conversational: vary sentence contours, stress, and transitions.';
+  }
+  return 'Prioritize believable spontaneous conversation: varied sentence contours, responsive emphasis, tiny natural transitions, and no over-enunciation, presenter voice, audiobook cadence, or repeated melodic pattern.';
+}
+
+function pauseInstruction(value) {
+  if (value <= 1) return 'Allow spacious intentional pauses where the punctuation supports them.';
+  if (value === 2) return 'Use relaxed pauses, but keep the thought connected.';
+  if (value === 3) return 'Use ordinary conversational pauses with no artificial breath gaps.';
+  if (value === 4) return 'Keep pauses short and purposeful; maintain forward conversational motion.';
+  return 'Minimize dead air and dramatic silence; move cleanly between phrases without rushing articulation.';
+}
+
 function buildVoiceInstructions(profile) {
   const companion = companionProfiles[profile.companionId];
+  const targetWordsPerMinute = Math.round(155 * profile.pace);
   return `Perform the supplied text exactly as written. Do not add, remove, paraphrase, announce, or explain anything.
 Character: ${companion.name}, ${companion.title}. ${companion.performance}
 Accent: ${aiVoiceAccents[profile.accent]}
-Pacing: ${profile.pace < 0.95 ? 'deliberate' : profile.pace > 1.05 ? 'brisk' : 'natural'} at approximately ${profile.pace.toFixed(2)}x.
+Delivery: ${aiVoiceDeliveries[profile.delivery]}
+Cadence: ${aiVoiceCadences[profile.cadence]}
+Vocal texture: ${aiVoiceTextures[profile.texture]}
+Pacing: Target approximately ${targetWordsPerMinute} spoken words per minute (${profile.pace.toFixed(2)}x). Maintain that pace across the take; do not substitute slow dramatic delivery for clarity.
 Performance balance: ${voiceScale('warmth', profile.warmth)}, ${voiceScale('energy', profile.energy)}, and ${voiceScale('expressiveness', profile.expressiveness)}.
-Keep the delivery natural, emotionally coherent, and free of stereotypes.`;
+Human realism: ${naturalismInstruction(profile.naturalism)}
+Pause shaping: ${pauseInstruction(profile.pauseDiscipline)}
+Keep the delivery emotionally coherent and free of stereotypes. Never default to a generic assistant, commercial, narrator, or guided-meditation voice unless the selected direction explicitly calls for it.`;
 }
 
 function extractOutputText(response) {

@@ -12,7 +12,14 @@ import {
   VolumeX,
 } from 'lucide-react';
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
-import { AI_ACCENT_OPTIONS, AI_VOICE_OPTIONS, CANON_VOICE_PROFILES } from '@/config/aiVoices';
+import {
+  AI_ACCENT_OPTIONS,
+  AI_CADENCE_OPTIONS,
+  AI_DELIVERY_OPTIONS,
+  AI_TEXTURE_OPTIONS,
+  AI_VOICE_OPTIONS,
+  CANON_VOICE_PROFILES,
+} from '@/config/aiVoices';
 import { COMPANIONS, getCompanionImage } from '@/config/companions';
 import { formatEstimatedSpend, type AiUsageSummary } from '@/game/aiVoice';
 import type { AiVoiceProfile, CompanionId, Settings } from '@/types/game';
@@ -59,6 +66,63 @@ export function AiVoiceLinkPanel({
   const monthWarning =
     settings.aiUsageWarningUsd > 0 &&
     (usage?.month.estimatedCostUsd ?? 0) >= settings.aiUsageWarningUsd;
+  const performanceSliders: Array<{
+    label: string;
+    key: 'pace' | 'warmth' | 'energy' | 'expressiveness' | 'naturalism' | 'pauseDiscipline';
+    min: number;
+    max: number;
+    step: number;
+    value: (profile: AiVoiceProfile) => string;
+  }> = [
+    {
+      label: 'Pace',
+      key: 'pace',
+      min: 0.75,
+      max: 1.65,
+      step: 0.05,
+      value: (profile) => `${profile.pace.toFixed(2)}x · ~${Math.round(155 * profile.pace)} WPM`,
+    },
+    {
+      label: 'Warmth',
+      key: 'warmth',
+      min: 1,
+      max: 5,
+      step: 1,
+      value: (profile) => String(profile.warmth),
+    },
+    {
+      label: 'Energy',
+      key: 'energy',
+      min: 1,
+      max: 5,
+      step: 1,
+      value: (profile) => String(profile.energy),
+    },
+    {
+      label: 'Expression',
+      key: 'expressiveness',
+      min: 1,
+      max: 5,
+      step: 1,
+      value: (profile) => String(profile.expressiveness),
+    },
+    {
+      label: 'Human feel',
+      key: 'naturalism',
+      min: 1,
+      max: 5,
+      step: 1,
+      value: (profile) => String(profile.naturalism),
+    },
+    {
+      label: 'Pause control',
+      key: 'pauseDiscipline',
+      min: 1,
+      max: 5,
+      step: 1,
+      value: (profile) => String(profile.pauseDiscipline),
+    },
+  ];
 
   async function save() {
     if (!draft) return;
@@ -215,8 +279,8 @@ export function AiVoiceLinkPanel({
                 <SlidersHorizontal size={18} />
               </span>
               <div>
-                <strong>Voice Forge</strong>
-                <small>Canon defaults by The System · every setting remains yours</small>
+                <strong>Voice Forge II · Living Performance</strong>
+                <small>Ten humanized Soulprints · every performance setting remains yours</small>
               </div>
             </header>
 
@@ -282,28 +346,92 @@ export function AiVoiceLinkPanel({
                       ))}
                     </select>
                     <small>
-                      Canon stays neutral because appearance never determines how someone sounds.
+                      Clearly audible but natural. Canon stays neutral because appearance never
+                      determines how someone sounds.
                     </small>
+                  </label>
+                  <label>
+                    Delivery style
+                    <select
+                      value={draft.delivery}
+                      onChange={(event) =>
+                        setDraft({
+                          ...draft,
+                          delivery: event.target.value as AiVoiceProfile['delivery'],
+                        })
+                      }
+                    >
+                      {AI_DELIVERY_OPTIONS.map((option) => (
+                        <option key={option.id} value={option.id}>
+                          {option.label} · {option.character}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label>
+                    Cadence
+                    <select
+                      value={draft.cadence}
+                      onChange={(event) =>
+                        setDraft({
+                          ...draft,
+                          cadence: event.target.value as AiVoiceProfile['cadence'],
+                        })
+                      }
+                    >
+                      {AI_CADENCE_OPTIONS.map((option) => (
+                        <option key={option.id} value={option.id}>
+                          {option.label} · {option.character}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label>
+                    Vocal texture
+                    <select
+                      value={draft.texture}
+                      onChange={(event) =>
+                        setDraft({
+                          ...draft,
+                          texture: event.target.value as AiVoiceProfile['texture'],
+                        })
+                      }
+                    >
+                      {AI_TEXTURE_OPTIONS.map((option) => (
+                        <option key={option.id} value={option.id}>
+                          {option.label} · {option.character}
+                        </option>
+                      ))}
+                    </select>
                   </label>
                 </div>
 
+                <div className="ai-voice-forge__performance-readout">
+                  <span>
+                    <Sparkles size={13} /> Natural-conversation engine
+                  </span>
+                  <strong>
+                    {AI_DELIVERY_OPTIONS.find((option) => option.id === draft.delivery)?.label} ·{' '}
+                    {AI_CADENCE_OPTIONS.find((option) => option.id === draft.cadence)?.label} · ~
+                    {Math.round(155 * draft.pace)} WPM
+                  </strong>
+                  <small>
+                    Anti-narrator timing, varied sentence rhythm, and human pause shaping are active.
+                  </small>
+                </div>
+
                 <div className="ai-voice-forge__sliders">
-                  {[
-                    ['Pace', 'pace', 0.8, 1.2, 0.05],
-                    ['Warmth', 'warmth', 1, 5, 1],
-                    ['Energy', 'energy', 1, 5, 1],
-                    ['Expression', 'expressiveness', 1, 5, 1],
-                  ].map(([label, key, min, max, step]) => (
-                    <label key={String(key)}>
+                  {performanceSliders.map(({ label, key, min, max, step, value }) => (
+                    <label key={key}>
                       <span>
-                        {label} <strong>{draft[key as keyof AiVoiceProfile]}</strong>
+                        {label} <strong>{value(draft)}</strong>
                       </span>
                       <input
                         type="range"
-                        min={Number(min)}
-                        max={Number(max)}
-                        step={Number(step)}
-                        value={Number(draft[key as keyof AiVoiceProfile])}
+                        min={min}
+                        max={max}
+                        step={step}
+                        value={draft[key]}
                         onChange={(event) =>
                           setDraft({ ...draft, [key]: Number(event.target.value) })
                         }

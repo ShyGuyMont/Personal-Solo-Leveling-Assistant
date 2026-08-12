@@ -326,7 +326,21 @@ export function useAiVoiceLink(input: {
   const previewProfile = useCallback(
     async (profile: AiVoiceProfile) => {
       const canon = CANON_VOICE_PROFILES[profile.id];
-      const cacheKey = `preview:${profile.id}:${profile.voice}:${profile.accent}:${profile.pace}:${profile.warmth}:${profile.energy}:${profile.expressiveness}`;
+      const cacheKey = [
+        'preview',
+        profile.id,
+        profile.voice,
+        profile.accent,
+        profile.delivery,
+        profile.cadence,
+        profile.texture,
+        profile.pace,
+        profile.warmth,
+        profile.energy,
+        profile.expressiveness,
+        profile.naturalism,
+        profile.pauseDiscipline,
+      ].join(':');
       await playMessages(
         [{ id: cacheKey, companionId: profile.id, message: canon.audition }],
         profile,

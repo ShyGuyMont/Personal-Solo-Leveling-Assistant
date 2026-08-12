@@ -1,4 +1,5 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { CANON_VOICE_PROFILES } from '@/config/aiVoices';
 import { db } from '@/db/database';
 import {
   createAiConversation,
@@ -12,11 +13,16 @@ import {
   saveAiMemoryCandidates,
   saveAiConversation,
 } from '@/game/aiHeadquarters';
+import { requestAiSpeech } from '@/services/aiHeadquarters';
 
 describe('AI Headquarters local history', () => {
   beforeEach(async () => {
     await db.aiConversations.clear();
     await db.aiMemories.clear();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   it('stores a party exchange locally and returns the newest conversation first', async () => {
@@ -66,5 +72,57 @@ describe('AI Headquarters local history', () => {
 
     await forgetAiRelationshipMemory(candidate.id);
     expect(await getAiRelationshipMemories()).toEqual([]);
+  });
+
+  it('sends every audible Voice Forge control through the secure speech request', async () => {
+    let requestBody: Record<string, unknown> | undefined;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_url: string, init: RequestInit) => {
+        requestBody = JSON.parse(String(init.body)) as Record<string, unknown>;
+        return new Response(new Uint8Array([1, 2, 3]), {
+          status: 200,
+          headers: {
+            'content-type': 'audio/wav',
+            'x-ai-model': 'gpt-4o-mini-tts',
+            'x-ai-characters': '24',
+          },
+        });
+      }),
+    );
+
+    await requestAiSpeech({
+      companionId: 'snow',
+      text: 'We are testing the forge.',
+      profile: {
+        ...CANON_VOICE_PROFILES.snow,
+        voice: 'verse',
+        accent: 'british',
+        delivery: 'playful',
+        cadence: 'rapid-fire',
+        texture: 'textured',
+        pace: 1.55,
+        warmth: 2,
+        energy: 4,
+        expressiveness: 5,
+        naturalism: 4,
+        pauseDiscipline: 5,
+      },
+    });
+
+    expect(requestBody).toMatchObject({
+      companionId: 'snow',
+      voice: 'verse',
+      accent: 'british',
+      delivery: 'playful',
+      cadence: 'rapid-fire',
+      texture: 'textured',
+      pace: 1.55,
+      warmth: 2,
+      energy: 4,
+      expressiveness: 5,
+      naturalism: 4,
+      pauseDiscipline: 5,
+    });
   });
 });

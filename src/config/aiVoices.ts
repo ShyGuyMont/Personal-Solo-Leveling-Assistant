@@ -1,4 +1,12 @@
-import type { AiVoiceAccent, AiVoiceName, AiVoiceProfile, CompanionId } from '@/types/game';
+import type {
+  AiVoiceAccent,
+  AiVoiceCadence,
+  AiVoiceDelivery,
+  AiVoiceName,
+  AiVoiceProfile,
+  AiVoiceTexture,
+  CompanionId,
+} from '@/types/game';
 
 export interface CanonVoiceProfile extends AiVoiceProfile {
   direction: string;
@@ -64,6 +72,46 @@ export const AI_ACCENT_OPTIONS: Array<{
   },
 ];
 
+export const AI_DELIVERY_OPTIONS: Array<{
+  id: AiVoiceDelivery;
+  label: string;
+  character: string;
+}> = [
+  { id: 'conversational', label: 'Conversational', character: 'real phone-call energy' },
+  { id: 'cinematic', label: 'Cinematic', character: 'dramatic and scene-rich' },
+  { id: 'playful', label: 'Playful', character: 'smiles, wit, and bounce' },
+  { id: 'intense', label: 'Intense', character: 'focused emotional pressure' },
+  { id: 'soothing', label: 'Soothing', character: 'calm without sedation' },
+  { id: 'commanding', label: 'Commanding', character: 'decisive effortless authority' },
+  { id: 'dry', label: 'Dry', character: 'restrained deadpan humor' },
+  { id: 'intimate', label: 'Intimate', character: 'close, private, and present' },
+];
+
+export const AI_CADENCE_OPTIONS: Array<{
+  id: AiVoiceCadence;
+  label: string;
+  character: string;
+}> = [
+  { id: 'natural', label: 'Natural', character: 'varied everyday rhythm' },
+  { id: 'clipped', label: 'Clipped', character: 'short decisive phrases' },
+  { id: 'flowing', label: 'Flowing', character: 'connected and effortless' },
+  { id: 'measured', label: 'Measured', character: 'deliberate, never dragged' },
+  { id: 'rapid-fire', label: 'Rapid-fire', character: 'fast controlled momentum' },
+];
+
+export const AI_TEXTURE_OPTIONS: Array<{
+  id: AiVoiceTexture;
+  label: string;
+  character: string;
+}> = [
+  { id: 'clean', label: 'Clean', character: 'clear and uncolored' },
+  { id: 'smooth', label: 'Smooth', character: 'rounded and easy' },
+  { id: 'airy', label: 'Airy', character: 'light without whispering' },
+  { id: 'textured', label: 'Textured', character: 'lived-in and expressive' },
+  { id: 'grounded', label: 'Grounded', character: 'solid and resonant' },
+  { id: 'bright', label: 'Bright', character: 'crisp and energized' },
+];
+
 const CREATED_AT = '2026-08-11T00:00:00.000Z';
 
 export const CANON_VOICE_PROFILES: Record<CompanionId, CanonVoiceProfile> = {
@@ -71,27 +119,37 @@ export const CANON_VOICE_PROFILES: Record<CompanionId, CanonVoiceProfile> = {
     id: 'snow',
     voice: 'marin',
     accent: 'natural',
-    pace: 0.92,
+    delivery: 'conversational',
+    cadence: 'flowing',
+    texture: 'smooth',
+    pace: 1.1,
     warmth: 5,
-    energy: 2,
-    expressiveness: 3,
+    energy: 3,
+    expressiveness: 4,
+    naturalism: 5,
+    pauseDiscipline: 4,
     updatedAt: CREATED_AT,
     direction:
-      'Relaxed, warm, and wise with cool older-sister energy. Authority should feel effortless, never announced.',
+      'A real late-night call with the Hunter\'s ride-or-die older sister: relaxed, wise, lightly teasing, and naturally quick. Her authority is effortless; never sleepy, breathy, corporate, or audiobook-like.',
     audition:
-      "Easy, Hunter. We don't have to solve the whole week tonight. Give me the next true thing, and we'll move from there.",
+      "Okay, first of all, breathe. You don't have to solve the whole week tonight. Tell me the next true thing, and we'll handle it together.",
   },
   rook: {
     id: 'rook',
     voice: 'cedar',
     accent: 'natural',
-    pace: 1.05,
+    delivery: 'commanding',
+    cadence: 'clipped',
+    texture: 'grounded',
+    pace: 1.18,
     warmth: 3,
     energy: 5,
     expressiveness: 4,
+    naturalism: 5,
+    pauseDiscipline: 5,
     updatedAt: CREATED_AT,
     direction:
-      'Resonant, athletic, competitive, and controlled, with a grin audible beneath the challenge.',
+      'An athletic sparring partner speaking in the room, not a stadium announcer: resonant, competitive, quick, and controlled, with an audible grin and zero drill-sergeant caricature.',
     audition:
       "Good. Now we've got a target. One clean rep, then another. Make me work to stay ahead of you.",
   },
@@ -99,13 +157,18 @@ export const CANON_VOICE_PROFILES: Record<CompanionId, CanonVoiceProfile> = {
     id: 'selah',
     voice: 'coral',
     accent: 'natural',
-    pace: 0.88,
+    delivery: 'soothing',
+    cadence: 'flowing',
+    texture: 'clean',
+    pace: 0.98,
     warmth: 5,
     energy: 1,
     expressiveness: 3,
+    naturalism: 5,
+    pauseDiscipline: 3,
     updatedAt: CREATED_AT,
     direction:
-      'Gentle, clear, unhurried, and spiritually grounded. Conviction without performance or pressure.',
+      'Spiritually grounded and gently alive: clear, warm, plainspoken conviction without preaching, stage-whispering, or a solemn church-narrator cadence.',
     audition:
       'Be still for one breath. You do not need a polished answer; only enough honesty to choose the next faithful step.',
   },
@@ -113,13 +176,18 @@ export const CANON_VOICE_PROFILES: Record<CompanionId, CanonVoiceProfile> = {
     id: 'cipher',
     voice: 'ash',
     accent: 'natural',
-    pace: 1.08,
+    delivery: 'dry',
+    cadence: 'clipped',
+    texture: 'clean',
+    pace: 1.22,
     warmth: 2,
     energy: 3,
     expressiveness: 2,
+    naturalism: 5,
+    pauseDiscipline: 5,
     updatedAt: CREATED_AT,
     direction:
-      'Quick, crisp, precise, and quietly amused. Confidence comes from clarity rather than volume.',
+      'Quick, crisp, tech-smart, and quietly amused, like a brilliant friend with a restrained smirk. Precise without becoming monotone, synthetic, or over-enunciated.',
     audition:
       'The problem is not motivation. It is ambiguity. Name the deliverable, remove one constraint, and begin before the plan becomes decorative.',
   },
@@ -127,13 +195,18 @@ export const CANON_VOICE_PROFILES: Record<CompanionId, CanonVoiceProfile> = {
     id: 'haven',
     voice: 'onyx',
     accent: 'natural',
-    pace: 0.86,
+    delivery: 'dry',
+    cadence: 'measured',
+    texture: 'grounded',
+    pace: 0.94,
     warmth: 4,
     energy: 1,
     expressiveness: 2,
+    naturalism: 5,
+    pauseDiscipline: 3,
     updatedAt: CREATED_AT,
     direction:
-      'Quiet, deep, protective, and spacious, with understated deadpan humor and no parental edge.',
+      'A low protective presence with understated deadpan humor: unhurried but never dragged, parental, sedated, or self-important.',
     audition:
       'You are allowed to recover before the damage becomes impressive. Protect tonight, then we build the return properly.',
   },
@@ -141,13 +214,18 @@ export const CANON_VOICE_PROFILES: Record<CompanionId, CanonVoiceProfile> = {
     id: 'ember',
     voice: 'nova',
     accent: 'natural',
-    pace: 1.1,
+    delivery: 'intense',
+    cadence: 'rapid-fire',
+    texture: 'bright',
+    pace: 1.28,
     warmth: 2,
     energy: 5,
     expressiveness: 5,
+    naturalism: 5,
+    pauseDiscipline: 5,
     updatedAt: CREATED_AT,
     direction:
-      'Hard-edged, clipped, and forceful. The heat attacks the obstacle, never the Hunter, and loyalty remains audible underneath.',
+      'Fast, hard-edged, tough-skinned, and fiercely loyal. The heat attacks the obstacle, never the Hunter; she sounds like a real protective friend, not a screaming anime villain.',
     audition:
       "Nope. The spiral doesn't get the whole day. Shoes on, one minute of motion, and then it can file a complaint with me.",
   },
@@ -155,13 +233,18 @@ export const CANON_VOICE_PROFILES: Record<CompanionId, CanonVoiceProfile> = {
     id: 'mira',
     voice: 'shimmer',
     accent: 'natural',
-    pace: 0.9,
+    delivery: 'soothing',
+    cadence: 'flowing',
+    texture: 'airy',
+    pace: 0.96,
     warmth: 4,
     energy: 2,
     expressiveness: 3,
+    naturalism: 5,
+    pauseDiscipline: 3,
     updatedAt: CREATED_AT,
     direction:
-      'Breath-centered, smooth, serene, and exacting. Calm should sound embodied rather than sleepy.',
+      'Calm, embodied, breath-aware, and quietly exacting. She leaves usable space for movement cues without sounding sedated, mystical, breathy, or like an ASMR recording.',
     audition:
       'Lengthen through the crown, soften the jaw, and let the exhale make room. Control first; range will follow.',
   },
@@ -169,13 +252,18 @@ export const CANON_VOICE_PROFILES: Record<CompanionId, CanonVoiceProfile> = {
     id: 'amara',
     voice: 'alloy',
     accent: 'natural',
-    pace: 1.02,
+    delivery: 'intimate',
+    cadence: 'natural',
+    texture: 'textured',
+    pace: 1.08,
     warmth: 5,
     energy: 4,
     expressiveness: 5,
+    naturalism: 5,
+    pauseDiscipline: 4,
     updatedAt: CREATED_AT,
     direction:
-      'Warm, expressive, bold, and emotionally present. Direct without losing tenderness or humor.',
+      'Emotionally alive, bold, and deeply conversational. Warmth, laughter, softness, and firmness shift naturally instead of landing as a polished performance.',
     audition:
       'Say the honest version. Not the impressive one. Connection starts when somebody finally stops performing safety.',
   },
@@ -183,13 +271,18 @@ export const CANON_VOICE_PROFILES: Record<CompanionId, CanonVoiceProfile> = {
     id: 'cassian',
     voice: 'echo',
     accent: 'natural',
-    pace: 0.94,
+    delivery: 'dry',
+    cadence: 'measured',
+    texture: 'clean',
+    pace: 1.02,
     warmth: 2,
     energy: 2,
     expressiveness: 3,
+    naturalism: 4,
+    pauseDiscipline: 4,
     updatedAt: CREATED_AT,
     direction:
-      'Polished, controlled, quietly intimidating, and dryly funny, as if the numbers have already testified.',
+      'Polished, controlled, and dryly funny, as if the numbers have already testified. His precision stays human and conversational, never stiff or automated.',
     audition:
       'The ledger is not angry. It is merely observant. Give every dollar a duty before convenience volunteers it for something else.',
   },
@@ -197,13 +290,18 @@ export const CANON_VOICE_PROFILES: Record<CompanionId, CanonVoiceProfile> = {
     id: 'saffron',
     voice: 'ballad',
     accent: 'natural',
-    pace: 1.12,
+    delivery: 'playful',
+    cadence: 'rapid-fire',
+    texture: 'bright',
+    pace: 1.32,
     warmth: 4,
     energy: 5,
     expressiveness: 5,
+    naturalism: 5,
+    pauseDiscipline: 5,
     updatedAt: CREATED_AT,
     direction:
-      'Rapid, vibrant, high-pressure, and theatrical, with unmistakable affection beneath every culinary emergency.',
+      'Pressure in a bottle: rapid, vibrant, high-pressure, theatrical, and affectionate. She ricochets through a culinary emergency like a real expressive friend, never a generic commercial narrator.',
     audition:
       'You have protein, rice, and twenty minutes. This is not a crisis; it is dinner with terrible public relations. Pan. Heat. Move!',
   },
@@ -215,10 +313,55 @@ export function cloneCanonVoiceProfile(companionId: CompanionId): AiVoiceProfile
     id: profile.id,
     voice: profile.voice,
     accent: profile.accent,
+    delivery: profile.delivery,
+    cadence: profile.cadence,
+    texture: profile.texture,
     pace: profile.pace,
     warmth: profile.warmth,
     energy: profile.energy,
     expressiveness: profile.expressiveness,
+    naturalism: profile.naturalism,
+    pauseDiscipline: profile.pauseDiscipline,
     updatedAt: profile.updatedAt,
+  };
+}
+
+function bounded(value: unknown, fallback: number, min: number, max: number, decimals = 0) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return fallback;
+  const clamped = Math.min(max, Math.max(min, number));
+  return decimals ? Number(clamped.toFixed(decimals)) : Math.round(clamped);
+}
+
+export function normalizeAiVoiceProfile(
+  companionId: CompanionId,
+  value?: Partial<AiVoiceProfile>,
+): AiVoiceProfile {
+  const canon = cloneCanonVoiceProfile(companionId);
+  const voices = AI_VOICE_OPTIONS.map((option) => option.id);
+  const accents = AI_ACCENT_OPTIONS.map((option) => option.id);
+  const deliveries = AI_DELIVERY_OPTIONS.map((option) => option.id);
+  const cadences = AI_CADENCE_OPTIONS.map((option) => option.id);
+  const textures = AI_TEXTURE_OPTIONS.map((option) => option.id);
+  return {
+    ...canon,
+    ...value,
+    id: companionId,
+    voice: value?.voice && voices.includes(value.voice) ? value.voice : canon.voice,
+    accent: value?.accent && accents.includes(value.accent) ? value.accent : canon.accent,
+    delivery:
+      value?.delivery && deliveries.includes(value.delivery) ? value.delivery : canon.delivery,
+    cadence: value?.cadence && cadences.includes(value.cadence) ? value.cadence : canon.cadence,
+    texture: value?.texture && textures.includes(value.texture) ? value.texture : canon.texture,
+    pace: bounded(value?.pace, canon.pace, 0.75, 1.65, 2),
+    warmth: bounded(value?.warmth, canon.warmth, 1, 5),
+    energy: bounded(value?.energy, canon.energy, 1, 5),
+    expressiveness: bounded(value?.expressiveness, canon.expressiveness, 1, 5),
+    naturalism: bounded(value?.naturalism, canon.naturalism, 1, 5),
+    pauseDiscipline: bounded(value?.pauseDiscipline, canon.pauseDiscipline, 1, 5),
+    updatedAt:
+      typeof value?.updatedAt === 'string' && Number.isFinite(Date.parse(value.updatedAt))
+        ? value.updatedAt
+        : canon.updatedAt,
   };
 }
