@@ -22,6 +22,7 @@ import type {
   CreatorVideoInsight,
   DailyMissionRecord,
   DailyCommandBriefing,
+  DailyOperationsRecord,
   DailyEventRecord,
   DailyReview,
   LevelHistory,
@@ -88,6 +89,7 @@ export class SystemDatabase extends Dexie {
   partyBanters!: EntityTable<PartyBanter, 'id'>;
   campfireRecaps!: EntityTable<CampfireRecap, 'id'>;
   dailyBriefings!: EntityTable<DailyCommandBriefing, 'id'>;
+  dailyOperations!: EntityTable<DailyOperationsRecord, 'id'>;
   campaignArcs!: EntityTable<CampaignArc, 'id'>;
   arcMilestones!: EntityTable<ArcMilestone, 'id'>;
   companionQuestProgress!: EntityTable<CompanionQuestProgress, 'id'>;
@@ -732,6 +734,16 @@ export class SystemDatabase extends Dexie {
         await metadata.put({ id: 'schema-seeded', value: 22, updatedAt: now });
         await metadata.put({ id: 'app-version', value: '7.6.1', updatedAt: now });
       });
+    this.version(23)
+      .stores({
+        dailyOperations: 'id,date,status,sourceCompanionId,updatedAt',
+      })
+      .upgrade(async (transaction) => {
+        const now = new Date().toISOString();
+        const metadata = transaction.table<AppMetadata, string>('appMetadata');
+        await metadata.put({ id: 'schema-seeded', value: 23, updatedAt: now });
+        await metadata.put({ id: 'app-version', value: '7.7.0', updatedAt: now });
+      });
   }
 }
 
@@ -768,6 +780,7 @@ export const TABLE_NAMES = [
   'partyBanters',
   'campfireRecaps',
   'dailyBriefings',
+  'dailyOperations',
   'campaignArcs',
   'arcMilestones',
   'companionQuestProgress',

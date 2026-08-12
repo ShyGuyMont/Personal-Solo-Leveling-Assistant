@@ -23,6 +23,7 @@ import { ClassEmblem } from '@/components/ClassEmblem';
 import { CompanionRoster } from '@/components/CompanionRoster';
 import { DailyEventCard } from '@/components/DailyEventCard';
 import { DailyBriefingCard } from '@/components/DailyBriefingCard';
+import { DailyOperationsPanel } from '@/components/DailyOperationsPanel';
 import { InstallCard } from '@/components/InstallCard';
 import { MissionCard } from '@/components/MissionCard';
 import { PartyPulsePanel } from '@/components/PartyPulsePanel';
@@ -260,6 +261,7 @@ export function DashboardPage() {
       <InstallCard />
       <DailyEventCard />
       <DailyBriefingCard />
+      <DailyOperationsPanel date={systemDate} />
       <PartyPulsePanel />
 
       <section className="panel realm-command-map" data-depth-surface="panel">

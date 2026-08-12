@@ -10,7 +10,7 @@ import type {
   Settings,
 } from '@/types/game';
 
-export const SAVE_VERSION = 22;
+export const SAVE_VERSION = 23;
 export const MAX_IMPORT_BYTES = 32 * 1024 * 1024;
 const MAX_SNAPSHOTS = 5;
 const FORBIDDEN_KEYS = new Set(['__proto__', 'prototype', 'constructor']);
@@ -164,6 +164,7 @@ function migrateData(
     data.creatorProjects ??= [];
   }
   if (version <= 19) data.creatorVideoInsights ??= [];
+  if (version <= 22) data.dailyOperations ??= [];
   data.aiVoiceProfiles = data.aiVoiceProfiles.map((row) => {
     if (
       !isObject(row) ||
@@ -600,6 +601,29 @@ function validateData(data: Record<string, unknown[]>) {
   }
   const validDate = (value: unknown) =>
     typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value);
+  const operationStatuses = new Set(['awaiting-confirmation', 'preparing', 'ready', 'partial']);
+  for (const row of data.dailyOperations) {
+    if (
+      !isObject(row) ||
+      !validDate(row.date) ||
+      row.id !== row.date ||
+      !operationStatuses.has(String(row.status)) ||
+      !aiCompanionIds.has(String(row.sourceCompanionId)) ||
+      !Number.isInteger(row.pendingMissionCount) ||
+      Number(row.pendingMissionCount) < 0 ||
+      !Number.isInteger(row.completedMissionCount) ||
+      Number(row.completedMissionCount) < 0 ||
+      !Array.isArray(row.preparationNotes) ||
+      row.preparationNotes.length > 12 ||
+      row.preparationNotes.some((note) => typeof note !== 'string' || note.length > 500) ||
+      typeof row.createdAt !== 'string' ||
+      !Number.isFinite(Date.parse(row.createdAt)) ||
+      typeof row.updatedAt !== 'string' ||
+      !Number.isFinite(Date.parse(row.updatedAt))
+    ) {
+      throw new Error('A Party Operations record contains an impossible value.');
+    }
+  }
   const validCents = (value: unknown, allowZero = false) =>
     Number.isInteger(value) &&
     Number(value) >= (allowZero ? 0 : 1) &&

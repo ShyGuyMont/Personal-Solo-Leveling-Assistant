@@ -21664,3 +21664,197 @@ html[data-motion='reduced'] .header-quick-link > i {
 html[data-motion='reduced'] .creator-hero::before {
   animation: none;
 }
+.daily-operations {
+  position: relative;
+  overflow: hidden;
+  border-color: color-mix(in srgb, var(--accent) 42%, var(--border));
+  background:
+    radial-gradient(
+      circle at 12% 0%,
+      color-mix(in srgb, var(--accent) 14%, transparent),
+      transparent 34%
+    ),
+    linear-gradient(145deg, color-mix(in srgb, var(--panel) 96%, transparent), var(--panel-strong));
+}
+
+.daily-operations::after {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  content: '';
+  background: linear-gradient(
+    105deg,
+    transparent 38%,
+    color-mix(in srgb, var(--accent) 5%, transparent) 50%,
+    transparent 62%
+  );
+}
+
+.daily-operations__header,
+.daily-operations__snow,
+.daily-operations__card,
+.daily-operations__flags {
+  display: flex;
+  align-items: center;
+}
+
+.daily-operations__header {
+  position: relative;
+  z-index: 1;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+
+.daily-operations__snow {
+  gap: 14px;
+}
+
+.daily-operations__snow img {
+  width: 58px;
+  height: 58px;
+  border: 1px solid color-mix(in srgb, var(--accent) 70%, white 10%);
+  border-radius: 18px;
+  object-fit: cover;
+  box-shadow: 0 0 26px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+.daily-operations__snow h2,
+.daily-operations__snow p {
+  margin: 0;
+}
+
+.daily-operations__snow > div > p:last-child {
+  margin-top: 5px;
+  color: var(--muted);
+}
+
+.daily-operations__signal {
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 7px;
+  align-items: center;
+  padding: 8px 11px;
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  border-radius: 999px;
+  color: var(--accent);
+  font: 700 0.68rem/1 var(--font-display);
+  letter-spacing: 0.12em;
+}
+
+.daily-operations__grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.daily-operations__card {
+  min-width: 0;
+  gap: 12px;
+  padding: 15px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--panel-strong) 92%, transparent);
+  color: var(--text);
+  text-decoration: none;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.daily-operations__card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+  box-shadow: 0 12px 28px rgb(0 0 0 / 18%);
+}
+
+.daily-operations__card > svg {
+  flex: 0 0 auto;
+  color: var(--accent);
+}
+
+.daily-operations__card > span {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: 3px;
+}
+
+.daily-operations__card small,
+.daily-operations__card em,
+.daily-operations__card b {
+  font-style: normal;
+}
+
+.daily-operations__card small {
+  overflow: hidden;
+  color: var(--muted);
+  font: 700 0.62rem/1.2 var(--font-display);
+  letter-spacing: 0.1em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.daily-operations__card strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.daily-operations__card em {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.78rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.daily-operations__card b {
+  color: var(--accent);
+  font: 700 0.7rem/1 var(--font-display);
+  text-transform: uppercase;
+}
+
+.daily-operations__flags {
+  position: relative;
+  z-index: 1;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 12px 14px;
+  border: 1px solid rgb(255 185 72 / 35%);
+  border-radius: 14px;
+  background: rgb(255 185 72 / 6%);
+  color: var(--muted);
+}
+
+.daily-operations__flags > svg {
+  flex: 0 0 auto;
+  color: #ffb948;
+}
+
+.daily-operations__flags strong {
+  color: var(--text);
+}
+
+.daily-operations__flags p {
+  margin: 3px 0 0;
+  font-size: 0.8rem;
+}
+
+@media (max-width: 760px) {
+  .daily-operations__header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .daily-operations__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .daily-operations__card {
+    min-height: 82px;
+  }
+}

@@ -96,6 +96,18 @@ Historical video insights remain on-device, travel in Archive Shield saves, and 
 edit, comment, delete, or account-management access. Google credentials remain encrypted behind
 the private gateway and never enter the browser save or OpenAI context.
 
+## Version 7.7.0 · Party Operations
+
+Snow and the specialist companions can now prepare the actual daily realms together without replacing the System's original rituals or granting themselves completion authority.
+
+- **Ask before waking the party:** Snow gathers Training location, food boundaries, and an optional Sanctuary mode and concern across a continuing Quick Link conversation, then shows one clear preparation confirmation.
+- **Real section preloading:** A confirmed operation uses the existing Training Hall, Kitchen, and Sanctuary engines. Opening a realm later resumes the exact assigned workout, cooking checklist, or Scripture session that the party prepared.
+- **Shared daily state:** Snow, Rook, Ember, Mira, Saffron, and Selah operate from one durable on-device daily record, so a direct specialist request and a later Snow briefing cannot quietly create conflicting versions of the day.
+- **Visible coordination:** The confirmed assembly appears as a genuine party exchange and a dashboard operations board with direct Begin, Cook, and Enter controls. Companions report only preparation that actually succeeded.
+- **Responsive Kitchen orders:** Saffron can check a confirmed food boundary against the rolled meal and, when needed, forge a complete replacement that enters the Private Grimoire and opens in the normal ingredient-and-step console.
+- **Authority stays with the Hunter:** Operations may prepare and navigate, but never claim completion, check a box, award XP, record spending, replace incompatible active work, or alter the campaign without the required confirmation.
+- **Offline foundation preserved:** Once prepared, every realm remains available through its original offline-first interaction and completion flow.
+
 ## Version 7.6.1 · Worthy Trials
 
 Weekly, Monthly, Boss, and Recovery challenges are optional side campaigns, so their account and

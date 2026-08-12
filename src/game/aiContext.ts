@@ -77,6 +77,7 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
     creatorSnapshots,
     creatorProjects,
     creatorVideoInsights,
+    dailyOperations,
   ] = await Promise.all([
     db.dailyReviews.where('date').aboveOrEqual(recentStart).toArray(),
     db.dailyMissions.where('date').aboveOrEqual(recentStart).toArray(),
@@ -101,6 +102,7 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
     db.creatorSnapshots.orderBy('capturedAt').reverse().limit(30).toArray(),
     db.creatorProjects.orderBy('updatedAt').reverse().limit(30).toArray(),
     db.creatorVideoInsights.orderBy('views').reverse().limit(10).toArray(),
+    db.dailyOperations.get(source.systemDate),
   ]);
 
   const available = source.missions.filter((mission) => mission.enabled && !mission.archived);
@@ -333,6 +335,38 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
             }
           : undefined,
       savedRecipeNames: customRecipes.slice(0, 40).map((recipe) => recipe.name),
+    },
+    operations: {
+      today: dailyOperations
+        ? {
+            status: dailyOperations.status,
+            sourceCompanionId: dailyOperations.sourceCompanionId,
+            training: dailyOperations.training
+              ? {
+                  location: dailyOperations.training.location,
+                  label: dailyOperations.training.label,
+                  detail: dailyOperations.training.detail,
+                }
+              : undefined,
+            kitchen: dailyOperations.kitchen
+              ? {
+                  label: dailyOperations.kitchen.label,
+                  detail: dailyOperations.kitchen.detail,
+                  constraints: dailyOperations.kitchen.constraints,
+                }
+              : undefined,
+            sanctuary: dailyOperations.sanctuary
+              ? {
+                  mode: dailyOperations.sanctuary.mode,
+                  label: dailyOperations.sanctuary.label,
+                  detail: dailyOperations.sanctuary.detail,
+                }
+              : undefined,
+            pendingMissionCount: dailyOperations.pendingMissionCount,
+            completedMissionCount: dailyOperations.completedMissionCount,
+            preparationNotes: dailyOperations.preparationNotes,
+          }
+        : undefined,
     },
     specialists: {
       sanctuary: {

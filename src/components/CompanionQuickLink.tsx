@@ -23,11 +23,22 @@ import {
   createCompanionMessage,
   createAiConversation,
   createHunterMessage,
+  getAiConversation,
+  getContinuingAiConversation,
   saveAiConversation,
   saveAiMemoryCandidates,
 } from '@/game/aiHeadquarters';
 import { buildAiProgressContext } from '@/game/aiContext';
 import { saveCreatorCampaign, saveCreatorProject } from '@/game/creatorForge';
+import {
+  addDailyOperationNote,
+  cancelStagedCompanionOperation,
+  getDailyOperations,
+  prepareCompanionOperation,
+  stageCompanionOperation,
+  synchronizeKitchenOperation,
+} from '@/game/dailyOperations';
+import { assignSpecificKitchenOrder } from '@/game/kitchen';
 import { saveCustomKitchenRecipe } from '@/game/kitchenGrimoire';
 import {
   buildQuickLinkActionCatalog,
@@ -47,7 +58,13 @@ import {
   type AiLinkStatus,
 } from '@/services/aiHeadquarters';
 import { useGameStore } from '@/store/useGameStore';
-import type { AiConversation, AiConversationMessage, CompanionId } from '@/types/game';
+import type {
+  AiConversation,
+  AiConversationMessage,
+  CompanionId,
+  CompanionOperationRequest,
+  DailyOperationsRecord,
+} from '@/types/game';
 
 interface PendingQuickLinkAction {
   action: QuickLinkAction;
@@ -78,6 +95,7 @@ export function CompanionQuickLink() {
   const [sending, setSending] = useState(false);
   const [replies, setReplies] = useState<AiConversationMessage[]>([]);
   const [pendingAction, setPendingAction] = useState<PendingQuickLinkAction>();
+  const [pendingOperation, setPendingOperation] = useState<CompanionOperationRequest>();
   const [pendingRecipe, setPendingRecipe] =
     useState<NonNullable<AiHeadquartersReply['recipeProposal']>>();
   const [pendingContent, setPendingContent] =
@@ -158,6 +176,7 @@ export function CompanionQuickLink() {
       setActiveCompanionId(companionId);
       setReplies([]);
       setPendingAction(undefined);
+      setPendingOperation(undefined);
       setPendingRecipe(undefined);
       setPendingContent(undefined);
       setPendingCampaign(undefined);
@@ -230,6 +249,8 @@ export function CompanionQuickLink() {
       setActiveCompanionId(addressedCompanion);
       setDraft('');
       setPendingAction(undefined);
+      if (pendingOperation) await cancelStagedCompanionOperation(systemDate);
+      setPendingOperation(undefined);
       setPendingRecipe(undefined);
       setPendingContent(undefined);
       setPendingCampaign(undefined);
@@ -333,6 +354,15 @@ export function CompanionQuickLink() {
           setPendingAction({ action: proposedAction, proposal: result.commandProposal });
           setActiveCompanionId(result.commandProposal.companionId);
         }
+        if (result.operationProposal) {
+          await stageCompanionOperation(
+            systemDate,
+            result.operationProposal,
+            completedConversation.id,
+          );
+          setPendingOperation(result.operationProposal);
+          setActiveCompanionId(result.operationProposal.companionId);
+        }
         if (result.recipeProposal) {
           setPendingRecipe(result.recipeProposal);
           setActiveCompanionId('saffron');
@@ -347,6 +377,7 @@ export function CompanionQuickLink() {
         }
         setNotice(
           proposedAction ||
+            result.operationProposal ||
             result.recipeProposal ||
             result.contentProposal ||
             result.campaignProposal
@@ -378,6 +409,7 @@ export function CompanionQuickLink() {
       missions,
       profile,
       progression,
+      pendingOperation,
       sending,
       settings,
       stats,
@@ -388,14 +420,21 @@ export function CompanionQuickLink() {
   );
   submitRef.current = transmit;
 
-  async function appendLocalAcknowledgement(companionId: CompanionId, message: string) {
-    const companionMessage = createCompanionMessage(companionId, message);
+  async function appendLocalMessages(
+    messages: Array<{ companionId: CompanionId; message: string }>,
+    options?: { party?: boolean; title?: string },
+  ) {
+    const companionMessages = messages.map((entry) =>
+      createCompanionMessage(entry.companionId, entry.message),
+    );
     const conversation = conversationRef.current;
     if (conversation) {
       const updatedConversation = {
         ...conversation,
-        messages: [...conversation.messages, companionMessage],
-        updatedAt: companionMessage.createdAt,
+        audience: options?.party ? ('party' as const) : conversation.audience,
+        title: options?.title ?? conversation.title,
+        messages: [...conversation.messages, ...companionMessages],
+        updatedAt: companionMessages.at(-1)?.createdAt ?? conversation.updatedAt,
       };
       await saveAiConversation(updatedConversation);
       conversationRef.current = updatedConversation;
@@ -405,8 +444,12 @@ export function CompanionQuickLink() {
         }),
       );
     }
-    setReplies((current) => [...current, companionMessage]);
-    if (settings?.aiVoiceOutputEnabled) void voiceLink.playMessages([companionMessage]);
+    setReplies((current) => [...current, ...companionMessages]);
+    if (settings?.aiVoiceOutputEnabled) void voiceLink.playMessages(companionMessages);
+  }
+
+  async function appendLocalAcknowledgement(companionId: CompanionId, message: string) {
+    await appendLocalMessages([{ companionId, message }]);
   }
 
   async function executePendingAction() {
@@ -432,6 +475,175 @@ export function CompanionQuickLink() {
       setNotice('Command confirmed · local campaign synchronized.');
     } catch (error) {
       setNotice(error instanceof Error ? error.message : 'The command could not be completed.');
+    } finally {
+      setExecutingAction(false);
+    }
+  }
+
+  function hasMeaningfulFoodConstraint(value?: string) {
+    const normalized = value?.trim().toLowerCase();
+    return Boolean(
+      normalized &&
+      !['none', 'no', 'no restrictions', 'nothing', 'anything is fine'].includes(normalized),
+    );
+  }
+
+  async function reviewPreparedKitchen(
+    request: CompanionOperationRequest,
+  ): Promise<Array<{ companionId: CompanionId; message: string }>> {
+    if (
+      !hasMeaningfulFoodConstraint(request.foodConstraints) ||
+      !profile ||
+      !settings ||
+      !progression
+    ) {
+      return [];
+    }
+    try {
+      const result = await requestAiHeadquartersReply({
+        audience: 'saffron',
+        message: `The Hunter already confirmed today's preparation. Review the current Kitchen Order against this exact boundary: "${request.foodConstraints}". If the current order satisfies it, keep the roll and return no recipe. If it conflicts, create one complete practical replacement recipe that satisfies the boundary. Do not return a Companion Operation; the operation is already confirmed.`,
+        history: conversationRef.current?.messages ?? [],
+        context: await buildAiProgressContext({
+          audience: 'saffron',
+          profile,
+          settings,
+          progression,
+          missions,
+          todayRecords,
+          stats,
+          challenges,
+          systemDate,
+          enabledCompanionIds: enabledCompanions.map((companion) => companion.id),
+        }),
+        commandMode: 'propose',
+      });
+      await voiceLink.trackTextUsage(result);
+      if (result.recipeProposal) {
+        const recipe = await saveCustomKitchenRecipe({
+          name: result.recipeProposal.name,
+          codename: result.recipeProposal.codename,
+          servings: result.recipeProposal.servings,
+          prepMinutes: result.recipeProposal.prepMinutes,
+          cookMinutes: result.recipeProposal.cookMinutes,
+          costTier: result.recipeProposal.costTier,
+          equipment: result.recipeProposal.equipment,
+          plate: result.recipeProposal.plate,
+          ingredients: result.recipeProposal.ingredients,
+          steps: result.recipeProposal.steps,
+          swaps: result.recipeProposal.swaps,
+          storage: result.recipeProposal.storage,
+          safety: result.recipeProposal.safety,
+        });
+        await assignSpecificKitchenOrder(systemDate, recipe.id);
+        await synchronizeKitchenOperation(systemDate, request.foodConstraints);
+      }
+      return result.replies;
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Saffron could not verify the boundary.';
+      await addDailyOperationNote(systemDate, `Kitchen constraint review: ${message}`);
+      return [
+        {
+          companionId: 'saffron',
+          message: `I kept the Kitchen Order intact, but I could not safely finish the “${request.foodConstraints}” replacement check. I flagged it instead of pretending the menu is settled.`,
+        },
+      ];
+    }
+  }
+
+  function buildOperationMessages(
+    record: DailyOperationsRecord,
+    request: CompanionOperationRequest,
+    kitchenMessages: Array<{ companionId: CompanionId; message: string }>,
+  ) {
+    const messages: Array<{ companionId: CompanionId; message: string }> = [];
+    const reportsTraining = request.kind === 'assemble-day' || request.kind === 'prepare-training';
+    const reportsKitchen =
+      request.kind === 'prepare-kitchen' ||
+      (request.kind === 'assemble-day' && request.includeKitchen);
+    const reportsSanctuary =
+      request.kind === 'prepare-sanctuary' ||
+      (request.kind === 'assemble-day' && request.includeSanctuary);
+
+    if (reportsTraining && record.training) {
+      const lead = record.training.location === 'recovery' ? 'mira' : 'rook';
+      messages.push({
+        companionId: lead,
+        message:
+          record.training.location === 'recovery'
+            ? `${record.training.label} is prepared. The movements and timing are waiting in the Training Hall; nothing begins until you do.`
+            : `${record.training.label} is rolled and loaded. Open the Training Hall and the proper deployment screen will already be waiting.`,
+      });
+      if (request.kind === 'assemble-day' && record.training.location !== 'recovery') {
+        messages.push({
+          companionId: 'ember',
+          message:
+            'I checked the deployment. It is real work, not decorative movement—and no, I did not mark a single rep complete for you.',
+        });
+      }
+    }
+    if (reportsKitchen) {
+      if (kitchenMessages.length) messages.push(...kitchenMessages);
+      else if (record.kitchen) {
+        messages.push({
+          companionId: 'saffron',
+          message: `${record.kitchen.label} is loaded in the Kitchen. Ingredients, steps, and the cooking checklist are all ready when you are.`,
+        });
+      }
+    }
+    if (reportsSanctuary && record.sanctuary) {
+      messages.push({
+        companionId: 'selah',
+        message: `${record.sanctuary.label} is prepared around ${record.sanctuary.detail.toLowerCase()}. The Sanctuary will open directly into the session, and your private reflection remains yours.`,
+      });
+    }
+    if (request.kind === 'assemble-day') {
+      messages.push({
+        companionId: 'snow',
+        message: record.preparationNotes.length
+          ? `The party is assembled and every safe assignment I could prepare is loaded. I left ${record.preparationNotes.length} clear flag${record.preparationNotes.length === 1 ? '' : 's'} in the briefing instead of forcing anything.`
+          : `Everybody is awake. Your assignments are assembled, the real section screens are preloaded, and nothing has been claimed or completed. Start wherever you want—I have the board.`,
+      });
+    }
+    return messages;
+  }
+
+  async function executePendingOperation() {
+    if (!pendingOperation || executingAction) return;
+    setExecutingAction(true);
+    try {
+      let record = await prepareCompanionOperation(
+        systemDate,
+        pendingOperation,
+        conversationRef.current?.id,
+      );
+      const kitchenMessages =
+        (pendingOperation.kind === 'prepare-kitchen' ||
+          (pendingOperation.kind === 'assemble-day' && pendingOperation.includeKitchen)) &&
+        record.kitchen
+          ? await reviewPreparedKitchen(pendingOperation)
+          : [];
+      record = (await getDailyOperations(systemDate)) ?? record;
+      const messages = buildOperationMessages(record, pendingOperation, kitchenMessages);
+      if (messages.length) {
+        await appendLocalMessages(messages, {
+          party: pendingOperation.kind === 'assemble-day',
+          title:
+            pendingOperation.kind === 'assemble-day'
+              ? `Daily Command Assembly · ${systemDate}`
+              : undefined,
+        });
+      }
+      setPendingOperation(undefined);
+      await refresh();
+      setNotice(
+        record.status === 'partial'
+          ? 'Party preparation complete with a visible flag · no assignment was forced.'
+          : 'Party preparation complete · real section assignments are ready.',
+      );
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : 'The party could not prepare that order.');
     } finally {
       setExecutingAction(false);
     }
@@ -620,6 +832,7 @@ export function CompanionQuickLink() {
     setReplies([]);
     setContinuityTurns(0);
     setPendingAction(undefined);
+    setPendingOperation(undefined);
     setPendingRecipe(undefined);
     setPendingContent(undefined);
     setPendingCampaign(undefined);
@@ -641,13 +854,20 @@ export function CompanionQuickLink() {
     realtimeLink.stop();
     setOpen(true);
     setLinkMode('command');
-    conversationRef.current = undefined;
-    setActiveCompanionId('snow');
-    setReplies([]);
+    const operations = await getDailyOperations(systemDate);
+    const continuing = operations?.conversationId
+      ? await getAiConversation(operations.conversationId)
+      : await getContinuingAiConversation('snow', new Date(), 24);
+    conversationRef.current = continuing;
+    setActiveCompanionId(operations?.pendingProposal?.companionId ?? 'snow');
+    setReplies(continuing?.messages ?? []);
     setPendingAction(undefined);
+    setPendingOperation(
+      operations?.status === 'awaiting-confirmation' ? operations.pendingProposal : undefined,
+    );
     setPendingRecipe(undefined);
     setPendingContent(undefined);
-    setContinuityTurns(0);
+    setContinuityTurns(continuing?.messages.length ?? 0);
     await beginListening();
   }
 
@@ -660,6 +880,15 @@ export function CompanionQuickLink() {
   }
 
   const activeCompanion = getCompanion(activeCompanionId);
+  const pendingOperationTitle = pendingOperation
+    ? pendingOperation.kind === 'assemble-day'
+      ? 'Daily Command Assembly'
+      : pendingOperation.kind === 'prepare-training'
+        ? 'Training Hall Deployment'
+        : pendingOperation.kind === 'prepare-kitchen'
+          ? 'Kitchen Order'
+          : 'Sanctuary Assignment'
+    : '';
   const busy =
     sending || voiceLink.transcribing || executingAction || realtimeLink.state === 'connecting';
   const ready =
@@ -931,6 +1160,81 @@ export function CompanionQuickLink() {
                       }}
                     >
                       Cancel
+                    </button>
+                  </div>
+                </section>
+              )}
+
+              {linkMode === 'command' && pendingOperation && (
+                <section
+                  className="quick-link__command quick-link__operation-command"
+                  aria-live="polite"
+                >
+                  <header>
+                    <span>
+                      <Users size={15} /> COMPANION OPERATIONS
+                    </span>
+                    <small>PREPARATION PERMISSION</small>
+                  </header>
+                  <strong>{pendingOperationTitle}</strong>
+                  <p>{pendingOperation.summary}</p>
+                  <div className="quick-link__recipe-meta">
+                    {pendingOperation.trainingLocation && (
+                      <span>{pendingOperation.trainingLocation} training</span>
+                    )}
+                    {pendingOperation.includeKitchen && <span>Kitchen included</span>}
+                    {pendingOperation.includeSanctuary && (
+                      <span>{pendingOperation.sanctuaryMode} Sanctuary</span>
+                    )}
+                  </div>
+                  {pendingOperation.foodConstraints && (
+                    <dl>
+                      <div>
+                        <dt>SAFFRON'S BOUNDARY</dt>
+                        <dd>{pendingOperation.foodConstraints}</dd>
+                      </div>
+                    </dl>
+                  )}
+                  <dl>
+                    <div>
+                      <dt>WHAT THIS ALLOWS</dt>
+                      <dd>
+                        The companions may roll, create, and preload today's real section
+                        assignments. They cannot complete work, check boxes, or award XP.
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>SNOW'S CHECK</dt>
+                      <dd>{pendingOperation.confirmation}</dd>
+                    </div>
+                  </dl>
+                  <div className="quick-link__command-actions">
+                    <button
+                      type="button"
+                      className="button button--primary"
+                      disabled={executingAction}
+                      onClick={() => void executePendingOperation()}
+                    >
+                      {executingAction ? (
+                        <LoaderCircle className="is-spinning" size={15} />
+                      ) : (
+                        <Check size={15} />
+                      )}
+                      {pendingOperation.kind === 'assemble-day'
+                        ? 'Wake the party'
+                        : 'Prepare assignment'}
+                    </button>
+                    <button
+                      type="button"
+                      className="button button--ghost"
+                      disabled={executingAction}
+                      onClick={() => {
+                        void cancelStagedCompanionOperation(systemDate);
+                        setPendingOperation(undefined);
+                        setNotice('Preparation dismissed. Existing assignments remain untouched.');
+                      }}
+                    >
+                      Not yet
                     </button>
                   </div>
                 </section>

@@ -82,6 +82,26 @@ describe('save validation and recovery', () => {
       createdAt: now,
       updatedAt: now,
     });
+    await db.dailyOperations.put({
+      id: '2026-08-01',
+      date: '2026-08-01',
+      status: 'ready',
+      sourceCompanionId: 'snow',
+      conversationId: 'ai:backup',
+      training: {
+        sessionId: '2026-08-01',
+        location: 'home',
+        label: 'Iron Foundation',
+        detail: '20-minute home deployment',
+        companionIds: ['rook', 'ember'],
+      },
+      pendingMissionCount: 5,
+      completedMissionCount: 1,
+      preparationNotes: [],
+      createdAt: now,
+      updatedAt: now,
+      preparedAt: now,
+    });
     await db.campaignArcs.put({
       id: 'arc:backup',
       name: 'Protected Campaign',
@@ -308,9 +328,10 @@ describe('save validation and recovery', () => {
     });
 
     const save = await createSaveFile();
-    expect(save.version).toBe(22);
+    expect(save.version).toBe(23);
     for (const table of [
       'dailyBriefings',
+      'dailyOperations',
       'campaignArcs',
       'arcMilestones',
       'companionQuestProgress',
@@ -332,6 +353,7 @@ describe('save validation and recovery', () => {
       'rw',
       [
         db.dailyBriefings,
+        db.dailyOperations,
         db.campaignArcs,
         db.arcMilestones,
         db.companionQuestProgress,
@@ -347,6 +369,7 @@ describe('save validation and recovery', () => {
       ],
       async () => {
         await db.dailyBriefings.clear();
+        await db.dailyOperations.clear();
         await db.campaignArcs.clear();
         await db.arcMilestones.clear();
         await db.companionQuestProgress.clear();
@@ -367,6 +390,7 @@ describe('save validation and recovery', () => {
       'prayer',
       'movement',
     ]);
+    expect((await db.dailyOperations.get('2026-08-01'))?.training?.label).toBe('Iron Foundation');
     expect((await db.campaignArcs.get('arc:backup'))?.purpose).toBe('Verify complete portability.');
     expect((await db.arcMilestones.get('arc-mark:backup'))?.status).toBe('completed');
     expect(
@@ -407,8 +431,9 @@ describe('save validation and recovery', () => {
     save.checksum = await digest(save.data);
 
     const prepared = await prepareSaveImport(asFile(save));
-    expect(prepared.save.version).toBe(22);
+    expect(prepared.save.version).toBe(23);
     expect(prepared.save.data.dailyBriefings).toEqual([]);
+    expect(prepared.save.data.dailyOperations).toEqual([]);
     const migrated = prepared.save.data.settings[0] as Record<string, unknown>;
     expect(migrated.enabledCompanionIds).toContain('amara');
     expect(migrated.enabledCompanionIds).toContain('cassian');

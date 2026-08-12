@@ -1,6 +1,6 @@
-export const APP_VERSION = '7.6.1';
-export const DATABASE_SCHEMA_VERSION = 22;
-export const SAVE_FORMAT_VERSION = 22;
+export const APP_VERSION = '7.7.0';
+export const DATABASE_SCHEMA_VERSION = 23;
+export const SAVE_FORMAT_VERSION = 23;
 
 export interface ReleaseSection {
   title: string;
@@ -9,6 +9,19 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 7.7.0 · Party Operations',
+    detail:
+      'Snow and the specialists can now prepare the real daily realms together while every original roll, interactive screen, offline path, completion rule, and reward boundary remains authoritative.',
+    points: [
+      'Ask Snow to assemble the day and she first gathers the missing choices—Training path, food boundaries, and optional Sanctuary focus—before presenting one explicit permission to wake the party.',
+      'A confirmed assembly uses the existing Training Hall, Kitchen, and Scripture Sanctuary engines, then preloads their real resumable sessions so the proper workout, recipe checklist, or guided study is waiting when its realm opens.',
+      'Rook, Ember, Mira, Saffron, and Selah can prepare their own domains through direct Quick Link conversations, while every companion shares one persistent on-device operations record for the System day.',
+      'Visible party coordination reports only assignments that actually reached local storage; incompatible active work is preserved and shown as a clear flag instead of being silently overwritten.',
+      'Food constraints can send Saffron back to the current Kitchen Order; when it conflicts, she can forge a complete replacement recipe, save it to the Private Grimoire, and load its normal ingredient and cooking checklists.',
+      'Preparation never checks a box, marks a mission complete, awards XP, records spending, or claims work on the Hunter’s behalf, and every prepared realm continues working offline after assembly.',
+    ],
+  },
   {
     title: 'Version 7.6.1 · Worthy Trials',
     detail:

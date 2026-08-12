@@ -4,6 +4,7 @@ import type {
   AiConversationMessage,
   AiVoiceProfile,
   AiVoiceScene,
+  CompanionOperationRequest,
   CompanionId,
   Focus,
   LocalDateKey,
@@ -132,6 +133,18 @@ export interface AiProgressContext {
       safety: string;
     };
     savedRecipeNames: string[];
+  };
+  operations: {
+    today?: {
+      status: 'awaiting-confirmation' | 'preparing' | 'ready' | 'partial';
+      sourceCompanionId: CompanionId;
+      training?: { location: string; label: string; detail: string };
+      kitchen?: { label: string; detail: string; constraints?: string };
+      sanctuary?: { mode: string; label: string; detail: string };
+      pendingMissionCount: number;
+      completedMissionCount: number;
+      preparationNotes: string[];
+    };
   };
   specialists: {
     sanctuary: {
@@ -303,6 +316,7 @@ export interface AiHeadquartersReply {
     summary: string;
     confirmation: string;
   };
+  operationProposal?: CompanionOperationRequest;
   recipeProposal?: {
     name: string;
     codename: string;
@@ -490,6 +504,10 @@ export async function requestAiHeadquartersReply(input: {
     commandProposal:
       payload.commandProposal && typeof payload.commandProposal === 'object'
         ? (payload.commandProposal as AiHeadquartersReply['commandProposal'])
+        : undefined,
+    operationProposal:
+      payload.operationProposal && typeof payload.operationProposal === 'object'
+        ? (payload.operationProposal as AiHeadquartersReply['operationProposal'])
         : undefined,
     recipeProposal:
       payload.recipeProposal && typeof payload.recipeProposal === 'object'

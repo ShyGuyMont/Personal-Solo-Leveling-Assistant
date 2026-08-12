@@ -477,6 +477,67 @@ export interface SanctuarySession {
   bibleMissionCredited: boolean;
 }
 
+export type CompanionOperationKind =
+  'assemble-day' | 'prepare-training' | 'prepare-kitchen' | 'prepare-sanctuary';
+
+export interface CompanionOperationRequest {
+  kind: CompanionOperationKind;
+  companionId: CompanionId;
+  trainingLocation?: TrainingLocation;
+  includeKitchen: boolean;
+  foodConstraints?: string;
+  includeSanctuary: boolean;
+  sanctuaryMode?: SanctuaryMode;
+  primaryConcern?: SanctuaryConcern;
+  secondaryConcern?: SanctuaryConcern;
+  summary: string;
+  confirmation: string;
+}
+
+export interface PreparedTrainingOperation {
+  sessionId: string;
+  location: TrainingLocation;
+  label: string;
+  detail: string;
+  companionIds: CompanionId[];
+}
+
+export interface PreparedKitchenOperation {
+  sessionId: LocalDateKey;
+  recipeId: string;
+  label: string;
+  detail: string;
+  customRecipe: boolean;
+  constraints?: string;
+  companionIds: CompanionId[];
+}
+
+export interface PreparedSanctuaryOperation {
+  sessionId: string;
+  mode: SanctuaryMode;
+  label: string;
+  detail: string;
+  companionIds: CompanionId[];
+}
+
+export interface DailyOperationsRecord {
+  id: LocalDateKey;
+  date: LocalDateKey;
+  status: 'awaiting-confirmation' | 'preparing' | 'ready' | 'partial';
+  sourceCompanionId: CompanionId;
+  conversationId?: string;
+  pendingProposal?: CompanionOperationRequest;
+  training?: PreparedTrainingOperation;
+  kitchen?: PreparedKitchenOperation;
+  sanctuary?: PreparedSanctuaryOperation;
+  pendingMissionCount: number;
+  completedMissionCount: number;
+  preparationNotes: string[];
+  createdAt: string;
+  updatedAt: string;
+  preparedAt?: string;
+}
+
 export interface DailyMissionRecord {
   id: string;
   date: LocalDateKey;

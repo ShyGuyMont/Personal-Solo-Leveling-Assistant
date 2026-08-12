@@ -54,6 +54,10 @@ export async function getRecentAiConversations(limit = 12) {
   return db.aiConversations.orderBy('updatedAt').reverse().limit(limit).toArray();
 }
 
+export async function getAiConversation(id: string) {
+  return db.aiConversations.get(id);
+}
+
 export async function getContinuingAiConversation(
   audience: AiConversationAudience,
   now = new Date(),

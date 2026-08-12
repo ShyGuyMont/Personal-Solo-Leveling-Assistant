@@ -182,6 +182,9 @@ describe('Companion Soulprint intelligence', () => {
     expect(instructions).toContain('Hunter must confirm');
     expect(instructions).toContain('Private Grimoire');
     expect(instructions).toContain('walk through today');
+    expect(instructions).toContain('Companion Operations');
+    expect(instructions).toContain('wake the party');
+    expect(instructions).toContain('may not finish');
   });
 
   it('builds focused solo channels and non-repetitive party councils', () => {
@@ -476,6 +479,91 @@ describe('Companion Soulprint intelligence', () => {
       route: 'quick',
       reasoningEffort: 'low',
       usage: { cachedInputTokens: 60, reasoningTokens: 4 },
+    });
+  });
+
+  it('returns a bounded Party Operations proposal without claiming completion', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        async () =>
+          new Response(
+            JSON.stringify({
+              output: [
+                {
+                  type: 'message',
+                  content: [
+                    {
+                      type: 'output_text',
+                      text: JSON.stringify({
+                        title: 'Daily Command Assembly',
+                        replies: [
+                          {
+                            companionId: 'snow',
+                            message: 'Everything is ready for your permission, not completion.',
+                          },
+                        ],
+                        memoryCandidates: [],
+                        command: {
+                          actionId: '',
+                          companionId: 'snow',
+                          summary: '',
+                          confirmation: '',
+                        },
+                        operation: {
+                          kind: 'assemble-day',
+                          companionId: 'snow',
+                          trainingLocation: 'home',
+                          includeKitchen: true,
+                          foodConstraints: 'No chicken today',
+                          includeSanctuary: true,
+                          sanctuaryMode: 'study',
+                          primaryConcern: 'focus',
+                          secondaryConcern: '',
+                          summary: 'Wake the party and prepare three real realm assignments.',
+                          confirmation: 'Should I wake everyone and prepare those assignments?',
+                        },
+                      }),
+                    },
+                  ],
+                },
+              ],
+            }),
+            { status: 200, headers: { 'content-type': 'application/json' } },
+          ),
+      ),
+    );
+
+    const response = await intelligence.default.fetch(
+      new Request('https://system.test/api/ai/chat', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', origin: 'https://system.test' },
+        body: JSON.stringify({
+          audience: 'snow',
+          message: 'Home, no chicken, and a study for focus. Wake them up.',
+          history: [],
+          context: {
+            party: { enabledCompanionIds: ['snow', 'rook', 'ember', 'saffron', 'selah'] },
+            bondMemory: { enabled: false, approved: [] },
+            commands: { allowedActions: [] },
+          },
+          commandMode: 'propose',
+        }),
+      }),
+      { OPENAI_API_KEY: 'test-key', OPENAI_TEXT_MODEL: 'test-model' },
+    );
+
+    expect(await response.json()).toMatchObject({
+      operationProposal: {
+        kind: 'assemble-day',
+        companionId: 'snow',
+        trainingLocation: 'home',
+        includeKitchen: true,
+        foodConstraints: 'No chicken today',
+        includeSanctuary: true,
+        sanctuaryMode: 'study',
+        primaryConcern: 'focus',
+      },
     });
   });
 
