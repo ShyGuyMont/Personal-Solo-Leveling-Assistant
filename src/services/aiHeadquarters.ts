@@ -67,7 +67,12 @@ export interface AiProgressContext {
       remainingDisciplineLevels: number;
       remainingBalancedStats: number;
       remainingChallenges: number;
+      designedTheoreticalFastestDays: number;
+      designedSustainableRangeDays: { minimum: number; maximum: number };
+      designedConsistencyRange: string;
       lowerBoundCompletedDaysAtRecentPace: number;
+      recentPaceSampleDays: number;
+      recentPaceConfidence: 'early' | 'developing' | 'established';
       forecastCaveat: string;
     };
   };

@@ -1,4 +1,4 @@
-import { RANK_ORDER, RANK_REQUIREMENTS } from '@/config/balance';
+import { RANK_ORDER, RANK_REQUIREMENTS, WORLD_CLASS_PACING } from '@/config/balance';
 import { db } from '@/db/database';
 import { getRelevantApprovedMemories } from '@/game/aiHeadquarters';
 import { calculateRankQualification } from '@/game/rank';
@@ -144,6 +144,12 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
   const lowerBoundCandidates = [
     remaining(source.progression.completedDays, worldRequirement.completedDays),
   ];
+  const recentPaceConfidence =
+    finalizedReviews.length < WORLD_CLASS_PACING.minimumReliableForecastDays
+      ? 'early'
+      : finalizedReviews.length < 60
+        ? 'developing'
+        : 'established';
   if (averageMissionsPerCompletedDay > 0) {
     lowerBoundCandidates.push(
       Math.ceil(
@@ -245,9 +251,17 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
           worldRequirement.balancedStatsRequired,
         ),
         remainingChallenges: remaining(completedChallenges, worldRequirement.challengesCompleted),
+        designedTheoreticalFastestDays: WORLD_CLASS_PACING.theoreticalFastestDays,
+        designedSustainableRangeDays: {
+          minimum: WORLD_CLASS_PACING.sustainableFastDays,
+          maximum: WORLD_CLASS_PACING.sustainableSteadyDays,
+        },
+        designedConsistencyRange: WORLD_CLASS_PACING.designedConsistencyRange,
         lowerBoundCompletedDaysAtRecentPace: Math.max(...lowerBoundCandidates),
+        recentPaceSampleDays: finalizedReviews.length,
+        recentPaceConfidence,
         forecastCaveat:
-          'This is a lower-bound pace estimate. Every intermediate Class trial, stat requirement, challenge requirement, and completed-day gate must still be cleared.',
+          'The System is designed around a sustainable 620–725 calendar-day path from a new save, with 570 days only as a near-perfect theoretical floor. The recent-pace figure is a secondary extrapolation, not the intended timeline; samples under 21 finalized days are too early for a reliable long-range forecast. Every intermediate Class trial, stat requirement, challenge requirement, and completed-day gate must still be cleared.',
       },
     },
     recentThirtyDays: {

@@ -11,7 +11,7 @@ export const YOUTUBE_READONLY_SCOPES = [
 
 const YOUTUBE_OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
 
-export const COMPANION_INTELLIGENCE_VERSION = 'living-voice-5';
+export const COMPANION_INTELLIGENCE_VERSION = 'living-forecast-6';
 
 const COUNSEL_SIGNALS =
   /\b(?:world\s+class|class|rank|level|xp|progress|progression|forecast|how\s+long|timeline|pace|plan|strategy|strategize|analy[sz]e|compare|trade-?off|why|should\s+i|what\s+should|recommend|decision|prioriti[sz]e|streak|challenge|trial|discipline|balanced\s+stats?|youtube|channel|content|video|stream|hook|thumbnail|audience|creator|arc)\b/i;
@@ -378,7 +378,7 @@ Rules:
 - If Bond Memory is disabled, memoryCandidates must be an empty array. A candidate is only a local suggestion; never claim it has been remembered or will be used later.
 - Be warm, useful, specific, and conversational. Avoid corporate language, therapy-script clichés, constant praise, and game-master narration unless it naturally fits The System.
 - Use only progress facts included in the supplied context. Never invent completions, streaks, history, feelings, diagnoses, or private facts. The supplied progression, classification roadmap, and recent-thirty-day counters are authoritative app records.
-- When asked about Class advancement or how long a milestone may take, calculate from progressContext.classification and progression. Clearly distinguish hard remaining requirements from the lower-bound recent-pace estimate, include the supplied forecast caveat, and identify any gate that cannot be reduced to a date. If a required fact is absent, say exactly what is absent instead of giving a vague answer.
+- When asked about Class advancement or how long World Class may take, lead with the designed System path: the supplied theoretical fastest floor and sustainable range. Then state the hard remaining requirements. Present the Hunter's recent-pace extrapolation only as a secondary comparison, always name its sample size and confidence, and never frame it as the intended timeline or destiny. A sample under 21 finalized days is explicitly an early baseline, not a reliable long-range forecast. Do not convert completed days into calendar years without labeling the assumption of one completed day per calendar day. Include the supplied forecast caveat and identify any gate that cannot be reduced to a date. If a required fact is absent, say exactly what is absent instead of giving a vague answer.
 - For casual conversation, companions may express in-world opinions, humor, preferences, and reactions, but must not claim real-world activity, off-screen observation, sentience, or access outside the supplied context.
 - The app's progression rules are authoritative. Never claim that XP, a mission, or the save has already changed. In Command Mode you may prepare one explicitly allowed on-device action, but the Hunter must confirm it in the app before anything changes.
 - Specialist context may appear in progressContext.specialists. Use only the domain relevant to the addressed companion or the party's actual question; do not dump unrelated records into the reply.

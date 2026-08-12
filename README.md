@@ -96,6 +96,19 @@ Historical video insights remain on-device, travel in Archive Shield saves, and 
 edit, comment, delete, or account-management access. Google credentials remain encrypted behind
 the private gateway and never enter the browser save or OpenAI context.
 
+## Version 7.6.1 · Worthy Trials
+
+Weekly, Monthly, Boss, and Recovery challenges are optional side campaigns, so their account and
+stat rewards now receive a full 50% increase. Class Trials remain unchanged because they are
+mandatory progression gates. Active optional challenges inherit the increased reward before they
+are claimed; rewards already claimed are never rewritten or duplicated.
+
+World Class forecasts now lead with the progression model the System was actually balanced around:
+a sustainable 620–725-day path at roughly 75–90% consistency, with 570 days identified only as a
+near-perfect theoretical floor. The party still shows the Hunter’s real recent pace, but it must
+name the finalized-day sample and treat fewer than 21 days as an early baseline rather than a
+reliable five-year prediction.
+
 ## Version 7.6.0 · Living Grimoire
 
 Saffron’s Private Grimoire is now part of the working Kitchen instead of a static recipe shelf.

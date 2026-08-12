@@ -28,4 +28,19 @@ describe('required local content libraries', () => {
     expect(SYSTEM_MESSAGE_COUNT).toBeGreaterThanOrEqual(50);
     expect(TITLE_LIBRARY.length).toBeGreaterThanOrEqual(40);
   });
+
+  it('pays optional challenges at the boosted rate without changing mandatory Class Trials', () => {
+    expect(WEEKLY_CHALLENGES.find((challenge) => challenge.id === 'w-faith-10')?.accountXp).toBe(
+      255,
+    );
+    expect(MONTHLY_CHALLENGES.find((challenge) => challenge.id === 'm-workout-12')?.accountXp).toBe(
+      750,
+    );
+    expect(BOSS_CHALLENGES.find((challenge) => challenge.id === 'boss-awakening')?.accountXp).toBe(
+      675,
+    );
+    expect(RECOVERY_CHALLENGES[0].accountXp).toBe(30);
+    expect(RECOVERY_CHALLENGES[0].statRewards[0].xp).toBe(8);
+    expect(RANK_TRIALS.find((challenge) => challenge.id === 'trial-e')?.accountXp).toBe(500);
+  });
 });

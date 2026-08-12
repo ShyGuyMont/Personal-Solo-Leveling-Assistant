@@ -1,4 +1,4 @@
-export const APP_VERSION = '7.6.0';
+export const APP_VERSION = '7.6.1';
 export const DATABASE_SCHEMA_VERSION = 22;
 export const SAVE_FORMAT_VERSION = 22;
 
@@ -9,6 +9,18 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 7.6.1 · Worthy Trials',
+    detail:
+      'Optional challenges now pay like genuine side campaigns, while World Class forecasts separate the designed two-year journey from a still-forming personal pace sample.',
+    points: [
+      'Every optional Weekly, Monthly, Boss, and Recovery challenge awards 50% more account XP and 50% more stat XP; mandatory Class Trial rewards remain unchanged.',
+      'Existing active challenges receive the new rewards automatically because their authoritative templates refresh on launch, while already-claimed rewards remain safely unchanged.',
+      'World Class answers now lead with the designed 620–725-day sustainable range and identify 570 days as the near-perfect theoretical floor before discussing personal pace.',
+      'Personal forecasts disclose the exact finalized-day sample and label fewer than 21 days as an early baseline rather than projecting one starting week as destiny.',
+      'The party still reports every hard Class gate and recent-pace calculation honestly, but it can no longer confuse a secondary extrapolation with the System’s intended progression curve.',
+    ],
+  },
   {
     title: 'Version 7.6.0 · Living Grimoire',
     detail:

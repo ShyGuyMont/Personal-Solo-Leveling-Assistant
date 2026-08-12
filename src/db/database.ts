@@ -730,7 +730,7 @@ export class SystemDatabase extends Dexie {
         const now = new Date().toISOString();
         const metadata = transaction.table<AppMetadata, string>('appMetadata');
         await metadata.put({ id: 'schema-seeded', value: 22, updatedAt: now });
-        await metadata.put({ id: 'app-version', value: '7.6.0', updatedAt: now });
+        await metadata.put({ id: 'app-version', value: '7.6.1', updatedAt: now });
       });
   }
 }

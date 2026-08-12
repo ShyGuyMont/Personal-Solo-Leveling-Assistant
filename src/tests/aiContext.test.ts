@@ -78,6 +78,13 @@ describe('Awakened Intelligence progress context', () => {
     expect(context.classification.roadmap.at(-1)?.class).toBe('WORLD CLASS');
     expect(context.classification.worldClass.remainingMissionCompletions).toBe(2_850);
     expect(context.classification.worldClass.lowerBoundCompletedDaysAtRecentPace).toBe(480);
+    expect(context.classification.worldClass.designedTheoreticalFastestDays).toBe(570);
+    expect(context.classification.worldClass.designedSustainableRangeDays).toEqual({
+      minimum: 620,
+      maximum: 725,
+    });
+    expect(context.classification.worldClass.recentPaceSampleDays).toBe(0);
+    expect(context.classification.worldClass.recentPaceConfidence).toBe('early');
     expect(context.party.directorNotes).toEqual([
       expect.objectContaining({
         companionId: 'snow',
