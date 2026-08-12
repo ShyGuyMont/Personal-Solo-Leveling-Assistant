@@ -579,11 +579,11 @@ export function AboutPage() {
         <details>
           <summary>How do updates and the Archive Shield work on my phone?</summary>
           <p>
-            Open the Update Center to check GitHub Pages for a new release. When one is waiting,
-            export a full save if you want an extra portable copy, then tap Install; the web app
-            reloads once and keeps the home-screen installation. Archive Shield exports use a
-            checksum and include every current record type. Imports are previewed and validated, and
-            the app creates an on-device recovery snapshot before replacing current data.
+            Open the Update Center to check The System’s private Sites release channel. When one is
+            waiting, export a full save if you want an extra portable copy, then tap Install; the
+            web app reloads once and keeps the home-screen installation. Archive Shield exports use
+            a checksum and include every current record type. Imports are previewed and validated,
+            and the app creates an on-device recovery snapshot before replacing current data.
           </p>
         </details>
       </section>

@@ -1,4 +1,4 @@
-export const APP_VERSION = '7.7.0';
+export const APP_VERSION = '7.7.1';
 export const DATABASE_SCHEMA_VERSION = 23;
 export const SAVE_FORMAT_VERSION = 23;
 
@@ -9,6 +9,20 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 7.7.1 · System Integrity Sweep',
+    detail:
+      'A full-system reliability pass makes Party Operations, mobile voice, Archive Shield, updates, and private AI boundaries match the behavior the interface promises.',
+    points: [
+      'The Daily Operations board now reconciles against the real Training, Kitchen, Sanctuary, and mission records, so completed, active, changed, and ready assignments never remain frozen in their original state.',
+      'Snow can truly leave Training untouched during a multi-realm assembly, and already-completed work is acknowledged as complete instead of being described as newly rolled or prepared.',
+      'Interrupted party preparation recovers into a visible, retryable partial briefing instead of leaving the System permanently stuck in an assembling state.',
+      'Quick Link now starts microphone capture directly from the Hunter’s tap, preserves staged preparation across mode changes, and locks confirmation and dismissal against rapid duplicate execution.',
+      'Archive Shield validates the nested contents of Party Operations records and safely upgrades staged Version 7.7 proposals without weakening save compatibility.',
+      'Private AI and Studio mutations reject cross-site browser submissions more defensively, while current model rates, local usage estimates, offline authority, and confirmation gates remain intact.',
+      'Update guidance now reflects the private Sites release channel, and stale release labels no longer point the Hunter toward the retired GitHub Pages path.',
+    ],
+  },
   {
     title: 'Version 7.7.0 · Party Operations',
     detail:

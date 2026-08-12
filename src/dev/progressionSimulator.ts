@@ -158,12 +158,7 @@ export function simulateProgression(
     previousTrialCompletedAt = trialCompletedAt;
     estimatedRank = requirement.rank;
   }
-  const projection = projectProgression(
-    safeDays,
-    safeRate,
-    commandCapacity,
-    completedTrialIds,
-  );
+  const projection = projectProgression(safeDays, safeRate, commandCapacity, completedTrialIds);
   const levels = Object.values(projection.statLevels);
   return {
     days: safeDays,

@@ -482,7 +482,7 @@ describe('Companion Soulprint intelligence', () => {
     });
   });
 
-  it('returns a bounded Party Operations proposal without claiming completion', async () => {
+  it('returns a bounded Party Operations proposal that can leave Training untouched', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn(
@@ -513,14 +513,15 @@ describe('Companion Soulprint intelligence', () => {
                         operation: {
                           kind: 'assemble-day',
                           companionId: 'snow',
-                          trainingLocation: 'home',
+                          includeTraining: false,
+                          trainingLocation: '',
                           includeKitchen: true,
                           foodConstraints: 'No chicken today',
                           includeSanctuary: true,
                           sanctuaryMode: 'study',
                           primaryConcern: 'focus',
                           secondaryConcern: '',
-                          summary: 'Wake the party and prepare three real realm assignments.',
+                          summary: 'Wake the party and prepare Kitchen and Sanctuary.',
                           confirmation: 'Should I wake everyone and prepare those assignments?',
                         },
                       }),
@@ -540,7 +541,8 @@ describe('Companion Soulprint intelligence', () => {
         headers: { 'content-type': 'application/json', origin: 'https://system.test' },
         body: JSON.stringify({
           audience: 'snow',
-          message: 'Home, no chicken, and a study for focus. Wake them up.',
+          message:
+            'Leave Training alone, but prepare no chicken and a study for focus. Wake them up.',
           history: [],
           context: {
             party: { enabledCompanionIds: ['snow', 'rook', 'ember', 'saffron', 'selah'] },
@@ -557,7 +559,7 @@ describe('Companion Soulprint intelligence', () => {
       operationProposal: {
         kind: 'assemble-day',
         companionId: 'snow',
-        trainingLocation: 'home',
+        includeTraining: false,
         includeKitchen: true,
         foodConstraints: 'No chicken today',
         includeSanctuary: true,
@@ -565,6 +567,20 @@ describe('Companion Soulprint intelligence', () => {
         primaryConcern: 'focus',
       },
     });
+  });
+
+  it('rejects cross-site AI submissions even when the Origin header is absent', async () => {
+    const response = await intelligence.default.fetch(
+      new Request('https://system.test/api/ai/chat', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'sec-fetch-site': 'cross-site' },
+        body: '{}',
+      }),
+      { OPENAI_API_KEY: 'test-key' },
+    );
+
+    expect(response.status).toBe(403);
+    expect(await response.json()).toMatchObject({ code: 'origin-denied' });
   });
 
   it('returns local memory suggestions only when Bond Memory is enabled', async () => {

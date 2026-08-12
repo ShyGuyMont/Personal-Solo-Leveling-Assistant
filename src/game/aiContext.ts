@@ -4,6 +4,7 @@ import { getRelevantApprovedMemories } from '@/game/aiHeadquarters';
 import { calculateRankQualification } from '@/game/rank';
 import { buildQuickLinkActionCatalog } from '@/game/aiQuickLink';
 import { getCustomKitchenRecipes } from '@/game/kitchenGrimoire';
+import { getDailyOperations } from '@/game/dailyOperations';
 import { resolveKitchenSessionRecipe } from '@/game/kitchen';
 import { accountXpForLevel, totalXpAtLevel } from '@/game/xp';
 import type { AiProgressContext } from '@/services/aiHeadquarters';
@@ -102,7 +103,7 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
     db.creatorSnapshots.orderBy('capturedAt').reverse().limit(30).toArray(),
     db.creatorProjects.orderBy('updatedAt').reverse().limit(30).toArray(),
     db.creatorVideoInsights.orderBy('views').reverse().limit(10).toArray(),
-    db.dailyOperations.get(source.systemDate),
+    getDailyOperations(source.systemDate),
   ]);
 
   const available = source.missions.filter((mission) => mission.enabled && !mission.archived);
@@ -346,6 +347,7 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
                   location: dailyOperations.training.location,
                   label: dailyOperations.training.label,
                   detail: dailyOperations.training.detail,
+                  state: dailyOperations.training.state,
                 }
               : undefined,
             kitchen: dailyOperations.kitchen
@@ -353,6 +355,7 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
                   label: dailyOperations.kitchen.label,
                   detail: dailyOperations.kitchen.detail,
                   constraints: dailyOperations.kitchen.constraints,
+                  state: dailyOperations.kitchen.state,
                 }
               : undefined,
             sanctuary: dailyOperations.sanctuary
@@ -360,6 +363,7 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
                   mode: dailyOperations.sanctuary.mode,
                   label: dailyOperations.sanctuary.label,
                   detail: dailyOperations.sanctuary.detail,
+                  state: dailyOperations.sanctuary.state,
                 }
               : undefined,
             pendingMissionCount: dailyOperations.pendingMissionCount,

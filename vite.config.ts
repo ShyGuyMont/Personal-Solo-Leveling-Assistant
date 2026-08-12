@@ -67,6 +67,7 @@ export default defineConfig({
             return 'react-vendor';
           }
           if (id.includes('/dexie/') || id.includes('/zustand/')) return 'data-vendor';
+          if (id.includes('/lucide-react/')) return 'ui-vendor';
           return undefined;
         },
       },

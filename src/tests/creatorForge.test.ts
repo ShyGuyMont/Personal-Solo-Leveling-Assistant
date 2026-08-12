@@ -4,6 +4,7 @@ import { createDefaultCreatorSettings } from '@/db/seed';
 import {
   getCreatorForgeSummary,
   parseYouTubeStudioCsv,
+  saveCreatorCampaign,
   saveCreatorProject,
   saveCreatorSnapshot,
   saveCreatorStudioIntelligence,
@@ -69,6 +70,28 @@ describe('Creator Forge', () => {
     expect(summary.latestSnapshot?.views).toBe(2400);
     expect(summary.activeProjects[0]).toEqual(expect.objectContaining({ id: project.id }));
     expect(summary.vesperCallout).toContain('The ARC Awakens');
+  });
+
+  it('adds a comeback campaign as one duplicate-safe board update', async () => {
+    const base = {
+      platform: 'youtube' as const,
+      contentType: 'long-form' as const,
+      pillar: 'ARC',
+      hook: 'A grounded opening.',
+      audiencePromise: 'One clear lesson.',
+      nextAction: 'Write the opening.',
+      notes: '',
+    };
+    await saveCreatorProject({ ...base, title: 'Already Planned', status: 'idea' });
+    const created = await saveCreatorCampaign([
+      { ...base, title: 'Already Planned' },
+      { ...base, title: 'Return Signal' },
+      { ...base, title: 'Return Signal' },
+      { ...base, title: 'Second Wave' },
+    ]);
+
+    expect(created.map((project) => project.title)).toEqual(['Return Signal', 'Second Wave']);
+    expect(await db.creatorProjects.count()).toBe(3);
   });
 
   it('imports common YouTube Studio analytics columns without credentials', () => {

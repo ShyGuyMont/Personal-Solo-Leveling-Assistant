@@ -39,7 +39,7 @@ import {
   synchronizeKitchenOperation,
 } from '@/game/dailyOperations';
 import { assignSpecificKitchenOrder } from '@/game/kitchen';
-import { saveCustomKitchenRecipe } from '@/game/kitchenGrimoire';
+import { deleteCustomKitchenRecipe, saveCustomKitchenRecipe } from '@/game/kitchenGrimoire';
 import {
   buildQuickLinkActionCatalog,
   commandSuccessAcknowledgement,
@@ -109,6 +109,7 @@ export function CompanionQuickLink() {
   const conversationRef = useRef<AiConversation>();
   const repliesRef = useRef<HTMLDivElement>(null);
   const liveWriteQueueRef = useRef(Promise.resolve());
+  const executionLockRef = useRef(false);
   const enabledCompanions = useMemo(() => {
     const enabled = new Set(settings?.enabledCompanionIds ?? []);
     return COMPANIONS.filter((companion) => enabled.has(companion.id));
@@ -185,6 +186,14 @@ export function CompanionQuickLink() {
       setLinkMode('command');
       setNotice(`${getCompanion(companionId).name}'s live channel is ready.`);
       setOpen(true);
+      void getDailyOperations(systemDate).then((operations) => {
+        if (operations?.status === 'awaiting-confirmation' && operations.pendingProposal) {
+          setPendingOperation(operations.pendingProposal);
+          setNotice(
+            `${getCompanion(companionId).name}'s channel is ready. Your staged preparation is still waiting below.`,
+          );
+        }
+      });
     };
     window.addEventListener('system:open-quick-link', openDirectLink);
     return () => {
@@ -192,7 +201,7 @@ export function CompanionQuickLink() {
       window.removeEventListener('offline', offline);
       window.removeEventListener('system:open-quick-link', openDirectLink);
     };
-  }, []);
+  }, [systemDate]);
 
   useEffect(() => {
     if (!open) return;
@@ -453,8 +462,10 @@ export function CompanionQuickLink() {
   }
 
   async function executePendingAction() {
-    if (!pendingAction || executingAction) return;
+    if (!pendingAction || executingAction || executionLockRef.current) return;
+    executionLockRef.current = true;
     setExecutingAction(true);
+    let applied = false;
     try {
       if (pendingAction.action.kind === 'complete_mission') {
         await complete(pendingAction.action.missionId);
@@ -467,15 +478,23 @@ export function CompanionQuickLink() {
       } else {
         await updateStatus(pendingAction.action.missionId, 'pending');
       }
+      applied = true;
+      setPendingAction(undefined);
       await appendLocalAcknowledgement(
         pendingAction.proposal.companionId,
         commandSuccessAcknowledgement(pendingAction.proposal.companionId, pendingAction.action),
       );
-      setPendingAction(undefined);
       setNotice('Command confirmed · local campaign synchronized.');
     } catch (error) {
-      setNotice(error instanceof Error ? error.message : 'The command could not be completed.');
+      setNotice(
+        applied
+          ? 'Command confirmed locally. Only the companion acknowledgement failed to save.'
+          : error instanceof Error
+            ? error.message
+            : 'The command could not be completed.',
+      );
     } finally {
+      executionLockRef.current = false;
       setExecutingAction(false);
     }
   }
@@ -520,23 +539,32 @@ export function CompanionQuickLink() {
       });
       await voiceLink.trackTextUsage(result);
       if (result.recipeProposal) {
-        const recipe = await saveCustomKitchenRecipe({
-          name: result.recipeProposal.name,
-          codename: result.recipeProposal.codename,
-          servings: result.recipeProposal.servings,
-          prepMinutes: result.recipeProposal.prepMinutes,
-          cookMinutes: result.recipeProposal.cookMinutes,
-          costTier: result.recipeProposal.costTier,
-          equipment: result.recipeProposal.equipment,
-          plate: result.recipeProposal.plate,
-          ingredients: result.recipeProposal.ingredients,
-          steps: result.recipeProposal.steps,
-          swaps: result.recipeProposal.swaps,
-          storage: result.recipeProposal.storage,
-          safety: result.recipeProposal.safety,
-        });
-        await assignSpecificKitchenOrder(systemDate, recipe.id);
-        await synchronizeKitchenOperation(systemDate, request.foodConstraints);
+        let replacementRecipeId: string | undefined;
+        try {
+          const recipe = await saveCustomKitchenRecipe({
+            name: result.recipeProposal.name,
+            codename: result.recipeProposal.codename,
+            servings: result.recipeProposal.servings,
+            prepMinutes: result.recipeProposal.prepMinutes,
+            cookMinutes: result.recipeProposal.cookMinutes,
+            costTier: result.recipeProposal.costTier,
+            equipment: result.recipeProposal.equipment,
+            plate: result.recipeProposal.plate,
+            ingredients: result.recipeProposal.ingredients,
+            steps: result.recipeProposal.steps,
+            swaps: result.recipeProposal.swaps,
+            storage: result.recipeProposal.storage,
+            safety: result.recipeProposal.safety,
+          });
+          replacementRecipeId = recipe.id;
+          await assignSpecificKitchenOrder(systemDate, recipe.id);
+          await synchronizeKitchenOperation(systemDate, request.foodConstraints);
+        } catch (error) {
+          if (replacementRecipeId) {
+            await deleteCustomKitchenRecipe(replacementRecipeId).catch(() => undefined);
+          }
+          throw error;
+        }
       }
       return result.replies;
     } catch (error) {
@@ -558,7 +586,9 @@ export function CompanionQuickLink() {
     kitchenMessages: Array<{ companionId: CompanionId; message: string }>,
   ) {
     const messages: Array<{ companionId: CompanionId; message: string }> = [];
-    const reportsTraining = request.kind === 'assemble-day' || request.kind === 'prepare-training';
+    const reportsTraining =
+      request.kind === 'prepare-training' ||
+      (request.kind === 'assemble-day' && request.includeTraining);
     const reportsKitchen =
       request.kind === 'prepare-kitchen' ||
       (request.kind === 'assemble-day' && request.includeKitchen);
@@ -571,11 +601,17 @@ export function CompanionQuickLink() {
       messages.push({
         companionId: lead,
         message:
-          record.training.location === 'recovery'
-            ? `${record.training.label} is prepared. The movements and timing are waiting in the Training Hall; nothing begins until you do.`
-            : `${record.training.label} is rolled and loaded. Open the Training Hall and the proper deployment screen will already be waiting.`,
+          record.training.state === 'completed'
+            ? `${record.training.label} was already complete today. I preserved the cleared record—nothing was rerolled, reopened, or rewarded twice.`
+            : record.training.location === 'recovery'
+              ? `${record.training.label} is prepared. The movements and timing are waiting in the Training Hall; nothing begins until you do.`
+              : `${record.training.label} is rolled and loaded. Open the Training Hall and the proper deployment screen will already be waiting.`,
       });
-      if (request.kind === 'assemble-day' && record.training.location !== 'recovery') {
+      if (
+        request.kind === 'assemble-day' &&
+        record.training.location !== 'recovery' &&
+        record.training.state !== 'completed'
+      ) {
         messages.push({
           companionId: 'ember',
           message:
@@ -588,30 +624,47 @@ export function CompanionQuickLink() {
       else if (record.kitchen) {
         messages.push({
           companionId: 'saffron',
-          message: `${record.kitchen.label} is loaded in the Kitchen. Ingredients, steps, and the cooking checklist are all ready when you are.`,
+          message:
+            record.kitchen.state === 'completed'
+              ? `${record.kitchen.label} is already complete today. I kept the finished Kitchen record exactly where it belongs—no duplicate order and no duplicate reward.`
+              : `${record.kitchen.label} is loaded in the Kitchen. Ingredients, steps, and the cooking checklist are all ready when you are.`,
         });
       }
     }
     if (reportsSanctuary && record.sanctuary) {
       messages.push({
         companionId: 'selah',
-        message: `${record.sanctuary.label} is prepared around ${record.sanctuary.detail.toLowerCase()}. The Sanctuary will open directly into the session, and your private reflection remains yours.`,
+        message:
+          record.sanctuary.state === 'completed'
+            ? `${record.sanctuary.label} is already complete today. I preserved the finished Sanctuary record and your private reflection exactly as they were.`
+            : `${record.sanctuary.label} is prepared around ${record.sanctuary.detail.toLowerCase()}. The Sanctuary will open directly into the session, and your private reflection remains yours.`,
       });
     }
     if (request.kind === 'assemble-day') {
+      const selectedStates = [
+        reportsTraining ? record.training?.state : undefined,
+        reportsKitchen ? record.kitchen?.state : undefined,
+        reportsSanctuary ? record.sanctuary?.state : undefined,
+      ].filter((state): state is NonNullable<typeof state> => Boolean(state));
+      const selectedAlreadyComplete =
+        selectedStates.length > 0 && selectedStates.every((state) => state === 'completed');
       messages.push({
         companionId: 'snow',
-        message: record.preparationNotes.length
-          ? `The party is assembled and every safe assignment I could prepare is loaded. I left ${record.preparationNotes.length} clear flag${record.preparationNotes.length === 1 ? '' : 's'} in the briefing instead of forcing anything.`
-          : `Everybody is awake. Your assignments are assembled, the real section screens are preloaded, and nothing has been claimed or completed. Start wherever you want—I have the board.`,
+        message: selectedAlreadyComplete
+          ? 'Every selected realm was already cleared today. I preserved the completed records exactly as they were—no rerolls, no reopened work, and no duplicate rewards.'
+          : record.preparationNotes.length
+            ? `The party is assembled and every safe assignment I could prepare is loaded. I left ${record.preparationNotes.length} clear flag${record.preparationNotes.length === 1 ? '' : 's'} in the briefing instead of forcing anything.`
+            : `Everybody is awake. Your assignments are assembled, the real section screens are preloaded, and nothing has been claimed or completed. Start wherever you want—I have the board.`,
       });
     }
     return messages;
   }
 
   async function executePendingOperation() {
-    if (!pendingOperation || executingAction) return;
+    if (!pendingOperation || executingAction || executionLockRef.current) return;
+    executionLockRef.current = true;
     setExecutingAction(true);
+    let prepared = false;
     try {
       let record = await prepareCompanionOperation(
         systemDate,
@@ -621,11 +674,15 @@ export function CompanionQuickLink() {
       const kitchenMessages =
         (pendingOperation.kind === 'prepare-kitchen' ||
           (pendingOperation.kind === 'assemble-day' && pendingOperation.includeKitchen)) &&
-        record.kitchen
+        record.kitchen &&
+        record.kitchen.state !== 'completed'
           ? await reviewPreparedKitchen(pendingOperation)
           : [];
       record = (await getDailyOperations(systemDate)) ?? record;
       const messages = buildOperationMessages(record, pendingOperation, kitchenMessages);
+      prepared = true;
+      setPendingOperation(undefined);
+      await refresh();
       if (messages.length) {
         await appendLocalMessages(messages, {
           party: pendingOperation.kind === 'assemble-day',
@@ -635,23 +692,48 @@ export function CompanionQuickLink() {
               : undefined,
         });
       }
-      setPendingOperation(undefined);
-      await refresh();
       setNotice(
         record.status === 'partial'
           ? 'Party preparation complete with a visible flag · no assignment was forced.'
           : 'Party preparation complete · real section assignments are ready.',
       );
     } catch (error) {
-      setNotice(error instanceof Error ? error.message : 'The party could not prepare that order.');
+      setNotice(
+        prepared
+          ? 'Assignments were prepared locally. Only the companion briefing failed to save.'
+          : error instanceof Error
+            ? error.message
+            : 'The party could not prepare that order.',
+      );
     } finally {
+      executionLockRef.current = false;
+      setExecutingAction(false);
+    }
+  }
+
+  async function dismissPendingOperation() {
+    if (executingAction || executionLockRef.current) return;
+    executionLockRef.current = true;
+    setExecutingAction(true);
+    try {
+      await cancelStagedCompanionOperation(systemDate);
+      setPendingOperation(undefined);
+      setNotice('Preparation dismissed. Existing assignments remain untouched.');
+    } catch (error) {
+      setNotice(
+        error instanceof Error ? error.message : 'That preparation could not be dismissed.',
+      );
+    } finally {
+      executionLockRef.current = false;
       setExecutingAction(false);
     }
   }
 
   async function savePendingRecipe() {
-    if (!pendingRecipe || executingAction) return;
+    if (!pendingRecipe || executingAction || executionLockRef.current) return;
+    executionLockRef.current = true;
     setExecutingAction(true);
+    let saved = false;
     try {
       const recipe = {
         name: pendingRecipe.name,
@@ -669,22 +751,32 @@ export function CompanionQuickLink() {
         safety: pendingRecipe.safety,
       };
       await saveCustomKitchenRecipe(recipe);
+      saved = true;
+      setPendingRecipe(undefined);
       await appendLocalAcknowledgement(
         'saffron',
         `${recipe.name} is in my Private Grimoire and Daily Rotation now. Open the Kitchen whenever you want to cook it with me step by step. Your recipe, your device, and nobody touched it before you confirmed.`,
       );
-      setPendingRecipe(undefined);
       setNotice('Recipe confirmed · Private Grimoire and Daily Rotation updated.');
     } catch (error) {
-      setNotice(error instanceof Error ? error.message : 'That recipe could not be saved.');
+      setNotice(
+        saved
+          ? 'Recipe saved locally. Only Saffron’s acknowledgement failed to save.'
+          : error instanceof Error
+            ? error.message
+            : 'That recipe could not be saved.',
+      );
     } finally {
+      executionLockRef.current = false;
       setExecutingAction(false);
     }
   }
 
   async function savePendingContent() {
-    if (!pendingContent || executingAction) return;
+    if (!pendingContent || executingAction || executionLockRef.current) return;
+    executionLockRef.current = true;
     setExecutingAction(true);
+    let saved = false;
     try {
       const content = await saveCreatorProject({
         title: pendingContent.title,
@@ -697,37 +789,51 @@ export function CompanionQuickLink() {
         nextAction: pendingContent.nextAction,
         notes: pendingContent.notes,
       });
+      saved = true;
+      setPendingContent(undefined);
       await appendLocalAcknowledgement(
         'haven',
         `“${content.title}” is on the Creator Forge board now. The spotlight is not asking for perfection—just ${content.nextAction || 'one honest next move'}.`,
       );
-      setPendingContent(undefined);
       setNotice('Content operation confirmed · Creator Forge synchronized.');
     } catch (error) {
       setNotice(
-        error instanceof Error ? error.message : 'That content operation could not be saved.',
+        saved
+          ? 'Content operation saved locally. Only Vesper’s acknowledgement failed to save.'
+          : error instanceof Error
+            ? error.message
+            : 'That content operation could not be saved.',
       );
     } finally {
+      executionLockRef.current = false;
       setExecutingAction(false);
     }
   }
 
   async function savePendingCampaign() {
-    if (!pendingCampaign || executingAction) return;
+    if (!pendingCampaign || executingAction || executionLockRef.current) return;
+    executionLockRef.current = true;
     setExecutingAction(true);
+    let saved = false;
     try {
       const projects = await saveCreatorCampaign(pendingCampaign.operations);
+      saved = true;
+      setPendingCampaign(undefined);
       await appendLocalAcknowledgement(
         'haven',
         `${pendingCampaign.name} is live on the Creator Forge board: ${projects.length} releases, one sequence, and no disappearing between uploads. We start with ${projects[0]?.nextAction || 'the first physical move'}.`,
       );
-      setPendingCampaign(undefined);
       setNotice(`Reawakening confirmed · ${projects.length} operations added to Creator Forge.`);
     } catch (error) {
       setNotice(
-        error instanceof Error ? error.message : 'That comeback campaign could not be saved.',
+        saved
+          ? 'Reawakening campaign saved locally. Only Vesper’s acknowledgement failed to save.'
+          : error instanceof Error
+            ? error.message
+            : 'That comeback campaign could not be saved.',
       );
     } finally {
+      executionLockRef.current = false;
       setExecutingAction(false);
     }
   }
@@ -832,7 +938,6 @@ export function CompanionQuickLink() {
     setReplies([]);
     setContinuityTurns(0);
     setPendingAction(undefined);
-    setPendingOperation(undefined);
     setPendingRecipe(undefined);
     setPendingContent(undefined);
     setPendingCampaign(undefined);
@@ -852,6 +957,7 @@ export function CompanionQuickLink() {
     if (sending || voiceLink.transcribing) return;
     voiceLink.stopPlayback();
     realtimeLink.stop();
+    const listening = beginListening();
     setOpen(true);
     setLinkMode('command');
     const operations = await getDailyOperations(systemDate);
@@ -868,7 +974,7 @@ export function CompanionQuickLink() {
     setPendingRecipe(undefined);
     setPendingContent(undefined);
     setContinuityTurns(continuing?.messages.length ?? 0);
-    await beginListening();
+    await listening;
   }
 
   function close() {
@@ -1179,7 +1285,7 @@ export function CompanionQuickLink() {
                   <strong>{pendingOperationTitle}</strong>
                   <p>{pendingOperation.summary}</p>
                   <div className="quick-link__recipe-meta">
-                    {pendingOperation.trainingLocation && (
+                    {pendingOperation.includeTraining && pendingOperation.trainingLocation && (
                       <span>{pendingOperation.trainingLocation} training</span>
                     )}
                     {pendingOperation.includeKitchen && <span>Kitchen included</span>}
@@ -1228,11 +1334,7 @@ export function CompanionQuickLink() {
                       type="button"
                       className="button button--ghost"
                       disabled={executingAction}
-                      onClick={() => {
-                        void cancelStagedCompanionOperation(systemDate);
-                        setPendingOperation(undefined);
-                        setNotice('Preparation dismissed. Existing assignments remain untouched.');
-                      }}
+                      onClick={() => void dismissPendingOperation()}
                     >
                       Not yet
                     </button>

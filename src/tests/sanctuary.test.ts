@@ -33,9 +33,7 @@ describe('Scripture Sanctuary', () => {
     expect(new Set(SCRIPTURE_LIBRARY.map((passage) => passage.id)).size).toBe(96);
     expect(new Set(SCRIPTURE_LIBRARY.map((passage) => passage.reference)).size).toBe(96);
 
-    const concerns = new Set<SanctuaryConcern>(
-      SCRIPTURE_LIBRARY.map((passage) => passage.concern),
-    );
+    const concerns = new Set<SanctuaryConcern>(SCRIPTURE_LIBRARY.map((passage) => passage.concern));
     expect(concerns.size).toBe(12);
     concerns.forEach((concern) => {
       expect(SCRIPTURE_LIBRARY.filter((passage) => passage.concern === concern)).toHaveLength(8);

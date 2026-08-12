@@ -483,6 +483,7 @@ export type CompanionOperationKind =
 export interface CompanionOperationRequest {
   kind: CompanionOperationKind;
   companionId: CompanionId;
+  includeTraining: boolean;
   trainingLocation?: TrainingLocation;
   includeKitchen: boolean;
   foodConstraints?: string;
@@ -494,12 +495,15 @@ export interface CompanionOperationRequest {
   confirmation: string;
 }
 
+export type PreparedOperationState = 'ready' | 'active' | 'completed' | 'changed';
+
 export interface PreparedTrainingOperation {
   sessionId: string;
   location: TrainingLocation;
   label: string;
   detail: string;
   companionIds: CompanionId[];
+  state?: PreparedOperationState;
 }
 
 export interface PreparedKitchenOperation {
@@ -510,6 +514,7 @@ export interface PreparedKitchenOperation {
   customRecipe: boolean;
   constraints?: string;
   companionIds: CompanionId[];
+  state?: PreparedOperationState;
 }
 
 export interface PreparedSanctuaryOperation {
@@ -518,6 +523,7 @@ export interface PreparedSanctuaryOperation {
   label: string;
   detail: string;
   companionIds: CompanionId[];
+  state?: PreparedOperationState;
 }
 
 export interface DailyOperationsRecord {

@@ -159,7 +159,7 @@ export function UpdateCenterPage() {
             <p>
               {pwa.updateAvailable
                 ? 'Export first if you want an extra portable copy, then install. The app reloads once; on-device campaign data remains in place.'
-                : 'Checking contacts the GitHub Pages release channel. It does not upload your personal campaign data.'}
+                : 'Checking contacts The System’s private Sites release channel. It does not upload your personal campaign data.'}
             </p>
             {pwa.lastCheckedAt && <small>Last checked {time(pwa.lastCheckedAt)}</small>}
           </div>
@@ -260,7 +260,7 @@ export function UpdateCenterPage() {
       <section className="release-notes">
         <div className="section-header">
           <div>
-            <p className="eyebrow">VERSION 2.5 · THE CAMPAIGN UPDATE</p>
+            <p className="eyebrow">SYSTEM RELEASE ARCHIVE</p>
             <h2>What changed</h2>
           </div>
         </div>

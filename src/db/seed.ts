@@ -7,6 +7,7 @@ import { BALANCE } from '@/config/balance';
 import { ACHIEVEMENTS } from '@/config/achievements';
 import { COSMETICS } from '@/config/cosmetics';
 import { DEFAULT_MISSIONS } from '@/config/missions';
+import { APP_VERSION, DATABASE_SCHEMA_VERSION } from '@/config/release';
 import { db } from '@/db/database';
 import { createChallengeProgress, chooseRotatingChallenge } from '@/game/challenges';
 import { accountXpForLevel } from '@/game/xp';
@@ -219,9 +220,9 @@ export async function initializeProfile(input: {
         },
       ]);
       await db.appMetadata.bulkPut([
-        { id: 'schema-seeded', value: 23, updatedAt: now },
+        { id: 'schema-seeded', value: DATABASE_SCHEMA_VERSION, updatedAt: now },
         { id: 'last-system-day', value: systemDate, updatedAt: now },
-        { id: 'app-version', value: '7.7.0', updatedAt: now },
+        { id: 'app-version', value: APP_VERSION, updatedAt: now },
       ]);
       await ensureRotatingChallenges(systemDate, settings.weekStartsOn);
     },
@@ -239,11 +240,14 @@ export async function ensureCoreData() {
   const creatorSettings = await db.creatorSettings.get('primary');
   await db.transaction(
     'rw',
-    db.settings,
-    db.progression,
-    db.stats,
-    db.treasurySettings,
-    db.creatorSettings,
+    [
+      db.settings,
+      db.progression,
+      db.stats,
+      db.treasurySettings,
+      db.creatorSettings,
+      db.appMetadata,
+    ],
     async () => {
       if (!(await db.settings.get('primary'))) await db.settings.put(settings);
       if (!progression) await db.progression.put(createDefaultProgression());
@@ -256,6 +260,11 @@ export async function ensureCoreData() {
       if (!creatorSettings) {
         await db.creatorSettings.put(createDefaultCreatorSettings());
       }
+      await db.appMetadata.put({
+        id: 'app-version',
+        value: APP_VERSION,
+        updatedAt: new Date().toISOString(),
+      });
     },
   );
   const systemDate = getSystemDateKey(new Date(), settings.resetTime, settings.timeZone);

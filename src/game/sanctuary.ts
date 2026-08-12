@@ -74,10 +74,7 @@ function choosePassages(
     .map((passage) => passage.id);
 }
 
-function sessionCompanions(
-  primaryConcern: SanctuaryConcern,
-  secondaryConcern?: SanctuaryConcern,
-) {
+function sessionCompanions(primaryConcern: SanctuaryConcern, secondaryConcern?: SanctuaryConcern) {
   const companions: CompanionId[] = [
     'snow',
     'selah',
@@ -230,9 +227,7 @@ export async function reopenSanctuaryCredit(date: LocalDateKey) {
     .equals(date)
     .filter(
       (session) =>
-        session.mode === 'study' &&
-        session.status === 'completed' &&
-        session.bibleMissionCredited,
+        session.mode === 'study' && session.status === 'completed' && session.bibleMissionCredited,
     )
     .toArray();
   const now = new Date().toISOString();

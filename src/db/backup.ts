@@ -165,6 +165,21 @@ function migrateData(
   }
   if (version <= 19) data.creatorVideoInsights ??= [];
   if (version <= 22) data.dailyOperations ??= [];
+  data.dailyOperations = data.dailyOperations.map((row) => {
+    if (!isObject(row) || !isObject(row.pendingProposal)) return row;
+    const pendingProposal = row.pendingProposal;
+    return {
+      ...row,
+      pendingProposal: {
+        ...pendingProposal,
+        includeTraining:
+          typeof pendingProposal.includeTraining === 'boolean'
+            ? pendingProposal.includeTraining
+            : pendingProposal.kind === 'prepare-training' ||
+              typeof pendingProposal.trainingLocation === 'string',
+      },
+    };
+  });
   data.aiVoiceProfiles = data.aiVoiceProfiles.map((row) => {
     if (
       !isObject(row) ||
@@ -602,6 +617,47 @@ function validateData(data: Record<string, unknown[]>) {
   const validDate = (value: unknown) =>
     typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value);
   const operationStatuses = new Set(['awaiting-confirmation', 'preparing', 'ready', 'partial']);
+  const operationKinds = new Set([
+    'assemble-day',
+    'prepare-training',
+    'prepare-kitchen',
+    'prepare-sanctuary',
+  ]);
+  const operationTrainingLocations = new Set(['home', 'gym', 'conditioning', 'recovery']);
+  const operationSanctuaryModes = new Set(['study', 'stronghold']);
+  const operationSanctuaryConcerns = new Set([
+    'sexual-integrity',
+    'shame',
+    'anger',
+    'sadness',
+    'loneliness',
+    'stress',
+    'numbness',
+    'focus',
+    'doubt',
+    'forgiveness',
+    'identity',
+    'gratitude',
+  ]);
+  const operationStates = new Set(['ready', 'active', 'completed', 'changed']);
+  const validOptionalText = (value: unknown, maximum: number) =>
+    value === undefined || (typeof value === 'string' && value.length <= maximum);
+  const validCompanions = (value: unknown) =>
+    Array.isArray(value) &&
+    value.length > 0 &&
+    value.length <= 10 &&
+    value.every((id) => aiCompanionIds.has(String(id)));
+  const validPreparedBase = (value: Record<string, unknown>) =>
+    typeof value.sessionId === 'string' &&
+    value.sessionId.trim().length > 0 &&
+    value.sessionId.length <= 200 &&
+    typeof value.label === 'string' &&
+    value.label.trim().length > 0 &&
+    value.label.length <= 200 &&
+    typeof value.detail === 'string' &&
+    value.detail.length <= 500 &&
+    validCompanions(value.companionIds) &&
+    (value.state === undefined || operationStates.has(String(value.state)));
   for (const row of data.dailyOperations) {
     if (
       !isObject(row) ||
@@ -619,9 +675,95 @@ function validateData(data: Record<string, unknown[]>) {
       typeof row.createdAt !== 'string' ||
       !Number.isFinite(Date.parse(row.createdAt)) ||
       typeof row.updatedAt !== 'string' ||
-      !Number.isFinite(Date.parse(row.updatedAt))
+      !Number.isFinite(Date.parse(row.updatedAt)) ||
+      !validOptionalText(row.conversationId, 200) ||
+      (row.preparedAt !== undefined &&
+        (typeof row.preparedAt !== 'string' || !Number.isFinite(Date.parse(row.preparedAt))))
     ) {
       throw new Error('A Party Operations record contains an impossible value.');
+    }
+    if (row.pendingProposal !== undefined) {
+      const proposal = row.pendingProposal;
+      if (!isObject(proposal)) {
+        throw new Error('A Party Operations proposal contains an impossible value.');
+      }
+      const kind = String(proposal.kind);
+      const includeTraining = proposal.includeTraining === true;
+      const includeKitchen = proposal.includeKitchen === true;
+      const includeSanctuary = proposal.includeSanctuary === true;
+      const ownershipAllowed =
+        (kind === 'assemble-day' && proposal.companionId === 'snow') ||
+        (kind === 'prepare-training' &&
+          ['snow', 'rook', 'ember', 'mira'].includes(String(proposal.companionId))) ||
+        (kind === 'prepare-kitchen' && proposal.companionId === 'saffron') ||
+        (kind === 'prepare-sanctuary' && proposal.companionId === 'selah');
+      if (
+        !operationKinds.has(kind) ||
+        !aiCompanionIds.has(String(proposal.companionId)) ||
+        !ownershipAllowed ||
+        typeof proposal.includeTraining !== 'boolean' ||
+        typeof proposal.includeKitchen !== 'boolean' ||
+        typeof proposal.includeSanctuary !== 'boolean' ||
+        (proposal.trainingLocation !== undefined &&
+          !operationTrainingLocations.has(String(proposal.trainingLocation))) ||
+        (includeTraining && !operationTrainingLocations.has(String(proposal.trainingLocation))) ||
+        (kind === 'assemble-day' && !includeTraining && !includeKitchen && !includeSanctuary) ||
+        (kind === 'prepare-training' && !includeTraining) ||
+        (kind === 'prepare-kitchen' && !includeKitchen) ||
+        (kind === 'prepare-sanctuary' && !includeSanctuary) ||
+        !validOptionalText(proposal.foodConstraints, 400) ||
+        (proposal.sanctuaryMode !== undefined &&
+          !operationSanctuaryModes.has(String(proposal.sanctuaryMode))) ||
+        (proposal.primaryConcern !== undefined &&
+          !operationSanctuaryConcerns.has(String(proposal.primaryConcern))) ||
+        (proposal.secondaryConcern !== undefined &&
+          !operationSanctuaryConcerns.has(String(proposal.secondaryConcern))) ||
+        (includeSanctuary &&
+          (!operationSanctuaryModes.has(String(proposal.sanctuaryMode)) ||
+            !operationSanctuaryConcerns.has(String(proposal.primaryConcern)))) ||
+        typeof proposal.summary !== 'string' ||
+        !proposal.summary.trim() ||
+        proposal.summary.length > 320 ||
+        typeof proposal.confirmation !== 'string' ||
+        !proposal.confirmation.trim() ||
+        proposal.confirmation.length > 240
+      ) {
+        throw new Error('A Party Operations proposal contains an impossible value.');
+      }
+    }
+    if (row.training !== undefined) {
+      const prepared = row.training;
+      if (
+        !isObject(prepared) ||
+        !validPreparedBase(prepared) ||
+        !operationTrainingLocations.has(String(prepared.location))
+      ) {
+        throw new Error('A prepared Training operation contains an impossible value.');
+      }
+    }
+    if (row.kitchen !== undefined) {
+      const prepared = row.kitchen;
+      if (
+        !isObject(prepared) ||
+        !validPreparedBase(prepared) ||
+        typeof prepared.recipeId !== 'string' ||
+        !prepared.recipeId.trim() ||
+        prepared.recipeId.length > 200 ||
+        typeof prepared.customRecipe !== 'boolean' ||
+        !validOptionalText(prepared.constraints, 400)
+      ) {
+        throw new Error('A prepared Kitchen operation contains an impossible value.');
+      }
+    }
+    if (row.sanctuary !== undefined) {
+      const prepared = row.sanctuary;
+      if (
+        !isObject(prepared) ||
+        !validPreparedBase(prepared) ||
+        !operationSanctuaryModes.has(String(prepared.mode))
+      ) {
+        throw new Error('A prepared Sanctuary operation contains an impossible value.');
+      }
     }
   }
   const validCents = (value: unknown, allowZero = false) =>

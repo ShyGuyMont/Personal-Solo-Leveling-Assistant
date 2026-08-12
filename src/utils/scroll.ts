@@ -4,10 +4,7 @@ export interface ScrollViewport {
   scrollTo?: (options: ScrollToOptions) => void;
 }
 
-export function scrollChatViewportToBottom(
-  viewport: ScrollViewport,
-  reducedMotion = false,
-) {
+export function scrollChatViewportToBottom(viewport: ScrollViewport, reducedMotion = false) {
   const behavior: ScrollBehavior = reducedMotion ? 'auto' : 'smooth';
 
   if (typeof viewport.scrollTo === 'function') {

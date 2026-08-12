@@ -21771,6 +21771,28 @@ html[data-motion='reduced'] .creator-hero::before {
   box-shadow: 0 12px 28px rgb(0 0 0 / 18%);
 }
 
+.daily-operations__card.is-completed {
+  border-color: color-mix(in srgb, var(--success) 55%, var(--border));
+  background: color-mix(in srgb, var(--success) 8%, var(--panel-strong));
+}
+
+.daily-operations__card.is-completed > svg,
+.daily-operations__card.is-completed b {
+  color: var(--success);
+}
+
+.daily-operations__card.is-changed {
+  border-color: color-mix(in srgb, #ffb948 55%, var(--border));
+}
+
+.daily-operations.is-preparing .daily-operations__signal {
+  animation: quick-link-pulse 1.2s ease-in-out infinite;
+}
+
+html[data-motion='reduced'] .daily-operations__signal {
+  animation: none;
+}
+
 .daily-operations__card > svg {
   flex: 0 0 auto;
   color: var(--accent);

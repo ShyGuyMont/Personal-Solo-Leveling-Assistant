@@ -138,9 +138,9 @@ export interface AiProgressContext {
     today?: {
       status: 'awaiting-confirmation' | 'preparing' | 'ready' | 'partial';
       sourceCompanionId: CompanionId;
-      training?: { location: string; label: string; detail: string };
-      kitchen?: { label: string; detail: string; constraints?: string };
-      sanctuary?: { mode: string; label: string; detail: string };
+      training?: { location: string; label: string; detail: string; state?: string };
+      kitchen?: { label: string; detail: string; constraints?: string; state?: string };
+      sanctuary?: { mode: string; label: string; detail: string; state?: string };
       pendingMissionCount: number;
       completedMissionCount: number;
       preparationNotes: string[];
@@ -507,7 +507,14 @@ export async function requestAiHeadquartersReply(input: {
         : undefined,
     operationProposal:
       payload.operationProposal && typeof payload.operationProposal === 'object'
-        ? (payload.operationProposal as AiHeadquartersReply['operationProposal'])
+        ? ({
+            ...(payload.operationProposal as Record<string, unknown>),
+            includeTraining:
+              typeof (payload.operationProposal as Record<string, unknown>).includeTraining ===
+              'boolean'
+                ? (payload.operationProposal as Record<string, unknown>).includeTraining
+                : Boolean((payload.operationProposal as Record<string, unknown>).trainingLocation),
+          } as AiHeadquartersReply['operationProposal'])
         : undefined,
     recipeProposal:
       payload.recipeProposal && typeof payload.recipeProposal === 'object'

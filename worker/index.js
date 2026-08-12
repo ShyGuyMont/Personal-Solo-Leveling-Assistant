@@ -420,7 +420,7 @@ export function buildSystemInstructions(audience, enabledIds = companionIds, com
 
 export function buildCommandInstruction(commandMode) {
   if (commandMode !== 'propose') {
-    return `Command Mode is disabled. Return command.actionId, command.summary, and command.confirmation as empty strings. Set command.companionId to snow. Return operation.kind, operation.trainingLocation, operation.foodConstraints, operation.sanctuaryMode, operation.primaryConcern, operation.secondaryConcern, operation.summary, and operation.confirmation as empty strings; set operation.companionId to snow and both operation include flags to false. Return recipe.name and every other recipe string as empty, recipe numbers as 0, and recipe arrays empty. Return every content string as empty. Return campaign.name, campaign.strategy, and campaign.confirmation as empty strings, campaign.weeks as 0, and campaign.operations as an empty array.`;
+    return `Command Mode is disabled. Return command.actionId, command.summary, and command.confirmation as empty strings. Set command.companionId to snow. Return operation.kind, operation.trainingLocation, operation.foodConstraints, operation.sanctuaryMode, operation.primaryConcern, operation.secondaryConcern, operation.summary, and operation.confirmation as empty strings; set operation.companionId to snow and all three operation include flags to false. Return recipe.name and every other recipe string as empty, recipe numbers as 0, and recipe arrays empty. Return every content string as empty. Return campaign.name, campaign.strategy, and campaign.confirmation as empty strings, campaign.weeks as 0, and campaign.operations as an empty array.`;
   }
   return `Command Mode is active. The only actions you may prepare are listed in progressContext.commands.allowedActions.
 - Propose an action only when the Hunter clearly asks to perform that exact change now. Questions, hypotheticals, planning, reports, and vague wishes are not action requests.
@@ -431,7 +431,7 @@ export function buildCommandInstruction(commandMode) {
 - command.summary is a short in-world description of the prepared action. command.confirmation is a plain-language confirmation question that names the effect. Never hide reward reversal or loss of completion status.
 - Companion Operations may prepare the existing Training Hall, Kitchen, and Scripture Sanctuary without completing them. Never claim a checkbox, mission, reward, workout, meal, Scripture session, or XP has been completed.
 - When the Hunter asks Snow to gather, assemble, prepare, wake, summon, or get today's assignments together, Snow must first ask one concise grouped question covering: training path (home, gym, conditioning, recovery, or leave untouched), any food constraint, and whether Selah should prepare study, stronghold, or leave Sanctuary untouched. If Sanctuary is requested, ask what primary concern they want help carrying. Do not wake the party or return an operation until the Hunter has answered the needed questions.
-- Once those answers are known, return operation.kind assemble-day, operation.companionId snow, the exact trainingLocation, the Kitchen and Sanctuary include flags, foodConstraints when supplied, and the Sanctuary mode and concern when included. The confirmation must explicitly ask permission to wake the party and prepare the real section assignments.
+- Once those answers are known, return operation.kind assemble-day, operation.companionId snow, the exact Training, Kitchen, and Sanctuary include flags, trainingLocation only when Training is included, foodConstraints when supplied, and the Sanctuary mode and concern when included. At least one realm must be included. The confirmation must explicitly ask permission to wake the party and prepare the real section assignments.
 - Rook or Ember may return prepare-training for home, gym, or conditioning. Mira may return prepare-training for recovery. Snow or the full party may prepare any training path. Ask for the path when it is missing.
 - Saffron may return prepare-kitchen when the Hunter directly asks her to roll, prepare, load, replace, or get today's meal ready. Snow or the party may do this only as part of assemble-day. Preserve stated ingredient boundaries exactly in foodConstraints.
 - Selah may return prepare-sanctuary when the Hunter asks her to prepare a Scripture session. Snow or the party may do this only as part of assemble-day. Ask for study versus stronghold and a primary concern when either is missing.
@@ -507,6 +507,7 @@ const responseSchema = {
           type: 'string',
           enum: ['', 'home', 'gym', 'conditioning', 'recovery'],
         },
+        includeTraining: { type: 'boolean' },
         includeKitchen: { type: 'boolean' },
         foodConstraints: { type: 'string', maxLength: 400 },
         includeSanctuary: { type: 'boolean' },
@@ -554,6 +555,7 @@ const responseSchema = {
         'kind',
         'companionId',
         'trainingLocation',
+        'includeTraining',
         'includeKitchen',
         'foodConstraints',
         'includeSanctuary',
@@ -1288,8 +1290,17 @@ function isObject(value) {
 }
 
 function isSameOriginRequest(request, url) {
+  const fetchSite = request.headers.get('sec-fetch-site');
+  if (fetchSite && fetchSite !== 'same-origin' && fetchSite !== 'none') return false;
   const origin = request.headers.get('origin');
-  return !origin || origin === url.origin;
+  if (origin) return origin === url.origin;
+  const referer = request.headers.get('referer');
+  if (!referer) return true;
+  try {
+    return new URL(referer).origin === url.origin;
+  } catch {
+    return false;
+  }
 }
 
 function validateChatPayload(payload) {
@@ -1767,6 +1778,10 @@ async function handleAiChat(request, env, url) {
     const operationTrainingLocation = trainingLocations.has(operation?.trainingLocation)
       ? operation.trainingLocation
       : undefined;
+    const operationIncludesTraining =
+      operationKind === 'prepare-training' || operation?.includeTraining === true;
+    const operationIncludesKitchen =
+      operationKind === 'prepare-kitchen' || operation?.includeKitchen === true;
     const operationIncludesSanctuary = operation?.includeSanctuary === true;
     const operationSanctuaryMode = sanctuaryModes.has(operation?.sanctuaryMode)
       ? operation.sanctuaryMode
@@ -1784,7 +1799,8 @@ async function handleAiChat(request, env, url) {
         operationSanctuaryMode &&
         operationPrimaryConcern) ||
       (operationKind === 'assemble-day' &&
-        operationTrainingLocation &&
+        (operationIncludesTraining || operationIncludesKitchen || operationIncludesSanctuary) &&
+        (!operationIncludesTraining || operationTrainingLocation) &&
         (!operationIncludesSanctuary || (operationSanctuaryMode && operationPrimaryConcern)));
     const operationProposal =
       payload.commandMode === 'propose' &&
@@ -1800,9 +1816,9 @@ async function handleAiChat(request, env, url) {
         ? {
             kind: operationKind,
             companionId: operationCompanionId,
+            includeTraining: operationIncludesTraining,
             trainingLocation: operationTrainingLocation,
-            includeKitchen:
-              operationKind === 'prepare-kitchen' || operation?.includeKitchen === true,
+            includeKitchen: operationIncludesKitchen,
             foodConstraints: String(operation.foodConstraints ?? '')
               .trim()
               .slice(0, 400),

@@ -15,6 +15,7 @@ import type {
   KitchenSession,
   LocalDateKey,
   PreparedKitchenOperation,
+  PreparedOperationState,
   PreparedSanctuaryOperation,
   PreparedTrainingOperation,
   SanctuarySession,
@@ -22,12 +23,32 @@ import type {
   TrainingSession,
 } from '@/types/game';
 
+const INTERRUPTED_PREPARATION_MS = 30_000;
+const INTERRUPTED_PREPARATION_NOTE =
+  'A previous preparation was interrupted. Existing assignments were preserved; ask Snow to retry any unfinished realm.';
+
 function emitOperationsChanged(date: LocalDateKey) {
   window.dispatchEvent(new CustomEvent('system:daily-operations-changed', { detail: { date } }));
 }
 
+function normalizeOperationRequest(request: CompanionOperationRequest): CompanionOperationRequest {
+  return {
+    ...request,
+    includeTraining:
+      typeof request.includeTraining === 'boolean'
+        ? request.includeTraining
+        : request.kind === 'prepare-training' || Boolean(request.trainingLocation),
+  };
+}
+
 function trainingCompanions(location: TrainingLocation): CompanionId[] {
   return location === 'recovery' ? ['mira'] : ['rook', 'ember'];
+}
+
+function trainingState(session: TrainingSession): PreparedOperationState {
+  if (session.status === 'completed') return 'completed';
+  if (session.status === 'active' || session.status === 'paused') return 'active';
+  return session.status === 'assigned' ? 'ready' : 'changed';
 }
 
 function describeTraining(session: TrainingSession): PreparedTrainingOperation {
@@ -39,6 +60,7 @@ function describeTraining(session: TrainingSession): PreparedTrainingOperation {
       label: circuit?.name ?? 'Home Circuit',
       detail: `${session.durationMinutes ?? 20}-minute ${circuit?.focus ?? 'home'} deployment`,
       companionIds: trainingCompanions(session.location),
+      state: trainingState(session),
     };
   }
   if (session.location === 'gym') {
@@ -49,6 +71,7 @@ function describeTraining(session: TrainingSession): PreparedTrainingOperation {
       label: workout?.name ?? 'Gym Deployment',
       detail: workout?.focus ?? 'Recommended gym operation ready for review',
       companionIds: trainingCompanions(session.location),
+      state: trainingState(session),
     };
   }
   if (session.location === 'recovery') {
@@ -58,6 +81,7 @@ function describeTraining(session: TrainingSession): PreparedTrainingOperation {
       label: session.recoveryProtocol ?? 'Stillpoint Protocol',
       detail: `${session.mobilityEstimatedMinutes ?? 15}-minute mobility and recovery assignment`,
       companionIds: trainingCompanions(session.location),
+      state: trainingState(session),
     };
   }
   return {
@@ -66,6 +90,7 @@ function describeTraining(session: TrainingSession): PreparedTrainingOperation {
     label: 'Conditioning Deployment',
     detail: 'Conditioning path prepared; choose the final modality when you enter the Hall',
     companionIds: trainingCompanions(session.location),
+    state: trainingState(session),
   };
 }
 
@@ -92,6 +117,7 @@ function describeKitchen(session: KitchenSession, constraints?: string): Prepare
     customRecipe: Boolean(session.customRecipeSnapshot),
     constraints: constraints?.trim() || undefined,
     companionIds: ['saffron'],
+    state: session.status === 'completed' ? 'completed' : 'ready',
   };
 }
 
@@ -114,6 +140,12 @@ function describeSanctuary(session: SanctuarySession): PreparedSanctuaryOperatio
     label: session.mode === 'study' ? 'Guided Scripture Study' : 'Stronghold Protocol',
     detail: `${primary.label}${session.secondaryConcern ? ` · ${getSanctuaryConcern(session.secondaryConcern).label}` : ''}`,
     companionIds: session.companionIds,
+    state:
+      session.status === 'completed'
+        ? 'completed'
+        : session.status === 'active'
+          ? 'active'
+          : 'changed',
   };
 }
 
@@ -154,7 +186,85 @@ async function missionCounts(date: LocalDateKey) {
 }
 
 export async function getDailyOperations(date: LocalDateKey) {
-  return db.dailyOperations.get(date);
+  let current = await db.dailyOperations.get(date);
+  if (!current) return undefined;
+  if (current.pendingProposal && typeof current.pendingProposal.includeTraining !== 'boolean') {
+    current = {
+      ...current,
+      pendingProposal: normalizeOperationRequest(current.pendingProposal),
+      updatedAt: new Date().toISOString(),
+    };
+    await db.dailyOperations.put(current);
+  }
+  if (
+    current.status === 'preparing' &&
+    (!Number.isFinite(Date.parse(current.updatedAt)) ||
+      Date.now() - Date.parse(current.updatedAt) >= INTERRUPTED_PREPARATION_MS)
+  ) {
+    const preparationNotes = Array.from(
+      new Set([...current.preparationNotes, INTERRUPTED_PREPARATION_NOTE]),
+    ).slice(-12);
+    current = {
+      ...current,
+      status: 'partial',
+      pendingProposal: undefined,
+      preparationNotes,
+      updatedAt: new Date().toISOString(),
+    };
+    await db.dailyOperations.put(current);
+    emitOperationsChanged(date);
+  }
+
+  const [counts, trainingSession, kitchenSession, sanctuarySession] = await Promise.all([
+    missionCounts(date),
+    current.training ? db.trainingSessions.get(current.training.sessionId) : undefined,
+    current.kitchen ? db.kitchenSessions.get(current.kitchen.sessionId) : undefined,
+    current.sanctuary ? db.sanctuarySessions.get(current.sanctuary.sessionId) : undefined,
+  ]);
+  const trainingState: PreparedOperationState | undefined = current.training
+    ? !trainingSession || trainingSession.location !== current.training.location
+      ? 'changed'
+      : trainingSession.status === 'completed'
+        ? 'completed'
+        : trainingSession.status === 'active' || trainingSession.status === 'paused'
+          ? 'active'
+          : trainingSession.status === 'assigned'
+            ? 'ready'
+            : 'changed'
+    : undefined;
+  const kitchenState: PreparedOperationState | undefined = current.kitchen
+    ? !kitchenSession || kitchenSession.recipeId !== current.kitchen.recipeId
+      ? 'changed'
+      : kitchenSession.status === 'completed'
+        ? 'completed'
+        : kitchenSession.status === 'assigned'
+          ? 'ready'
+          : 'changed'
+    : undefined;
+  const sanctuaryState: PreparedOperationState | undefined = current.sanctuary
+    ? !sanctuarySession || sanctuarySession.mode !== current.sanctuary.mode
+      ? 'changed'
+      : sanctuarySession.status === 'completed'
+        ? 'completed'
+        : sanctuarySession.status === 'active'
+          ? 'active'
+          : 'changed'
+    : undefined;
+  const reconciledStates = [trainingState, kitchenState, sanctuaryState].filter(Boolean);
+  const hasChangedAssignment = reconciledStates.includes('changed');
+  const reconciliationNote =
+    'A prepared assignment changed outside Party Operations. Open the marked realm to review its current state.';
+  return {
+    ...current,
+    status: hasChangedAssignment && current.status === 'ready' ? 'partial' : current.status,
+    ...counts,
+    training: current.training ? { ...current.training, state: trainingState } : undefined,
+    kitchen: current.kitchen ? { ...current.kitchen, state: kitchenState } : undefined,
+    sanctuary: current.sanctuary ? { ...current.sanctuary, state: sanctuaryState } : undefined,
+    preparationNotes: hasChangedAssignment
+      ? Array.from(new Set([...current.preparationNotes, reconciliationNote])).slice(-12)
+      : current.preparationNotes,
+  };
 }
 
 export async function stageCompanionOperation(
@@ -162,6 +272,7 @@ export async function stageCompanionOperation(
   proposal: CompanionOperationRequest,
   conversationId?: string,
 ) {
+  proposal = normalizeOperationRequest(proposal);
   const now = new Date().toISOString();
   const previous = await db.dailyOperations.get(date);
   const counts = await missionCounts(date);
@@ -211,6 +322,20 @@ export async function prepareCompanionOperation(
   request: CompanionOperationRequest,
   conversationId?: string,
 ) {
+  request = normalizeOperationRequest(request);
+  const wantsTraining =
+    request.kind === 'prepare-training' ||
+    (request.kind === 'assemble-day' &&
+      (request.includeTraining ?? Boolean(request.trainingLocation)));
+  const wantsKitchen =
+    request.kind === 'prepare-kitchen' ||
+    (request.kind === 'assemble-day' && request.includeKitchen);
+  const wantsSanctuary =
+    request.kind === 'prepare-sanctuary' ||
+    (request.kind === 'assemble-day' && request.includeSanctuary);
+  if (!wantsTraining && !wantsKitchen && !wantsSanctuary) {
+    throw new Error('Choose at least one realm before waking the party.');
+  }
   const now = new Date().toISOString();
   const previous = await db.dailyOperations.get(date);
   const preparing: DailyOperationsRecord = {
@@ -236,14 +361,6 @@ export async function prepareCompanionOperation(
   let training = preparing.training;
   let kitchen = preparing.kitchen;
   let sanctuary = preparing.sanctuary;
-  const wantsTraining = request.kind === 'assemble-day' || request.kind === 'prepare-training';
-  const wantsKitchen =
-    request.kind === 'prepare-kitchen' ||
-    (request.kind === 'assemble-day' && request.includeKitchen);
-  const wantsSanctuary =
-    request.kind === 'prepare-sanctuary' ||
-    (request.kind === 'assemble-day' && request.includeSanctuary);
-
   if (wantsTraining) {
     if (!request.trainingLocation) {
       notes.push('Training Hall: Snow still needs a deployment path.');

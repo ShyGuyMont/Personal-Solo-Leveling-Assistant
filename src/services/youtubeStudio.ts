@@ -27,9 +27,7 @@ export interface YouTubeStudioSyncResult {
     note?: string;
   };
   snapshots: Array<YouTubeStudioSyncResult['snapshot']>;
-  topVideos: Array<
-    Omit<CreatorVideoInsight, 'id' | 'capturedAt'>
-  >;
+  topVideos: Array<Omit<CreatorVideoInsight, 'id' | 'capturedAt'>>;
 }
 
 export class YouTubeStudioError extends Error {

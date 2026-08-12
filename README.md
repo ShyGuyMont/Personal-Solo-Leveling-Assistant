@@ -96,6 +96,21 @@ Historical video insights remain on-device, travel in Archive Shield saves, and 
 edit, comment, delete, or account-management access. Google credentials remain encrypted behind
 the private gateway and never enter the browser save or OpenAI context.
 
+## Version 7.7.1 · System Integrity Sweep
+
+The full System has been audited across progression, Party Operations, AI commands, persistence,
+mobile interaction, update behavior, and private server boundaries. The Daily Operations board now
+reconciles with the actual Training, Kitchen, Sanctuary, and mission records instead of preserving a
+stale preparation snapshot. Completed work is identified honestly, interrupted preparation recovers
+cleanly, and Snow can assemble only the realms the Hunter requests—including leaving Training
+untouched.
+
+Quick Link preserves mobile microphone activation from the original tap, prevents rapid duplicate
+operation execution, and keeps staged permission visible across mode changes. Archive Shield now
+validates nested Party Operations data and migrates earlier Version 7.7 proposals safely. Private AI
+write endpoints reject cross-site browser submissions more defensively, while the original offline
+campaign, explicit confirmations, reward boundaries, and local data ownership remain unchanged.
+
 ## Version 7.7.0 · Party Operations
 
 Snow and the specialist companions can now prepare the actual daily realms together without replacing the System's original rituals or granting themselves completion authority.
@@ -401,36 +416,24 @@ pnpm run icons
 
 `pnpm run test:simulator` verifies deterministic pacing at 7, 30, and 90 days, one year, and five years across several completion rates. Simulator code is not imported into the production app. `pnpm run icons` regenerates the original local icons without downloading art.
 
-The production output is `dist/`. Relative assets and hash routing allow it to run from a GitHub repository subpath.
+The production output is `dist/`. Relative assets and hash routing allow it to run from the private Sites address.
 
-## Put it on an iPhone with GitHub Pages
+## Put it on an iPhone with private Sites hosting
 
-An iPhone cannot install this app directly from the Windows project folder. Safari requires an HTTPS address. The included GitHub Pages workflow supplies that address without a paid host.
+The production app is published through the private Sites project and requires the owner’s sign-in.
+Open its HTTPS address in Safari, complete the private sign-in, tap Safari’s **Share** button, choose
+**Add to Home Screen**, and tap **Add**. Launch The System from that icon.
 
-1. Create a new, empty GitHub repository. Do not add a README or license during repository creation.
-2. Open a terminal in this project folder and push the project:
+After one successful online load, the app shell and complete core campaign work offline. Campaign
+data stays on that iPhone—not in the source repository or hosting service. AI Headquarters and
+YouTube Studio synchronization are optional online features. Export a save before clearing Safari
+data or changing phones.
 
-   ```bash
-   git init
-   git add .
-   git commit -m "Initial phone-ready release"
-   git branch -M main
-   git remote add origin https://github.com/YOUR-NAME/YOUR-REPOSITORY.git
-   git push -u origin main
-   ```
-
-3. On GitHub, open **Settings → Pages**.
-4. Under **Build and deployment**, set **Source** to **GitHub Actions**.
-5. Open **Actions** and wait for “Deploy The System to GitHub Pages” to finish.
-6. Open the deployment URL on the iPhone in Safari. It will resemble `https://YOUR-NAME.github.io/YOUR-REPOSITORY/`.
-7. Tap Safari’s **Share** button, choose **Add to Home Screen**, and tap **Add**.
-8. Launch The System from its Home Screen icon.
-
-After one successful online load, the app shell works offline. Campaign data stays on that iPhone—not in GitHub or on a server. Export a save before clearing Safari data or changing phones.
-
-If the workflow is unavailable, enable Actions under **Settings → Actions → General**. If the site is blank, confirm Pages uses GitHub Actions, confirm the workflow uploaded `dist/`, and hard-refresh once after deployment.
-
-When updating an existing installation, commit and push the changed project through GitHub Desktop, wait for the Pages workflow to succeed, then open the app online once. Open **Update Center** and choose **Check for update** if the prompt does not appear automatically. The service worker installs the release without deleting or re-adding the home-screen app. Earlier saves are migrated automatically to the version 10 database, but exporting through Archive Shield before any major update is still recommended.
+When a new private Sites release is published, open the app online once. Use **Update Center → Check
+for update** if the prompt does not appear automatically. The service worker installs the release
+without deleting or re-adding the home-screen app, and earlier saves migrate automatically to the
+current Version 23 format. Exporting through Archive Shield before any major update is still
+recommended.
 
 ## Save, restore, and reset
 
@@ -495,6 +498,6 @@ All campaign data and private notes stay in IndexedDB unless explicitly exported
 
 Imported JSON is size-limited, parsed as data rather than code, rejects prototype-related property names, validates required data and impossible negative values, and never becomes HTML. A restrictive Content Security Policy is declared in `index.html`.
 
-Run `pnpm audit` before releases and review dependency changes in `pnpm-lock.yaml`. A compromised phone, browser extension, exported-file location, or GitHub account is outside the protection an offline web app can provide.
+Run `pnpm audit` before releases and review dependency changes in `pnpm-lock.yaml`. A compromised phone, browser extension, exported-file location, hosting sign-in, OpenAI account, or connected Google account is outside the protection an offline web app can provide.
 
 The app does not diagnose health, prescribe dangerous exercise, use monetary penalties, or connect spiritual or sexual setbacks to exercise punishment. Recovery language is constructive and non-shaming. Static iPhone PWAs cannot guarantee scheduled background notifications, so the app keeps notification permissions off and does not promise reminders it cannot reliably deliver.

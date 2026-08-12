@@ -38,12 +38,7 @@ import {
 import { Link } from '@/router';
 import { useGameStore } from '@/store/useGameStore';
 import { CATEGORY_LABELS } from '@/config/missions';
-import type {
-  ArcMilestone,
-  CampaignArc,
-  CompanionId,
-  CompanionQuestProgress,
-} from '@/types/game';
+import type { ArcMilestone, CampaignArc, CompanionId, CompanionQuestProgress } from '@/types/game';
 
 type ArcBundle = { arc: CampaignArc; milestones: ArcMilestone[] };
 
@@ -315,8 +310,7 @@ export function CampaignsPage() {
                     <img src={getCompanionImage(companion.image)} alt="" />
                     <div>
                       <span>
-                        {arc.status.toUpperCase()} ·{' '}
-                        {ARC_CATEGORY_LABELS[arc.category]}
+                        {arc.status.toUpperCase()} · {ARC_CATEGORY_LABELS[arc.category]}
                       </span>
                       <h2>{arc.name}</h2>
                       <p>{arc.purpose}</p>

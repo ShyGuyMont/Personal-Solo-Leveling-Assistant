@@ -55,6 +55,38 @@ describe('save validation and recovery', () => {
     await expect(prepareSaveImport(asFile(save))).rejects.toThrow(/impossible totalXp/);
   });
 
+  it('migrates a staged Party Operations proposal from an earlier 7.7 save', async () => {
+    const save = await createSaveFile();
+    const now = new Date().toISOString();
+    save.data.dailyOperations = [
+      {
+        id: '2026-08-12',
+        date: '2026-08-12',
+        status: 'awaiting-confirmation',
+        sourceCompanionId: 'snow',
+        pendingProposal: {
+          kind: 'assemble-day',
+          companionId: 'snow',
+          trainingLocation: 'home',
+          includeKitchen: false,
+          includeSanctuary: false,
+          summary: 'Prepare Training.',
+          confirmation: 'Prepare the real Training assignment?',
+        },
+        pendingMissionCount: 5,
+        completedMissionCount: 0,
+        preparationNotes: [],
+        createdAt: now,
+        updatedAt: now,
+      },
+    ];
+    save.checksum = await digest(save.data);
+
+    const prepared = await prepareSaveImport(asFile(save));
+    const operation = prepared.save.data.dailyOperations[0] as Record<string, unknown>;
+    expect(operation.pendingProposal).toMatchObject({ includeTraining: true });
+  });
+
   it('retains only the five newest automatic snapshots', async () => {
     for (let index = 0; index < 7; index += 1) {
       await createLocalSnapshot('manual');
@@ -499,6 +531,34 @@ describe('save validation and recovery', () => {
     ];
     save.checksum = await digest(save.data);
     await expect(prepareSaveImport(asFile(save))).rejects.toThrow(/Treasury ledger entry/i);
+  });
+
+  it('rejects malformed nested Party Operations assignments even when the checksum matches', async () => {
+    const save = await createSaveFile();
+    const now = new Date().toISOString();
+    save.data.dailyOperations = [
+      {
+        id: '2026-08-12',
+        date: '2026-08-12',
+        status: 'ready',
+        sourceCompanionId: 'snow',
+        training: {
+          sessionId: '2026-08-12',
+          location: 'teleportation',
+          label: 'Impossible path',
+          detail: 'This should never load.',
+          companionIds: ['rook'],
+        },
+        pendingMissionCount: 5,
+        completedMissionCount: 0,
+        preparationNotes: [],
+        createdAt: now,
+        updatedAt: now,
+      },
+    ];
+    save.checksum = await digest(save.data);
+
+    await expect(prepareSaveImport(asFile(save))).rejects.toThrow(/prepared Training/i);
   });
 
   it('rejects impossible Sanctuary credit even when the checksum matches', async () => {

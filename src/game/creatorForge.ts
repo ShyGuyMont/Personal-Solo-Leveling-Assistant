@@ -154,9 +154,9 @@ export async function saveCreatorStudioIntelligence(input: {
   topVideos: Array<Omit<CreatorVideoInsight, 'id' | 'capturedAt'>>;
 }) {
   const capturedAt = new Date().toISOString();
-  const snapshots = input.snapshots.slice(0, 3).map((snapshot) =>
-    cleanCreatorSnapshot({ ...snapshot, source: 'youtube-api' }, capturedAt),
-  );
+  const snapshots = input.snapshots
+    .slice(0, 3)
+    .map((snapshot) => cleanCreatorSnapshot({ ...snapshot, source: 'youtube-api' }, capturedAt));
   if (!snapshots.some((snapshot) => snapshot.periodDays === 28)) {
     throw new Error('The Studio synchronization did not include its recent channel signal.');
   }
@@ -168,7 +168,8 @@ export async function saveCreatorStudioIntelligence(input: {
       videoId: cleanText(video.videoId, 100),
       title: cleanText(video.title, 200),
       publishedAt:
-        typeof video.publishedAt === 'string' && Number.isFinite(new Date(video.publishedAt).getTime())
+        typeof video.publishedAt === 'string' &&
+        Number.isFinite(new Date(video.publishedAt).getTime())
           ? video.publishedAt
           : undefined,
       periodDays: Math.max(1, Math.min(3650, Math.round(video.periodDays || 365))),
@@ -180,16 +181,11 @@ export async function saveCreatorStudioIntelligence(input: {
       comments: cleanOptionalNumber(video.comments),
       capturedAt,
     }));
-  await db.transaction(
-    'rw',
-    db.creatorSnapshots,
-    db.creatorVideoInsights,
-    async () => {
-      await db.creatorSnapshots.bulkPut(snapshots);
-      await db.creatorVideoInsights.clear();
-      if (topVideos.length) await db.creatorVideoInsights.bulkPut(topVideos);
-    },
-  );
+  await db.transaction('rw', db.creatorSnapshots, db.creatorVideoInsights, async () => {
+    await db.creatorSnapshots.bulkPut(snapshots);
+    await db.creatorVideoInsights.clear();
+    if (topVideos.length) await db.creatorVideoInsights.bulkPut(topVideos);
+  });
   window.dispatchEvent(new CustomEvent('system:creator-forge-changed'));
   return { snapshots, topVideos };
 }
@@ -251,15 +247,33 @@ export async function saveCreatorCampaign(
   const existingTitles = new Set(
     (await db.creatorProjects.toArray()).map((project) => project.title.trim().toLowerCase()),
   );
+  const now = new Date().toISOString();
   const created: CreatorProject[] = [];
   for (const candidate of candidates) {
-    const normalizedTitle = candidate.title.trim().toLowerCase();
+    const title = cleanText(candidate.title, 180);
+    const normalizedTitle = title.toLowerCase();
     if (!normalizedTitle || existingTitles.has(normalizedTitle)) continue;
-    const project = await saveCreatorProject({ ...candidate, status: 'idea' });
+    const project: CreatorProject = {
+      id: createId('creator-project'),
+      title,
+      platform: candidate.platform,
+      contentType: candidate.contentType,
+      status: 'idea',
+      pillar: cleanText(candidate.pillar, 200),
+      hook: cleanText(candidate.hook, 1000),
+      audiencePromise: cleanText(candidate.audiencePromise, 1000),
+      nextAction: cleanText(candidate.nextAction, 1000),
+      notes: typeof candidate.notes === 'string' ? candidate.notes.trim().slice(0, 4000) : '',
+      createdAt: now,
+      updatedAt: now,
+    };
     existingTitles.add(normalizedTitle);
     created.push(project);
   }
-  if (!created.length) throw new Error('Every campaign release is already on the Creator Forge board.');
+  if (!created.length)
+    throw new Error('Every campaign release is already on the Creator Forge board.');
+  await db.creatorProjects.bulkPut(created);
+  window.dispatchEvent(new CustomEvent('system:creator-forge-changed'));
   return created;
 }
 
@@ -273,12 +287,14 @@ function buildReawakeningBriefing(
   const quarter = snapshotsByPeriod[90];
   const year = snapshotsByPeriod[365];
   const strongest = videoInsights[0];
-  const currentFocus = settings.currentArcFocus || strongest?.title || 'your clearest audience promise';
+  const currentFocus =
+    settings.currentArcFocus || strongest?.title || 'your clearest audience promise';
   if (!recent) {
     return {
       state: 'unmapped',
       headline: 'The comeback has no evidence map yet.',
-      diagnosis: 'Connect Studio or enter a snapshot so Vesper can separate a quiet season from a weak idea.',
+      diagnosis:
+        'Connect Studio or enter a snapshot so Vesper can separate a quiet season from a weak idea.',
       focus: `Define the next arc around ${currentFocus}.`,
       nextAction: 'Synchronize one real channel baseline.',
       proof: [],
@@ -301,7 +317,9 @@ function buildReawakeningBriefing(
       focus: strongest
         ? `Recover the audience promise that made “${strongest.title}” move, then express it through ${currentFocus}.`
         : `Build a clean return around ${currentFocus} and give the audience a reason to come back twice.`,
-      nextAction: activeProjects[0]?.nextAction || 'Choose the first return video and write its opening 30 seconds.',
+      nextAction:
+        activeProjects[0]?.nextAction ||
+        'Choose the first return video and write its opening 30 seconds.',
       proof,
     };
   }
@@ -312,7 +330,8 @@ function buildReawakeningBriefing(
       diagnosis:
         'The last month cooled, but the longer window gives Vesper enough evidence to build from proven attention instead of starting blind.',
       focus: `Turn ${currentFocus} into one anchor release and one fast follow-up.`,
-      nextAction: activeProjects[0]?.nextAction || 'Lock the anchor release title and recording date.',
+      nextAction:
+        activeProjects[0]?.nextAction || 'Lock the anchor release title and recording date.',
       proof,
     };
   }
@@ -322,7 +341,9 @@ function buildReawakeningBriefing(
     diagnosis:
       'Recent publishing activity exists, so the next campaign should tighten the promise and sequence rather than reset the channel identity.',
     focus: `Build the next two releases around ${currentFocus}.`,
-    nextAction: activeProjects[0]?.nextAction || 'Choose the next release and define its smallest physical move.',
+    nextAction:
+      activeProjects[0]?.nextAction ||
+      'Choose the next release and define its smallest physical move.',
     proof,
   };
 }
