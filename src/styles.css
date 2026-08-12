@@ -20681,6 +20681,84 @@ html[data-motion='reduced'] .header-quick-link > i {
   font: 750 1.1rem/1.2 var(--display-font);
 }
 
+.creator-studio-link {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 17px 18px;
+  border: 1px solid color-mix(in srgb, var(--creator-accent) 22%, var(--panel-border));
+  border-radius: 16px;
+  background:
+    radial-gradient(
+      circle at 3% 50%,
+      color-mix(in srgb, var(--creator-accent) 10%, transparent),
+      transparent 35%
+    ),
+    color-mix(in srgb, var(--creator-accent) 2%, var(--panel-strong));
+}
+
+.creator-studio-link.is-connected {
+  border-color: color-mix(in srgb, var(--creator-accent) 58%, var(--panel-border));
+  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--creator-accent) 72%, transparent);
+}
+
+.creator-studio-link__identity {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  min-width: 0;
+}
+
+.creator-studio-link__identity > div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.creator-studio-link__icon {
+  display: grid;
+  flex: 0 0 auto;
+  width: 46px;
+  height: 46px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--creator-accent) 44%, var(--panel-border));
+  border-radius: 14px;
+  color: var(--creator-accent);
+  background: color-mix(in srgb, var(--creator-accent) 8%, var(--panel));
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--creator-accent) 8%, transparent);
+}
+
+.creator-studio-link small {
+  color: var(--creator-accent);
+  font: 700 0.64rem/1.2 var(--display-font);
+  letter-spacing: 0.12em;
+}
+
+.creator-studio-link strong {
+  overflow: hidden;
+  font: 750 1rem/1.25 var(--display-font);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.creator-studio-link p {
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.creator-studio-link__actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 9px;
+  align-items: center;
+}
+
+.creator-disconnect-button {
+  color: var(--muted);
+}
+
 .creator-file-button {
   position: relative;
   cursor: pointer;
@@ -20938,6 +21016,20 @@ html[data-motion='reduced'] .header-quick-link > i {
 
   .creator-metric-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .creator-studio-link,
+  .creator-studio-link__actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .creator-studio-link__actions > button {
+    width: 100%;
+  }
+
+  .creator-studio-link strong {
+    white-space: normal;
   }
 
   .creator-form,

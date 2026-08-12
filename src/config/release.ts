@@ -1,4 +1,4 @@
-export const APP_VERSION = '7.2.0';
+export const APP_VERSION = '7.3.0';
 export const DATABASE_SCHEMA_VERSION = 19;
 export const SAVE_FORMAT_VERSION = 19;
 
@@ -9,6 +9,18 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 7.3.0 · Studio Link',
+    detail:
+      'Creator Forge gains a private read-only YouTube Studio connection so Vesper can reason from fresh channel signals without receiving Google credentials or gaining control of the channel.',
+    points: [
+      'Secure Google authorization connects the signed-in Hunter to one YouTube channel with only channel-read and analytics-read permissions; uploads, edits, comments, deletions, and account management remain impossible.',
+      'One-tap Studio synchronization captures the latest 28-day views, watch hours, average view duration, upload count, and current subscriber signal into the existing on-device Creator Forge history.',
+      'Vesper can discuss the synchronized baseline alongside active projects, hooks, audience promises, publishing momentum, and weekly targets while clearly separating supplied facts from strategy hypotheses.',
+      'Google refresh access is encrypted behind the private gateway, never enters the browser save or OpenAI context, and can be revoked with a visible Disconnect control while existing local snapshots remain yours.',
+      'Manual entry and CSV import remain available for reach impressions, thumbnail click-through rate, historical backfill, or fully offline creator tracking.',
+    ],
+  },
   {
     title: 'Version 7.2.0 · Creator Awakening',
     detail:

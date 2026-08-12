@@ -5,13 +5,17 @@ import {
   CirclePlay,
   FileUp,
   Flame,
+  Link2,
   MessageCircle,
   Plus,
   Radio,
+  RefreshCw,
   Save,
+  ShieldCheck,
   Sparkles,
   Target,
   TrendingUp,
+  Unplug,
   Users,
   Video,
 } from 'lucide-react';
@@ -27,7 +31,19 @@ import {
   type CreatorForgeSummary,
 } from '@/game/creatorForge';
 import { Link } from '@/router';
-import type { CreatorContentType, CreatorPlatform, CreatorProjectStatus } from '@/types/game';
+import {
+  beginYouTubeStudioConnection,
+  disconnectYouTubeStudio,
+  getYouTubeStudioStatus,
+  syncYouTubeStudio,
+  type YouTubeStudioStatus,
+} from '@/services/youtubeStudio';
+import type {
+  CreatorContentType,
+  CreatorPlatform,
+  CreatorProjectStatus,
+  CreatorSnapshotSource,
+} from '@/types/game';
 
 const PIPELINE: Array<{ id: CreatorProjectStatus; label: string }> = [
   { id: 'idea', label: 'Idea' },
@@ -52,12 +68,19 @@ function formatDuration(seconds: number | undefined) {
   return `${minutes}:${remainder.toString().padStart(2, '0')}`;
 }
 
+function formatSnapshotSource(source: CreatorSnapshotSource) {
+  if (source === 'youtube-api') return 'secure Studio link';
+  return source.replace('-', ' ');
+}
+
 export function CreatorForgePage() {
   const vesper = getCompanion('haven');
   const cipher = getCompanion('cipher');
   const [summary, setSummary] = useState<CreatorForgeSummary>();
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
+  const [studioAction, setStudioAction] = useState(false);
+  const [studioLink, setStudioLink] = useState<YouTubeStudioStatus>();
   const [showSnapshotForm, setShowSnapshotForm] = useState(false);
   const [showProjectForm, setShowProjectForm] = useState(false);
   const [snapshot, setSnapshot] = useState({
@@ -94,12 +117,48 @@ export function CreatorForgePage() {
     setSummary(await getCreatorForgeSummary());
   }, []);
 
+  const refreshStudioLink = useCallback(async () => {
+    try {
+      setStudioLink(await getYouTubeStudioStatus());
+    } catch {
+      setStudioLink({ configured: false, connected: false, redirectUri: '', scopes: [] });
+    }
+  }, []);
+
   useEffect(() => {
     void refresh();
+    void refreshStudioLink();
     const onChange = () => void refresh();
     window.addEventListener('system:creator-forge-changed', onChange);
     return () => window.removeEventListener('system:creator-forge-changed', onChange);
-  }, [refresh]);
+  }, [refresh, refreshStudioLink]);
+
+  useEffect(() => {
+    const query = window.location.hash.split('?')[1];
+    const result = query ? new URLSearchParams(query).get('youtube') : null;
+    if (!result) return;
+    const messages: Record<string, string> = {
+      connected: 'YouTube Studio authorized. Run the first secure sync when you are ready.',
+      cancelled: 'Google authorization was cancelled. Nothing was connected.',
+      'channel-missing': 'That Google account does not have a YouTube channel to connect.',
+      'youtube-channel-missing': 'That Google account does not have a YouTube channel to connect.',
+      'state-invalid': 'That Google authorization window expired. Start the connection again.',
+      'setup-required': 'The private Google authorization settings still need to be completed.',
+      'refresh-token-missing':
+        'Google did not grant a lasting connection. Start the connection again.',
+      'youtube-reconnect-required': 'Google authorization expired. Reconnect YouTube Studio.',
+      'youtube-google-error':
+        'Google could not complete authorization. Please try the connection again.',
+      'authorization-failed': 'YouTube Studio authorization could not be completed.',
+    };
+    setNotice(messages[result] ?? 'YouTube Studio authorization could not be completed.');
+    window.history.replaceState(
+      null,
+      '',
+      `${window.location.pathname}${window.location.search}#/creator-forge`,
+    );
+    void refreshStudioLink();
+  }, [refreshStudioLink]);
 
   const projectColumns = useMemo(
     () =>
@@ -185,6 +244,50 @@ export function CreatorForgePage() {
       setNotice(error instanceof Error ? error.message : 'That Studio CSV could not be read.');
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function handleStudioSync() {
+    if (!summary || studioAction) return;
+    setStudioAction(true);
+    try {
+      const result = await syncYouTubeStudio();
+      await saveCreatorSnapshot(result.snapshot);
+      if (!summary.settings.channelName || !summary.settings.channelUrl) {
+        await saveCreatorSettings({
+          ...summary.settings,
+          channelName: summary.settings.channelName || result.channelTitle,
+          channelUrl: summary.settings.channelUrl || result.channelUrl,
+        });
+      }
+      setNotice(
+        `${result.channelTitle} synchronized securely. Vesper can use the new 28-day signal immediately.`,
+      );
+      await Promise.all([refresh(), refreshStudioLink()]);
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : 'YouTube Studio could not synchronize.');
+    } finally {
+      setStudioAction(false);
+    }
+  }
+
+  async function handleStudioDisconnect() {
+    if (studioAction) return;
+    const confirmed = window.confirm(
+      'Disconnect YouTube Studio? Existing Creator Forge snapshots stay on this device, but automatic refresh access will be revoked.',
+    );
+    if (!confirmed) return;
+    setStudioAction(true);
+    try {
+      await disconnectYouTubeStudio();
+      setNotice(
+        'YouTube Studio disconnected. Existing local snapshots remain available to Creator Forge.',
+      );
+      await refreshStudioLink();
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : 'YouTube Studio could not disconnect.');
+    } finally {
+      setStudioAction(false);
     }
   }
 
@@ -297,7 +400,7 @@ export function CreatorForgePage() {
             </p>
           </div>
           <span className="creator-source-badge">
-            {latest?.source.replace('-', ' ') ?? 'awaiting sync'}
+            {latest ? formatSnapshotSource(latest.source) : 'awaiting sync'}
           </span>
         </header>
         <div className="creator-metric-grid">
@@ -332,6 +435,67 @@ export function CreatorForgePage() {
             <strong>{formatDuration(latest?.averageViewDurationSeconds)}</strong>
           </article>
         </div>
+        <section
+          className={`creator-studio-link ${studioLink?.connected ? 'is-connected' : ''}`}
+          aria-label="YouTube Studio read-only connection"
+        >
+          <div className="creator-studio-link__identity">
+            <span className="creator-studio-link__icon">
+              {studioLink?.connected ? <ShieldCheck size={22} /> : <Link2 size={22} />}
+            </span>
+            <div>
+              <small>SECURE STUDIO LINK · READ ONLY</small>
+              <strong>
+                {studioLink?.connected
+                  ? studioLink.channelTitle || 'YouTube Studio connected'
+                  : studioLink?.configured
+                    ? 'Connect your YouTube channel'
+                    : 'Google authorization setup required'}
+              </strong>
+              <p>
+                {studioLink?.connected
+                  ? studioLink.lastSyncAt
+                    ? `Last refreshed ${new Date(studioLink.lastSyncAt).toLocaleString()}.`
+                    : 'Connection secured. Your first analytics refresh is ready.'
+                  : studioLink?.configured
+                    ? 'Google will show the exact analytics permissions before anything is connected.'
+                    : 'The private bridge is built. Complete the one-time Google credential step to activate it.'}
+              </p>
+            </div>
+          </div>
+          <div className="creator-studio-link__actions">
+            {studioLink?.connected ? (
+              <>
+                <button
+                  type="button"
+                  className="primary-button"
+                  onClick={() => void handleStudioSync()}
+                  disabled={studioAction}
+                >
+                  <RefreshCw size={18} className={studioAction ? 'is-spinning' : ''} />
+                  {studioAction ? 'Synchronizing…' : 'Sync Studio now'}
+                </button>
+                <button
+                  type="button"
+                  className="secondary-button creator-disconnect-button"
+                  onClick={() => void handleStudioDisconnect()}
+                  disabled={studioAction}
+                >
+                  <Unplug size={17} /> Disconnect
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                className="primary-button"
+                onClick={beginYouTubeStudioConnection}
+                disabled={!studioLink?.configured || studioAction}
+              >
+                <Link2 size={18} /> Connect YouTube Studio
+              </button>
+            )}
+          </div>
+        </section>
         <div className="creator-sync-actions">
           <button
             type="button"
@@ -359,9 +523,9 @@ export function CreatorForgePage() {
           </a>
         </div>
         <p className="creator-privacy-note">
-          CSV and manual sync are fully local: the app never receives your Google password. A direct
-          read-only Studio authorization bridge can be activated later with your own Google OAuth
-          client.
+          Direct synchronization requests analytics-only access. The System never receives your
+          Google password, cannot modify your channel, and never sends Google authorization tokens
+          to Vesper or OpenAI. CSV and manual snapshots remain available and fully local.
         </p>
 
         {showSnapshotForm && (

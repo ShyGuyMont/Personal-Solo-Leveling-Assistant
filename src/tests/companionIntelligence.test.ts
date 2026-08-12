@@ -16,6 +16,7 @@ interface Soulprint {
 
 interface CompanionIntelligenceModule {
   COMPANION_INTELLIGENCE_VERSION: string;
+  YOUTUBE_READONLY_SCOPES: string[];
   companionIds: string[];
   companionProfiles: Record<string, Soulprint>;
   aiVoiceNames: string[];
@@ -32,6 +33,11 @@ interface CompanionIntelligenceModule {
     payload: { audience: string; message: string },
     env?: Record<string, string>,
   ) => { route: string; model: string; reasoningEffort: string };
+  buildYouTubeAnalyticsWindow: (now?: Date) => {
+    startDate: string;
+    endDate: string;
+    periodDays: number;
+  };
   default: {
     fetch: (request: Request, env: Record<string, unknown>) => Promise<Response>;
   };
@@ -49,6 +55,33 @@ afterEach(() => {
 });
 
 describe('Companion Soulprint intelligence', () => {
+  it('keeps the YouTube Studio link strictly read-only', () => {
+    expect(intelligence.YOUTUBE_READONLY_SCOPES).toEqual([
+      'https://www.googleapis.com/auth/youtube.readonly',
+      'https://www.googleapis.com/auth/yt-analytics.readonly',
+    ]);
+    expect(intelligence.YOUTUBE_READONLY_SCOPES.join(' ')).not.toMatch(
+      /youtube\.upload|youtube\.force-ssl|youtubepartner|monetary/i,
+    );
+  });
+
+  it('builds an inclusive 28-day Studio analytics window across month boundaries', () => {
+    expect(intelligence.buildYouTubeAnalyticsWindow(new Date('2026-08-12T23:59:59.000Z'))).toEqual({
+      startDate: '2026-07-16',
+      endDate: '2026-08-12',
+      periodDays: 28,
+    });
+  });
+
+  it('requires an authenticated Sites owner before revealing Studio link status', async () => {
+    const response = await intelligence.default.fetch(
+      new Request('https://system.test/api/youtube/status'),
+      {},
+    );
+    expect(response.status).toBe(401);
+    expect(await response.json()).toMatchObject({ code: 'authentication-required' });
+  });
+
   it('gives all ten companions complete and distinct identity directions', () => {
     expect(Object.keys(intelligence.companionProfiles)).toEqual(intelligence.companionIds);
     expect(intelligence.companionIds).toHaveLength(10);

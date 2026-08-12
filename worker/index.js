@@ -4,6 +4,13 @@ const jsonHeaders = {
   'x-content-type-options': 'nosniff',
 };
 
+export const YOUTUBE_READONLY_SCOPES = [
+  'https://www.googleapis.com/auth/youtube.readonly',
+  'https://www.googleapis.com/auth/yt-analytics.readonly',
+];
+
+const YOUTUBE_OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
+
 export const COMPANION_INTELLIGENCE_VERSION = 'creator-awakening-3';
 
 const COUNSEL_SIGNALS =
@@ -534,6 +541,448 @@ const responseSchema = {
 
 function json(payload, status = 200) {
   return new Response(JSON.stringify(payload), { status, headers: jsonHeaders });
+}
+
+function authenticatedUserId(request) {
+  return request.headers.get('oai-authenticated-user-id')?.trim() || undefined;
+}
+
+function youtubeRedirectUri(url) {
+  return `${url.origin}/api/youtube/callback`;
+}
+
+function youtubeConfigured(env) {
+  return Boolean(
+    env.DB &&
+      env.GOOGLE_CLIENT_ID &&
+      env.GOOGLE_CLIENT_SECRET &&
+      env.YOUTUBE_TOKEN_ENCRYPTION_KEY,
+  );
+}
+
+function appYoutubeRedirect(url, result) {
+  const target = new URL('/', url.origin);
+  target.hash = `/creator-forge?youtube=${encodeURIComponent(result)}`;
+  return Response.redirect(target.toString(), 302);
+}
+
+function bytesToBase64Url(bytes) {
+  let binary = '';
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+}
+
+function base64UrlToBytes(value) {
+  const padded = value.replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(value.length / 4) * 4, '=');
+  const binary = atob(padded);
+  return Uint8Array.from(binary, (character) => character.charCodeAt(0));
+}
+
+function randomBase64Url(size = 32) {
+  const bytes = new Uint8Array(size);
+  crypto.getRandomValues(bytes);
+  return bytesToBase64Url(bytes);
+}
+
+async function sha256Base64Url(value) {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
+  return bytesToBase64Url(new Uint8Array(digest));
+}
+
+async function youtubeTokenKey(env) {
+  const raw = base64UrlToBytes(String(env.YOUTUBE_TOKEN_ENCRYPTION_KEY || ''));
+  if (raw.byteLength !== 32) throw new Error('Invalid YouTube token encryption key');
+  return crypto.subtle.importKey('raw', raw, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
+}
+
+async function encryptYoutubeToken(value, env) {
+  const iv = new Uint8Array(12);
+  crypto.getRandomValues(iv);
+  const encrypted = await crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv },
+    await youtubeTokenKey(env),
+    new TextEncoder().encode(value),
+  );
+  return `${bytesToBase64Url(iv)}.${bytesToBase64Url(new Uint8Array(encrypted))}`;
+}
+
+async function decryptYoutubeToken(value, env) {
+  const [ivValue, encryptedValue] = String(value).split('.');
+  if (!ivValue || !encryptedValue) throw new Error('Invalid encrypted token');
+  const decrypted = await crypto.subtle.decrypt(
+    { name: 'AES-GCM', iv: base64UrlToBytes(ivValue) },
+    await youtubeTokenKey(env),
+    base64UrlToBytes(encryptedValue),
+  );
+  return new TextDecoder().decode(decrypted);
+}
+
+async function googleTokenRequest(parameters) {
+  const response = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams(parameters),
+  });
+  let payload;
+  try {
+    payload = await response.json();
+  } catch {
+    payload = undefined;
+  }
+  if (!response.ok || !payload?.access_token) {
+    const error = new Error('Google authorization could not be completed.');
+    error.code = payload?.error === 'invalid_grant' ? 'youtube-reconnect-required' : 'youtube-google-error';
+    throw error;
+  }
+  return payload;
+}
+
+async function googleJson(url, accessToken) {
+  const response = await fetch(url, {
+    headers: { authorization: `Bearer ${accessToken}`, accept: 'application/json' },
+  });
+  let payload;
+  try {
+    payload = await response.json();
+  } catch {
+    payload = undefined;
+  }
+  if (!response.ok) {
+    const error = new Error('YouTube Studio did not return a readable report.');
+    error.code = response.status === 401 || response.status === 403
+      ? 'youtube-reconnect-required'
+      : 'youtube-report-error';
+    throw error;
+  }
+  return payload;
+}
+
+async function fetchYoutubeChannel(accessToken) {
+  const endpoint = new URL('https://www.googleapis.com/youtube/v3/channels');
+  endpoint.searchParams.set('part', 'id,snippet,statistics,contentDetails');
+  endpoint.searchParams.set('mine', 'true');
+  const payload = await googleJson(endpoint, accessToken);
+  const channel = Array.isArray(payload?.items) ? payload.items[0] : undefined;
+  if (!channel?.id) {
+    const error = new Error('No YouTube channel was found for that Google account.');
+    error.code = 'youtube-channel-missing';
+    throw error;
+  }
+  return channel;
+}
+
+function googleDate(date) {
+  return date.toISOString().slice(0, 10);
+}
+
+export function buildYouTubeAnalyticsWindow(now = new Date()) {
+  const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  const start = new Date(end);
+  start.setUTCDate(start.getUTCDate() - 27);
+  return { startDate: googleDate(start), endDate: googleDate(end), periodDays: 28 };
+}
+
+function analyticsMetricMap(payload) {
+  const headers = Array.isArray(payload?.columnHeaders) ? payload.columnHeaders : [];
+  const row = Array.isArray(payload?.rows?.[0]) ? payload.rows[0] : [];
+  return Object.fromEntries(
+    headers.map((header, index) => [String(header?.name || ''), Number(row[index] ?? 0)]),
+  );
+}
+
+async function countRecentUploads(playlistId, accessToken, startDate) {
+  if (!playlistId) return undefined;
+  let pageToken = '';
+  let uploads = 0;
+  let pageCount = 0;
+  let reachedOlderVideo = false;
+  do {
+    const endpoint = new URL('https://www.googleapis.com/youtube/v3/playlistItems');
+    endpoint.searchParams.set('part', 'contentDetails');
+    endpoint.searchParams.set('playlistId', playlistId);
+    endpoint.searchParams.set('maxResults', '50');
+    if (pageToken) endpoint.searchParams.set('pageToken', pageToken);
+    const payload = await googleJson(endpoint, accessToken);
+    for (const item of Array.isArray(payload?.items) ? payload.items : []) {
+      const publishedAt = String(item?.contentDetails?.videoPublishedAt || '');
+      if (publishedAt && publishedAt.slice(0, 10) < startDate) {
+        reachedOlderVideo = true;
+        continue;
+      }
+      if (publishedAt) uploads += 1;
+    }
+    pageToken = String(payload?.nextPageToken || '');
+    pageCount += 1;
+  } while (pageToken && !reachedOlderVideo && pageCount < 10);
+  return uploads;
+}
+
+async function buildYoutubeSnapshot(accessToken, channel, now = new Date()) {
+  const window = buildYouTubeAnalyticsWindow(now);
+  const endpoint = new URL('https://youtubeanalytics.googleapis.com/v2/reports');
+  endpoint.searchParams.set('ids', 'channel==MINE');
+  endpoint.searchParams.set('startDate', window.startDate);
+  endpoint.searchParams.set('endDate', window.endDate);
+  endpoint.searchParams.set(
+    'metrics',
+    'views,estimatedMinutesWatched,averageViewDuration,subscribersGained,subscribersLost',
+  );
+  const analytics = analyticsMetricMap(await googleJson(endpoint, accessToken));
+  const subscriberCount = Number(channel?.statistics?.subscriberCount);
+  const uploads = await countRecentUploads(
+    channel?.contentDetails?.relatedPlaylists?.uploads,
+    accessToken,
+    window.startDate,
+  );
+  return {
+    source: 'youtube-api',
+    periodDays: window.periodDays,
+    subscribers: Number.isFinite(subscriberCount) ? subscriberCount : undefined,
+    views: Number.isFinite(analytics.views) ? analytics.views : undefined,
+    watchHours: Number.isFinite(analytics.estimatedMinutesWatched)
+      ? analytics.estimatedMinutesWatched / 60
+      : undefined,
+    averageViewDurationSeconds: Number.isFinite(analytics.averageViewDuration)
+      ? analytics.averageViewDuration
+      : undefined,
+    uploads,
+    note: `Read-only YouTube Studio sync for ${window.startDate} through ${window.endDate}. Reach impressions and thumbnail CTR remain manual metrics.`,
+  };
+}
+
+async function refreshYoutubeAccessToken(connection, env) {
+  const refreshToken = await decryptYoutubeToken(connection.refresh_token_encrypted, env);
+  const token = await googleTokenRequest({
+    client_id: env.GOOGLE_CLIENT_ID,
+    client_secret: env.GOOGLE_CLIENT_SECRET,
+    refresh_token: refreshToken,
+    grant_type: 'refresh_token',
+  });
+  return { accessToken: token.access_token, refreshToken };
+}
+
+async function youtubeConnectionForUser(userId, env) {
+  return env.DB.prepare(
+    `SELECT user_id, refresh_token_encrypted, granted_scopes, channel_id, channel_title,
+            connected_at, updated_at, last_sync_at
+     FROM youtube_connections
+     WHERE user_id = ?`,
+  )
+    .bind(userId)
+    .first();
+}
+
+async function handleYoutubeStatus(request, env, url) {
+  const userId = authenticatedUserId(request);
+  if (!userId) return json({ code: 'authentication-required', message: 'Sign in to The System first.' }, 401);
+  const configured = youtubeConfigured(env);
+  if (!configured) {
+    return json({
+      ok: true,
+      configured: false,
+      connected: false,
+      redirectUri: youtubeRedirectUri(url),
+    });
+  }
+  try {
+    const connection = await youtubeConnectionForUser(userId, env);
+    return json({
+      ok: true,
+      configured: true,
+      connected: Boolean(connection),
+      redirectUri: youtubeRedirectUri(url),
+      channelId: connection?.channel_id,
+      channelTitle: connection?.channel_title,
+      connectedAt: connection?.connected_at,
+      lastSyncAt: connection?.last_sync_at,
+      scopes: connection ? String(connection.granted_scopes).split(' ').filter(Boolean) : [],
+    });
+  } catch {
+    return json(
+      { code: 'youtube-storage-unavailable', message: 'The Studio Link storage is not ready yet.' },
+      503,
+    );
+  }
+}
+
+async function handleYoutubeConnect(request, env, url) {
+  const userId = authenticatedUserId(request);
+  if (!userId) return json({ code: 'authentication-required', message: 'Sign in to The System first.' }, 401);
+  if (!youtubeConfigured(env)) {
+    return appYoutubeRedirect(url, 'setup-required');
+  }
+  const state = randomBase64Url(32);
+  const stateHash = await sha256Base64Url(state);
+  const verifier = randomBase64Url(64);
+  const challenge = await sha256Base64Url(verifier);
+  const now = new Date();
+  const expiresAt = new Date(now.getTime() + YOUTUBE_OAUTH_STATE_TTL_MS);
+  await env.DB.batch([
+    env.DB.prepare('DELETE FROM youtube_oauth_states WHERE expires_at < ?').bind(now.toISOString()),
+    env.DB.prepare(
+      `INSERT INTO youtube_oauth_states
+       (state_hash, user_id, code_verifier, created_at, expires_at)
+       VALUES (?, ?, ?, ?, ?)`,
+    ).bind(stateHash, userId, verifier, now.toISOString(), expiresAt.toISOString()),
+  ]);
+  const authorize = new URL('https://accounts.google.com/o/oauth2/v2/auth');
+  authorize.searchParams.set('client_id', env.GOOGLE_CLIENT_ID);
+  authorize.searchParams.set('redirect_uri', youtubeRedirectUri(url));
+  authorize.searchParams.set('response_type', 'code');
+  authorize.searchParams.set('scope', YOUTUBE_READONLY_SCOPES.join(' '));
+  authorize.searchParams.set('access_type', 'offline');
+  authorize.searchParams.set('prompt', 'consent');
+  authorize.searchParams.set('include_granted_scopes', 'true');
+  authorize.searchParams.set('state', state);
+  authorize.searchParams.set('code_challenge', challenge);
+  authorize.searchParams.set('code_challenge_method', 'S256');
+  return Response.redirect(authorize.toString(), 302);
+}
+
+async function handleYoutubeCallback(request, env, url) {
+  const userId = authenticatedUserId(request);
+  if (!userId || !youtubeConfigured(env)) return appYoutubeRedirect(url, 'setup-required');
+  const state = url.searchParams.get('state') || '';
+  if (!state) return appYoutubeRedirect(url, 'state-invalid');
+  const stateHash = await sha256Base64Url(state);
+  const oauthState = await env.DB.prepare(
+    `SELECT state_hash, user_id, code_verifier, expires_at
+     FROM youtube_oauth_states
+     WHERE state_hash = ?`,
+  )
+    .bind(stateHash)
+    .first();
+  await env.DB.prepare('DELETE FROM youtube_oauth_states WHERE state_hash = ?').bind(stateHash).run();
+  if (
+    !oauthState ||
+    oauthState.user_id !== userId ||
+    new Date(oauthState.expires_at).getTime() <= Date.now()
+  ) {
+    return appYoutubeRedirect(url, 'state-invalid');
+  }
+  if (url.searchParams.get('error')) return appYoutubeRedirect(url, 'cancelled');
+  const code = url.searchParams.get('code');
+  if (!code) return appYoutubeRedirect(url, 'authorization-failed');
+  try {
+    const token = await googleTokenRequest({
+      client_id: env.GOOGLE_CLIENT_ID,
+      client_secret: env.GOOGLE_CLIENT_SECRET,
+      code,
+      code_verifier: oauthState.code_verifier,
+      redirect_uri: youtubeRedirectUri(url),
+      grant_type: 'authorization_code',
+    });
+    if (!token.refresh_token) return appYoutubeRedirect(url, 'refresh-token-missing');
+    const channel = await fetchYoutubeChannel(token.access_token);
+    const timestamp = new Date().toISOString();
+    const existing = await youtubeConnectionForUser(userId, env);
+    await env.DB.prepare(
+      `INSERT INTO youtube_connections
+       (user_id, refresh_token_encrypted, granted_scopes, channel_id, channel_title,
+        connected_at, updated_at, last_sync_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, NULL)
+       ON CONFLICT(user_id) DO UPDATE SET
+         refresh_token_encrypted = excluded.refresh_token_encrypted,
+         granted_scopes = excluded.granted_scopes,
+         channel_id = excluded.channel_id,
+         channel_title = excluded.channel_title,
+         updated_at = excluded.updated_at`,
+    )
+      .bind(
+        userId,
+        await encryptYoutubeToken(token.refresh_token, env),
+        String(token.scope || YOUTUBE_READONLY_SCOPES.join(' ')),
+        channel.id,
+        String(channel.snippet?.title || 'YouTube Channel').slice(0, 200),
+        existing?.connected_at || timestamp,
+        timestamp,
+      )
+      .run();
+    return appYoutubeRedirect(url, 'connected');
+  } catch (error) {
+    return appYoutubeRedirect(url, error?.code || 'authorization-failed');
+  }
+}
+
+async function handleYoutubeSync(request, env, url) {
+  if (!isSameOriginRequest(request, url)) {
+    return json({ code: 'origin-denied', message: 'That synchronization origin was not accepted.' }, 403);
+  }
+  const userId = authenticatedUserId(request);
+  if (!userId) return json({ code: 'authentication-required', message: 'Sign in to The System first.' }, 401);
+  if (!youtubeConfigured(env)) {
+    return json({ code: 'youtube-setup-required', message: 'The Studio Link needs its Google authorization setup.' }, 503);
+  }
+  const connection = await youtubeConnectionForUser(userId, env);
+  if (!connection) {
+    return json({ code: 'youtube-not-connected', message: 'Connect your YouTube Studio channel first.' }, 409);
+  }
+  try {
+    const { accessToken } = await refreshYoutubeAccessToken(connection, env);
+    const channel = await fetchYoutubeChannel(accessToken);
+    if (channel.id !== connection.channel_id) {
+      return json(
+        { code: 'youtube-channel-changed', message: 'Reconnect Studio to confirm the selected channel.' },
+        409,
+      );
+    }
+    const snapshot = await buildYoutubeSnapshot(accessToken, channel);
+    const syncedAt = new Date().toISOString();
+    await env.DB.prepare(
+      `UPDATE youtube_connections
+       SET channel_title = ?, updated_at = ?, last_sync_at = ?
+       WHERE user_id = ?`,
+    )
+      .bind(String(channel.snippet?.title || connection.channel_title).slice(0, 200), syncedAt, syncedAt, userId)
+      .run();
+    return json({
+      ok: true,
+      syncedAt,
+      channelId: channel.id,
+      channelTitle: String(channel.snippet?.title || connection.channel_title).slice(0, 200),
+      channelUrl: `https://www.youtube.com/channel/${encodeURIComponent(channel.id)}`,
+      snapshot,
+    });
+  } catch (error) {
+    const reconnect = error?.code === 'youtube-reconnect-required';
+    return json(
+      {
+        code: error?.code || 'youtube-sync-failed',
+        message: reconnect
+          ? 'Google authorization expired or was revoked. Reconnect YouTube Studio to continue.'
+          : 'YouTube Studio could not complete that synchronization. Try again shortly.',
+      },
+      reconnect ? 401 : 502,
+    );
+  }
+}
+
+async function handleYoutubeDisconnect(request, env, url) {
+  if (!isSameOriginRequest(request, url)) {
+    return json({ code: 'origin-denied', message: 'That disconnect origin was not accepted.' }, 403);
+  }
+  const userId = authenticatedUserId(request);
+  if (!userId) return json({ code: 'authentication-required', message: 'Sign in to The System first.' }, 401);
+  if (!youtubeConfigured(env)) {
+    return json({ code: 'youtube-setup-required', message: 'The Studio Link is not configured.' }, 503);
+  }
+  const connection = await youtubeConnectionForUser(userId, env);
+  let revoked = false;
+  if (connection) {
+    try {
+      const token = await decryptYoutubeToken(connection.refresh_token_encrypted, env);
+      const response = await fetch('https://oauth2.googleapis.com/revoke', {
+        method: 'POST',
+        headers: { 'content-type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ token }),
+      });
+      revoked = response.ok;
+    } catch {
+      revoked = false;
+    }
+    await env.DB.prepare('DELETE FROM youtube_connections WHERE user_id = ?').bind(userId).run();
+  }
+  return json({ ok: true, connected: false, revoked });
 }
 
 function isObject(value) {
@@ -1238,6 +1687,32 @@ export default {
         transcriptionModel: env.OPENAI_TRANSCRIBE_MODEL || 'gpt-4o-transcribe',
         intelligenceVersion: COMPANION_INTELLIGENCE_VERSION,
       });
+    }
+
+    if (url.pathname === '/api/youtube/status' && request.method === 'GET') {
+      return handleYoutubeStatus(request, env, url);
+    }
+
+    if (url.pathname === '/api/youtube/connect' && request.method === 'GET') {
+      return handleYoutubeConnect(request, env, url);
+    }
+
+    if (url.pathname === '/api/youtube/callback' && request.method === 'GET') {
+      return handleYoutubeCallback(request, env, url);
+    }
+
+    if (url.pathname === '/api/youtube/sync') {
+      if (request.method !== 'POST') {
+        return json({ code: 'method-not-allowed', message: 'Use a secure POST synchronization.' }, 405);
+      }
+      return handleYoutubeSync(request, env, url);
+    }
+
+    if (url.pathname === '/api/youtube/disconnect') {
+      if (request.method !== 'POST') {
+        return json({ code: 'method-not-allowed', message: 'Use a secure POST disconnect.' }, 405);
+      }
+      return handleYoutubeDisconnect(request, env, url);
     }
 
     if (url.pathname === '/api/ai/chat') {

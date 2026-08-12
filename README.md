@@ -56,6 +56,20 @@ Completed AI conversations are stored on-device, included in Archive Shield expo
 offline. Readiness checks, usage-limit guidance, and failure-safe local saving keep a broken or
 unconfigured online link from affecting the campaign.
 
+## Version 7.3.0 · Studio Link
+
+Creator Forge can now connect directly to the Hunter's YouTube Studio channel through a private,
+read-only Google authorization. A secure sync captures the current subscriber signal and the latest
+28 days of views, watch time, average view duration, and upload pace into the existing on-device
+Creator Forge history. Vesper can discuss those supplied numbers alongside active projects and
+publishing targets without inventing analytics or claiming access to the complete Studio account.
+
+The Google refresh credential is encrypted behind the private Sites gateway. It never enters the
+browser save, Archive Shield export, or Vesper/OpenAI context. The requested permissions cannot
+upload, edit, delete, comment, or manage the channel, and a visible disconnect action revokes the
+link while preserving already-synchronized local snapshots. Manual entry and CSV import remain
+available for reach impressions, thumbnail click-through rate, and fully offline tracking.
+
 ## Version 6.3.0 · Stillpoint Protocol
 
 Version 6.3 welcomes **Mira, The Stillpoint**, as the Training Hall’s third commander. Recovery is
