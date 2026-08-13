@@ -544,7 +544,7 @@ export function AboutPage() {
           <summary>How do Weekly Campfires and Monthly Councils work?</summary>
           <p>
             Campfires summarize a completed week with at least one finalized Daily Review. Monthly
-            Councils assemble all ten companions after a completed calendar month and review mission
+            Councils assemble all eleven companions after a completed calendar month and review mission
             balance, Perfect Days, levels, classes, titles, Campaign milestones, quest chapters, and
             relationship actions that were actually recorded. Their commentary is saved in
             Headquarters and the Archive, and never changes scoring. The Council also gives you an

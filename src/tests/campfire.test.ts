@@ -43,6 +43,7 @@ describe('Weekly Campfire Recaps', () => {
       'amara',
       'cassian',
       'saffron',
+      'quill',
       'snow',
     ]);
     expect(messages.every((message) => message.message.length > 40)).toBe(true);

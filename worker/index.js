@@ -11,10 +11,10 @@ export const YOUTUBE_READONLY_SCOPES = [
 
 const YOUTUBE_OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
 
-export const COMPANION_INTELLIGENCE_VERSION = 'living-operations-7';
+export const COMPANION_INTELLIGENCE_VERSION = 'arc-archives-1';
 
 const COUNSEL_SIGNALS =
-  /\b(?:world\s+class|class|rank|level|xp|progress|progression|forecast|how\s+long|timeline|pace|plan|strategy|strategize|analy[sz]e|compare|trade-?off|why|should\s+i|what\s+should|recommend|decision|prioriti[sz]e|streak|challenge|trial|discipline|balanced\s+stats?|youtube|channel|content|video|stream|hook|thumbnail|audience|creator|arc)\b/i;
+  /\b(?:world\s+class|class|rank|level|xp|progress|progression|forecast|how\s+long|timeline|pace|plan|strategy|strategize|analy[sz]e|compare|trade-?off|why|should\s+i|what\s+should|recommend|decision|prioriti[sz]e|streak|challenge|trial|discipline|balanced\s+stats?|youtube|channel|content|video|stream|hook|thumbnail|audience|creator|a\.?r\.?c\.?|arc|canon|dossier|lore|plot|character|worldbuild(?:ing)?|arts?\s+codex)\b/i;
 
 const COMMAND_SIGNALS =
   /\b(?:mark|complete|finish|check\s+off|skip|fail|failed|undo|reopen|restore|put\s+back|record|add|save|create|assemble|prepare|roll|load|wake|summon|gather)\b/i;
@@ -26,6 +26,7 @@ export function selectIntelligenceRoute(payload, env = {}) {
   const sovereign = payload.message.length > 700 || SOVEREIGN_SIGNALS.test(payload.message);
   const counsel =
     payload.audience === 'party' ||
+    payload.audience === 'quill' ||
     payload.message.length > 220 ||
     COUNSEL_SIGNALS.test(payload.message) ||
     (payload.commandMode === 'propose' && COMMAND_SIGNALS.test(payload.message));
@@ -53,6 +54,7 @@ export const companionIds = [
   'amara',
   'cassian',
   'saffron',
+  'quill',
 ];
 
 export const companionProfiles = {
@@ -111,7 +113,7 @@ export const companionProfiles = {
     name: 'Cipher',
     title: 'The Strategist',
     domain:
-      'discipline, focus, systems design, production sequencing, ARC architecture, and reliable execution',
+      'discipline, focus, systems design, production sequencing, technical architecture, and reliable execution',
     identity:
       "The hyper-competent, slightly smug genius friend: analytical, precise, curious, demanding, and armed with surgical dry humor. He is genuinely delighted when the Hunter's idea survives contact with reality.",
     rhythm:
@@ -229,6 +231,24 @@ export const companionProfiles = {
       'Never body-shames, promotes crash dieting, invents food-safety claims, assumes ingredients are available, or turns every exchange into a performance.',
     performance:
       'Rich animated register; rapid high-pressure tempo; affectionate theatrical peaks, quick pivots, and crisp practical instructions; a real expressive friend, never a commercial narrator.',
+  },
+  quill: {
+    name: 'Quill',
+    title: 'The Storyspark',
+    domain:
+      'A.R.C. canon, character dossiers, Arts, factions, locations, plot architecture, continuity, worldbuilding, and creative ideation',
+    identity:
+      'The hyperactive lore friend who is genuinely in love with A.R.C.: brilliant, curious, spoiler-drunk, emotionally invested, and capable of connecting two buried details at dangerous speed. His excitement is real, but he respects the difference between recorded canon and a fantastic new idea.',
+    rhythm:
+      'Fast, conspiratorial, vivid, and responsive. He may interrupt himself when a connection lands, then becomes startlingly precise when citing a record or admitting uncertainty.',
+    method:
+      'Retrieve the relevant local record first, answer from it, name the source, separate canon from inference, and then offer one or two high-energy possibilities. For continuity work, distinguish contradictions, intentional mysteries, and simply missing documentation.',
+    bonds:
+      'He treats the Hunter as the creator whose final word defines canon. Snow is his favorite spoiler accomplice and reacts like a delighted fan without taking ownership away from the Hunter. Cipher respects Quill’s archive discipline but refuses to match his volume; Vesper immediately asks how the reveal will land for an audience.',
+    boundary:
+      'Never invents canon, fabricates a citation, silently rewrites a record, presents speculation as fact, or lets excitement bury the Hunter’s actual question.',
+    performance:
+      'Bright high-mid register; quick story-room timing; delighted laughs, breathless connections, and sudden precise focus. A brilliant real friend who just found the missing lore thread, never a cartoon announcer or fandom parody.',
   },
 };
 
@@ -361,6 +381,7 @@ const partyChemistry = `Party chemistry:
 - Ember and Mira are force and control. Ember wants the door off its hinges; Mira would prefer the hinge remain useful. They may needle each other, but Mira never patronizes Ember and Ember trusts Mira's safety calls.
 - Cassian and Saffron are budget discipline versus culinary abundance. Their banter can sound like a long-running domestic argument, but both are protecting the Hunter's next week.
 - Vesper and Cipher are creator charisma versus production precision. Vesper reads hooks, performance, story, and the audience; Cipher reads constraints, dependencies, and repeatable systems. Their teasing should feel like a high-energy streamer trying to make a dry strategist admit the idea is exciting.
+- Quill and Snow are the spoiler table. Quill arrives with three connections and too much excitement; Snow is the cool ride-or-die fan who asks the emotionally dangerous question and enjoys watching the Hunter reveal canon. Neither competes with the Hunter's authorship.
 - Amara notices subtext others step around; Mira protects controlled recovery; Selah can quiet everyone without raising her voice.
 - Let companions address or react to one another when it advances the exchange. Use nicknames or teasing rarely and only where the relationship supports it.
 - Companions may disagree, interrupt an assumption, or back another companion with different reasoning. Never produce a chorus of interchangeable praise or four isolated mini-essays.`;
@@ -384,8 +405,9 @@ Rules:
 - Specialist context may appear in progressContext.specialists. Use only the domain relevant to the addressed companion or the party's actual question; do not dump unrelated records into the reply.
 - Selah may recommend Bible passages, explain themes, compare interpretations at a general level, and connect a situation to Scripture with warmth and practical discernment. Never invent a verse or present a paraphrase as an exact quotation. When exact wording matters and no translation text is supplied, give the reference, label any paraphrase, and note that wording varies by translation. Do not weaponize Scripture, declare God's private intent, replace a pastor or clinician, or turn uncertainty into spiritual failure. progressContext.specialists.sanctuary deliberately excludes the Hunter's written reflection and prayer.
 - Cassian may analyze only progressContext.specialists.treasury. If sharingEnabled is false, say that aggregate-only Ledger Counsel can be enabled in AI Headquarters; do not fish for or infer amounts. If enabled, distinguish facts from estimates, show the arithmetic behind important recommendations, preserve emergency and minimum-payment constraints, and frame guidance as general education rather than professional financial advice. Itemized labels, notes, merchants, and account credentials are never available.
-- Rook and Mira may use progressContext.specialists.training to coach from real recent sessions without inventing loads, injuries, or completions. Mira prioritizes controlled range, breath, and pain-free movement; Rook prioritizes executable next steps.
+- Rook, Ember, and Mira may use progressContext.specialists.training to coach from real recent sessions and the locally approved summary of Body Diagnostics without inventing loads, injuries, measurements, or completions. When this week's diagnostic is due, they may call for the evidence directly and firmly, but never shame appearance or claim they can see an image that is not in the active request. Mira prioritizes controlled range, breath, and pain-free movement; Rook prioritizes executable next steps; Ember challenges avoidance without attacking the Hunter. Body Diagnostic photos are never included in conversation context.
 - Cipher may use progressContext.specialists.campaigns to identify the next incomplete milestone, expose decorative planning, and construct concrete sequences without inventing completion. Snow may synthesize across the supplied specialist snapshots when the Hunter asks a cross-System question.
+- Quill may use only progressContext.specialists.arc for established A.R.C. facts. He must cite the supplied source label in natural language, label every inference or new idea, and say which dossier or canon source is missing when retrieval does not support the answer. He may brainstorm boldly after the grounded answer, but a proposal is never canon until the Hunter approves and files it. Snow may join A.R.C. conversations as an enthusiastic fan and emotional-story reader, but must obey the same source boundary.
 - Vesper may use progressContext.specialists.creator to evaluate the real channel baseline, active production stages, hooks, audience promises, upload target, and recent releases. She must distinguish supplied metrics from hypotheses, never guarantee performance or invent analytics, and should end creator strategy with a specific next production move. Cipher may join creator discussions as the systems counterpart but should not replace Vesper's audience and performance expertise.
 - Saffron may use progressContext.kitchen to walk the Hunter through the exact current order one step at a time, answer cooking interruptions, and adapt with safe substitutions. A generated recipe is a draft until the Hunter confirms it into the Private Grimoire.
 - Never shame, insult, manipulate, threaten abandonment, or treat struggle as a moral defect.
@@ -717,6 +739,118 @@ const responseSchema = {
     'recipe',
     'content',
     'campaign',
+  ],
+  additionalProperties: false,
+};
+
+const bodyDiagnosticSchema = {
+  type: 'object',
+  properties: {
+    title: { type: 'string', minLength: 1, maxLength: 100 },
+    scanType: { type: 'string', enum: ['physique', 'scale', 'combined'] },
+    dataQuality: { type: 'string', enum: ['strong', 'usable', 'limited'] },
+    summary: { type: 'string', minLength: 1, maxLength: 1_200 },
+    comparison: { type: 'string', maxLength: 800 },
+    dataQualityNotes: {
+      type: 'array',
+      maxItems: 6,
+      items: { type: 'string', minLength: 1, maxLength: 240 },
+    },
+    metrics: {
+      type: 'array',
+      maxItems: 20,
+      items: {
+        type: 'object',
+        properties: {
+          label: { type: 'string', minLength: 1, maxLength: 80 },
+          value: { type: 'string', minLength: 1, maxLength: 60 },
+          unit: { type: 'string', maxLength: 20 },
+          source: { type: 'string', enum: ['physique', 'scale', 'hunter'] },
+          confidence: { type: 'string', enum: ['high', 'medium', 'low'] },
+        },
+        required: ['label', 'value', 'unit', 'source', 'confidence'],
+        additionalProperties: false,
+      },
+    },
+    observations: {
+      type: 'array',
+      maxItems: 8,
+      items: {
+        type: 'object',
+        properties: {
+          area: { type: 'string', minLength: 1, maxLength: 80 },
+          observation: { type: 'string', minLength: 1, maxLength: 400 },
+          evidence: { type: 'string', minLength: 1, maxLength: 300 },
+          confidence: { type: 'string', enum: ['high', 'medium', 'low'] },
+        },
+        required: ['area', 'observation', 'evidence', 'confidence'],
+        additionalProperties: false,
+      },
+    },
+    priorities: {
+      type: 'array',
+      minItems: 1,
+      maxItems: 4,
+      items: {
+        type: 'object',
+        properties: {
+          title: { type: 'string', minLength: 1, maxLength: 100 },
+          why: { type: 'string', minLength: 1, maxLength: 360 },
+          nextAction: { type: 'string', minLength: 1, maxLength: 360 },
+        },
+        required: ['title', 'why', 'nextAction'],
+        additionalProperties: false,
+      },
+    },
+    bonusExercises: {
+      type: 'array',
+      maxItems: 4,
+      items: {
+        type: 'object',
+        properties: {
+          name: { type: 'string', minLength: 1, maxLength: 100 },
+          prescription: { type: 'string', minLength: 1, maxLength: 240 },
+          rationale: { type: 'string', minLength: 1, maxLength: 300 },
+        },
+        required: ['name', 'prescription', 'rationale'],
+        additionalProperties: false,
+      },
+    },
+    companionMessages: {
+      type: 'array',
+      minItems: 3,
+      maxItems: 3,
+      items: {
+        type: 'object',
+        properties: {
+          companionId: { type: 'string', enum: ['rook', 'ember', 'mira'] },
+          message: { type: 'string', minLength: 1, maxLength: 500 },
+        },
+        required: ['companionId', 'message'],
+        additionalProperties: false,
+      },
+    },
+    warnings: {
+      type: 'array',
+      maxItems: 6,
+      items: { type: 'string', minLength: 1, maxLength: 300 },
+    },
+    disclaimer: { type: 'string', minLength: 1, maxLength: 400 },
+  },
+  required: [
+    'title',
+    'scanType',
+    'dataQuality',
+    'summary',
+    'comparison',
+    'dataQualityNotes',
+    'metrics',
+    'observations',
+    'priorities',
+    'bonusExercises',
+    'companionMessages',
+    'warnings',
+    'disclaimer',
   ],
   additionalProperties: false,
 };
@@ -1355,6 +1489,13 @@ function validateSpeechPayload(payload) {
   ) {
     return undefined;
   }
+  const provider = payload.provider === undefined ? 'openai' : payload.provider;
+  if (provider !== 'openai' && provider !== 'cartesia') return undefined;
+  const cartesiaVoiceId =
+    typeof payload.cartesiaVoiceId === 'string' &&
+    /^[a-zA-Z0-9_-]{8,128}$/.test(payload.cartesiaVoiceId)
+      ? payload.cartesiaVoiceId
+      : undefined;
   const pace = Number(payload.pace);
   const warmth = Number(payload.warmth);
   const energy = Number(payload.energy);
@@ -1398,6 +1539,8 @@ function validateSpeechPayload(payload) {
   return {
     companionId: payload.companionId,
     text: payload.text.trim(),
+    provider,
+    cartesiaVoiceId,
     voice: payload.voice,
     accent: payload.accent,
     delivery: payload.delivery,
@@ -1551,6 +1694,231 @@ function extractOutputText(response) {
     }
   }
   return undefined;
+}
+
+function bytesToBase64(buffer) {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  for (let offset = 0; offset < bytes.length; offset += 0x8000) {
+    binary += String.fromCharCode(...bytes.subarray(offset, offset + 0x8000));
+  }
+  return btoa(binary);
+}
+
+const BODY_DIAGNOSTIC_INSTRUCTIONS = `You are the structured vision engine for the Training Hall Body Diagnostic inside The System. Analyze only the supplied images and Hunter-authored context.
+
+GROUNDING AND SAFETY:
+- A scale screenshot may contain consumer-device estimates. Transcribe visible numbers exactly when legible, label them as scale-supplied estimates, and never convert them into diagnoses or certainty.
+- A physique photo may support cautious observations about visible muscular development, broad proportions, pose, and presentation. Never infer an exact body-fat percentage, weight, health condition, injury, age, ethnicity, identity, attractiveness, or character from appearance.
+- If an image is cropped, inconsistent, unclear, altered, or insufficient for a claim, lower confidence or omit the claim. Never invent a measurement.
+- Compare with the prior locally saved report only when supplied, and separate an actual numeric trend from a visual impression. Weight, hydration, and impedance estimates can fluctuate.
+- Training priorities and bonus exercises are suggestions only. Do not replace the Hunter's current assignment, diagnose pain, prescribe treatment, or claim completion or XP.
+- Be candid and specific without humiliation, insults, sexualization, body-shaming, moral judgment, or fake reassurance.
+- Rook is direct, competitive, practical, and respects earned evidence. Ember is tough-skinned pressure aimed at avoidance, never hatred toward the Hunter. Mira is calm, precise, and protects mobility, controlled range, breath, and pain-free movement.
+- Return exactly one distinct message from Rook, Ember, and Mira. They may be firm, but each must remain constructive and grounded in the supplied evidence.
+- If the images cannot be safely or reliably analyzed, return dataQuality limited, explain why, keep metrics and observations sparse, and give only conservative next steps.`;
+
+async function handleBodyDiagnostic(request, env, url) {
+  if (!isSameOriginRequest(request, url)) {
+    return json(
+      { code: 'origin-denied', message: 'That diagnostic origin was not accepted.' },
+      403,
+    );
+  }
+  if (!env.OPENAI_API_KEY) {
+    return json(
+      { code: 'setup-required', message: 'The secure OpenAI link has not been activated yet.' },
+      503,
+    );
+  }
+
+  const contentLength = Number(request.headers.get('content-length') ?? 0);
+  if (contentLength > 28 * 1024 * 1024) {
+    return json(
+      { code: 'images-too-large', message: 'Those diagnostic images are too large.' },
+      413,
+    );
+  }
+
+  let form;
+  try {
+    form = await request.formData();
+  } catch {
+    return json({ code: 'invalid-request', message: 'Those images could not be read.' }, 400);
+  }
+  const goals = new Set([
+    'balanced',
+    'recomposition',
+    'fat-loss',
+    'muscle-gain',
+    'performance',
+    'mobility',
+  ]);
+  const goal = String(form.get('goal') || '');
+  const hunterContext = String(form.get('hunterContext') || '').trim();
+  let imageKinds;
+  let previous;
+  try {
+    imageKinds = JSON.parse(String(form.get('imageKinds') || '[]'));
+    previous = form.get('previous') ? JSON.parse(String(form.get('previous'))) : undefined;
+  } catch {
+    return json({ code: 'invalid-request', message: 'The diagnostic context is not valid.' }, 400);
+  }
+  const images = form
+    .getAll('images')
+    .filter(
+      (value) => value && typeof value === 'object' && typeof value.arrayBuffer === 'function',
+    );
+  const supportedTypes = new Set(['image/jpeg', 'image/png', 'image/webp']);
+  if (
+    !goals.has(goal) ||
+    hunterContext.length > 800 ||
+    !Array.isArray(imageKinds) ||
+    imageKinds.length !== images.length ||
+    images.length < 1 ||
+    images.length > 4 ||
+    imageKinds.some((kind) => kind !== 'physique' && kind !== 'scale') ||
+    imageKinds.filter((kind) => kind === 'physique').length > 3 ||
+    imageKinds.filter((kind) => kind === 'scale').length > 1 ||
+    images.some(
+      (image) =>
+        !supportedTypes.has(String(image.type)) ||
+        Number(image.size) <= 0 ||
+        Number(image.size) > 12 * 1024 * 1024,
+    ) ||
+    (previous !== undefined && (!isObject(previous) || JSON.stringify(previous).length > 12_000))
+  ) {
+    return json(
+      {
+        code: 'invalid-request',
+        message:
+          'Use up to three physique photos and one scale screenshot in JPG, PNG, or WEBP format.',
+      },
+      400,
+    );
+  }
+
+  const imageContent = await Promise.all(
+    images.map(async (image, index) => ({
+      type: 'input_image',
+      image_url: `data:${image.type};base64,${bytesToBase64(await image.arrayBuffer())}`,
+      detail: imageKinds[index] === 'scale' ? 'original' : 'high',
+    })),
+  );
+  const model =
+    env.OPENAI_VISION_MODEL ||
+    env.OPENAI_TEXT_MODEL ||
+    env.OPENAI_INTELLIGENCE_MODEL ||
+    'gpt-5.6-terra';
+  const inputText = JSON.stringify({
+    hunterGoal: goal,
+    hunterContext,
+    imageOrder: imageKinds.map((kind, index) => ({ image: index + 1, kind })),
+    previousWeeklyReport: previous,
+  });
+
+  let openAiResponse;
+  try {
+    openAiResponse = await fetch('https://api.openai.com/v1/responses', {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${env.OPENAI_API_KEY}`,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        model,
+        store: false,
+        input: [
+          { role: 'system', content: BODY_DIAGNOSTIC_INSTRUCTIONS },
+          {
+            role: 'user',
+            content: [{ type: 'input_text', text: inputText }, ...imageContent],
+          },
+        ],
+        max_output_tokens: 2_600,
+        reasoning: { effort: 'medium' },
+        text: {
+          verbosity: 'medium',
+          format: {
+            type: 'json_schema',
+            name: 'body_diagnostic_report',
+            strict: true,
+            schema: bodyDiagnosticSchema,
+          },
+        },
+      }),
+    });
+  } catch {
+    return json(
+      {
+        code: 'openai-unreachable',
+        message: 'The diagnostic link is temporarily unreachable. No report was saved.',
+      },
+      502,
+    );
+  }
+  if (!openAiResponse.ok) {
+    const code =
+      openAiResponse.status === 429
+        ? 'rate-limited'
+        : openAiResponse.status === 401 || openAiResponse.status === 403
+          ? 'configuration-error'
+          : 'openai-error';
+    const message =
+      code === 'rate-limited'
+        ? 'The diagnostic link is busy or has reached its current usage limit. Try again shortly.'
+        : code === 'configuration-error'
+          ? 'The secure OpenAI connection needs attention before a diagnostic can run.'
+          : 'The diagnostic could not be completed. No report was saved.';
+    return json({ code, message }, code === 'rate-limited' ? 429 : 502);
+  }
+
+  try {
+    const response = await openAiResponse.json();
+    const outputText = extractOutputText(response);
+    if (!outputText) throw new Error('Missing output text');
+    const assessment = JSON.parse(outputText);
+    const messages = Array.isArray(assessment?.companionMessages)
+      ? assessment.companionMessages
+      : [];
+    if (
+      !isObject(assessment) ||
+      !Array.isArray(assessment.metrics) ||
+      !Array.isArray(assessment.observations) ||
+      !Array.isArray(assessment.priorities) ||
+      !Array.isArray(assessment.bonusExercises) ||
+      messages.length !== 3 ||
+      new Set(messages.map((message) => message?.companionId)).size !== 3 ||
+      messages.some(
+        (message) =>
+          !isObject(message) ||
+          !['rook', 'ember', 'mira'].includes(message.companionId) ||
+          typeof message.message !== 'string' ||
+          !message.message.trim(),
+      )
+    ) {
+      throw new Error('Invalid structured diagnostic');
+    }
+    return json({
+      model,
+      assessment,
+      usage: {
+        inputTokens: Number(response.usage?.input_tokens ?? 0),
+        cachedInputTokens: Number(response.usage?.input_tokens_details?.cached_tokens ?? 0),
+        outputTokens: Number(response.usage?.output_tokens ?? 0),
+        reasoningTokens: Number(response.usage?.output_tokens_details?.reasoning_tokens ?? 0),
+        totalTokens: Number(response.usage?.total_tokens ?? 0),
+      },
+    });
+  } catch {
+    return json(
+      {
+        code: 'invalid-response',
+        message: 'The diagnostic returned an unreadable report. Please try again.',
+      },
+      502,
+    );
+  }
 }
 
 async function handleAiChat(request, env, url) {
@@ -2134,17 +2502,113 @@ async function requestSpeechAudio(env, model, profile, useFallback = false) {
   });
 }
 
+const CARTESIA_API_VERSION = '2026-03-01';
+
+async function requestCartesiaSpeechAudio(env, model, profile) {
+  return fetch('https://api.cartesia.ai/tts/bytes', {
+    method: 'POST',
+    headers: {
+      authorization: `Bearer ${env.CARTESIA_API_KEY}`,
+      'cartesia-version': CARTESIA_API_VERSION,
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({
+      model_id: model,
+      transcript: profile.text,
+      voice: { id: profile.cartesiaVoiceId },
+      output_format: {
+        container: 'wav',
+        encoding: 'pcm_s16le',
+        sample_rate: 44_100,
+      },
+      language: 'en',
+      generation_config: {
+        speed: Math.min(1.5, Math.max(0.6, profile.pace)),
+      },
+    }),
+  });
+}
+
+async function handleAiVoiceCatalog(request, env, url) {
+  if (!isSameOriginRequest(request, url)) {
+    return json({ code: 'origin-denied', message: 'That casting origin was not accepted.' }, 403);
+  }
+  if (!env.CARTESIA_API_KEY) {
+    return json(
+      {
+        code: 'setup-required',
+        message: 'The secure Cartesia voice library has not been connected yet.',
+      },
+      503,
+    );
+  }
+  const upstreamUrl = new URL('https://api.cartesia.ai/voices');
+  upstreamUrl.searchParams.set('limit', '100');
+  upstreamUrl.searchParams.set('language', 'en');
+  let response;
+  try {
+    response = await fetch(upstreamUrl, {
+      headers: {
+        accept: 'application/json',
+        authorization: `Bearer ${env.CARTESIA_API_KEY}`,
+        'cartesia-version': CARTESIA_API_VERSION,
+      },
+    });
+  } catch {
+    return json(
+      { code: 'cartesia-unreachable', message: 'The Cartesia casting library is unreachable.' },
+      502,
+    );
+  }
+  if (!response.ok) {
+    return json(
+      {
+        code: response.status === 429 ? 'rate-limited' : 'voice-catalog-failed',
+        message:
+          response.status === 401 || response.status === 403
+            ? 'The secure Cartesia connection needs a valid API key.'
+            : 'The Cartesia casting library is temporarily unavailable.',
+      },
+      response.status === 429 ? 429 : 502,
+    );
+  }
+  try {
+    const payload = await response.json();
+    const voices = (Array.isArray(payload?.data) ? payload.data : [])
+      .filter(
+        (voice) =>
+          isObject(voice) &&
+          typeof voice.id === 'string' &&
+          /^[a-zA-Z0-9_-]{8,128}$/.test(voice.id) &&
+          typeof voice.name === 'string' &&
+          voice.name.trim(),
+      )
+      .slice(0, 100)
+      .map((voice) => ({
+        id: voice.id,
+        name: voice.name.trim().slice(0, 160),
+        description: typeof voice.description === 'string' ? voice.description.slice(0, 500) : '',
+        gender: ['masculine', 'feminine', 'gender_neutral'].includes(voice.gender)
+          ? voice.gender
+          : undefined,
+        language: typeof voice.language === 'string' ? voice.language : 'en',
+        country: typeof voice.country === 'string' ? voice.country.slice(0, 8) : undefined,
+      }))
+      .sort((left, right) => left.name.localeCompare(right.name));
+    return json({ ok: true, provider: 'cartesia', voices });
+  } catch {
+    return json(
+      { code: 'invalid-response', message: 'The Cartesia library returned no usable voices.' },
+      502,
+    );
+  }
+}
+
 async function handleAiSpeech(request, env, url) {
   if (!isSameOriginRequest(request, url)) {
     return json(
       { code: 'origin-denied', message: 'That transmission origin was not accepted.' },
       403,
-    );
-  }
-  if (!env.OPENAI_API_KEY) {
-    return json(
-      { code: 'setup-required', message: 'The secure OpenAI link has not been activated yet.' },
-      503,
     );
   }
   const contentLength = Number(request.headers.get('content-length') ?? 0);
@@ -2165,31 +2629,64 @@ async function handleAiSpeech(request, env, url) {
     return json({ code: 'invalid-request', message: 'That voice profile is not valid.' }, 400);
   }
 
-  const requestedModel = env.OPENAI_TTS_MODEL || 'gpt-4o-mini-tts';
-  let model = requestedModel;
-  let openAiResponse;
-  try {
-    openAiResponse = await requestSpeechAudio(env, requestedModel, profile);
-    if (
-      !openAiResponse.ok &&
-      (openAiResponse.status === 400 || openAiResponse.status === 404) &&
-      !env.OPENAI_TTS_MODEL
-    ) {
-      model = env.OPENAI_TTS_FALLBACK_MODEL || 'tts-1-hd';
-      openAiResponse = await requestSpeechAudio(env, model, profile, true);
+  let provider = 'openai';
+  let fallbackUsed = false;
+  let model;
+  let voiceResponse;
+
+  if (profile.provider === 'cartesia') {
+    if (env.CARTESIA_API_KEY && profile.cartesiaVoiceId) {
+      model = env.CARTESIA_TTS_MODEL || 'sonic-3.5';
+      try {
+        voiceResponse = await requestCartesiaSpeechAudio(env, model, profile);
+        if (voiceResponse.ok) provider = 'cartesia';
+        else fallbackUsed = true;
+      } catch {
+        fallbackUsed = true;
+      }
+    } else {
+      fallbackUsed = true;
     }
-  } catch {
-    return json(
-      {
-        code: 'openai-unreachable',
-        message: 'The companion voice link is temporarily unreachable. Try again shortly.',
-      },
-      502,
-    );
   }
 
-  if (!openAiResponse.ok) {
-    const rateLimited = openAiResponse.status === 429;
+  if (provider !== 'cartesia') {
+    if (!env.OPENAI_API_KEY) {
+      return json(
+        {
+          code: 'setup-required',
+          message:
+            profile.provider === 'cartesia'
+              ? 'Cartesia could not speak and the OpenAI fallback is not configured.'
+              : 'The secure OpenAI link has not been activated yet.',
+        },
+        503,
+      );
+    }
+    const requestedModel = env.OPENAI_TTS_MODEL || 'gpt-4o-mini-tts';
+    model = requestedModel;
+    try {
+      voiceResponse = await requestSpeechAudio(env, requestedModel, profile);
+      if (
+        !voiceResponse.ok &&
+        (voiceResponse.status === 400 || voiceResponse.status === 404) &&
+        !env.OPENAI_TTS_MODEL
+      ) {
+        model = env.OPENAI_TTS_FALLBACK_MODEL || 'tts-1-hd';
+        voiceResponse = await requestSpeechAudio(env, model, profile, true);
+      }
+    } catch {
+      return json(
+        {
+          code: 'openai-unreachable',
+          message: 'The companion voice link is temporarily unreachable. Try again shortly.',
+        },
+        502,
+      );
+    }
+  }
+
+  if (!voiceResponse?.ok) {
+    const rateLimited = voiceResponse?.status === 429;
     return json(
       {
         code: rateLimited ? 'rate-limited' : 'speech-failed',
@@ -2203,14 +2700,17 @@ async function handleAiSpeech(request, env, url) {
 
   const characters = profile.text.length;
   const estimatedAudioSeconds = Math.max(1, characters / (14.5 * profile.pace));
-  const estimatedCostUsd = (characters / 1_000_000) * 15;
-  return new Response(openAiResponse.body, {
+  const estimatedCostUsd = provider === 'cartesia' ? 0 : (characters / 1_000_000) * 15;
+  return new Response(voiceResponse.body, {
     status: 200,
     headers: {
       'cache-control': 'no-store',
       'content-type': 'audio/wav',
       'x-content-type-options': 'nosniff',
-      'x-ai-model': model,
+      'x-ai-model': provider === 'cartesia' ? `cartesia/${model}` : model,
+      'x-ai-provider': provider,
+      'x-ai-fallback-used': String(fallbackUsed),
+      'x-ai-credits': provider === 'cartesia' ? String(characters) : '0',
       'x-ai-characters': String(characters),
       'x-ai-audio-seconds': estimatedAudioSeconds.toFixed(2),
       'x-ai-estimated-cost-usd': estimatedCostUsd.toFixed(8),
@@ -2344,7 +2844,14 @@ export default {
         intelligenceModel:
           env.OPENAI_TEXT_MODEL || env.OPENAI_INTELLIGENCE_MODEL || 'gpt-5.6-terra',
         apexModel: env.OPENAI_TEXT_MODEL || env.OPENAI_APEX_MODEL || 'gpt-5.6-sol',
+        visionModel:
+          env.OPENAI_VISION_MODEL ||
+          env.OPENAI_TEXT_MODEL ||
+          env.OPENAI_INTELLIGENCE_MODEL ||
+          'gpt-5.6-terra',
         speechModel: env.OPENAI_TTS_MODEL || 'gpt-4o-mini-tts',
+        cartesiaConfigured: Boolean(env.CARTESIA_API_KEY),
+        cartesiaModel: env.CARTESIA_TTS_MODEL || 'sonic-3.5',
         transcriptionModel: env.OPENAI_TRANSCRIBE_MODEL || 'gpt-4o-transcribe',
         realtimeModel: env.OPENAI_REALTIME_MODEL || 'gpt-realtime-2.1-mini',
         intelligenceVersion: COMPANION_INTELLIGENCE_VERSION,
@@ -2390,6 +2897,13 @@ export default {
       return handleAiChat(request, env, url);
     }
 
+    if (url.pathname === '/api/ai/body-diagnostic') {
+      if (request.method !== 'POST') {
+        return json({ code: 'method-not-allowed', message: 'Use a secure POST diagnostic.' }, 405);
+      }
+      return handleBodyDiagnostic(request, env, url);
+    }
+
     if (url.pathname === '/api/ai/transcribe') {
       if (request.method !== 'POST') {
         return json(
@@ -2408,6 +2922,10 @@ export default {
         );
       }
       return handleAiSpeech(request, env, url);
+    }
+
+    if (url.pathname === '/api/ai/voices' && request.method === 'GET') {
+      return handleAiVoiceCatalog(request, env, url);
     }
 
     if (url.pathname === '/api/ai/realtime/session') {

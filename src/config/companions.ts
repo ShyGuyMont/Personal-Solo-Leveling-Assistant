@@ -553,6 +553,54 @@ export const COMPANIONS: CompanionDefinition[] = [
       ],
     },
   },
+  {
+    id: 'quill',
+    name: 'Quill',
+    title: 'The Storyspark',
+    shortRole: 'A.R.C. canon · Characters · Plot · Dossiers',
+    description:
+      'Quill commands the A.R.C. Archives: character dossiers, Arts records, canon recall, continuity pressure-testing, and the dangerous little question that turns a good idea into the next great reveal.',
+    appearance:
+      'A warm-brown Filipino storyteller with lively amber eyes, tousled ink-black hair split by an electric-fuchsia streak, and a midnight archive jacket traced with teal story circuitry. Floating pages and constellation glyphs orbit his luminous codex halo.',
+    personality:
+      'Hyperactive, razor-observant, spoiler-drunk, and sincerely in love with the story. He celebrates wild ideas at full volume, then checks the archive before letting enthusiasm become false canon. Snow is his favorite co-conspirator whenever a reveal is too good to keep quiet.',
+    accent: '#ff4fd8',
+    image: 'companions/quill.png',
+    categories: ['creator'],
+    stats: ['creativity'],
+    messages: {
+      'daily-briefing': [
+        'Archive lights are on! Give me a character, a mystery, or one terrible idea we can turn into excellent canon.',
+        'I reread the records. Twice. Snow says that is not technically sleeping, but the continuity is immaculate.',
+        'Today needs one story move: sharpen a dossier, answer a canon gap, or plant a reveal future-you will be furious about—in a good way.',
+      ],
+      mission: [
+        'That was not just work. That was new canon entering the world. Archive it before your brain tries to rewrite history overnight!',
+        'Story progress detected! I have notes, questions, and an unreasonable amount of excitement.',
+        'You moved A.R.C. forward. Snow already wants spoilers. I have shown admirable restraint for nearly six seconds.',
+      ],
+      'stat-level': [
+        '{stat} reached level {level}. Your imagination now requires a larger containment chamber.',
+        'Level {level} {stat}. The ideas are getting sharper—and, importantly, easier to preserve as actual canon.',
+      ],
+      'rank-up': [
+        'New class confirmed! That is protagonist energy. Yes, I know you are the author. It still counts.',
+        'Classification advanced. The Archives demand a suitably dramatic chapter title.',
+      ],
+      'rare-event': [
+        'Unexpected story signal! Hold still while I connect seventeen things that may or may not be foreshadowing.',
+        'Rare objective cleared. That is absolutely going in the timeline—with accurate sourcing, obviously.',
+      ],
+      comeback: [
+        'The author has returned! No guilt montage. Open one file, choose one unresolved thread, and let the world start breathing again.',
+        'A.R.C. waited. I did not wait quietly, but I did keep the records safe. What are we building first?',
+      ],
+      achievement: [
+        'Archive milestone! Snow, get in here—this one deserves the full spoiler celebration.',
+        'Achievement recorded. The story is larger because you refused to leave it as an idea.',
+      ],
+    },
+  },
 ];
 
 export function getCompanion(id: CompanionId) {

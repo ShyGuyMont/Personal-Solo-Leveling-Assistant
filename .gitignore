@@ -6,4 +6,5 @@ dev-dist
 coverage
 .sites-*.tar.gz
 *.local
+private-imports/
 .DS_Store

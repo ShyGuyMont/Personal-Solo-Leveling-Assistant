@@ -304,6 +304,7 @@ export function AiHeadquartersPanel() {
           challenges,
           systemDate,
           enabledCompanionIds: enabledCompanions.map((companion) => companion.id),
+          query: message,
         }),
       });
       void voiceLink.trackTextUsage(result).catch(() => undefined);
@@ -531,11 +532,18 @@ export function AiHeadquartersPanel() {
           settings={currentSettings}
           profiles={voiceLink.profiles}
           usage={voiceLink.usage}
+          status={status}
+          cartesiaVoices={voiceLink.cartesiaVoices}
+          cartesiaCatalogLoading={voiceLink.cartesiaCatalogLoading}
+          cartesiaCatalogError={voiceLink.cartesiaCatalogError}
           voiceBusyMessageId={voiceLink.voiceBusyMessageId}
           onEnable={voiceLink.enableVoiceOutput}
           onToggleOutput={voiceLink.setVoiceOutputEnabled}
           onToggleAutoPlay={voiceLink.setAutoPlay}
           onSetWarning={voiceLink.setUsageWarning}
+          onSetProvider={voiceLink.setVoiceProvider}
+          onSetCartesiaPlan={voiceLink.setCartesiaPlan}
+          onLoadCartesiaVoices={voiceLink.loadCartesiaVoices}
           onSaveProfile={voiceLink.saveProfile}
           onResetProfile={voiceLink.resetProfile}
           onPreview={voiceLink.previewProfile}

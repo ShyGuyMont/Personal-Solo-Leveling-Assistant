@@ -402,6 +402,31 @@ export const CANON_VOICE_PROFILES: Record<CompanionId, CanonVoiceProfile> = {
     audition:
       'You have protein, rice, and twenty minutes. This is not a crisis; it is dinner with terrible public relations. Pan. Heat. Move!',
   },
+  quill: {
+    id: 'quill',
+    voice: 'ash',
+    accent: 'natural',
+    delivery: 'playful',
+    cadence: 'rapid-fire',
+    texture: 'bright',
+    register: 'high-mid',
+    resonance: 'forward',
+    performanceTake: 'dynamic',
+    pace: 1.36,
+    warmth: 4,
+    energy: 5,
+    expressiveness: 5,
+    naturalism: 5,
+    pauseDiscipline: 5,
+    intonation: 5,
+    articulation: 4,
+    emotionalRange: 5,
+    updatedAt: CREATED_AT,
+    direction:
+      'Fast, delighted, conspiratorial, and unmistakably human. He sounds like a brilliant friend who just found the missing lore connection, with genuine wonder under the speed and enough control to become precise when canon is uncertain.',
+    audition:
+      'Wait—do not answer yet. If that scar came before the vow, the entire rivalry changes, and Snow is going to lose her mind when she sees why.',
+  },
 };
 
 export function cloneCanonVoiceProfile(companionId: CompanionId): AiVoiceProfile {
@@ -409,6 +434,8 @@ export function cloneCanonVoiceProfile(companionId: CompanionId): AiVoiceProfile
   return {
     id: profile.id,
     voice: profile.voice,
+    cartesiaVoiceId: profile.cartesiaVoiceId,
+    cartesiaVoiceName: profile.cartesiaVoiceName,
     accent: profile.accent,
     delivery: profile.delivery,
     cadence: profile.cadence,
@@ -454,6 +481,15 @@ export function normalizeAiVoiceProfile(
     ...value,
     id: companionId,
     voice: value?.voice && voices.includes(value.voice) ? value.voice : canon.voice,
+    cartesiaVoiceId:
+      typeof value?.cartesiaVoiceId === 'string' &&
+      /^[a-zA-Z0-9_-]{8,128}$/.test(value.cartesiaVoiceId)
+        ? value.cartesiaVoiceId
+        : undefined,
+    cartesiaVoiceName:
+      typeof value?.cartesiaVoiceName === 'string' && value.cartesiaVoiceName.trim().length <= 160
+        ? value.cartesiaVoiceName.trim()
+        : undefined,
     accent: value?.accent && accents.includes(value.accent) ? value.accent : canon.accent,
     delivery:
       value?.delivery && deliveries.includes(value.delivery) ? value.delivery : canon.delivery,

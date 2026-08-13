@@ -1,6 +1,6 @@
-export const APP_VERSION = '7.7.1';
-export const DATABASE_SCHEMA_VERSION = 23;
-export const SAVE_FORMAT_VERSION = 23;
+export const APP_VERSION = '8.0.0';
+export const DATABASE_SCHEMA_VERSION = 26;
+export const SAVE_FORMAT_VERSION = 26;
 
 export interface ReleaseSection {
   title: string;
@@ -9,6 +9,34 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 8.0.0 · A.R.C. Archives',
+    detail:
+      'The complete A.R.C. character system joins The System as a private creative realm, while Quill brings source-grounded canon recall, continuity counsel, and unapologetic story-room energy to the party.',
+    points: [
+      'The original five-section Character Archives, printable profile, 0–1000 Graced stat engine, Starting and Ending Story Classes, transcendence rules, and all 152 Arts now run inside the compiled Dossier Forge without depending on nested host routes.',
+      'Imported v4 and legacy JSON dossiers enter a searchable on-device Character Library; saving in the Forge synchronizes the record, and an existing character name updates instead of silently creating duplicates.',
+      'The Canon Vault accepts modern Word (.docx), Text, Markdown, JSON, and pasted source records with explicit types, tags, and character references, while the Continuity Scanner flags gaps and collisions without rewriting canon.',
+      'A portable Quill Knowledge Pack can carry up to 300 organized lore sources in one JSON file, making laptop-to-phone transfer possible without replacing missions, progression, settings, or any unrelated campaign data.',
+      'Quill, The Storyspark, becomes the eleventh companion with a complete Soulprint, Quick Link and Voice Link access, support dialogue, party chemistry, progression reactions, Campfires, Councils, and milestone celebrations.',
+      'A.R.C. retrieval is topic-gated and source-aware: only Quill—or Snow and the Party during an explicit A.R.C. conversation—receives compact relevant records, with established canon separated from inference and new ideas.',
+      'Archive Shield format 25 validates and preserves Character Library and Canon Vault records alongside the full campaign, while imported lore remains private on this device until the Hunter intentionally asks for online counsel.',
+      'Voice Forge can now cast companions from an optional Cartesia Sonic voice library while preserving their existing OpenAI voices as an automatic fallback; provider choice, voice IDs, and local allowance tracking travel safely in Archive Shield format 26.',
+    ],
+  },
+  {
+    title: 'Version 7.8.0 · Body Diagnostic',
+    detail:
+      'The Training Hall gains a private weekly evidence review where Rook, Ember, and Mira turn physique photos and smart-scale screenshots into a disciplined, non-medical progress report.',
+    points: [
+      'A dedicated Body Diagnostic accepts up to three physique angles and one smart-scale screenshot, with optional Hunter context and goals for balance, recomposition, fat loss, muscle gain, performance, or mobility.',
+      'Terra vision extracts readable scale values, separates visible observations from estimates, identifies data quality, compares against the prior text report, and returns priorities plus optional support work without inventing a diagnosis or exact body-fat reading from appearance.',
+      'Rook, Ember, and Mira each deliver a distinct no-excuses response, and the wider companion intelligence now knows whether the weekly diagnostic is due so accountability can stay direct without body-shaming.',
+      'Completing the optional diagnostic awards 150 account XP exactly once per configured System week; it never completes the Daily Workout mission or awards credit for suggested exercises.',
+      'Submitted images exist only for the active request and are never written to IndexedDB, Archive Shield, conversation history, or the stored diagnostic record; only the report, source types, model usage, and reward proof remain on-device.',
+      'Archive Shield Version 24 validates every nested diagnostic value, preserves portable reports, and rejects impossible records or image-like payload fields.',
+    ],
+  },
   {
     title: 'Version 7.7.1 · System Integrity Sweep',
     detail:

@@ -7,9 +7,12 @@ import type {
   AiUsageRecord,
   AiVoiceProfile,
   ArcMilestone,
+  ArcCanonSource,
+  ArcCharacterRecord,
   AuditEntry,
   AppMetadata,
   BackupSnapshot,
+  BodyDiagnosticRecord,
   CampfireRecap,
   CampaignArc,
   ChallengeProgress,
@@ -102,6 +105,9 @@ export class SystemDatabase extends Dexie {
   treasuryWeeks!: EntityTable<TreasuryWeek, 'id'>;
   treasuryChallenges!: EntityTable<TreasuryDailyChallenge, 'id'>;
   trainingSessions!: EntityTable<TrainingSession, 'id'>;
+  bodyDiagnostics!: EntityTable<BodyDiagnosticRecord, 'id'>;
+  arcCharacters!: EntityTable<ArcCharacterRecord, 'id'>;
+  arcCanonSources!: EntityTable<ArcCanonSource, 'id'>;
   kitchenSessions!: EntityTable<KitchenSession, 'id'>;
   sanctuarySessions!: EntityTable<SanctuarySession, 'id'>;
   aiConversations!: EntityTable<AiConversation, 'id'>;
@@ -744,6 +750,56 @@ export class SystemDatabase extends Dexie {
         await metadata.put({ id: 'schema-seeded', value: 23, updatedAt: now });
         await metadata.put({ id: 'app-version', value: '7.7.0', updatedAt: now });
       });
+    this.version(24)
+      .stores({
+        bodyDiagnostics: 'id,weekStart,weekEnd,date,completedAt',
+      })
+      .upgrade(async (transaction) => {
+        const now = new Date().toISOString();
+        const metadata = transaction.table<AppMetadata, string>('appMetadata');
+        await metadata.put({ id: 'schema-seeded', value: 24, updatedAt: now });
+        await metadata.put({ id: 'app-version', value: '7.8.0', updatedAt: now });
+      });
+    this.version(25)
+      .stores({
+        arcCharacters: 'id,name,style,faction,overallClass,updatedAt',
+        arcCanonSources: 'id,title,kind,*tags,*characterNames,updatedAt',
+      })
+      .upgrade(async (transaction) => {
+        const now = new Date().toISOString();
+        const settings = transaction.table<Settings, string>('settings');
+        const current = await settings.get('primary');
+        if (current) {
+          await settings.put({
+            ...current,
+            enabledCompanionIds: Array.from(
+              new Set([...(current.enabledCompanionIds ?? []), 'quill']),
+            ) as Settings['enabledCompanionIds'],
+          });
+        }
+        const metadata = transaction.table<AppMetadata, string>('appMetadata');
+        await metadata.put({ id: 'schema-seeded', value: 25, updatedAt: now });
+        await metadata.put({ id: 'app-version', value: '8.0.0', updatedAt: now });
+      });
+    this.version(26)
+      .stores({
+        aiVoiceProfiles: 'id,voice,accent,updatedAt',
+        aiUsageRecords: 'id,kind,sessionId,createdAt,model,companionId',
+      })
+      .upgrade(async (transaction) => {
+        const settings = transaction.table<Settings, string>('settings');
+        const current = await settings.get('primary');
+        if (current) {
+          await settings.update('primary', {
+            aiVoiceProvider: current.aiVoiceProvider ?? 'openai',
+            aiCartesiaPlan: current.aiCartesiaPlan ?? 'free',
+          });
+        }
+        const now = new Date().toISOString();
+        const metadata = transaction.table<AppMetadata, string>('appMetadata');
+        await metadata.put({ id: 'schema-seeded', value: 26, updatedAt: now });
+        await metadata.put({ id: 'app-version', value: '8.0.0', updatedAt: now });
+      });
   }
 }
 
@@ -793,6 +849,9 @@ export const TABLE_NAMES = [
   'treasuryWeeks',
   'treasuryChallenges',
   'trainingSessions',
+  'bodyDiagnostics',
+  'arcCharacters',
+  'arcCanonSources',
   'kitchenSessions',
   'sanctuarySessions',
   'aiConversations',

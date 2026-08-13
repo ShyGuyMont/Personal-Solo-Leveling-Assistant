@@ -331,6 +331,7 @@ export function CompanionQuickLink() {
             challenges,
             systemDate,
             enabledCompanionIds: enabledCompanions.map((companion) => companion.id),
+            query: addressed.message || text,
           }),
           commandMode: 'propose',
         });

@@ -6,6 +6,7 @@ import {
   Mic,
   RotateCcw,
   Save,
+  Search,
   SlidersHorizontal,
   Sparkles,
   Volume2,
@@ -24,18 +25,33 @@ import {
   CANON_VOICE_PROFILES,
 } from '@/config/aiVoices';
 import { COMPANIONS, getCompanionImage } from '@/config/companions';
-import { formatEstimatedSpend, type AiUsageSummary } from '@/game/aiVoice';
-import type { AiVoiceProfile, AiVoiceTake, CompanionId, Settings } from '@/types/game';
+import { formatEstimatedSpend, getCartesiaMonthlyUsage, type AiUsageSummary } from '@/game/aiVoice';
+import type {
+  AiCartesiaPlan,
+  AiVoiceProfile,
+  AiVoiceProvider,
+  AiVoiceTake,
+  CompanionId,
+  Settings,
+} from '@/types/game';
+import type { AiLinkStatus, CartesiaVoiceOption } from '@/services/aiHeadquarters';
 
 export function AiVoiceLinkPanel({
   settings,
   profiles,
   usage,
+  status,
+  cartesiaVoices,
+  cartesiaCatalogLoading,
+  cartesiaCatalogError,
   voiceBusyMessageId,
   onEnable,
   onToggleOutput,
   onToggleAutoPlay,
   onSetWarning,
+  onSetProvider,
+  onSetCartesiaPlan,
+  onLoadCartesiaVoices,
   onSaveProfile,
   onResetProfile,
   onPreview,
@@ -44,11 +60,18 @@ export function AiVoiceLinkPanel({
   settings: Settings;
   profiles?: Record<CompanionId, AiVoiceProfile>;
   usage?: AiUsageSummary;
+  status?: AiLinkStatus;
+  cartesiaVoices: CartesiaVoiceOption[];
+  cartesiaCatalogLoading: boolean;
+  cartesiaCatalogError: string;
   voiceBusyMessageId?: string;
   onEnable: () => Promise<void>;
   onToggleOutput: (enabled: boolean) => Promise<void>;
   onToggleAutoPlay: (enabled: boolean) => Promise<void>;
   onSetWarning: (value: number) => Promise<void>;
+  onSetProvider: (provider: AiVoiceProvider) => Promise<void>;
+  onSetCartesiaPlan: (plan: AiCartesiaPlan) => Promise<void>;
+  onLoadCartesiaVoices: () => Promise<CartesiaVoiceOption[]>;
   onSaveProfile: (profile: AiVoiceProfile) => Promise<AiVoiceProfile>;
   onResetProfile: (companionId: CompanionId) => Promise<AiVoiceProfile>;
   onPreview: (profile: AiVoiceProfile, takeOverride?: AiVoiceTake) => Promise<void>;
@@ -59,12 +82,48 @@ export function AiVoiceLinkPanel({
   const [draft, setDraft] = useState<AiVoiceProfile>();
   const [saving, setSaving] = useState(false);
   const [usageOpen, setUsageOpen] = useState(false);
+  const [voiceSearch, setVoiceSearch] = useState('');
   const companion = useMemo(() => COMPANIONS.find((item) => item.id === forgeId)!, [forgeId]);
   const canon = CANON_VOICE_PROFILES[forgeId];
+  const selectedProvider = settings.aiVoiceProvider ?? 'openai';
+  const cartesiaPlan = settings.aiCartesiaPlan ?? 'free';
+  const cartesiaUsage = getCartesiaMonthlyUsage(usage, cartesiaPlan);
+  const filteredCartesiaVoices = useMemo(() => {
+    const search = voiceSearch.trim().toLowerCase();
+    if (!search) return cartesiaVoices;
+    return cartesiaVoices.filter(
+      (voice) =>
+        voice.id === draft?.cartesiaVoiceId ||
+        [voice.name, voice.description, voice.gender, voice.country]
+          .filter(Boolean)
+          .some((value) => String(value).toLowerCase().includes(search)),
+    );
+  }, [cartesiaVoices, draft?.cartesiaVoiceId, voiceSearch]);
 
   useEffect(() => {
     if (profiles?.[forgeId]) setDraft({ ...profiles[forgeId] });
   }, [forgeId, profiles]);
+
+  useEffect(() => {
+    if (
+      open &&
+      selectedProvider === 'cartesia' &&
+      status?.cartesiaConfigured &&
+      !cartesiaVoices.length &&
+      !cartesiaCatalogLoading &&
+      !cartesiaCatalogError
+    ) {
+      void onLoadCartesiaVoices();
+    }
+  }, [
+    cartesiaCatalogError,
+    cartesiaCatalogLoading,
+    cartesiaVoices.length,
+    onLoadCartesiaVoices,
+    open,
+    selectedProvider,
+    status?.cartesiaConfigured,
+  ]);
 
   const monthWarning =
     settings.aiUsageWarningUsd > 0 &&
@@ -190,7 +249,7 @@ export function AiVoiceLinkPanel({
             <strong>Voice Link · Voice Forge</strong>
             <small>
               {settings.aiVoiceOutputEnabled
-                ? `${settings.aiVoiceAutoPlay ? 'Voiced replies automatic' : 'Manual playback'} · ten soulprints ready`
+                ? `${settings.aiVoiceAutoPlay ? 'Voiced replies automatic' : 'Manual playback'} · ${selectedProvider === 'cartesia' ? 'Cartesia Realistic' : 'OpenAI Standard'}`
                 : 'AI-generated companion voices are muted'}
             </small>
           </span>
@@ -262,6 +321,40 @@ export function AiVoiceLinkPanel({
                 </span>
               ))}
             </div>
+            {(status?.cartesiaConfigured || cartesiaUsage.characters > 0) && (
+              <div className="ai-cartesia-allowance">
+                <span>
+                  <small>CARTESIA {cartesiaPlan.toUpperCase()} · LOCAL APP COUNT</small>
+                  <strong>
+                    {cartesiaUsage.characters.toLocaleString()} /{' '}
+                    {cartesiaUsage.limit.toLocaleString()} credits
+                  </strong>
+                </span>
+                <span>
+                  <small>ESTIMATED REMAINING</small>
+                  <strong>~{cartesiaUsage.approximateMinutesRemaining} voice minutes</strong>
+                </span>
+                <div aria-label={`${Math.round(cartesiaUsage.percent)} percent used`}>
+                  <i style={{ width: `${cartesiaUsage.percent}%` }} />
+                </div>
+                <label>
+                  Allowance
+                  <select
+                    value={cartesiaPlan}
+                    onChange={(event) =>
+                      void onSetCartesiaPlan(event.target.value as AiCartesiaPlan)
+                    }
+                  >
+                    <option value="free">Free · 20,000 monthly credits</option>
+                    <option value="pro">Pro · 100,000 monthly credits</option>
+                  </select>
+                </label>
+                <p>
+                  This counts speech generated inside The System. Cartesia remains the authority if
+                  the same account is used elsewhere.
+                </p>
+              </div>
+            )}
             <label>
               Warn me near
               <span>$</span>
@@ -276,11 +369,12 @@ export function AiVoiceLinkPanel({
             </label>
           </div>
           <p className="ai-usage-ledger__note">
-            Text, cache, reasoning, transcription, and Live Link audio token counts come from API
-            responses. Dollar totals apply current model rates locally; generated-speech cost
-            remains an estimate because the speech endpoint returns audio rather than a usage
-            ledger. This never includes API use outside The System, and the OpenAI Usage dashboard
-            remains the billing authority.
+            Text, vision, cache, reasoning, transcription, and Live Link audio token counts come
+            from API responses. Dollar totals apply current model rates locally; generated-speech
+            cost remains an estimate because the speech endpoint returns audio rather than a usage
+            ledger. Cartesia speech is counted as local monthly credits rather than estimated
+            pay-per-call dollars. This never includes API use outside The System; each provider's
+            own dashboard remains the billing authority.
           </p>
         </div>
       )}
@@ -336,6 +430,46 @@ export function AiVoiceLinkPanel({
             </div>
           )}
 
+          <div className="ai-voice-engine">
+            <header>
+              <span>
+                <Sparkles size={17} />
+              </span>
+              <div>
+                <strong>Voice Engine</strong>
+                <small>Change the speaker without changing the companion</small>
+              </div>
+            </header>
+            <div>
+              <button
+                type="button"
+                className={selectedProvider === 'openai' ? 'is-active' : ''}
+                onClick={() => void onSetProvider('openai')}
+              >
+                <strong>OpenAI Standard</strong>
+                <small>Current voices · permanent fallback</small>
+              </button>
+              <button
+                type="button"
+                className={selectedProvider === 'cartesia' ? 'is-active' : ''}
+                disabled={!status?.cartesiaConfigured}
+                onClick={() => void onSetProvider('cartesia')}
+              >
+                <strong>Cartesia Realistic</strong>
+                <small>
+                  {status?.cartesiaConfigured
+                    ? `${status.cartesiaModel ?? 'Sonic 3.5'} · connected`
+                    : 'Secure connection required'}
+                </small>
+              </button>
+            </div>
+            <p>
+              Play Voice, automatic replies, Quick Link, Party Council, and previews use this
+              engine. Live Link remains on its native OpenAI realtime channel. Cartesia failures
+              return to OpenAI automatically.
+            </p>
+          </div>
+
           <div className="ai-voice-forge">
             <header>
               <span>
@@ -343,7 +477,7 @@ export function AiVoiceLinkPanel({
               </span>
               <div>
                 <strong>Voice Forge III · Living Performance</strong>
-                <small>Ten unmistakable Soulprints · scene intelligence · dual-take casting</small>
+                <small>Eleven unmistakable Soulprints · dual-engine casting · safe fallback</small>
               </div>
             </header>
 
@@ -377,7 +511,7 @@ export function AiVoiceLinkPanel({
 
                 <div className="ai-voice-forge__selectors">
                   <label>
-                    Base voice
+                    OpenAI fallback voice
                     <select
                       value={draft.voice}
                       onChange={(event) =>
@@ -391,6 +525,53 @@ export function AiVoiceLinkPanel({
                       ))}
                     </select>
                   </label>
+                  {status?.cartesiaConfigured && (
+                    <label className="ai-cartesia-casting">
+                      Cartesia voice
+                      <span>
+                        <Search size={14} />
+                        <input
+                          type="search"
+                          value={voiceSearch}
+                          onChange={(event) => setVoiceSearch(event.target.value)}
+                          placeholder="Search name, style, or region"
+                        />
+                      </span>
+                      <select
+                        value={draft.cartesiaVoiceId ?? ''}
+                        disabled={cartesiaCatalogLoading}
+                        onChange={(event) => {
+                          const selected = cartesiaVoices.find(
+                            (voice) => voice.id === event.target.value,
+                          );
+                          setDraft({
+                            ...draft,
+                            cartesiaVoiceId: selected?.id,
+                            cartesiaVoiceName: selected?.name,
+                          });
+                        }}
+                      >
+                        <option value="">
+                          {cartesiaCatalogLoading
+                            ? 'Loading casting library…'
+                            : 'Uncast · use OpenAI'}
+                        </option>
+                        {filteredCartesiaVoices.map((voice) => (
+                          <option key={voice.id} value={voice.id}>
+                            {voice.name}
+                            {voice.gender ? ` · ${voice.gender.replace('_', ' ')}` : ''}
+                            {voice.country ? ` · ${voice.country}` : ''}
+                          </option>
+                        ))}
+                      </select>
+                      <small>
+                        {cartesiaCatalogError ||
+                          (draft.cartesiaVoiceName
+                            ? `${draft.cartesiaVoiceName} is cast for ${companion.name}.`
+                            : `${companion.name} will keep using their OpenAI fallback until cast.`)}
+                      </small>
+                    </label>
+                  )}
                   <label>
                     Accent / region
                     <select

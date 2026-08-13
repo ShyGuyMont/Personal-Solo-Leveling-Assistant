@@ -3,6 +3,7 @@ import type {
   AiConversationAudience,
   AiConversationMessage,
   AiVoiceProfile,
+  AiVoiceProvider,
   AiVoiceScene,
   CompanionOperationRequest,
   CompanionId,
@@ -160,6 +161,19 @@ export interface AiProgressContext {
       privateWritingExcluded: true;
     };
     training: {
+      bodyDiagnostic: {
+        dueThisWeek: boolean;
+        weekStart: LocalDateKey;
+        weeklyXp: number;
+        latest?: {
+          date: LocalDateKey;
+          goal: string;
+          summary: string;
+          priorities: string[];
+          sourceKinds: string[];
+        };
+        photosExcluded: true;
+      };
       recentSessions: Array<{
         date: LocalDateKey;
         location: string;
@@ -184,6 +198,29 @@ export interface AiProgressContext {
         completedMilestones: number;
       }>;
       milestoneNotesExcluded: true;
+    };
+    arc: {
+      library: { characterCount: number; canonSourceCount: number };
+      retrievalQuery: string;
+      relevantCharacters: Array<{
+        source: string;
+        name: string;
+        alias: string;
+        style: string;
+        faction: string;
+        overallClass: string;
+        startingClass: string;
+        endingClass: string;
+        dossier: Record<string, unknown>;
+      }>;
+      relevantCanonSources: Array<{
+        source: string;
+        kind: string;
+        tags: string[];
+        characterNames: string[];
+        excerpt: string;
+      }>;
+      grounding: string;
     };
     creator: {
       identity: {
@@ -291,8 +328,11 @@ export interface AiLinkStatus {
   fastModel?: string;
   intelligenceModel?: string;
   apexModel?: string;
+  visionModel?: string;
   intelligenceVersion?: string;
   speechModel?: string;
+  cartesiaConfigured?: boolean;
+  cartesiaModel?: string;
   transcriptionModel?: string;
   realtimeModel?: string;
 }
@@ -387,9 +427,20 @@ export interface AiTranscriptionResult {
 export interface AiSpeechResult {
   audio: Blob;
   model: string;
+  provider: AiVoiceProvider;
+  fallbackUsed: boolean;
   characters: number;
   estimatedAudioSeconds: number;
   estimatedCostUsd: number;
+}
+
+export interface CartesiaVoiceOption {
+  id: string;
+  name: string;
+  description: string;
+  gender?: 'masculine' | 'feminine' | 'gender_neutral';
+  language: string;
+  country?: string;
 }
 
 export class AiLinkError extends Error {
@@ -423,9 +474,12 @@ export async function getAiLinkStatus(): Promise<AiLinkStatus> {
       intelligenceModel:
         typeof payload?.intelligenceModel === 'string' ? payload.intelligenceModel : undefined,
       apexModel: typeof payload?.apexModel === 'string' ? payload.apexModel : undefined,
+      visionModel: typeof payload?.visionModel === 'string' ? payload.visionModel : undefined,
       intelligenceVersion:
         typeof payload?.intelligenceVersion === 'string' ? payload.intelligenceVersion : undefined,
       speechModel: typeof payload?.speechModel === 'string' ? payload.speechModel : undefined,
+      cartesiaConfigured: payload?.cartesiaConfigured === true,
+      cartesiaModel: typeof payload?.cartesiaModel === 'string' ? payload.cartesiaModel : undefined,
       transcriptionModel:
         typeof payload?.transcriptionModel === 'string' ? payload.transcriptionModel : undefined,
       realtimeModel: typeof payload?.realtimeModel === 'string' ? payload.realtimeModel : undefined,
@@ -433,6 +487,49 @@ export async function getAiLinkStatus(): Promise<AiLinkStatus> {
   } catch {
     return { ok: false, configured: false };
   }
+}
+
+export async function requestCartesiaVoiceCatalog(): Promise<CartesiaVoiceOption[]> {
+  let response: Response;
+  try {
+    response = await fetch('/api/ai/voices?provider=cartesia', {
+      headers: { accept: 'application/json' },
+      cache: 'no-store',
+    });
+  } catch {
+    throw new AiLinkError('The Cartesia casting library could not be reached.', 'network');
+  }
+  const payload = await readJson(response);
+  if (!response.ok) {
+    throw new AiLinkError(
+      typeof payload?.message === 'string'
+        ? payload.message
+        : 'The Cartesia casting library is unavailable.',
+      typeof payload?.code === 'string' ? payload.code : 'voice-catalog-failed',
+    );
+  }
+  const voices = Array.isArray(payload?.voices) ? payload.voices : [];
+  return voices
+    .filter(
+      (voice): voice is Record<string, unknown> =>
+        Boolean(voice) &&
+        typeof voice === 'object' &&
+        typeof (voice as Record<string, unknown>).id === 'string' &&
+        typeof (voice as Record<string, unknown>).name === 'string',
+    )
+    .map((voice) => ({
+      id: String(voice.id),
+      name: String(voice.name),
+      description: typeof voice.description === 'string' ? voice.description : '',
+      gender:
+        voice.gender === 'masculine' ||
+        voice.gender === 'feminine' ||
+        voice.gender === 'gender_neutral'
+          ? voice.gender
+          : undefined,
+      language: typeof voice.language === 'string' ? voice.language : 'en',
+      country: typeof voice.country === 'string' ? voice.country : undefined,
+    }));
 }
 
 export async function requestAiHeadquartersReply(input: {
@@ -587,6 +684,7 @@ export async function requestAiSpeech(input: {
   companionId: CompanionId;
   text: string;
   profile: AiVoiceProfile;
+  provider?: AiVoiceProvider;
   scene?: AiVoiceScene;
 }): Promise<AiSpeechResult> {
   let response: Response;
@@ -601,6 +699,8 @@ export async function requestAiSpeech(input: {
         companionId: input.companionId,
         text: input.text.slice(0, 4_000),
         voice: input.profile.voice,
+        provider: input.provider ?? 'openai',
+        cartesiaVoiceId: input.profile.cartesiaVoiceId,
         accent: input.profile.accent,
         delivery: input.profile.delivery,
         cadence: input.profile.cadence,
@@ -638,6 +738,8 @@ export async function requestAiSpeech(input: {
   return {
     audio,
     model: response.headers.get('x-ai-model') ?? 'unknown',
+    provider: response.headers.get('x-ai-provider') === 'cartesia' ? 'cartesia' : 'openai',
+    fallbackUsed: response.headers.get('x-ai-fallback-used') === 'true',
     characters: Number(response.headers.get('x-ai-characters') ?? input.text.length),
     estimatedAudioSeconds: Number(response.headers.get('x-ai-audio-seconds') ?? 0),
     estimatedCostUsd: Number(response.headers.get('x-ai-estimated-cost-usd') ?? 0),

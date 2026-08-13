@@ -46,9 +46,12 @@ export type CompanionId =
   | 'mira'
   | 'amara'
   | 'cassian'
-  | 'saffron';
+  | 'saffron'
+  | 'quill';
 export type CompanionMode = 'off' | 'quiet' | 'balanced' | 'talkative';
 export type AiLinkMode = 'offline' | 'online';
+export type AiVoiceProvider = 'openai' | 'cartesia';
+export type AiCartesiaPlan = 'free' | 'pro';
 export type AiVoiceName =
   | 'alloy'
   | 'ash'
@@ -191,6 +194,8 @@ export interface Settings {
   aiVoiceOutputEnabled: boolean;
   aiVoiceAutoPlay: boolean;
   aiVoiceDisclosureAcknowledged: boolean;
+  aiVoiceProvider?: AiVoiceProvider;
+  aiCartesiaPlan?: AiCartesiaPlan;
   aiUsageWarningUsd: number;
   aiSoulprintNotes: Partial<Record<CompanionId, AiSoulprintNotes>>;
 }
@@ -313,6 +318,79 @@ export interface TrainingSession {
   mobilityEstimatedMinutes?: number;
   note?: string;
   updatedAt: string;
+}
+
+export type BodyDiagnosticGoal =
+  'balanced' | 'recomposition' | 'fat-loss' | 'muscle-gain' | 'performance' | 'mobility';
+export type BodyDiagnosticSourceKind = 'physique' | 'scale';
+export type BodyDiagnosticConfidence = 'high' | 'medium' | 'low';
+
+export interface BodyDiagnosticMetric {
+  label: string;
+  value: string;
+  unit: string;
+  source: BodyDiagnosticSourceKind | 'hunter';
+  confidence: BodyDiagnosticConfidence;
+}
+
+export interface BodyDiagnosticObservation {
+  area: string;
+  observation: string;
+  evidence: string;
+  confidence: BodyDiagnosticConfidence;
+}
+
+export interface BodyDiagnosticPriority {
+  title: string;
+  why: string;
+  nextAction: string;
+}
+
+export interface BodyDiagnosticExercise {
+  name: string;
+  prescription: string;
+  rationale: string;
+}
+
+export interface BodyDiagnosticAssessment {
+  title: string;
+  scanType: 'physique' | 'scale' | 'combined';
+  dataQuality: 'strong' | 'usable' | 'limited';
+  summary: string;
+  comparison: string;
+  dataQualityNotes: string[];
+  metrics: BodyDiagnosticMetric[];
+  observations: BodyDiagnosticObservation[];
+  priorities: BodyDiagnosticPriority[];
+  bonusExercises: BodyDiagnosticExercise[];
+  companionMessages: Array<{
+    companionId: 'rook' | 'ember' | 'mira';
+    message: string;
+  }>;
+  warnings: string[];
+  disclaimer: string;
+}
+
+export interface BodyDiagnosticRecord {
+  id: string;
+  weekStart: LocalDateKey;
+  weekEnd: LocalDateKey;
+  date: LocalDateKey;
+  goal: BodyDiagnosticGoal;
+  hunterContext?: string;
+  sourceKinds: BodyDiagnosticSourceKind[];
+  assessment: BodyDiagnosticAssessment;
+  model: string;
+  usage: {
+    inputTokens: number;
+    cachedInputTokens: number;
+    outputTokens: number;
+    reasoningTokens: number;
+    totalTokens: number;
+  };
+  rewardApplied: boolean;
+  rewardXp: number;
+  completedAt: string;
 }
 
 export type KitchenRecipeId =
@@ -440,6 +518,38 @@ export interface CreatorProject {
   createdAt: string;
   updatedAt: string;
   publishedAt?: string;
+}
+
+export type ArcCanonSourceKind =
+  'character-dossier' | 'world-lore' | 'faction' | 'location' | 'timeline' | 'plot' | 'reference';
+
+export interface ArcCharacterRecord {
+  id: string;
+  name: string;
+  alias: string;
+  style: string;
+  faction: string;
+  overallClass: string;
+  startingClass: string;
+  endingClass: string;
+  completion: number;
+  schemaVersion: number;
+  sourceFileName?: string;
+  data: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ArcCanonSource {
+  id: string;
+  title: string;
+  kind: ArcCanonSourceKind;
+  sourceFileName?: string;
+  tags: string[];
+  characterNames: string[];
+  text: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export type SanctuaryMode = 'study' | 'stronghold';
@@ -629,6 +739,7 @@ export interface XpTransaction {
     | 'daily-event'
     | 'daily-command'
     | 'training'
+    | 'body-diagnostic'
     | 'kitchen'
     | 'recovery'
     | 'reversal'
@@ -939,6 +1050,8 @@ export interface AiRelationshipMemory {
 export interface AiVoiceProfile {
   id: CompanionId;
   voice: AiVoiceName;
+  cartesiaVoiceId?: string;
+  cartesiaVoiceName?: string;
   accent: AiVoiceAccent;
   delivery: AiVoiceDelivery;
   cadence: AiVoiceCadence;
@@ -958,7 +1071,7 @@ export interface AiVoiceProfile {
   updatedAt: string;
 }
 
-export type AiUsageKind = 'text' | 'transcription' | 'speech' | 'realtime';
+export type AiUsageKind = 'text' | 'vision' | 'transcription' | 'speech' | 'realtime';
 
 export interface AiUsageRecord {
   id: string;
@@ -966,6 +1079,7 @@ export interface AiUsageRecord {
   sessionId: string;
   createdAt: string;
   model: string;
+  provider?: AiVoiceProvider;
   companionId?: CompanionId;
   inputTokens: number;
   cachedInputTokens?: number;

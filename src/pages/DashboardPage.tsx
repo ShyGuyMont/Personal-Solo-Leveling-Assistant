@@ -2,6 +2,7 @@ import {
   ArrowRight,
   Archive,
   BookHeart,
+  BookOpenCheck,
   CalendarDays,
   Castle,
   ChefHat,
@@ -346,6 +347,18 @@ export function DashboardPage() {
             <ChevronRight size={17} />
             <RealmVista />
           </Link>
+          <Link to="/arc-archives" className="realm-portal" data-portal="arc">
+            <span className="realm-portal__icon">
+              <BookOpenCheck size={23} />
+            </span>
+            <span>
+              <small>QUILL & SNOW</small>
+              <strong>A.R.C. Archives</strong>
+            </span>
+            <em>Canon library synchronized</em>
+            <ChevronRight size={17} />
+            <RealmVista />
+          </Link>
           <Link to="/headquarters" className="realm-portal" data-portal="party">
             <span className="realm-portal__icon">
               <Castle size={23} />
@@ -354,7 +367,7 @@ export function DashboardPage() {
               <small>FULL PARTY</small>
               <strong>Party Headquarters</strong>
             </span>
-            <em>Ten companion links</em>
+            <em>Eleven companion links</em>
             <ChevronRight size={17} />
             <RealmVista />
           </Link>

@@ -4,7 +4,13 @@ import {
   normalizeAiVoiceProfile,
 } from '@/config/aiVoices';
 import { db } from '@/db/database';
-import type { AiUsageKind, AiUsageRecord, AiVoiceProfile, CompanionId } from '@/types/game';
+import type {
+  AiCartesiaPlan,
+  AiUsageKind,
+  AiUsageRecord,
+  AiVoiceProfile,
+  CompanionId,
+} from '@/types/game';
 
 export interface AiUsageTotals {
   estimatedCostUsd: number;
@@ -27,6 +33,36 @@ export interface AiUsageSummary {
   month: AiUsageTotals;
   byKind: Record<AiUsageKind, AiUsageTotals>;
   byModel: Record<string, AiUsageTotals>;
+}
+
+export const CARTESIA_PLAN_CREDITS: Record<AiCartesiaPlan, number> = {
+  free: 20_000,
+  pro: 100_000,
+};
+
+export function getCartesiaMonthlyUsage(
+  usage: AiUsageSummary | undefined,
+  plan: AiCartesiaPlan = 'free',
+) {
+  const totals = Object.entries(usage?.byModel ?? {})
+    .filter(([model]) => model.startsWith('cartesia/'))
+    .reduce(
+      (sum, [, current]) => ({
+        characters: sum.characters + current.characters,
+        audioSeconds: sum.audioSeconds + current.audioSeconds,
+        calls: sum.calls + current.calls,
+      }),
+      { characters: 0, audioSeconds: 0, calls: 0 },
+    );
+  const limit = CARTESIA_PLAN_CREDITS[plan];
+  const remaining = Math.max(0, limit - totals.characters);
+  return {
+    ...totals,
+    limit,
+    remaining,
+    percent: limit ? Math.min(100, (totals.characters / limit) * 100) : 0,
+    approximateMinutesRemaining: Math.floor(remaining / 750),
+  };
 }
 
 const EMPTY_TOTALS: AiUsageTotals = {
@@ -134,7 +170,9 @@ export async function getAiUsageSummary(sessionId: string, now = new Date()) {
   const monthRecords = records.filter(
     (record) => validDate(record.createdAt).getTime() >= monthStart,
   );
-  const byKind = (['text', 'transcription', 'speech', 'realtime'] as AiUsageKind[]).reduce(
+  const byKind = (
+    ['text', 'vision', 'transcription', 'speech', 'realtime'] as AiUsageKind[]
+  ).reduce(
     (result, kind) => {
       result[kind] = total(monthRecords.filter((record) => record.kind === kind));
       return result;

@@ -57,7 +57,7 @@ type SupportSpeaker = CompanionId | 'snow-close';
 
 const BASE_SUPPORT_DIALOGUE: Record<
   SupportTopicId,
-  Record<Exclude<SupportSpeaker, 'mira' | 'cassian' | 'saffron'>, readonly string[]>
+  Record<Exclude<SupportSpeaker, 'mira' | 'cassian' | 'saffron' | 'quill'>, readonly string[]>
 > = {
   motivation: {
     snow: [
@@ -412,6 +412,39 @@ const MIRA_SUPPORT_DIALOGUE: Record<SupportTopicId, readonly string[]> = {
   ],
 };
 
+const QUILL_SUPPORT_DIALOGUE: Record<SupportTopicId, readonly string[]> = {
+  motivation: [
+    'Give me one unfinished thread and five honest minutes. Stories wake up when the author touches the page, not when inspiration finishes dressing.',
+    'Open the record. One sentence, one character question, one canon decision. Tiny sparks still start chapters.',
+    'You do not need the whole saga tonight. Hand me the smallest live wire in your imagination and we will make it glow.',
+  ],
+  'make-a-plan': [
+    'Story-room sequence: choose the character, name the unresolved pressure, then decide which record needs the next answer. Everything else stays in the vault.',
+    'Let us separate canon maintenance from invention. One dossier update, one plot question, one future idea—clean shelves, loud imagination.',
+    'Three cards: what is established, what is uncertain, and what would be fun. We finish one card before opening another portal.',
+  ],
+  'faith-perspective': [
+    'A story can matter deeply without becoming the measure of your worth. Create from gratitude, curiosity, and truth—not from fear that silence erases you.',
+    'Some chapters grow quietly. Faithfulness can look like preserving one good idea until its proper moment arrives.',
+    'A gift is still a gift during a quiet season. Steward the spark without demanding that it prove your value.',
+  ],
+  'calm-down': [
+    'No continuity trial while the whole mind is on fire. Put the ideas in the inbox, mark what is canon, and let the verdict wait.',
+    'We are not solving the entire mythology tonight. Save the spark, close the extra tabs, breathe with Snow, and protect the story from panic-writing.',
+    'Archive first, decide later. Nothing brilliant is lost merely because we refused to wrestle it while exhausted.',
+  ],
+  recover: [
+    'The story did not reject you because you went quiet. Open one familiar dossier and remember why you loved this world before asking it for output.',
+    'No shame retcon. We resume from the last confirmed page, recover one thread, and let momentum return without pretending the gap never happened.',
+    'Read one scene you still love. No edits required. Sometimes the way back into a world is simply remembering that it already welcomed you.',
+  ],
+  celebrate: [
+    'Yes! Archive the win before your brain calls it obvious. Snow, this is a spoiler-safe celebration emergency!',
+    'That deserves a chapter marker, a ridiculous title, and at least thirty seconds where nobody asks what comes next.',
+    'Canon bell! That idea survived contact with the page and got better. File it, admire it, then let Snow pretend she was not fishing for spoilers.',
+  ],
+};
+
 export const SUPPORT_DIALOGUE = Object.fromEntries(
   SUPPORT_TOPICS.map(({ id }) => [
     id,
@@ -420,6 +453,7 @@ export const SUPPORT_DIALOGUE = Object.fromEntries(
       mira: MIRA_SUPPORT_DIALOGUE[id],
       cassian: CASSIAN_SUPPORT_DIALOGUE[id],
       saffron: SAFFRON_SUPPORT_DIALOGUE[id],
+      quill: QUILL_SUPPORT_DIALOGUE[id],
     },
   ]),
 ) as Record<SupportTopicId, Record<SupportSpeaker, readonly string[]>>;

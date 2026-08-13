@@ -16,10 +16,14 @@ import {
   requestAiSpeech,
   requestAiTranscription,
   type AiHeadquartersReply,
+  type CartesiaVoiceOption,
+  requestCartesiaVoiceCatalog,
 } from '@/services/aiHeadquarters';
 import type {
+  AiCartesiaPlan,
   AiConversationMessage,
   AiVoiceProfile,
+  AiVoiceProvider,
   AiVoiceTake,
   CompanionId,
   Settings,
@@ -54,6 +58,9 @@ export function useAiVoiceLink(input: {
   const sessionIdRef = useRef(APP_AI_SESSION_ID);
   const [profiles, setProfiles] = useState<Record<CompanionId, AiVoiceProfile>>();
   const [usage, setUsage] = useState<AiUsageSummary>();
+  const [cartesiaVoices, setCartesiaVoices] = useState<CartesiaVoiceOption[]>([]);
+  const [cartesiaCatalogLoading, setCartesiaCatalogLoading] = useState(false);
+  const [cartesiaCatalogError, setCartesiaCatalogError] = useState('');
   const [recording, setRecording] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
@@ -71,6 +78,7 @@ export function useAiVoiceLink(input: {
   const playbackResolverRef = useRef<() => void>();
   const playbackGenerationRef = useRef(0);
   const audioCacheRef = useRef(new Map<string, AudioBuffer>());
+  const fallbackNoticeShownRef = useRef(false);
 
   const refreshUsage = useCallback(async () => {
     setUsage(await getAiUsageSummary(sessionIdRef.current));
@@ -162,6 +170,50 @@ export function useAiVoiceLink(input: {
     [updateVoiceSettings],
   );
 
+  const loadCartesiaVoices = useCallback(async () => {
+    setCartesiaCatalogLoading(true);
+    setCartesiaCatalogError('');
+    try {
+      const voices = await requestCartesiaVoiceCatalog();
+      setCartesiaVoices(voices);
+      return voices;
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'The Cartesia casting library is unavailable.';
+      setCartesiaCatalogError(message);
+      return [];
+    } finally {
+      setCartesiaCatalogLoading(false);
+    }
+  }, []);
+
+  const setVoiceProvider = useCallback(
+    async (provider: AiVoiceProvider) => {
+      stopPlayback();
+      audioCacheRef.current.clear();
+      fallbackNoticeShownRef.current = false;
+      await updateVoiceSettings({ aiVoiceProvider: provider });
+      if (provider === 'cartesia') {
+        const voices = cartesiaVoices.length ? cartesiaVoices : await loadCartesiaVoices();
+        input.onNotice(
+          voices.length
+            ? 'Cartesia Realistic selected. Uncast companions will use their OpenAI fallback.'
+            : 'Cartesia is not connected yet. OpenAI fallback remains active.',
+        );
+      } else {
+        input.onNotice('OpenAI Standard selected. Every saved Cartesia casting remains preserved.');
+      }
+    },
+    [cartesiaVoices, input, loadCartesiaVoices, stopPlayback, updateVoiceSettings],
+  );
+
+  const setCartesiaPlan = useCallback(
+    async (plan: AiCartesiaPlan) => {
+      await updateVoiceSettings({ aiCartesiaPlan: plan });
+    },
+    [updateVoiceSettings],
+  );
+
   const saveProfile = useCallback(async (profile: AiVoiceProfile) => {
     const saved = await saveAiVoiceProfile(profile);
     setProfiles((current) => (current ? { ...current, [saved.id]: saved } : current));
@@ -208,35 +260,62 @@ export function useAiVoiceLink(input: {
       cacheKey: string,
       profileOverride?: AiVoiceProfile,
     ) => {
-      const cached = audioCacheRef.current.get(cacheKey);
-      if (cached) return cached;
       const profile = profileOverride ?? profiles?.[companionId];
       if (!profile) throw new Error('That companion voice is still initializing.');
+      const preferredProvider = input.settings?.aiVoiceProvider ?? 'openai';
+      const effectiveCacheKey = [
+        preferredProvider,
+        profile.cartesiaVoiceId ?? profile.voice,
+        cacheKey,
+      ].join(':');
+      const cached = audioCacheRef.current.get(effectiveCacheKey);
+      if (cached) return cached;
       setVoiceBusyMessageId(cacheKey);
       try {
-        const result = await requestAiSpeech({ companionId, text, profile });
+        const result = await requestAiSpeech({
+          companionId,
+          text,
+          profile,
+          provider: preferredProvider,
+        });
         await recordAiUsage({
           kind: 'speech',
           sessionId: sessionIdRef.current,
           model: result.model,
+          provider: result.provider,
           companionId,
           inputTokens: 0,
           outputTokens: 0,
           totalTokens: 0,
           characters: result.characters,
           audioSeconds: result.estimatedAudioSeconds,
-          estimatedCostUsd: result.estimatedCostUsd || estimateSpeechCostUsd(result.characters),
+          estimatedCostUsd:
+            result.provider === 'cartesia'
+              ? 0
+              : result.estimatedCostUsd || estimateSpeechCostUsd(result.characters),
           exactUsage: false,
         });
+        if (
+          preferredProvider === 'cartesia' &&
+          result.fallbackUsed &&
+          !fallbackNoticeShownRef.current
+        ) {
+          fallbackNoticeShownRef.current = true;
+          input.onNotice(
+            'Cartesia could not complete that voice. The OpenAI fallback spoke instead; no message or progress was lost.',
+          );
+        } else if (result.provider === 'cartesia') {
+          fallbackNoticeShownRef.current = false;
+        }
         await refreshUsage();
         const buffer = await decodeAudioBlob(result.audio);
-        audioCacheRef.current.set(cacheKey, buffer);
+        audioCacheRef.current.set(effectiveCacheKey, buffer);
         return buffer;
       } finally {
         setVoiceBusyMessageId(undefined);
       }
     },
-    [profiles, refreshUsage],
+    [input, profiles, refreshUsage],
   );
 
   const playOne = useCallback(
@@ -345,6 +424,7 @@ export function useAiVoiceLink(input: {
         'preview',
         auditionProfile.id,
         auditionProfile.voice,
+        auditionProfile.cartesiaVoiceId ?? 'uncast',
         auditionProfile.accent,
         auditionProfile.delivery,
         auditionProfile.cadence,
@@ -462,6 +542,9 @@ export function useAiVoiceLink(input: {
   return {
     profiles,
     usage,
+    cartesiaVoices,
+    cartesiaCatalogLoading,
+    cartesiaCatalogError,
     recording,
     transcribing,
     recordingSeconds,
@@ -473,6 +556,9 @@ export function useAiVoiceLink(input: {
     setVoiceOutputEnabled,
     setAutoPlay,
     setUsageWarning,
+    setVoiceProvider,
+    setCartesiaPlan,
+    loadCartesiaVoices,
     saveProfile,
     resetProfile,
     trackTextUsage,

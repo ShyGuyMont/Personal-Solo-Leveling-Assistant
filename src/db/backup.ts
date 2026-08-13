@@ -10,7 +10,7 @@ import type {
   Settings,
 } from '@/types/game';
 
-export const SAVE_VERSION = 23;
+export const SAVE_VERSION = 26;
 export const MAX_IMPORT_BYTES = 32 * 1024 * 1024;
 const MAX_SNAPSHOTS = 5;
 const FORBIDDEN_KEYS = new Set(['__proto__', 'prototype', 'constructor']);
@@ -165,6 +165,11 @@ function migrateData(
   }
   if (version <= 19) data.creatorVideoInsights ??= [];
   if (version <= 22) data.dailyOperations ??= [];
+  if (version <= 23) data.bodyDiagnostics ??= [];
+  if (version <= 24) {
+    data.arcCharacters ??= [];
+    data.arcCanonSources ??= [];
+  }
   data.dailyOperations = data.dailyOperations.map((row) => {
     if (!isObject(row) || !isObject(row.pendingProposal)) return row;
     const pendingProposal = row.pendingProposal;
@@ -265,6 +270,8 @@ function migrateData(
           : withCassian;
       const withMira =
         version <= 12 && !withSaffron.includes('mira') ? [...withSaffron, 'mira'] : withSaffron;
+      const withQuill =
+        version <= 24 && !withMira.includes('quill') ? [...withMira, 'quill'] : withMira;
       return {
         privacyScreenEnabled: false,
         sensitiveMissionAlias: 'Integrity Protocol',
@@ -282,10 +289,12 @@ function migrateData(
         aiVoiceOutputEnabled: false,
         aiVoiceAutoPlay: false,
         aiVoiceDisclosureAcknowledged: false,
+        aiVoiceProvider: 'openai',
+        aiCartesiaPlan: 'free',
         aiUsageWarningUsd: 5,
         aiSoulprintNotes: {},
         ...row,
-        enabledCompanionIds: ['snow', ...withMira.filter((id) => id !== 'snow')],
+        enabledCompanionIds: ['snow', ...withQuill.filter((id) => id !== 'snow')],
       };
     }
     return row;
@@ -331,6 +340,8 @@ function validateData(data: Record<string, unknown[]>) {
     typeof settings.aiVoiceOutputEnabled !== 'boolean' ||
     typeof settings.aiVoiceAutoPlay !== 'boolean' ||
     typeof settings.aiVoiceDisclosureAcknowledged !== 'boolean' ||
+    !['openai', 'cartesia'].includes(settings.aiVoiceProvider ?? 'openai') ||
+    !['free', 'pro'].includes(settings.aiCartesiaPlan ?? 'free') ||
     !Number.isFinite(settings.aiUsageWarningUsd) ||
     settings.aiUsageWarningUsd < 0 ||
     settings.aiUsageWarningUsd > 1_000
@@ -348,6 +359,7 @@ function validateData(data: Record<string, unknown[]>) {
     'amara',
     'cassian',
     'saffron',
+    'quill',
   ]);
   if (!isObject(settings.aiSoulprintNotes)) {
     throw new Error('The Soulprint Studio setting is not valid.');
@@ -491,6 +503,11 @@ function validateData(data: Record<string, unknown[]>) {
       !isObject(row) ||
       !aiCompanionIds.has(String(row.id)) ||
       !aiVoiceNames.has(String(row.voice)) ||
+      (row.cartesiaVoiceId !== undefined &&
+        (typeof row.cartesiaVoiceId !== 'string' ||
+          !/^[a-zA-Z0-9_-]{8,128}$/.test(row.cartesiaVoiceId))) ||
+      (row.cartesiaVoiceName !== undefined &&
+        (typeof row.cartesiaVoiceName !== 'string' || row.cartesiaVoiceName.length > 160)) ||
       !aiVoiceAccents.has(String(row.accent)) ||
       !aiVoiceDeliveries.has(String(row.delivery)) ||
       !aiVoiceCadences.has(String(row.cadence)) ||
@@ -532,7 +549,7 @@ function validateData(data: Record<string, unknown[]>) {
     }
   }
 
-  const aiUsageKinds = new Set(['text', 'transcription', 'speech', 'realtime']);
+  const aiUsageKinds = new Set(['text', 'vision', 'transcription', 'speech', 'realtime']);
   for (const row of data.aiUsageRecords) {
     if (
       !isObject(row) ||
@@ -543,6 +560,7 @@ function validateData(data: Record<string, unknown[]>) {
       !Number.isFinite(Date.parse(row.createdAt)) ||
       typeof row.model !== 'string' ||
       !row.model.trim() ||
+      (row.provider !== undefined && !['openai', 'cartesia'].includes(String(row.provider))) ||
       (row.companionId !== undefined && !aiCompanionIds.has(String(row.companionId))) ||
       [
         row.inputTokens,
@@ -565,6 +583,202 @@ function validateData(data: Record<string, unknown[]>) {
       typeof row.exactUsage !== 'boolean'
     ) {
       throw new Error('An AI usage record contains an impossible value.');
+    }
+  }
+
+  const diagnosticGoals = new Set([
+    'balanced',
+    'recomposition',
+    'fat-loss',
+    'muscle-gain',
+    'performance',
+    'mobility',
+  ]);
+  const diagnosticConfidence = new Set(['high', 'medium', 'low']);
+  const diagnosticCompanions = new Set(['rook', 'ember', 'mira']);
+  for (const row of data.bodyDiagnostics) {
+    if (!isObject(row)) {
+      throw new Error('A Training Hall Body Diagnostic contains an impossible value.');
+    }
+    const assessment = isObject(row.assessment) ? row.assessment : undefined;
+    const usage = isObject(row.usage) ? row.usage : undefined;
+    const sourceKinds = Array.isArray(row.sourceKinds) ? row.sourceKinds : [];
+    const metrics = Array.isArray(assessment?.metrics) ? assessment.metrics : [];
+    const observations = Array.isArray(assessment?.observations) ? assessment.observations : [];
+    const priorities = Array.isArray(assessment?.priorities) ? assessment.priorities : [];
+    const bonusExercises = Array.isArray(assessment?.bonusExercises)
+      ? assessment.bonusExercises
+      : [];
+    const companionMessages = Array.isArray(assessment?.companionMessages)
+      ? assessment.companionMessages
+      : [];
+    const stringListIsValid = (value: unknown, maximum: number) =>
+      Array.isArray(value) &&
+      value.length <= maximum &&
+      value.every((item) => typeof item === 'string' && item.trim().length > 0);
+    if (
+      !/^\d{4}-\d{2}-\d{2}$/.test(String(row.weekStart)) ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(String(row.weekEnd)) ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(String(row.date)) ||
+      String(row.weekStart) > String(row.date) ||
+      String(row.date) > String(row.weekEnd) ||
+      !diagnosticGoals.has(String(row.goal)) ||
+      sourceKinds.length < 1 ||
+      sourceKinds.length > 4 ||
+      sourceKinds.filter((kind) => kind === 'physique').length > 3 ||
+      sourceKinds.filter((kind) => kind === 'scale').length > 1 ||
+      sourceKinds.some((kind) => kind !== 'physique' && kind !== 'scale') ||
+      !assessment ||
+      !['physique', 'scale', 'combined'].includes(String(assessment.scanType)) ||
+      !['strong', 'usable', 'limited'].includes(String(assessment.dataQuality)) ||
+      typeof assessment.title !== 'string' ||
+      !assessment.title.trim() ||
+      typeof assessment.summary !== 'string' ||
+      !assessment.summary.trim() ||
+      typeof assessment.comparison !== 'string' ||
+      !stringListIsValid(assessment.dataQualityNotes, 6) ||
+      !stringListIsValid(assessment.warnings, 6) ||
+      typeof assessment.disclaimer !== 'string' ||
+      !assessment.disclaimer.trim() ||
+      metrics.length > 20 ||
+      observations.length > 8 ||
+      priorities.length < 1 ||
+      priorities.length > 4 ||
+      bonusExercises.length > 4 ||
+      companionMessages.length !== 3 ||
+      new Set(companionMessages.map((message) => isObject(message) && message.companionId)).size !==
+        3 ||
+      companionMessages.some(
+        (message) =>
+          !isObject(message) ||
+          !diagnosticCompanions.has(String(message.companionId)) ||
+          typeof message.message !== 'string' ||
+          !message.message.trim(),
+      ) ||
+      metrics.some(
+        (metric) =>
+          !isObject(metric) ||
+          typeof metric.label !== 'string' ||
+          typeof metric.value !== 'string' ||
+          typeof metric.unit !== 'string' ||
+          !['physique', 'scale', 'hunter'].includes(String(metric.source)) ||
+          !diagnosticConfidence.has(String(metric.confidence)),
+      ) ||
+      observations.some(
+        (observation) =>
+          !isObject(observation) ||
+          typeof observation.area !== 'string' ||
+          typeof observation.observation !== 'string' ||
+          typeof observation.evidence !== 'string' ||
+          !diagnosticConfidence.has(String(observation.confidence)),
+      ) ||
+      priorities.some(
+        (priority) =>
+          !isObject(priority) ||
+          typeof priority.title !== 'string' ||
+          !priority.title.trim() ||
+          typeof priority.why !== 'string' ||
+          !priority.why.trim() ||
+          typeof priority.nextAction !== 'string' ||
+          !priority.nextAction.trim(),
+      ) ||
+      bonusExercises.some(
+        (exercise) =>
+          !isObject(exercise) ||
+          typeof exercise.name !== 'string' ||
+          !exercise.name.trim() ||
+          typeof exercise.prescription !== 'string' ||
+          !exercise.prescription.trim() ||
+          typeof exercise.rationale !== 'string' ||
+          !exercise.rationale.trim(),
+      ) ||
+      !usage ||
+      [
+        usage.inputTokens,
+        usage.cachedInputTokens,
+        usage.outputTokens,
+        usage.reasoningTokens,
+        usage.totalTokens,
+        row.rewardXp,
+      ].some((value) => !Number.isFinite(value) || Number(value) < 0) ||
+      typeof row.rewardApplied !== 'boolean' ||
+      typeof row.model !== 'string' ||
+      !row.model.trim() ||
+      typeof row.completedAt !== 'string' ||
+      !Number.isFinite(Date.parse(row.completedAt)) ||
+      Object.keys(row).some((key) => /(?:image|photo|dataurl|base64)/i.test(key))
+    ) {
+      throw new Error('A Training Hall Body Diagnostic contains an impossible value.');
+    }
+  }
+
+  const arcSourceKinds = new Set([
+    'character-dossier',
+    'world-lore',
+    'faction',
+    'location',
+    'timeline',
+    'plot',
+    'reference',
+  ]);
+  for (const row of data.arcCharacters) {
+    if (
+      !isObject(row) ||
+      typeof row.name !== 'string' ||
+      !row.name.trim() ||
+      row.name.length > 200 ||
+      typeof row.alias !== 'string' ||
+      row.alias.length > 240 ||
+      typeof row.style !== 'string' ||
+      row.style.length > 100 ||
+      typeof row.faction !== 'string' ||
+      row.faction.length > 240 ||
+      typeof row.overallClass !== 'string' ||
+      row.overallClass.length > 80 ||
+      typeof row.startingClass !== 'string' ||
+      row.startingClass.length > 80 ||
+      typeof row.endingClass !== 'string' ||
+      row.endingClass.length > 80 ||
+      !Number.isFinite(row.completion) ||
+      Number(row.completion) < 0 ||
+      Number(row.completion) > 100 ||
+      !Number.isInteger(row.schemaVersion) ||
+      Number(row.schemaVersion) < 1 ||
+      Number(row.schemaVersion) > 20 ||
+      !isObject(row.data) ||
+      JSON.stringify(row.data).length > 2_500_000 ||
+      typeof row.createdAt !== 'string' ||
+      !Number.isFinite(Date.parse(row.createdAt)) ||
+      typeof row.updatedAt !== 'string' ||
+      !Number.isFinite(Date.parse(row.updatedAt))
+    ) {
+      throw new Error('An A.R.C. character dossier contains an impossible value.');
+    }
+  }
+  for (const row of data.arcCanonSources) {
+    if (!isObject(row)) {
+      throw new Error('An A.R.C. canon source contains an impossible value.');
+    }
+    const tags = Array.isArray(row.tags) ? row.tags : [];
+    const characterNames = Array.isArray(row.characterNames) ? row.characterNames : [];
+    if (
+      typeof row.title !== 'string' ||
+      !row.title.trim() ||
+      row.title.length > 240 ||
+      !arcSourceKinds.has(String(row.kind)) ||
+      tags.length > 80 ||
+      tags.some((tag: unknown) => typeof tag !== 'string' || tag.length > 100) ||
+      characterNames.length > 120 ||
+      characterNames.some((name: unknown) => typeof name !== 'string' || name.length > 200) ||
+      typeof row.text !== 'string' ||
+      !row.text.trim() ||
+      row.text.length > 2_500_000 ||
+      typeof row.createdAt !== 'string' ||
+      !Number.isFinite(Date.parse(row.createdAt)) ||
+      typeof row.updatedAt !== 'string' ||
+      !Number.isFinite(Date.parse(row.updatedAt))
+    ) {
+      throw new Error('An A.R.C. canon source contains an impossible value.');
     }
   }
 
@@ -1030,6 +1244,7 @@ function validateData(data: Record<string, unknown[]>) {
     'amara',
     'cassian',
     'saffron',
+    'quill',
   ]);
   for (const row of data.sanctuarySessions) {
     if (!isObject(row)) {

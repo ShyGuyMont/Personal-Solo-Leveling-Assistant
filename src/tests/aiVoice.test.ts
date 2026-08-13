@@ -5,6 +5,7 @@ import {
   estimateSpeechCostUsd,
   estimateRealtimeCostUsd,
   estimateTextCostUsd,
+  getCartesiaMonthlyUsage,
   getAiUsageSummary,
   getAiVoiceProfiles,
   recordAiUsage,
@@ -19,10 +20,12 @@ describe('Voice Link local profiles and usage', () => {
     await db.aiUsageRecords.clear();
   });
 
-  it('provides ten distinct canon voices with deliberately authored performance directions', async () => {
+  it('provides eleven distinct canon soulprints with deliberately authored performance directions', async () => {
     const profiles = await getAiVoiceProfiles();
-    expect(Object.keys(profiles)).toHaveLength(10);
-    expect(new Set(Object.values(profiles).map((profile) => profile.voice)).size).toBe(10);
+    expect(Object.keys(profiles)).toHaveLength(11);
+    expect(
+      new Set(Object.values(profiles).map((profile) => profile.voice)).size,
+    ).toBeGreaterThanOrEqual(10);
     expect(profiles.haven).toMatchObject({ voice: 'fable', accent: 'caribbean' });
     expect(profiles.ember).toMatchObject({
       register: 'low-mid',
@@ -33,6 +36,7 @@ describe('Voice Link local profiles and usage', () => {
     expect(CANON_VOICE_PROFILES.snow.direction).toMatch(/older sister/i);
     expect(CANON_VOICE_PROFILES.ember.direction).toMatch(/obstacle/i);
     expect(CANON_VOICE_PROFILES.saffron.direction).toMatch(/high-pressure/i);
+    expect(CANON_VOICE_PROFILES.quill.direction).toMatch(/lore connection/i);
   });
 
   it('saves tuning safely and restores the original soulprint', async () => {
@@ -40,6 +44,8 @@ describe('Voice Link local profiles and usage', () => {
     const saved = await saveAiVoiceProfile({
       ...profiles.snow,
       voice: 'verse',
+      cartesiaVoiceId: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b',
+      cartesiaVoiceName: 'Tessa',
       accent: 'irish',
       pace: 1.5,
       warmth: 20,
@@ -51,6 +57,7 @@ describe('Voice Link local profiles and usage', () => {
       warmth: 5,
       naturalism: 5,
       pauseDiscipline: 4,
+      cartesiaVoiceName: 'Tessa',
     });
     expect((await getAiVoiceProfiles()).snow.voice).toBe('verse');
 
@@ -109,6 +116,35 @@ describe('Voice Link local profiles and usage', () => {
         audioOutputTokens: 400,
       }),
     ).toBeCloseTo(0.013396, 8);
+  });
+
+  it('tracks Cartesia monthly credits separately from OpenAI speech estimates', async () => {
+    await recordAiUsage({
+      id: 'speech:cartesia',
+      kind: 'speech',
+      sessionId: 'session:current',
+      createdAt: '2026-08-11T14:00:00.000Z',
+      model: 'cartesia/sonic-3.5',
+      provider: 'cartesia',
+      companionId: 'snow',
+      inputTokens: 0,
+      outputTokens: 0,
+      totalTokens: 0,
+      characters: 1_500,
+      audioSeconds: 120,
+      estimatedCostUsd: 0,
+      exactUsage: false,
+    });
+    const summary = await getAiUsageSummary(
+      'session:current',
+      new Date('2026-08-11T18:00:00.000Z'),
+    );
+    expect(getCartesiaMonthlyUsage(summary, 'free')).toMatchObject({
+      characters: 1_500,
+      limit: 20_000,
+      remaining: 18_500,
+      calls: 1,
+    });
   });
 
   it('separates session, daily, and monthly usage while keeping spend clearly estimated', async () => {

@@ -10,14 +10,14 @@ The design, writing, interface, icons, animations, and generated tones are origi
 - Custom and template missions, weekday schedules, optional completion types, notes, and stable history IDs
 - Daily Review, idempotent rewards, current-day undo, Perfect and Protected Perfect Days, humane momentum/decay, and Recovery Mode
 - System and Clean interface styles, five complete color protocols from Abyss to Winter Crown, and selectable visual intensity
-- Ten original chibi companion characters with daily greetings, stat-specific encouragement, shame-free accountability, occasional two-character banter, cinematic milestone celebrations, adjustable frequency, and individual mute controls
+- Eleven original chibi companion characters with daily greetings, stat-specific encouragement, shame-free accountability, occasional two-character banter, cinematic milestone celebrations, adjustable frequency, and individual mute controls
 - A private Party Channel with ten-mood Check-Ins, six Direct Support topics, whole-party or one-to-one responses, history-aware dialogue rotation, and locally saved conversations that never affect XP or streaks
 - Full Party Headquarters with the complete roster, support shortcuts, saved-message counts, Ember's Lock-In Protocol, Amara's Heartweaver Protocol, permanent Weekly Campfires, Monthly Councils, and an opt-in AI conversation chamber
 - Secure online AI conversations with the full party or any individual companion, local-only conversation history, compact progress context, and an immediate offline fallback
 - Weekly Campfire Recaps generated once per completed week from finalized mission data, with an in-character review from every companion and no hidden rewards or penalties
-- Monthly Councils generated after a completed month with fact-aware commentary from all ten companions, permanent history, and an optional next-month intention
+- Monthly Councils generated after a completed month with fact-aware commentary from all eleven companions, permanent history, and an optional next-month intention
 - Snow's optional Daily Command Briefing with Low, Steady, and High capacity planning, broad completion targets, and transparent 1×–2.5× scheduled-mission XP outcomes
-- Rook, Ember, and Mira’s Training Hall with four home circuits, four structured progressive gym sessions, Conditioning, guided randomized mobility/yoga/Pilates protocols, a three-tier multi-path reward ladder, and a full-party post-workout scene
+- Rook, Ember, and Mira’s Training Hall with four home circuits, four structured progressive gym sessions, Conditioning, guided randomized mobility/yoga/Pilates protocols, a three-tier multi-path reward ladder, a full-party post-workout scene, and a private weekly Body Diagnostic
 - Saffron’s Kitchen with eighteen rotating no-bean, no-pea recipes, guided ingredients and steps, substitutions, food-safety and leftover guidance, three rewarded weekly orders, and permanent cooking history
 - Snow and Selah’s Scripture Sanctuary with 96 rotating passage paths, twelve emotional and spiritual concerns, guided reflection, deeper prayer structure, private history, and unlimited no-XP Stronghold support
 - User-authored Campaign Arcs with purpose, companion guidance, optional target dates, milestones, pause/resume, completion, and archive states
@@ -41,12 +41,53 @@ Headquarters channel uses the private Sites sign-in and a server-side OpenAI con
 only the message, limited recent chat context, and a compact progress signal when the user presses
 Send. There is no analytics, advertising, or tracking.
 
+## Version 8.0.0 · A.R.C. Archives
+
+Version 8 brings the original A.R.C. Character Archives into The System as a complete creative
+realm. The full five-section dossier builder, live printable profile, 0–1000 Graced stat engine,
+Starting and Ending Story Classes, World and Domain Transcendence rules, and all 152 Arts remain
+available through the embedded Dossier Forge. Saving JSON in the Forge also synchronizes the
+character into a searchable on-device Character Library; existing names update instead of creating
+silent duplicate records.
+
+The new Canon Vault accepts local Word (.docx), Text, Markdown, JSON, and pasted source records with types, tags,
+and character references. Quill retrieves only the records relevant to the current question, names
+the local dossier or canon source behind established facts, and separates confirmed canon from
+inference and new ideas. A non-destructive Continuity Scanner flags structural gaps, duplicate
+identities, and canon records that reference characters without dossiers. It never rewrites A.R.C.
+automatically. Imported dossiers and canon sources stay in IndexedDB and are included in Archive
+Shield format 26. A Quill Knowledge Pack can move up to 300 organized lore sources between devices
+as one JSON file without replacing unrelated campaign progress.
+
+**Quill, The Storyspark** is the eleventh companion: a hyperactive Filipino lore specialist for
+A.R.C. canon, character dossiers, Arts, plot architecture, continuity, and worldbuilding. He is
+available in Quick Link, Voice Link, Party Check-Ins, Direct Support, Campfires, Councils, and
+milestone celebrations. Snow joins A.R.C. conversations as an enthusiastic spoiler fan, while the
+Hunter remains the sole authority who can approve or file canon.
+
+## Version 7.8.0 · Body Diagnostic
+
+The Training Hall now runs one optional Body Diagnostic per configured System week. The Hunter may
+submit up to three physique angles, one smart-scale screenshot, or any smaller combination; choose
+a current goal, add relevant context, and receive a structured Terra vision report from Rook,
+Ember, and Mira. The report distinguishes visible observations from transcribed scale estimates,
+labels evidence confidence, compares against the prior stored report when available, and produces
+specific Training Hall priorities plus optional support work. It does not diagnose health
+conditions or infer an exact body-fat percentage from appearance.
+
+Clearing the weekly diagnostic awards 150 account XP exactly once. It does not complete the Daily
+Workout mission, and its optional exercises do not grant mission credit. The party’s compact AI
+context knows whether the diagnostic is due and can hold the Hunter firmly accountable without
+body-shaming. Submitted images are sent only when the Hunter explicitly consents, are never written
+to the local database or Archive Shield save, and are released after the active request; the
+on-device record retains only the text report, source types, usage, and reward proof.
+
 ## Version 6.4.0 · Awakened Link
 
 Version 6.4 opens the first secure intelligence channel in Headquarters. The Hunter can speak with
 the full party or call any enabled companion directly, while the established personalities remain
 distinct and the offline System remains authoritative. Party conversations intentionally call only
-the companions relevant to the moment instead of making all ten answer every message.
+the companions relevant to the moment instead of making all eleven answer every message.
 
 Online mode is explicit and reversible. The OpenAI credential stays behind the private Sites
 gateway, API requests are not stored by the app server, and the browser receives no secret. Only
@@ -152,7 +193,7 @@ personal recipe pool.
 
 ## Version 7.5.0 · Living Voice Ascension
 
-Voice Forge III gives all ten companion Soulprints a deeper vocal fingerprint: register,
+Voice Forge III gives all eleven companion Soulprints a deeper vocal fingerprint: register,
 resonance, intonation, articulation, emotional range, and a grounded, balanced, or dynamic acting
 take now join the established base voice, accent, cadence, texture, warmth, and energy controls.
 The pace slider also drives the speech model's native speed control, and the Casting Room can
@@ -340,23 +381,24 @@ Class gates and the development pacing simulator were also rebalanced for the ex
 - **Snow, The Constant** is the primary whole-journey companion. She greets each new System day and supports major milestones, difficult seasons, and victories. She has long black hair, a pearl-white and navy support jacket, and an ice-blue System halo.
 - **Rook, The Vanguard** supports Strength, Endurance, and Vitality. He is bold, competitive, and protective, with graphite-and-gold armor and amber energy.
 - **Selah, The Beacon** supports Faith, Wisdom, and spiritual consistency. She is warm and grounded, with long braids, an ivory-and-navy mantle, and a sun-gold halo.
-- **Cipher, The Strategist** supports Discipline, Focus, Willpower, production systems, and ARC architecture. He is precise, dryly funny, and demanding, with a navy tech jacket and violet-cyan tactical glyphs.
+- **Cipher, The Strategist** supports Discipline, Focus, Willpower, production systems, and technical architecture. He is precise, dryly funny, and demanding, with a navy tech jacket and violet-cyan tactical glyphs.
 - **Vesper, The Spotlight** supports Creativity, YouTube, audience strategy, hooks, camera confidence, content packaging, and publishing momentum. She is charismatic, quick-witted, and camera-ready, with warm brown skin, amber-gold eyes, a high curly ponytail, a graphite broadcast jacket, and an electric-chartreuse creator halo.
 - **Ember, The Ignition** supports accountability, re-entry, and locking back in after momentum slips. She is fiery, blunt, and fiercely supportive, with copper-red hair, amber eyes, charcoal-and-crimson gear, and an ember-orange System halo.
 - **Mira, The Stillpoint** supports mobility, flexibility, breath, yoga, Pilates, and calm core control. She is serene, gently playful, and impossible to rush, with fair skin, long black hair, luminous purple eyes, pearl-and-indigo movement gear, and a violet System halo.
 - **Amara, The Heartweaver** supports Empathy, relationships, communication, repair, healthy boundaries, belonging, and shame-free sexual-integrity support in the Sanctuary. She is warm, perceptive, and playfully romantic, with warm olive skin, wavy chestnut hair, luminous pink eyes, rose-and-plum battle attire, and a radiant pink System halo.
 - **Cassian, The Steward** supports Stewardship, budgeting, savings, debt reduction, spending awareness, and financial recovery. He is a calm, exacting, never-shaming white accountant type with fair skin, tousled light-brown hair, hazel eyes behind round gold-rimmed glasses, a pencil behind one ear, a dark ledger, and a tailored emerald-and-navy Steward coat.
 - **Saffron, The Flame Chef** supports cooking, meal preparation, training nutrition, leftovers, and reducing expensive convenience choices. She is theatrical, fiery, and nurturing, with warm olive-brown skin, vivid green eyes, dark curls, a white chef jacket, forest-green apron, and tangerine flame accents.
+- **Quill, The Storyspark** supports A.R.C. canon, characters, Arts, dossiers, plots, continuity, and worldbuilding. He is hyperactive, source-conscious, and delighted by spoilers, with warm brown skin, amber eyes, an electric-fuchsia hair streak, a midnight archive jacket, and a luminous story-glyph halo.
 
-Companions never judge missed missions. Snow checks in once per System day, while stat level-ups notify the matching specialist. Ember may open one Lock-In signal when the previous day is unfinished or finalized below 50%; her response is direct but never removes XP, changes a streak, or attacks the user's worth. Amara owns the Empathy stat and ordinary Character-path relationship responses; every relationship objective offers a safe alternative and never requires contact with someone unsafe. Cassian owns the Stewardship stat and Treasury coaching; Budget Stability never removes account XP, class, streaks, or mission credit. Saffron runs the Kitchen without body shame or punishment dieting. Mira guides mobility without presenting pain as progress. Ordinary mission reactions follow the selected Off, Quiet, Balanced, or Talkative setting. All ten portraits are bundled locally and require no network connection.
+Companions never judge missed missions. Snow checks in once per System day, while stat level-ups notify the matching specialist. Ember may open one Lock-In signal when the previous day is unfinished or finalized below 50%; her response is direct but never removes XP, changes a streak, or attacks the user's worth. Amara owns the Empathy stat and ordinary Character-path relationship responses; every relationship objective offers a safe alternative and never requires contact with someone unsafe. Cassian owns the Stewardship stat and Treasury coaching; Budget Stability never removes account XP, class, streaks, or mission credit. Saffron runs the Kitchen without body shame or punishment dieting. Mira guides mobility without presenting pain as progress. Quill protects the line between sourced canon and unapproved ideas. Ordinary mission reactions follow the selected Off, Quiet, Balanced, or Talkative setting. All eleven portraits are bundled locally and require no network connection.
 
 The Party Check-In lets the user choose Energized, Proud, Good, Okay, Tired, Stressed, Frustrated, Discouraged, Lonely, or Not sure. Snow opens and closes each conversation while the complete party answers in character. Each companion has emotion-specific dialogue pools, and the app uses the least recently heard line only after every unused line in that pool has been heard. Check-ins are saved locally in the Archive and intentionally award no XP, alter no streak, and create no penalty.
 
-Direct Support offers Motivation, Make a plan, Faith & perspective, Calm down, Recover, and Celebrate. The user can hear from the full party or intentionally open a focused channel with any of the ten companions, including Mira, Amara, Cassian, and Saffron. Support uses separate topic-specific dialogue pools with history-aware rotation. It is selection-based, works offline, and changes no progression data.
+Direct Support offers Motivation, Make a plan, Faith & perspective, Calm down, Recover, and Celebrate. The user can hear from the full party or intentionally open a focused channel with any of the eleven companions, including Mira, Amara, Cassian, Saffron, and Quill. Support uses separate topic-specific dialogue pools with history-aware rotation. It is selection-based, works offline, and changes no progression data.
 
-At the start of a new week, Headquarters can present a saved Campfire Recap for the previous completed week. It counts finalized Daily Reviews, mission records, Treasury progress, and Kitchen Orders, then gives all ten companions distinct commentary based on those facts. Snow closes the gathering. Campfires can be favorited, reopened in Headquarters, and reviewed in the Archive.
+At the start of a new week, Headquarters can present a saved Campfire Recap for the previous completed week. It counts finalized Daily Reviews, mission records, Treasury progress, and Kitchen Orders, then gives all eleven companions distinct commentary based on those facts. Snow closes the gathering. Campfires can be favorited, reopened in Headquarters, and reviewed in the Archive.
 
-After a calendar month with at least one finalized Daily Review, a Monthly Council records mission totals, completion rate, Perfect Days, category balance, relationship actions, Treasury progress, Kitchen Orders, levels, classes, titles, Campaign milestones, and Companion Quest chapters. Snow opens and closes; all ten companions are represented. Councils are permanent, never change scoring, and include an optional next-month intention.
+After a calendar month with at least one finalized Daily Review, a Monthly Council records mission totals, completion rate, Perfect Days, category balance, relationship actions, Treasury progress, Kitchen Orders, levels, classes, titles, Campaign milestones, and Companion Quest chapters. Snow opens and closes; all eleven companions are represented. Councils are permanent, never change scoring, and include an optional next-month intention.
 
 ### Campaign Command
 

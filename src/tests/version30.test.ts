@@ -38,14 +38,15 @@ describe('Version 3.0 Steward systems', () => {
     });
   });
 
-  it('seeds ten enabled companions, Stewardship, and the 75% protocol', async () => {
+  it('seeds eleven enabled companions, Stewardship, and the 75% protocol', async () => {
     const settings = await db.settings.get('primary');
     const treasury = await db.treasurySettings.get('primary');
-    expect(COMPANIONS).toHaveLength(10);
+    expect(COMPANIONS).toHaveLength(11);
     expect(settings?.enabledCompanionIds).toContain('amara');
     expect(settings?.enabledCompanionIds).toContain('cassian');
     expect(settings?.enabledCompanionIds).toContain('saffron');
     expect(settings?.enabledCompanionIds).toContain('mira');
+    expect(settings?.enabledCompanionIds).toContain('quill');
     expect(await db.stats.get('stewardship')).toBeDefined();
     expect(treasury?.challengeEnabled).toBe(true);
     expect(treasury?.challengeChance).toBe(0.75);

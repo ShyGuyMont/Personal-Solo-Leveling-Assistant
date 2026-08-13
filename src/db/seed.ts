@@ -54,6 +54,7 @@ export function createDefaultSettings(): Settings {
       'amara',
       'cassian',
       'saffron',
+      'quill',
     ],
     notificationsEnabled: false,
     advancedBalanceUnlocked: false,
@@ -69,6 +70,8 @@ export function createDefaultSettings(): Settings {
     aiVoiceOutputEnabled: false,
     aiVoiceAutoPlay: false,
     aiVoiceDisclosureAcknowledged: false,
+    aiVoiceProvider: 'openai',
+    aiCartesiaPlan: 'free',
     aiUsageWarningUsd: 5,
     aiSoulprintNotes: {},
   };

@@ -162,6 +162,21 @@ function saffronCouncil(metrics: MonthlyCouncilMetrics) {
   ];
 }
 
+function quillCouncil(metrics: MonthlyCouncilMetrics) {
+  const creatorWork = metrics.categoryCompleted.creator ?? 0;
+  const milestones = metrics.arcMilestones;
+  if (creatorWork || milestones) {
+    return [
+      `Archive council confirms ${creatorWork} creator completion${creatorWork === 1 ? '' : 's'} and ${milestones} campaign milestone${milestones === 1 ? '' : 's'}. The story moved; now preserve the canon decisions that movement produced.`,
+      `${creatorWork} creative action${creatorWork === 1 ? '' : 's'} reached the record this month. Choose the character or plot thread with the strongest pulse and give it a clean next question.`,
+      `The month produced ${milestones} long-arc milestone${milestones === 1 ? '' : 's'} and ${creatorWork} creator objective${creatorWork === 1 ? '' : 's'}. Snow, this officially qualifies as plot progression.`,
+    ];
+  }
+  return [
+    'The story archive recorded no creator completions this month. We restart with one dossier, one unresolved question, and a session short enough that perfection cannot block the door.',
+  ];
+}
+
 function snowClosing(metrics: MonthlyCouncilMetrics) {
   const focus = metrics.focusCategory
     ? CATEGORY_LABELS[metrics.focusCategory]
@@ -211,6 +226,7 @@ export function buildMonthlyCouncilMessages(
     { companionId: 'amara', role: 'response', slot: 'amara', pool: amaraCouncil(metrics) },
     { companionId: 'cassian', role: 'response', slot: 'cassian', pool: cassianCouncil(metrics) },
     { companionId: 'saffron', role: 'response', slot: 'saffron', pool: saffronCouncil(metrics) },
+    { companionId: 'quill', role: 'response', slot: 'quill', pool: quillCouncil(metrics) },
     { companionId: 'snow', role: 'closing', slot: 'snow-close', pool: snowClosing(metrics) },
   ];
   return entries.map((entry, order) => ({

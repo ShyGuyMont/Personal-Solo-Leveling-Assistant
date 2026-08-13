@@ -1,7 +1,7 @@
 {
   "name": "the-system",
   "private": true,
-  "version": "7.7.1",
+  "version": "8.0.0",
   "packageManager": "pnpm@10.12.4",
   "type": "module",
   "scripts": {
@@ -19,6 +19,7 @@
   "dependencies": {
     "dexie": "^4.0.11",
     "lucide-react": "^0.468.0",
+    "mammoth": "1.12.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "workbox-window": "^7.3.0",
