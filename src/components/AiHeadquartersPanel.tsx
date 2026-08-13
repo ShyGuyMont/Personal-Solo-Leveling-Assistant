@@ -40,6 +40,25 @@ import {
 } from '@/game/aiHeadquarters';
 import { buildAiProgressContext } from '@/game/aiContext';
 import {
+  clearPendingAiProposal,
+  extractAiPendingProposal,
+  getPendingAiProposal,
+  savePendingAiProposal,
+  type AiPendingProposal,
+} from '@/game/aiPendingProposals';
+import { buildQuickLinkActionCatalog, commandSuccessAcknowledgement } from '@/game/aiQuickLink';
+import { applyCalendarProposal } from '@/game/calendar';
+import { saveCreatorCampaign, saveCreatorProject } from '@/game/creatorForge';
+import {
+  addDailyOperationNote,
+  cancelStagedCompanionOperation,
+  prepareCompanionOperation,
+  stageCompanionOperation,
+  synchronizeKitchenOperation,
+} from '@/game/dailyOperations';
+import { assignSpecificKitchenOrder } from '@/game/kitchen';
+import { deleteCustomKitchenRecipe, saveCustomKitchenRecipe } from '@/game/kitchenGrimoire';
+import {
   getAiLinkStatus,
   requestAiHeadquartersReply,
   type AiLinkStatus,
@@ -61,6 +80,9 @@ export function AiHeadquartersPanel() {
     challenges,
     systemDate,
     refresh,
+    complete,
+    updateStatus,
+    undo,
   } = useGameStore();
   const [conversations, setConversations] = useState<AiConversation[]>([]);
   const [activeId, setActiveId] = useState<string>();
@@ -72,6 +94,8 @@ export function AiHeadquartersPanel() {
   const [memoryLedger, setMemoryLedger] = useState<AiRelationshipMemory[]>([]);
   const [memoryOpen, setMemoryOpen] = useState(false);
   const [deviceOnline, setDeviceOnline] = useState(navigator.onLine);
+  const [pendingProposal, setPendingProposal] = useState<AiPendingProposal>();
+  const [executingProposal, setExecutingProposal] = useState(false);
   const messageListRef = useRef<HTMLDivElement>(null);
   const voiceLink = useAiVoiceLink({
     settings,
@@ -86,6 +110,10 @@ export function AiHeadquartersPanel() {
     const enabled = new Set(settings?.enabledCompanionIds ?? []);
     return COMPANIONS.filter((companion) => enabled.has(companion.id));
   }, [settings?.enabledCompanionIds]);
+  const actionCatalog = useMemo(
+    () => buildQuickLinkActionCatalog(missions, todayRecords),
+    [missions, todayRecords],
+  );
 
   const refreshStatus = useCallback(async () => {
     setStatusLoading(true);
@@ -159,6 +187,23 @@ export function AiHeadquartersPanel() {
 
     return () => window.cancelAnimationFrame(frame);
   }, [activeConversation?.id, activeConversation?.messages.length, settings?.reducedMotion]);
+
+  useEffect(() => {
+    let active = true;
+    if (!activeId) {
+      setPendingProposal(undefined);
+      return () => {
+        active = false;
+      };
+    }
+    setPendingProposal(undefined);
+    void getPendingAiProposal(activeId).then((proposal) => {
+      if (active) setPendingProposal(proposal);
+    });
+    return () => {
+      active = false;
+    };
+  }, [activeId]);
 
   if (!profile || !settings || !progression || !activeConversation) return null;
 
@@ -277,6 +322,28 @@ export function AiHeadquartersPanel() {
   async function sendMessage() {
     const message = draft.trim();
     if (!message || sending || !linkReady) return;
+    if (
+      pendingProposal &&
+      /^(?:yes[, ]*)?(?:i\s+)?(?:confirm|approve|do it|apply it|save it)[.! ]*$/i.test(message)
+    ) {
+      const hunterMessage = createHunterMessage(message);
+      const confirmationConversation: AiConversation = {
+        ...currentConversation,
+        updatedAt: hunterMessage.createdAt,
+        messages: [...currentConversation.messages, hunterMessage],
+      };
+      setDraft('');
+      await updateConversation(confirmationConversation);
+      await executePendingProposal(confirmationConversation);
+      return;
+    }
+    if (pendingProposal) {
+      if (pendingProposal.kind === 'operation') {
+        await cancelStagedCompanionOperation(systemDate);
+      }
+      await clearPendingAiProposal(currentConversation.id);
+      setPendingProposal(undefined);
+    }
     setSending(true);
     setNotice('');
     setDraft('');
@@ -306,6 +373,7 @@ export function AiHeadquartersPanel() {
           enabledCompanionIds: enabledCompanions.map((companion) => companion.id),
           query: message,
         }),
+        commandMode: 'propose',
       });
       void voiceLink.trackTextUsage(result).catch(() => undefined);
       const memoryAdditions = currentSettings.aiRelationshipMemoryEnabled
@@ -326,6 +394,19 @@ export function AiHeadquartersPanel() {
         messages: [...pendingConversation.messages, ...replyMessages],
       };
       await updateConversation(completedConversation);
+      const proposal = extractAiPendingProposal(
+        result,
+        actionCatalog,
+        currentConversation.audience,
+      );
+      if (proposal) {
+        if (proposal.kind === 'operation') {
+          await stageCompanionOperation(systemDate, proposal.payload, completedConversation.id);
+        }
+        await savePendingAiProposal(completedConversation.id, proposal);
+        setPendingProposal(proposal);
+        setNotice('Action preview prepared. Nothing changes until you confirm it below.');
+      }
       if (currentSettings.aiVoiceOutputEnabled && currentSettings.aiVoiceAutoPlay) {
         void voiceLink.playMessages(replyMessages);
       }
@@ -341,6 +422,215 @@ export function AiHeadquartersPanel() {
     } finally {
       setSending(false);
     }
+  }
+
+  async function appendVerifiedAcknowledgement(
+    conversation: AiConversation,
+    companionId: AiPendingProposal['ownerId'],
+    message: string,
+  ) {
+    const acknowledgement = createCompanionMessage(companionId, message);
+    const updated: AiConversation = {
+      ...conversation,
+      updatedAt: acknowledgement.createdAt,
+      messages: [...conversation.messages, acknowledgement],
+    };
+    await updateConversation(updated);
+    if (currentSettings.aiVoiceOutputEnabled && currentSettings.aiVoiceAutoPlay) {
+      void voiceLink.playMessages([acknowledgement]);
+    }
+  }
+
+  async function executePendingProposal(conversation = currentConversation) {
+    if (!pendingProposal || executingProposal) return;
+    setExecutingProposal(true);
+    let applied = false;
+    try {
+      let acknowledgement = '';
+      if (pendingProposal.kind === 'command') {
+        const { action } = pendingProposal.payload;
+        if (action.kind === 'complete_mission') await complete(action.missionId);
+        else if (action.kind === 'skip_mission') await updateStatus(action.missionId, 'skipped');
+        else if (action.kind === 'fail_mission') await updateStatus(action.missionId, 'failed');
+        else if (action.kind === 'reopen_mission') await undo(action.missionId);
+        else await updateStatus(action.missionId, 'pending');
+        acknowledgement = commandSuccessAcknowledgement(pendingProposal.ownerId, action);
+      } else if (pendingProposal.kind === 'operation') {
+        const record = await prepareCompanionOperation(
+          systemDate,
+          pendingProposal.payload,
+          conversation.id,
+        );
+        const prepared = [
+          record.training?.label,
+          record.kitchen?.label,
+          record.sanctuary?.label,
+        ].filter(Boolean);
+        let kitchenBoundary = '';
+        const constraint = pendingProposal.payload.foodConstraints?.trim();
+        const meaningfulConstraint =
+          constraint &&
+          !['none', 'no', 'no restrictions', 'nothing', 'anything is fine'].includes(
+            constraint.toLowerCase(),
+          );
+        const includesKitchen =
+          pendingProposal.payload.kind === 'prepare-kitchen' ||
+          (pendingProposal.payload.kind === 'assemble-day' &&
+            pendingProposal.payload.includeKitchen);
+        if (meaningfulConstraint && includesKitchen && record.kitchen?.state !== 'completed') {
+          try {
+            const review = await requestAiHeadquartersReply({
+              audience: 'saffron',
+              message: `The Hunter confirmed today's preparation. Review the current Kitchen Order against this exact boundary: "${constraint}". If the order satisfies it, return no recipe. If it conflicts, prepare one complete practical replacement recipe that satisfies the boundary. Do not return another Companion Operation.`,
+              history: conversation.messages,
+              context: await buildAiProgressContext({
+                audience: 'saffron',
+                profile: currentProfile,
+                settings: currentSettings,
+                progression: currentProgression,
+                missions,
+                todayRecords,
+                stats,
+                challenges,
+                systemDate,
+                enabledCompanionIds: enabledCompanions.map((companion) => companion.id),
+                query: constraint,
+              }),
+              commandMode: 'propose',
+            });
+            void voiceLink.trackTextUsage(review).catch(() => undefined);
+            if (review.recipeProposal) {
+              let replacementId: string | undefined;
+              try {
+                const replacement = await saveCustomKitchenRecipe(review.recipeProposal);
+                replacementId = replacement.id;
+                await assignSpecificKitchenOrder(systemDate, replacement.id);
+                await synchronizeKitchenOperation(systemDate, constraint);
+                kitchenBoundary = ` Saffron replaced the conflicting roll with ${replacement.name}, which preserves “${constraint}.”`;
+              } catch (error) {
+                if (replacementId) {
+                  await deleteCustomKitchenRecipe(replacementId).catch(() => undefined);
+                }
+                throw error;
+              }
+            } else {
+              kitchenBoundary = ` Saffron checked the rolled order against “${constraint}” and kept it.`;
+            }
+          } catch (error) {
+            const message = error instanceof Error ? error.message : 'Boundary review failed.';
+            await addDailyOperationNote(systemDate, `Kitchen constraint review: ${message}`);
+            kitchenBoundary = ` The “${constraint}” Kitchen boundary is visibly flagged because Saffron could not safely finish the replacement check; no conflicting recipe was forced.`;
+          }
+        }
+        acknowledgement = record.preparationNotes.length
+          ? `The preparation is saved with ${record.preparationNotes.length} visible flag${record.preparationNotes.length === 1 ? '' : 's'}. I preserved every existing assignment instead of forcing a replacement.${kitchenBoundary}`
+          : `${prepared.join(', ')} ${prepared.length === 1 ? 'is' : 'are'} loaded in the proper section${prepared.length === 1 ? '' : 's'}. Nothing was completed and no XP was awarded.${kitchenBoundary}`;
+      } else if (pendingProposal.kind === 'recipe') {
+        const recipe = await saveCustomKitchenRecipe(pendingProposal.payload);
+        acknowledgement = `${recipe.name} is now in the Private Grimoire and Daily Rotation. Open Kitchen whenever you want Saffron's full cooking checklist.`;
+      } else if (pendingProposal.kind === 'content') {
+        const content = await saveCreatorProject({
+          ...pendingProposal.payload,
+          status: 'idea',
+        });
+        acknowledgement = `“${content.title}” is now on the Creator Forge board. The recorded next move is ${content.nextAction || 'one honest production step'}.`;
+      } else if (pendingProposal.kind === 'campaign') {
+        const projects = await saveCreatorCampaign(pendingProposal.payload.operations);
+        acknowledgement = `${pendingProposal.payload.name} is now on Creator Forge: ${projects.length} real operations in one sequence. Start with ${projects[0]?.nextAction || 'the first physical move'}.`;
+      } else {
+        const event = await applyCalendarProposal(pendingProposal.payload, pendingProposal.ownerId);
+        const linked = event.linkedCompanionId ? getCompanion(event.linkedCompanionId) : undefined;
+        acknowledgement = `${event.title} is now ${event.status === 'canceled' ? 'canceled' : 'secured'} in Calendar Command.${linked ? ` ${linked.name} is linked to the time block; the actual ${event.linkedRealm ?? 'realm'} assignment still begins in its own section.` : ''}`;
+      }
+      applied = true;
+      await clearPendingAiProposal(conversation.id);
+      const completed = pendingProposal;
+      setPendingProposal(undefined);
+      await appendVerifiedAcknowledgement(conversation, completed.ownerId, acknowledgement);
+      await refresh();
+      setNotice(
+        'Confirmed locally. The acknowledgement was written only after the save succeeded.',
+      );
+    } catch (error) {
+      setNotice(
+        applied
+          ? 'The action was saved locally, but its companion acknowledgement could not be written.'
+          : error instanceof Error
+            ? error.message
+            : 'That action could not be applied.',
+      );
+    } finally {
+      setExecutingProposal(false);
+    }
+  }
+
+  async function dismissPendingProposal() {
+    if (!pendingProposal || executingProposal) return;
+    try {
+      if (pendingProposal.kind === 'operation') {
+        await cancelStagedCompanionOperation(systemDate);
+      }
+      await clearPendingAiProposal(currentConversation.id);
+      setPendingProposal(undefined);
+      setNotice('Preview dismissed. Existing records remain untouched.');
+    } catch (error) {
+      setNotice(
+        error instanceof Error ? error.message : 'That preview could not be safely dismissed.',
+      );
+    }
+  }
+
+  function pendingProposalCopy(proposal: AiPendingProposal) {
+    if (proposal.kind === 'command') {
+      return {
+        eyebrow: 'SYSTEM COMMAND',
+        title: proposal.payload.action.label,
+        summary: proposal.payload.proposal.summary,
+        confirmation: proposal.payload.proposal.confirmation,
+      };
+    }
+    if (proposal.kind === 'operation') {
+      return {
+        eyebrow: 'PARTY OPERATION',
+        title: proposal.payload.kind.replaceAll('-', ' '),
+        summary: proposal.payload.summary,
+        confirmation: proposal.payload.confirmation,
+      };
+    }
+    if (proposal.kind === 'recipe') {
+      return {
+        eyebrow: 'PRIVATE GRIMOIRE',
+        title: proposal.payload.name,
+        summary: `${proposal.payload.servings} servings · ${proposal.payload.prepMinutes + proposal.payload.cookMinutes} minutes · ${proposal.payload.ingredients.length} ingredients`,
+        confirmation: proposal.payload.confirmation,
+      };
+    }
+    if (proposal.kind === 'content') {
+      return {
+        eyebrow: 'CREATOR FORGE',
+        title: proposal.payload.title,
+        summary: `${proposal.payload.contentType} · Next: ${proposal.payload.nextAction}`,
+        confirmation: proposal.payload.confirmation,
+      };
+    }
+    if (proposal.kind === 'campaign') {
+      return {
+        eyebrow: 'REAWAKENING CAMPAIGN',
+        title: proposal.payload.name,
+        summary: `${proposal.payload.weeks} weeks · ${proposal.payload.operations.length} operations · ${proposal.payload.strategy}`,
+        confirmation: proposal.payload.confirmation,
+      };
+    }
+    return {
+      eyebrow: 'CALENDAR COMMAND',
+      title: proposal.payload.title,
+      summary: `${proposal.payload.action} · ${new Intl.DateTimeFormat('en-US', {
+        dateStyle: 'medium',
+        timeStyle: proposal.payload.allDay ? undefined : 'short',
+        timeZone: currentSettings.timeZone,
+      }).format(new Date(proposal.payload.startAt))}`,
+      confirmation: proposal.payload.confirmation,
+    };
   }
 
   const readiness = !deviceOnline
@@ -743,6 +1033,71 @@ export function AiHeadquartersPanel() {
                 </div>
               )}
             </div>
+
+            {pendingProposal &&
+              (() => {
+                const copy = pendingProposalCopy(pendingProposal);
+                const owner = getCompanion(pendingProposal.ownerId);
+                return (
+                  <section
+                    className="ai-proposal-card"
+                    style={{ '--companion-accent': owner.accent } as CSSProperties}
+                    aria-live="polite"
+                  >
+                    <header>
+                      <span>
+                        <ShieldCheck size={16} /> {copy.eyebrow}
+                      </span>
+                      <small>CONFIRMATION REQUIRED</small>
+                    </header>
+                    <div className="ai-proposal-card__identity">
+                      <img src={getCompanionImage(owner.image)} alt="" />
+                      <div>
+                        <strong>{copy.title}</strong>
+                        <small>Prepared by {owner.name} · still only a preview</small>
+                      </div>
+                    </div>
+                    <p>{copy.summary}</p>
+                    {pendingProposal.kind === 'campaign' && (
+                      <ol>
+                        {pendingProposal.payload.operations.map((operation) => (
+                          <li key={`${operation.title}-${operation.contentType}`}>
+                            <strong>{operation.title}</strong>
+                            <span>{operation.nextAction}</span>
+                          </li>
+                        ))}
+                      </ol>
+                    )}
+                    <blockquote>{copy.confirmation}</blockquote>
+                    <div>
+                      <button
+                        className="button button--primary"
+                        type="button"
+                        disabled={executingProposal}
+                        onClick={() => void executePendingProposal()}
+                      >
+                        {executingProposal ? (
+                          <LoaderCircle className="is-spinning" size={16} />
+                        ) : (
+                          <Check size={16} />
+                        )}
+                        Confirm and apply
+                      </button>
+                      <button
+                        className="button button--ghost"
+                        type="button"
+                        disabled={executingProposal}
+                        onClick={() => void dismissPendingProposal()}
+                      >
+                        Dismiss preview
+                      </button>
+                    </div>
+                    <small>
+                      A companion reply cannot save this. Only this verified local confirmation can.
+                    </small>
+                  </section>
+                );
+              })()}
 
             {notice && <p className="ai-command-link__notice">{notice}</p>}
             {onlineMode && !statusLoading && !status?.configured && (

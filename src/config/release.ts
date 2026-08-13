@@ -14,6 +14,10 @@ export const RELEASE_SECTIONS: ReleaseSection[] = [
     detail:
       'The complete A.R.C. character system joins The System as a private creative realm, while Quill brings source-grounded canon recall, continuity counsel, and unapologetic story-room energy to the party.',
     points: [
+      'AI Headquarters and Quick Link now share one verified action channel: missions, Party Operations, recipes, Creator Forge entries, Reawakening campaigns, and Calendar changes stay as persistent previews until the Hunter confirms them and the real local record succeeds.',
+      'Every action-capable companion follows the same honesty boundary in either command surface, so a conversational “I confirm” can never be mistaken for a saved, scheduled, completed, or synchronized result.',
+      'Calendar Command can show or hide today’s Daily Missions as a read-only planning layer without creating duplicate events, awarding XP, or altering mission completion.',
+      'Kairo, Snow, and each realm specialist can reserve a companion-linked time block together; the Calendar protects the time while the authoritative workout, recipe, study, content, lore, or ledger work still begins and completes inside its original realm.',
       "Kairo, The Timekeeper, becomes the twelfth companion and Snow's schedule keeper, bringing a private offline-first Calendar Command realm, grounded schedule briefings, conflict detection, recurring commitments, and full Soulprint, Voice Link, Quick Link, party, milestone, and backup support.",
       'Calendar changes prepared through Kairo or Snow remain visible previews until the Hunter confirms them; neither companion may silently add, move, complete, cancel, or overwrite a commitment.',
       'The intelligent calendar expands recurring events into a real agenda, detects overlapping commitments, surfaces the next arrival and protected focus windows, and keeps the complete schedule available offline in Archive Shield format 27.',

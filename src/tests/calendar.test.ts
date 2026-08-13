@@ -110,10 +110,14 @@ describe('Calendar Command', () => {
         recurrenceInterval: 1,
         recurrenceEndsOn: '',
         location: 'Sanctuary',
+        linkedCompanionId: 'selah',
+        linkedRealm: 'sanctuary',
       },
       'snow',
     );
     expect(saved.source).toBe('snow');
+    expect(saved.linkedCompanionId).toBe('selah');
+    expect(saved.linkedRealm).toBe('sanctuary');
     expect(await db.calendarEvents.count()).toBe(1);
   });
 
@@ -126,6 +130,15 @@ describe('Calendar Command', () => {
         endAt: '2026-08-18T13:00:00.000Z',
       }),
     ).rejects.toThrow(/after start/i);
+    await expect(
+      saveCalendarEvent({
+        title: 'Half-linked entry',
+        category: 'creator',
+        startAt: '2026-08-18T14:00:00.000Z',
+        endAt: '2026-08-18T15:00:00.000Z',
+        linkedCompanionId: 'haven',
+      }),
+    ).rejects.toThrow(/both its companion and realm/i);
     await expect(
       applyCalendarProposal(
         {

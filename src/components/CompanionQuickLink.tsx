@@ -30,6 +30,13 @@ import {
   saveAiMemoryCandidates,
 } from '@/game/aiHeadquarters';
 import { buildAiProgressContext } from '@/game/aiContext';
+import {
+  clearPendingAiProposal,
+  extractAiPendingProposal,
+  getPendingAiProposal,
+  savePendingAiProposal,
+  type AiPendingProposal,
+} from '@/game/aiPendingProposals';
 import { applyCalendarProposal } from '@/game/calendar';
 import { saveCreatorCampaign, saveCreatorProject } from '@/game/creatorForge';
 import {
@@ -166,6 +173,20 @@ export function CompanionQuickLink() {
     onNotice: setNotice,
   });
 
+  const restorePendingProposal = useCallback((proposal?: AiPendingProposal) => {
+    if (!proposal) return;
+    if (proposal.kind === 'command') setPendingAction(proposal.payload);
+    if (proposal.kind === 'operation') setPendingOperation(proposal.payload);
+    if (proposal.kind === 'recipe') setPendingRecipe(proposal.payload);
+    if (proposal.kind === 'content') setPendingContent(proposal.payload);
+    if (proposal.kind === 'campaign') setPendingCampaign(proposal.payload);
+    if (proposal.kind === 'calendar') {
+      setPendingCalendar(proposal.payload);
+      setPendingCalendarOwner(proposal.ownerId);
+    }
+    setNotice('Your unfinished confirmation is still waiting below. Nothing changed without you.');
+  }, []);
+
   useEffect(() => {
     void getAiLinkStatus().then(setStatus);
     const online = () => setDeviceOnline(true);
@@ -178,7 +199,6 @@ export function CompanionQuickLink() {
       const companionId = detail?.companionId;
       if (!companionId) return;
       voiceLinkRef.current.stopPlayback();
-      conversationRef.current = createAiConversation(companionId);
       setActiveCompanionId(companionId);
       setReplies([]);
       setPendingAction(undefined);
@@ -192,14 +212,21 @@ export function CompanionQuickLink() {
       setLinkMode('command');
       setNotice(`${getCompanion(companionId).name}'s live channel is ready.`);
       setOpen(true);
-      void getDailyOperations(systemDate).then((operations) => {
+      void (async () => {
+        const continuing = await getContinuingAiConversation(companionId, new Date(), 24);
+        const conversation = continuing ?? createAiConversation(companionId);
+        conversationRef.current = conversation;
+        setReplies(conversation.messages);
+        setContinuityTurns(conversation.messages.length);
+        restorePendingProposal(await getPendingAiProposal(conversation.id));
+        const operations = await getDailyOperations(systemDate);
         if (operations?.status === 'awaiting-confirmation' && operations.pendingProposal) {
           setPendingOperation(operations.pendingProposal);
           setNotice(
             `${getCompanion(companionId).name}'s channel is ready. Your staged preparation is still waiting below.`,
           );
         }
-      });
+      })();
     };
     window.addEventListener('system:open-quick-link', openDirectLink);
     return () => {
@@ -207,7 +234,7 @@ export function CompanionQuickLink() {
       window.removeEventListener('offline', offline);
       window.removeEventListener('system:open-quick-link', openDirectLink);
     };
-  }, [systemDate]);
+  }, [restorePendingProposal, systemDate]);
 
   useEffect(() => {
     if (!open) return;
@@ -265,6 +292,9 @@ export function CompanionQuickLink() {
       setDraft('');
       setPendingAction(undefined);
       if (pendingOperation) await cancelStagedCompanionOperation(systemDate);
+      if (conversationRef.current) {
+        await clearPendingAiProposal(conversationRef.current.id);
+      }
       setPendingOperation(undefined);
       setPendingRecipe(undefined);
       setPendingContent(undefined);
@@ -364,6 +394,8 @@ export function CompanionQuickLink() {
         conversationRef.current = completedConversation;
         setReplies((current) => [...current, ...responseMessages]);
         setContinuityTurns(completedConversation.messages.length);
+        const pending = extractAiPendingProposal(result, actionCatalog, addressed.audience);
+        if (pending) await savePendingAiProposal(completedConversation.id, pending);
         const proposedAction = result.commandProposal
           ? actionCatalog.find((action) => action.actionId === result.commandProposal?.actionId)
           : undefined;
@@ -499,6 +531,7 @@ export function CompanionQuickLink() {
         pendingAction.proposal.companionId,
         commandSuccessAcknowledgement(pendingAction.proposal.companionId, pendingAction.action),
       );
+      if (conversationRef.current) await clearPendingAiProposal(conversationRef.current.id);
       setNotice('Command confirmed · local campaign synchronized.');
     } catch (error) {
       setNotice(
@@ -697,6 +730,7 @@ export function CompanionQuickLink() {
       const messages = buildOperationMessages(record, pendingOperation, kitchenMessages);
       prepared = true;
       setPendingOperation(undefined);
+      if (conversationRef.current) await clearPendingAiProposal(conversationRef.current.id);
       await refresh();
       if (messages.length) {
         await appendLocalMessages(messages, {
@@ -733,6 +767,7 @@ export function CompanionQuickLink() {
     try {
       await cancelStagedCompanionOperation(systemDate);
       setPendingOperation(undefined);
+      if (conversationRef.current) await clearPendingAiProposal(conversationRef.current.id);
       setNotice('Preparation dismissed. Existing assignments remain untouched.');
     } catch (error) {
       setNotice(
@@ -741,6 +776,20 @@ export function CompanionQuickLink() {
     } finally {
       executionLockRef.current = false;
       setExecutingAction(false);
+    }
+  }
+
+  async function dismissPendingPreview(clearPreview: () => void, notice: string) {
+    try {
+      if (conversationRef.current) {
+        await clearPendingAiProposal(conversationRef.current.id);
+      }
+      clearPreview();
+      setNotice(notice);
+    } catch (error) {
+      setNotice(
+        error instanceof Error ? error.message : 'That preview could not be safely dismissed.',
+      );
     }
   }
 
@@ -768,6 +817,7 @@ export function CompanionQuickLink() {
       await saveCustomKitchenRecipe(recipe);
       saved = true;
       setPendingRecipe(undefined);
+      if (conversationRef.current) await clearPendingAiProposal(conversationRef.current.id);
       await appendLocalAcknowledgement(
         'saffron',
         `${recipe.name} is in my Private Grimoire and Daily Rotation now. Open the Kitchen whenever you want to cook it with me step by step. Your recipe, your device, and nobody touched it before you confirmed.`,
@@ -806,6 +856,7 @@ export function CompanionQuickLink() {
       });
       saved = true;
       setPendingContent(undefined);
+      if (conversationRef.current) await clearPendingAiProposal(conversationRef.current.id);
       await appendLocalAcknowledgement(
         'haven',
         `“${content.title}” is on the Creator Forge board now. The spotlight is not asking for perfection—just ${content.nextAction || 'one honest next move'}.`,
@@ -834,6 +885,7 @@ export function CompanionQuickLink() {
       const projects = await saveCreatorCampaign(pendingCampaign.operations);
       saved = true;
       setPendingCampaign(undefined);
+      if (conversationRef.current) await clearPendingAiProposal(conversationRef.current.id);
       await appendLocalAcknowledgement(
         'haven',
         `${pendingCampaign.name} is live on the Creator Forge board: ${projects.length} releases, one sequence, and no disappearing between uploads. We start with ${projects[0]?.nextAction || 'the first physical move'}.`,
@@ -862,6 +914,7 @@ export function CompanionQuickLink() {
       const event = await applyCalendarProposal(pendingCalendar, pendingCalendarOwner);
       saved = true;
       setPendingCalendar(undefined);
+      if (conversationRef.current) await clearPendingAiProposal(conversationRef.current.id);
       const localDateTime = new Intl.DateTimeFormat('en-US', {
         weekday: 'short',
         month: 'short',
@@ -1321,8 +1374,10 @@ export function CompanionQuickLink() {
                       className="button button--ghost"
                       disabled={executingAction}
                       onClick={() => {
-                        setPendingAction(undefined);
-                        setNotice('Command dismissed. No campaign data changed.');
+                        void dismissPendingPreview(
+                          () => setPendingAction(undefined),
+                          'Command dismissed. No campaign data changed.',
+                        );
                       }}
                     >
                       Cancel
@@ -1461,8 +1516,10 @@ export function CompanionQuickLink() {
                       className="button button--ghost"
                       disabled={executingAction}
                       onClick={() => {
-                        setPendingRecipe(undefined);
-                        setNotice('Recipe dismissed. Saffron changed nothing on this device.');
+                        void dismissPendingPreview(
+                          () => setPendingRecipe(undefined),
+                          'Recipe dismissed. Saffron changed nothing on this device.',
+                        );
                       }}
                     >
                       Cancel
@@ -1522,8 +1579,10 @@ export function CompanionQuickLink() {
                       className="button button--ghost"
                       disabled={executingAction}
                       onClick={() => {
-                        setPendingContent(undefined);
-                        setNotice('Content draft dismissed. Creator Forge was not changed.');
+                        void dismissPendingPreview(
+                          () => setPendingContent(undefined),
+                          'Content draft dismissed. Creator Forge was not changed.',
+                        );
                       }}
                     >
                       Cancel
@@ -1585,8 +1644,10 @@ export function CompanionQuickLink() {
                       className="button button--ghost"
                       disabled={executingAction}
                       onClick={() => {
-                        setPendingCampaign(undefined);
-                        setNotice('Campaign dismissed. Creator Forge was not changed.');
+                        void dismissPendingPreview(
+                          () => setPendingCampaign(undefined),
+                          'Campaign dismissed. Creator Forge was not changed.',
+                        );
                       }}
                     >
                       Cancel
@@ -1695,8 +1756,10 @@ export function CompanionQuickLink() {
                       className="button button--ghost"
                       disabled={executingAction}
                       onClick={() => {
-                        setPendingCalendar(undefined);
-                        setNotice('Calendar preview dismissed. No schedule record changed.');
+                        void dismissPendingPreview(
+                          () => setPendingCalendar(undefined),
+                          'Calendar preview dismissed. No schedule record changed.',
+                        );
                       }}
                     >
                       Cancel

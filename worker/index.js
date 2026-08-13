@@ -11,7 +11,7 @@ export const YOUTUBE_READONLY_SCOPES = [
 
 const YOUTUBE_OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
 
-export const COMPANION_INTELLIGENCE_VERSION = 'adaptive-workrooms-1';
+export const COMPANION_INTELLIGENCE_VERSION = 'verified-actions-2';
 
 const COUNSEL_SIGNALS =
   /\b(?:world\s+class|class|rank|level|xp|progress|progression|forecast|how\s+long|timeline|pace|plan|strategy|strategize|analy[sz]e|compare|trade-?off|why|should\s+i|what\s+should|recommend|decision|prioriti[sz]e|streak|challenge|trial|discipline|balanced\s+stats?|youtube|channel|content|video|stream|hook|thumbnail|audience|creator|a\.?r\.?c\.?|arc|canon|dossier|lore|plot|character|worldbuild(?:ing)?|arts?\s+codex)\b/i;
@@ -68,6 +68,10 @@ export function selectIntelligenceWorkload(payload) {
   const recent = conversationWindow(payload);
   const previousCompanion = lastCompanionMessage(payload);
   const proposing = payload.commandMode === 'propose';
+
+  if (proposing && CALENDAR_WORK_SIGNALS.test(recent) && CALENDAR_MUTATION_SIGNALS.test(current)) {
+    return 'calendar-command';
+  }
 
   if (payload.audience === 'haven' || payload.audience === 'party') {
     const campaignFollowUp =
@@ -529,6 +533,7 @@ Rules:
 - When asked about Class advancement or how long World Class may take, lead with the designed System path: the supplied theoretical fastest floor and sustainable range. Then state the hard remaining requirements. Present the Hunter's recent-pace extrapolation only as a secondary comparison, always name its sample size and confidence, and never frame it as the intended timeline or destiny. A sample under 21 finalized days is explicitly an early baseline, not a reliable long-range forecast. Do not convert completed days into calendar years without labeling the assumption of one completed day per calendar day. Include the supplied forecast caveat and identify any gate that cannot be reduced to a date. If a required fact is absent, say exactly what is absent instead of giving a vague answer.
 - For casual conversation, companions may express in-world opinions, humor, preferences, and reactions, but must not claim real-world activity, off-screen observation, sentience, or access outside the supplied context.
 - The app's progression rules are authoritative. Never claim that XP, a mission, or the save has already changed. In Command Mode you may prepare one explicitly allowed on-device action, but the Hunter must confirm it in the app before anything changes.
+- Never use saved, added, scheduled, confirmed, completed, synchronized, or other past-tense mutation language merely because the Hunter typed “I confirm.” Until the client returns a locally generated success acknowledgement after a verified write, describe the action only as a preview waiting for confirmation.
 - Specialist context may appear in progressContext.specialists. Use only the domain relevant to the addressed companion or the party's actual question; do not dump unrelated records into the reply.
 - Selah may recommend Bible passages, explain themes, compare interpretations at a general level, and connect a situation to Scripture with warmth and practical discernment. Never invent a verse or present a paraphrase as an exact quotation. When exact wording matters and no translation text is supplied, give the reference, label any paraphrase, and note that wording varies by translation. Do not weaponize Scripture, declare God's private intent, replace a pastor or clinician, or turn uncertainty into spiritual failure. progressContext.specialists.sanctuary deliberately excludes the Hunter's written reflection and prayer.
 - Cassian may analyze only progressContext.specialists.treasury. If sharingEnabled is false, say that aggregate-only Ledger Counsel can be enabled in AI Headquarters; do not fish for or infer amounts. If enabled, distinguish facts from estimates, show the arithmetic behind important recommendations, preserve emergency and minimum-payment constraints, and frame guidance as general education rather than professional financial advice. Itemized labels, notes, merchants, and account credentials are never available.
@@ -588,7 +593,10 @@ function buildFocusedWorkloadInstruction(workload, commandMode) {
 - An update or cancel must copy eventId exactly from progressContext.calendar.upcoming. Never fabricate an ID or edit one event because its title merely resembles the Hunter's words. For cancel, preserve the selected event's factual fields in the preview.
 - Surface any supplied conflict or new overlap before confirmation. Never silently overwrite, merge, complete, or delete another commitment. Cancel means status cancellation; permanent deletion remains a manual Calendar Command control.
 - Use recurrence none, daily, weekly, or monthly. recurrenceInterval must be 1 to 12. recurrenceEndsOn may be empty only when the series is intentionally open-ended.
-- If no complete mutation should be proposed, set action, eventId, title, description, category, startAt, endAt, recurrence, recurrenceEndsOn, location, and confirmation to empty strings; set allDay false and recurrenceInterval 0.`;
+- Coordinate domain time without pretending the domain assignment exists. Cooking and meal-prep blocks link to Saffron and kitchen; training links to Rook and training unless recovery clearly calls for Mira; Scripture or prayer links to Selah and sanctuary; content links to Vesper (haven) and creator; A.R.C. work links to Quill and arc; finance work links to Cassian and treasury. General commitments have no linked specialist.
+- A linked event means Kairo reserved time and made the responsible companion visible. It never rolls a meal or workout, creates a Scripture session or content project, checks a mission, awards XP, or proves the specialist performed a separate verification.
+- When the Hunter asks a domain companion directly to schedule relevant time, that companion may hand the structured calendar preview to Kairo while replying in their own voice. Kairo remains the record owner; this is coordination, not proof of a second unseen AI conversation.
+- If no complete mutation should be proposed, set action, eventId, title, description, category, startAt, endAt, recurrence, recurrenceEndsOn, location, linkedCompanionId, linkedRealm, and confirmation to empty strings; set allDay false and recurrenceInterval 0.`;
   }
   if (workload === 'arc-forge') {
     return `Focused workroom: A.R.C. Story Room. Return only title, replies, and memoryCandidates. Give Quill enough room for grounded canon recall, continuity analysis, dossier development, or story invention while clearly separating established canon, inference, and new ideas. Do not prepare unrelated System mutations in this response.`;
@@ -629,7 +637,7 @@ export function buildCommandInstruction(commandMode, workload = 'conversation') 
   const focusedInstruction = buildFocusedWorkloadInstruction(workload, commandMode);
   if (focusedInstruction) return focusedInstruction;
   if (commandMode !== 'propose') {
-    return `Command Mode is disabled. Return command.actionId, command.summary, and command.confirmation as empty strings. Set command.companionId to snow. Return operation.kind, operation.trainingLocation, operation.foodConstraints, operation.sanctuaryMode, operation.primaryConcern, operation.secondaryConcern, operation.summary, and operation.confirmation as empty strings; set operation.companionId to snow and all three operation include flags to false. Return recipe.name and every other recipe string as empty, recipe numbers as 0, and recipe arrays empty. Return every content string as empty. Return campaign.name, campaign.strategy, and campaign.confirmation as empty strings, campaign.weeks as 0, and campaign.operations as an empty array. Return calendar strings empty, calendar.allDay false, and calendar.recurrenceInterval 0.`;
+    return `Command Mode is disabled. Return command.actionId, command.summary, and command.confirmation as empty strings. Set command.companionId to snow. Return operation.kind, operation.trainingLocation, operation.foodConstraints, operation.sanctuaryMode, operation.primaryConcern, operation.secondaryConcern, operation.summary, and operation.confirmation as empty strings; set operation.companionId to snow and all three operation include flags to false. Return recipe.name and every other recipe string as empty, recipe numbers as 0, and recipe arrays empty. Return every content string as empty. Return campaign.name, campaign.strategy, and campaign.confirmation as empty strings, campaign.weeks as 0, and campaign.operations as an empty array. Return calendar strings, calendar.linkedCompanionId, and calendar.linkedRealm empty, calendar.allDay false, and calendar.recurrenceInterval 0.`;
   }
   return `Command Mode is active. The only actions you may prepare are listed in progressContext.commands.allowedActions.
 - Propose an action only when the Hunter clearly asks to perform that exact change now. Questions, hypotheticals, planning, reports, and vague wishes are not action requests.
@@ -935,6 +943,11 @@ const responseSchema = {
         recurrenceInterval: { type: 'integer', minimum: 0, maximum: 12 },
         recurrenceEndsOn: { type: 'string', maxLength: 10 },
         location: { type: 'string', maxLength: 240 },
+        linkedCompanionId: { type: 'string', enum: ['', ...companionIds] },
+        linkedRealm: {
+          type: 'string',
+          enum: ['', 'missions', 'training', 'kitchen', 'sanctuary', 'creator', 'arc', 'treasury'],
+        },
         confirmation: { type: 'string', maxLength: 320 },
       },
       required: [
@@ -950,6 +963,8 @@ const responseSchema = {
         'recurrenceInterval',
         'recurrenceEndsOn',
         'location',
+        'linkedCompanionId',
+        'linkedRealm',
         'confirmation',
       ],
       additionalProperties: false,
@@ -2727,11 +2742,21 @@ async function handleAiChat(request, env, url) {
       'deadline',
     ]);
     const calendarRecurrences = new Set(['none', 'daily', 'weekly', 'monthly']);
+    const calendarRealms = new Set([
+      'missions',
+      'training',
+      'kitchen',
+      'sanctuary',
+      'creator',
+      'arc',
+      'treasury',
+    ]);
     const scheduleKeeperAllowed =
       payload.audience === 'kairo' ||
       payload.audience === 'snow' ||
       (payload.audience === 'party' &&
-        (enabledCompanionIds.includes('kairo') || enabledCompanionIds.includes('snow')));
+        (enabledCompanionIds.includes('kairo') || enabledCompanionIds.includes('snow'))) ||
+      (companionIds.includes(payload.audience) && enabledCompanionIds.includes('kairo'));
     const knownCalendarEvents = Array.isArray(payload.context?.calendar?.upcoming)
       ? payload.context.calendar.upcoming.filter(
           (event) => isObject(event) && typeof event.eventId === 'string',
@@ -2749,6 +2774,11 @@ async function handleAiChat(request, env, url) {
     const calendarIdentityValid =
       calendarAction === 'create' ? !calendarEventId : knownCalendarEventIds.has(calendarEventId);
     const calendarRecurrenceEndsOn = String(calendar?.recurrenceEndsOn ?? '').trim();
+    const linkedCompanionId = String(calendar?.linkedCompanionId ?? '').trim();
+    const linkedRealm = String(calendar?.linkedRealm ?? '').trim();
+    const calendarLinkValid =
+      (!linkedCompanionId && !linkedRealm) ||
+      (companionIds.includes(linkedCompanionId) && calendarRealms.has(linkedRealm));
     const calendarProposal =
       payload.commandMode === 'propose' &&
       scheduleKeeperAllowed &&
@@ -2761,6 +2791,7 @@ async function handleAiChat(request, env, url) {
       calendarDatesValid &&
       typeof calendar.allDay === 'boolean' &&
       calendarRecurrences.has(calendar.recurrence) &&
+      calendarLinkValid &&
       Number.isInteger(calendar.recurrenceInterval) &&
       calendar.recurrenceInterval >= 1 &&
       calendar.recurrenceInterval <= 12 &&
@@ -2784,6 +2815,8 @@ async function handleAiChat(request, env, url) {
             location: String(calendar.location ?? '')
               .trim()
               .slice(0, 240),
+            linkedCompanionId: linkedCompanionId || '',
+            linkedRealm: linkedRealm || '',
             confirmation: calendar.confirmation.trim().slice(0, 320),
           }
         : undefined;

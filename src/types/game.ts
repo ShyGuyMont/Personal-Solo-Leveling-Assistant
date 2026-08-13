@@ -1432,6 +1432,8 @@ export type CalendarEventCategory =
 export type CalendarRecurrence = 'none' | 'daily' | 'weekly' | 'monthly';
 export type CalendarEventStatus = 'scheduled' | 'completed' | 'canceled';
 export type CalendarEventSource = 'hunter' | 'kairo' | 'snow';
+export type CalendarRealm =
+  'missions' | 'training' | 'kitchen' | 'sanctuary' | 'creator' | 'arc' | 'treasury';
 
 export interface CalendarEvent {
   id: string;
@@ -1446,6 +1448,8 @@ export interface CalendarEvent {
   recurrenceEndsOn?: LocalDateKey;
   location: string;
   source: CalendarEventSource;
+  linkedCompanionId?: CompanionId;
+  linkedRealm?: CalendarRealm;
   status: CalendarEventStatus;
   createdAt: string;
   updatedAt: string;
@@ -1462,6 +1466,8 @@ export interface CalendarEventOccurrence {
   allDay: boolean;
   location: string;
   source: CalendarEventSource;
+  linkedCompanionId?: CompanionId;
+  linkedRealm?: CalendarRealm;
   status: CalendarEventStatus;
   recurring: boolean;
 }

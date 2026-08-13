@@ -1312,6 +1312,15 @@ function validateData(data: Record<string, unknown[]>) {
   const calendarRecurrences = new Set(['none', 'daily', 'weekly', 'monthly']);
   const calendarStatuses = new Set(['scheduled', 'completed', 'canceled']);
   const calendarSources = new Set(['hunter', 'kairo', 'snow']);
+  const calendarRealms = new Set([
+    'missions',
+    'training',
+    'kitchen',
+    'sanctuary',
+    'creator',
+    'arc',
+    'treasury',
+  ]);
   for (const row of data.calendarEvents) {
     const start = isObject(row) ? Date.parse(String(row.startAt)) : Number.NaN;
     const end = isObject(row) ? Date.parse(String(row.endAt)) : Number.NaN;
@@ -1336,6 +1345,9 @@ function validateData(data: Record<string, unknown[]>) {
       typeof row.location !== 'string' ||
       row.location.length > 240 ||
       !calendarSources.has(String(row.source)) ||
+      (row.linkedCompanionId !== undefined && !companionIds.has(String(row.linkedCompanionId))) ||
+      (row.linkedRealm !== undefined && !calendarRealms.has(String(row.linkedRealm))) ||
+      (row.linkedCompanionId === undefined) !== (row.linkedRealm === undefined) ||
       !calendarStatuses.has(String(row.status)) ||
       typeof row.createdAt !== 'string' ||
       !Number.isFinite(Date.parse(row.createdAt)) ||

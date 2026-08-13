@@ -1014,6 +1014,10 @@
 .calendar-grid i[data-category='appointment'] {
   background: #d79055;
 }
+.calendar-grid i[data-category='mission'] {
+  background: #69e7d0;
+  box-shadow: 0 0 10px #69e7d0;
+}
 
 .calendar-grid small {
   position: absolute;
@@ -1108,6 +1112,98 @@
   display: inline-flex;
   gap: 4px;
   align-items: center;
+}
+
+.calendar-agenda__copy div .calendar-agenda__companion {
+  color: var(--calendar-teal);
+  font-weight: 700;
+}
+
+.calendar-agenda__companion img {
+  width: 22px;
+  height: 22px;
+  object-fit: cover;
+  border: 1px solid rgb(39 216 207 / 35%);
+  border-radius: 7px;
+}
+
+.calendar-agenda__realm {
+  width: fit-content;
+  margin-top: 9px;
+  color: var(--calendar-teal);
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.calendar-mission-layer {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid rgb(105 231 208 / 24%);
+  border-radius: 16px;
+  background: linear-gradient(145deg, rgb(39 216 207 / 8%), rgb(255 255 255 / 2%));
+}
+
+.calendar-mission-layer > header {
+  display: flex;
+  justify-content: space-between;
+  color: var(--calendar-teal);
+  font-size: 0.63rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+.calendar-mission-layer > header span {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.calendar-agenda__list .calendar-mission-layer article {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 9px 10px;
+  border: 1px solid rgb(255 255 255 / 6%);
+  border-left: 0;
+  border-radius: 11px;
+  background: rgb(3 12 18 / 48%);
+}
+
+.calendar-mission-layer article > div {
+  display: grid;
+  gap: 2px;
+}
+
+.calendar-mission-layer article small,
+.calendar-mission-layer > p {
+  color: var(--muted);
+  font-size: 0.66rem;
+}
+
+.calendar-mission-layer article a {
+  color: var(--calendar-teal);
+  font-size: 0.62rem;
+  font-weight: 700;
+}
+
+.calendar-mission-layer__status {
+  width: 9px;
+  height: 9px;
+  border: 2px solid var(--calendar-teal);
+  border-radius: 50%;
+}
+
+.calendar-mission-layer article[data-status='completed'] .calendar-mission-layer__status {
+  background: var(--calendar-teal);
+  box-shadow: 0 0 9px var(--calendar-teal);
+}
+
+.calendar-mission-layer > p {
+  margin: 2px 0 0;
+  line-height: 1.45;
 }
 
 .calendar-agenda__actions {
@@ -5232,6 +5328,97 @@ html[data-theme='daybreak'] .about-rank-grid article {
   scrollbar-gutter: stable;
   scrollbar-width: thin;
   touch-action: pan-y;
+}
+
+.ai-proposal-card {
+  --companion-accent: var(--ai-accent);
+  display: grid;
+  gap: 12px;
+  margin: 0 14px 12px;
+  padding: 15px;
+  border: 1px solid color-mix(in srgb, var(--companion-accent) 48%, var(--border));
+  border-radius: 16px;
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--companion-accent) 11%, var(--surface)),
+    rgb(4 12 18 / 96%)
+  );
+  box-shadow: 0 16px 45px rgb(0 0 0 / 22%);
+}
+
+.ai-proposal-card > header,
+.ai-proposal-card > header span,
+.ai-proposal-card__identity,
+.ai-proposal-card > div:last-of-type {
+  display: flex;
+  align-items: center;
+}
+
+.ai-proposal-card > header {
+  justify-content: space-between;
+  color: var(--companion-accent);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+.ai-proposal-card > header span {
+  gap: 6px;
+}
+
+.ai-proposal-card__identity {
+  gap: 10px;
+}
+
+.ai-proposal-card__identity img {
+  width: 42px;
+  height: 46px;
+  object-fit: cover;
+  border: 1px solid color-mix(in srgb, var(--companion-accent) 55%, var(--border));
+  border-radius: 9px 15px 9px 15px;
+}
+
+.ai-proposal-card__identity div {
+  display: grid;
+  gap: 2px;
+}
+
+.ai-proposal-card__identity small,
+.ai-proposal-card > small,
+.ai-proposal-card li span {
+  color: var(--muted);
+  font-size: 0.66rem;
+}
+
+.ai-proposal-card > p,
+.ai-proposal-card blockquote {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.ai-proposal-card blockquote {
+  padding-left: 10px;
+  color: var(--text);
+  border-left: 2px solid var(--companion-accent);
+}
+
+.ai-proposal-card ol {
+  display: grid;
+  gap: 7px;
+  max-height: 220px;
+  margin: 0;
+  padding: 0 0 0 22px;
+  overflow: auto;
+}
+
+.ai-proposal-card li strong,
+.ai-proposal-card li span {
+  display: block;
+}
+
+.ai-proposal-card > div:last-of-type {
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .ai-message-stage__empty {

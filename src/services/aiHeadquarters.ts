@@ -463,6 +463,9 @@ export interface AiHeadquartersReply {
     recurrenceInterval: number;
     recurrenceEndsOn: string;
     location: string;
+    linkedCompanionId: CompanionId | '';
+    linkedRealm:
+      '' | 'missions' | 'training' | 'kitchen' | 'sanctuary' | 'creator' | 'arc' | 'treasury';
     confirmation: string;
   };
   usage?: {

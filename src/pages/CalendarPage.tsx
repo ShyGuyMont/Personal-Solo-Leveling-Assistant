@@ -9,6 +9,9 @@ import {
   CirclePlus,
   Clock3,
   Edit3,
+  Eye,
+  EyeOff,
+  ListChecks,
   MapPin,
   MessageCircleMore,
   Repeat2,
@@ -37,6 +40,7 @@ import type {
   CalendarEventCategory,
   CalendarEventOccurrence,
   CalendarRecurrence,
+  CalendarRealm,
   LocalDateKey,
 } from '@/types/game';
 import {
@@ -71,6 +75,18 @@ const CATEGORY_LABELS: Record<CalendarEventCategory, string> = {
   appointment: 'Appointment',
   deadline: 'Deadline',
 };
+
+const REALM_ROUTES: Record<CalendarRealm, string> = {
+  missions: '/missions',
+  training: '/training-hall',
+  kitchen: '/kitchen',
+  sanctuary: '/sanctuary',
+  creator: '/creator-forge',
+  arc: '/arc-archives',
+  treasury: '/treasury',
+};
+
+const MISSION_LAYER_KEY = 'the-system:calendar-mission-layer';
 
 function localInputValue(date: Date) {
   const offset = date.getTimezoneOffset() * 60_000;
@@ -130,7 +146,7 @@ function eventTimeLabel(event: CalendarEventOccurrence, timeZone?: string) {
 }
 
 export function CalendarPage() {
-  const { systemDate, settings } = useGameStore();
+  const { systemDate, settings, missions, todayRecords } = useGameStore();
   const timeZone = settings?.timeZone;
   const kairo = getCompanion('kairo');
   const [events, setEvents] = useState<CalendarEvent[]>([]);
@@ -140,6 +156,9 @@ export function CalendarPage() {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState('Calendar Command is synchronized locally.');
+  const [showMissionLayer, setShowMissionLayer] = useState(
+    () => window.localStorage.getItem(MISSION_LAYER_KEY) !== 'hidden',
+  );
 
   const refresh = useCallback(async () => setEvents(await getCalendarEvents()), []);
 
@@ -180,6 +199,20 @@ export function CalendarPage() {
     return map;
   }, [monthOccurrences]);
   const selectedOccurrences = occurrencesByDate.get(selectedDate) ?? [];
+  const missionById = useMemo(
+    () => new Map(missions.map((mission) => [mission.id, mission])),
+    [missions],
+  );
+  const selectedMissions =
+    showMissionLayer && selectedDate === systemDate
+      ? todayRecords
+          .map((record) => ({ record, mission: missionById.get(record.missionId) }))
+          .filter((entry) => entry.mission && !entry.mission.archived)
+      : [];
+  const todayMissionCount = todayRecords.filter((record) => {
+    const mission = missionById.get(record.missionId);
+    return mission && !mission.archived;
+  }).length;
   const selectedConflicts = getCalendarConflicts(selectedOccurrences);
   const briefing = useMemo(
     () => buildCalendarBriefing(events, selectedDate, new Date()),
@@ -190,6 +223,19 @@ export function CalendarPage() {
     window.dispatchEvent(
       new CustomEvent('system:open-quick-link', { detail: { companionId, initialDraft } }),
     );
+  }
+
+  function toggleMissionLayer() {
+    setShowMissionLayer((current) => {
+      const next = !current;
+      window.localStorage.setItem(MISSION_LAYER_KEY, next ? 'shown' : 'hidden');
+      setNotice(
+        next
+          ? 'Daily Missions are visible as a read-only calendar layer.'
+          : 'Daily Missions are hidden. Their real records remain untouched in Missions.',
+      );
+      return next;
+    });
   }
 
   function startCreate(date = selectedDate) {
@@ -310,6 +356,10 @@ export function CalendarPage() {
             <Link className="button button--ghost" to="/archive">
               <Archive size={17} /> Archive Shield
             </Link>
+            <button className="button button--ghost" type="button" onClick={toggleMissionLayer}>
+              {showMissionLayer ? <EyeOff size={17} /> : <Eye size={17} />}
+              {showMissionLayer ? 'Hide missions' : 'Show missions'}
+            </button>
           </div>
         </div>
         <div className="calendar-hero__signal">
@@ -406,6 +456,7 @@ export function CalendarPage() {
           <div className="calendar-grid">
             {monthDays.map((date) => {
               const dayEvents = occurrencesByDate.get(date) ?? [];
+              const missionCount = showMissionLayer && date === systemDate ? todayMissionCount : 0;
               const hasConflict = getCalendarConflicts(dayEvents).length > 0;
               return (
                 <button
@@ -422,7 +473,10 @@ export function CalendarPage() {
                 >
                   <span>{Number(date.slice(-2))}</span>
                   <div>
-                    {dayEvents.slice(0, 3).map((event) => (
+                    {missionCount > 0 && (
+                      <i data-category="mission" title={`${missionCount} daily missions`} />
+                    )}
+                    {dayEvents.slice(0, missionCount > 0 ? 2 : 3).map((event) => (
                       <i
                         key={event.occurrenceId}
                         data-category={event.category}
@@ -430,7 +484,9 @@ export function CalendarPage() {
                       />
                     ))}
                   </div>
-                  {dayEvents.length > 3 && <small>+{dayEvents.length - 3}</small>}
+                  {dayEvents.length + missionCount > 3 && (
+                    <small>+{dayEvents.length + missionCount - 3}</small>
+                  )}
                 </button>
               );
             })}
@@ -462,7 +518,33 @@ export function CalendarPage() {
           )}
 
           <div className="calendar-agenda__list">
-            {!selectedOccurrences.length && (
+            {selectedMissions.length > 0 && (
+              <section className="calendar-mission-layer" aria-label="Daily missions">
+                <header>
+                  <span>
+                    <ListChecks size={17} /> DAILY MISSIONS
+                  </span>
+                  <small>READ-ONLY LAYER</small>
+                </header>
+                {selectedMissions.map(({ record, mission }) => (
+                  <article key={record.id} data-status={record.status}>
+                    <span className="calendar-mission-layer__status" />
+                    <div>
+                      <strong>{mission?.name}</strong>
+                      <small>
+                        {record.status} · {mission?.accountXp ?? 0} XP
+                      </small>
+                    </div>
+                    <Link to="/missions">Open Missions</Link>
+                  </article>
+                ))}
+                <p>
+                  Kairo can reserve time around these missions, but this layer never duplicates,
+                  completes, or rewards them.
+                </p>
+              </section>
+            )}
+            {!selectedOccurrences.length && !selectedMissions.length && (
               <div className="calendar-empty">
                 <CalendarClock size={34} />
                 <strong>Open horizon</strong>
@@ -500,7 +582,21 @@ export function CalendarPage() {
                           ? 'Snow'
                           : 'Kairo'}
                     </span>
+                    {event.linkedCompanionId && (
+                      <span className="calendar-agenda__companion">
+                        <img
+                          src={getCompanionImage(getCompanion(event.linkedCompanionId).image)}
+                          alt=""
+                        />
+                        {getCompanion(event.linkedCompanionId).name}
+                      </span>
+                    )}
                   </div>
+                  {event.linkedRealm && (
+                    <Link className="calendar-agenda__realm" to={REALM_ROUTES[event.linkedRealm]}>
+                      Open {event.linkedRealm}
+                    </Link>
+                  )}
                 </div>
                 <div className="calendar-agenda__actions">
                   {event.status === 'scheduled' && !event.recurring && (

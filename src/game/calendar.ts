@@ -5,6 +5,8 @@ import type {
   CalendarEventOccurrence,
   CalendarEventSource,
   CalendarEventStatus,
+  CalendarRealm,
+  CompanionId,
   CalendarRecurrence,
   LocalDateKey,
 } from '@/types/game';
@@ -23,6 +25,8 @@ export interface CalendarEventDraft {
   location?: string;
   source?: CalendarEventSource;
   status?: CalendarEventStatus;
+  linkedCompanionId?: CompanionId;
+  linkedRealm?: CalendarRealm;
 }
 
 export interface CalendarMutationProposal {
@@ -38,6 +42,8 @@ export interface CalendarMutationProposal {
   recurrenceInterval: number;
   recurrenceEndsOn: string;
   location: string;
+  linkedCompanionId?: CompanionId | '';
+  linkedRealm?: CalendarRealm | '';
 }
 
 export interface CalendarConflict {
@@ -113,6 +119,11 @@ function normalizeDraft(input: CalendarEventDraft, existing?: CalendarEvent): Ca
   if (input.recurrenceEndsOn && !/^\d{4}-\d{2}-\d{2}$/.test(input.recurrenceEndsOn)) {
     throw new Error('The recurrence end date is not valid.');
   }
+  const linkedCompanionId = input.linkedCompanionId ?? existing?.linkedCompanionId;
+  const linkedRealm = input.linkedRealm ?? existing?.linkedRealm;
+  if (Boolean(linkedCompanionId) !== Boolean(linkedRealm)) {
+    throw new Error('A companion-linked time block needs both its companion and realm.');
+  }
   const now = new Date().toISOString();
   return {
     id: input.id ?? existing?.id ?? uniqueId(),
@@ -127,6 +138,8 @@ function normalizeDraft(input: CalendarEventDraft, existing?: CalendarEvent): Ca
     recurrenceEndsOn: recurrence === 'none' ? undefined : input.recurrenceEndsOn,
     location: clean(input.location, 240),
     source,
+    linkedCompanionId,
+    linkedRealm,
     status,
     createdAt: existing?.createdAt ?? now,
     updatedAt: now,
@@ -179,6 +192,8 @@ export async function applyCalendarProposal(
       ? (proposal.recurrenceEndsOn as LocalDateKey)
       : undefined,
     location: proposal.location,
+    linkedCompanionId: proposal.linkedCompanionId || undefined,
+    linkedRealm: proposal.linkedRealm || undefined,
     source,
     status: 'scheduled',
   });
@@ -230,6 +245,8 @@ function occurrenceFrom(
     allDay: event.allDay,
     location: event.location,
     source: event.source,
+    linkedCompanionId: event.linkedCompanionId,
+    linkedRealm: event.linkedRealm,
     status: event.status,
     recurring: event.recurrence !== 'none',
   };

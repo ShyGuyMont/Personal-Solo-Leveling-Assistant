@@ -280,9 +280,43 @@ describe('Companion Soulprint intelligence', () => {
         commandMode: 'propose',
       }),
     ).toMatchObject({ workload: 'calendar-command' });
+    const instructions = intelligence.buildSystemInstructions(
+      'kairo',
+      ['kairo'],
+      'propose',
+      'calendar-command',
+    );
+    expect(instructions).toContain('Hunter must confirm');
+    expect(instructions).toContain('Cooking and meal-prep blocks link to Saffron');
+    expect(instructions).toContain('never rolls a meal or workout');
     expect(
-      intelligence.buildSystemInstructions('kairo', ['kairo'], 'propose', 'calendar-command'),
-    ).toContain('Hunter must confirm');
+      intelligence.selectIntelligenceRoute({
+        audience: 'saffron',
+        message: 'Schedule cooking this Sunday at 5 PM for one hour.',
+        commandMode: 'propose',
+      }),
+    ).toMatchObject({ workload: 'calendar-command' });
+    expect(
+      intelligence.selectIntelligenceRoute({
+        audience: 'haven',
+        message: 'Schedule a recording block this Sunday at 2 PM for two hours.',
+        commandMode: 'propose',
+      }),
+    ).toMatchObject({ workload: 'calendar-command' });
+    for (const audience of intelligence.companionIds) {
+      expect(
+        intelligence.selectIntelligenceRoute({
+          audience,
+          message: 'Schedule a personal appointment this Sunday at 3 PM for one hour.',
+          commandMode: 'propose',
+        }),
+      ).toMatchObject({ workload: 'calendar-command' });
+    }
+  });
+
+  it('forbids every companion from claiming a write before the verified local confirmation', () => {
+    expect(intelligence.baseInstructions).toContain('merely because the Hunter typed “I confirm.”');
+    expect(intelligence.baseInstructions).toContain('locally generated success acknowledgement');
   });
 
   it('requires a visible confirmation for commands and Private Grimoire recipes', () => {
