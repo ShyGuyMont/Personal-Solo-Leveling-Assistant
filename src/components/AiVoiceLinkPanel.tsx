@@ -509,23 +509,8 @@ export function AiVoiceLinkPanel({
                   </span>
                 </div>
 
-                <div className="ai-voice-forge__selectors">
-                  <label>
-                    OpenAI fallback voice
-                    <select
-                      value={draft.voice}
-                      onChange={(event) =>
-                        setDraft({ ...draft, voice: event.target.value as AiVoiceProfile['voice'] })
-                      }
-                    >
-                      {AI_VOICE_OPTIONS.map((voice) => (
-                        <option key={voice.id} value={voice.id}>
-                          {voice.label} · {voice.character}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  {status?.cartesiaConfigured && (
+                {selectedProvider === 'cartesia' ? (
+                  <div className="ai-voice-forge__selectors ai-voice-forge__selectors--cartesia">
                     <label className="ai-cartesia-casting">
                       Cartesia voice
                       <span>
@@ -568,237 +553,332 @@ export function AiVoiceLinkPanel({
                         {cartesiaCatalogError ||
                           (draft.cartesiaVoiceName
                             ? `${draft.cartesiaVoiceName} is cast for ${companion.name}.`
-                            : `${companion.name} will keep using their OpenAI fallback until cast.`)}
+                            : `${companion.name} will keep using their saved OpenAI voice until cast.`)}
                       </small>
                     </label>
-                  )}
-                  <label>
-                    Accent / region
-                    <select
-                      value={draft.accent}
-                      onChange={(event) =>
-                        setDraft({
-                          ...draft,
-                          accent: event.target.value as AiVoiceProfile['accent'],
-                        })
-                      }
-                    >
-                      {AI_ACCENT_OPTIONS.map((accent) => (
-                        <option key={accent.id} value={accent.id}>
-                          {accent.label}
-                        </option>
-                      ))}
-                    </select>
-                    <small>
-                      Clearly audible but natural. Canon stays neutral because appearance never
-                      determines how someone sounds.
-                    </small>
-                  </label>
-                  <label>
-                    Delivery style
-                    <select
-                      value={draft.delivery}
-                      onChange={(event) =>
-                        setDraft({
-                          ...draft,
-                          delivery: event.target.value as AiVoiceProfile['delivery'],
-                        })
-                      }
-                    >
-                      {AI_DELIVERY_OPTIONS.map((option) => (
-                        <option key={option.id} value={option.id}>
-                          {option.label} · {option.character}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label>
-                    Cadence
-                    <select
-                      value={draft.cadence}
-                      onChange={(event) =>
-                        setDraft({
-                          ...draft,
-                          cadence: event.target.value as AiVoiceProfile['cadence'],
-                        })
-                      }
-                    >
-                      {AI_CADENCE_OPTIONS.map((option) => (
-                        <option key={option.id} value={option.id}>
-                          {option.label} · {option.character}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label>
-                    Vocal texture
-                    <select
-                      value={draft.texture}
-                      onChange={(event) =>
-                        setDraft({
-                          ...draft,
-                          texture: event.target.value as AiVoiceProfile['texture'],
-                        })
-                      }
-                    >
-                      {AI_TEXTURE_OPTIONS.map((option) => (
-                        <option key={option.id} value={option.id}>
-                          {option.label} · {option.character}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label>
-                    Vocal register
-                    <select
-                      value={draft.register}
-                      onChange={(event) =>
-                        setDraft({
-                          ...draft,
-                          register: event.target.value as AiVoiceProfile['register'],
-                        })
-                      }
-                    >
-                      {AI_REGISTER_OPTIONS.map((option) => (
-                        <option key={option.id} value={option.id}>
-                          {option.label} · {option.character}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label>
-                    Resonance
-                    <select
-                      value={draft.resonance}
-                      onChange={(event) =>
-                        setDraft({
-                          ...draft,
-                          resonance: event.target.value as AiVoiceProfile['resonance'],
-                        })
-                      }
-                    >
-                      {AI_RESONANCE_OPTIONS.map((option) => (
-                        <option key={option.id} value={option.id}>
-                          {option.label} · {option.character}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label>
-                    Canon performance
-                    <select
-                      value={draft.performanceTake}
-                      onChange={(event) =>
-                        setDraft({
-                          ...draft,
-                          performanceTake: event.target.value as AiVoiceProfile['performanceTake'],
-                        })
-                      }
-                    >
-                      {AI_PERFORMANCE_TAKE_OPTIONS.map((option) => (
-                        <option key={option.id} value={option.id}>
-                          {option.label} · {option.character}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                </div>
-
-                <div className="ai-voice-forge__performance-readout">
-                  <span>
-                    <Sparkles size={13} /> Natural-conversation engine
-                  </span>
-                  <strong>
-                    {AI_DELIVERY_OPTIONS.find((option) => option.id === draft.delivery)?.label} ·{' '}
-                    {AI_CADENCE_OPTIONS.find((option) => option.id === draft.cadence)?.label} ·{' '}
-                    {AI_REGISTER_OPTIONS.find((option) => option.id === draft.register)?.label} · ~
-                    {Math.round(155 * draft.pace)} WPM
-                  </strong>
-                  <small>
-                    The performance now reacts to celebration, support, accountability, instruction,
-                    and strategy scenes while preserving this Soulprint.
-                  </small>
-                </div>
-
-                <div className="ai-voice-forge__sliders">
-                  {performanceSliders.map(({ label, key, min, max, step, value }) => (
-                    <label key={key}>
+                    <label className="ai-cartesia-speed">
                       <span>
-                        {label} <strong>{value(draft)}</strong>
+                        Cartesia speed
+                        <strong>{(draft.cartesiaSpeed ?? 1).toFixed(2)}x</strong>
                       </span>
                       <input
                         type="range"
-                        min={min}
-                        max={max}
-                        step={step}
-                        value={draft[key]}
+                        min="0.75"
+                        max="1.65"
+                        step="0.05"
+                        value={draft.cartesiaSpeed ?? 1}
                         onChange={(event) =>
-                          setDraft({ ...draft, [key]: Number(event.target.value) })
+                          setDraft({ ...draft, cartesiaSpeed: Number(event.target.value) })
                         }
                       />
+                      <small>
+                        This changes Cartesia only. The OpenAI fallback pace stays saved.
+                      </small>
                     </label>
-                  ))}
-                </div>
+                  </div>
+                ) : (
+                  <div className="ai-voice-forge__selectors">
+                    <label>
+                      OpenAI voice
+                      <select
+                        value={draft.voice}
+                        onChange={(event) =>
+                          setDraft({
+                            ...draft,
+                            voice: event.target.value as AiVoiceProfile['voice'],
+                          })
+                        }
+                      >
+                        {AI_VOICE_OPTIONS.map((voice) => (
+                          <option key={voice.id} value={voice.id}>
+                            {voice.label} · {voice.character}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label>
+                      Accent / region
+                      <select
+                        value={draft.accent}
+                        onChange={(event) =>
+                          setDraft({
+                            ...draft,
+                            accent: event.target.value as AiVoiceProfile['accent'],
+                          })
+                        }
+                      >
+                        {AI_ACCENT_OPTIONS.map((accent) => (
+                          <option key={accent.id} value={accent.id}>
+                            {accent.label}
+                          </option>
+                        ))}
+                      </select>
+                      <small>
+                        Clearly audible but natural. Canon stays neutral because appearance never
+                        determines how someone sounds.
+                      </small>
+                    </label>
+                    <label>
+                      Delivery style
+                      <select
+                        value={draft.delivery}
+                        onChange={(event) =>
+                          setDraft({
+                            ...draft,
+                            delivery: event.target.value as AiVoiceProfile['delivery'],
+                          })
+                        }
+                      >
+                        {AI_DELIVERY_OPTIONS.map((option) => (
+                          <option key={option.id} value={option.id}>
+                            {option.label} · {option.character}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label>
+                      Cadence
+                      <select
+                        value={draft.cadence}
+                        onChange={(event) =>
+                          setDraft({
+                            ...draft,
+                            cadence: event.target.value as AiVoiceProfile['cadence'],
+                          })
+                        }
+                      >
+                        {AI_CADENCE_OPTIONS.map((option) => (
+                          <option key={option.id} value={option.id}>
+                            {option.label} · {option.character}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label>
+                      Vocal texture
+                      <select
+                        value={draft.texture}
+                        onChange={(event) =>
+                          setDraft({
+                            ...draft,
+                            texture: event.target.value as AiVoiceProfile['texture'],
+                          })
+                        }
+                      >
+                        {AI_TEXTURE_OPTIONS.map((option) => (
+                          <option key={option.id} value={option.id}>
+                            {option.label} · {option.character}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label>
+                      Vocal register
+                      <select
+                        value={draft.register}
+                        onChange={(event) =>
+                          setDraft({
+                            ...draft,
+                            register: event.target.value as AiVoiceProfile['register'],
+                          })
+                        }
+                      >
+                        {AI_REGISTER_OPTIONS.map((option) => (
+                          <option key={option.id} value={option.id}>
+                            {option.label} · {option.character}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label>
+                      Resonance
+                      <select
+                        value={draft.resonance}
+                        onChange={(event) =>
+                          setDraft({
+                            ...draft,
+                            resonance: event.target.value as AiVoiceProfile['resonance'],
+                          })
+                        }
+                      >
+                        {AI_RESONANCE_OPTIONS.map((option) => (
+                          <option key={option.id} value={option.id}>
+                            {option.label} · {option.character}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label>
+                      Canon performance
+                      <select
+                        value={draft.performanceTake}
+                        onChange={(event) =>
+                          setDraft({
+                            ...draft,
+                            performanceTake: event.target
+                              .value as AiVoiceProfile['performanceTake'],
+                          })
+                        }
+                      >
+                        {AI_PERFORMANCE_TAKE_OPTIONS.map((option) => (
+                          <option key={option.id} value={option.id}>
+                            {option.label} · {option.character}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
+                )}
 
-                <blockquote>“{canon.audition}”</blockquote>
-                <div className="ai-voice-forge__casting" aria-label="Compare performance takes">
-                  <span>
-                    <small>CASTING ROOM</small>
-                    <strong>Hear the same line two ways</strong>
-                  </span>
-                  <button
-                    className="button button--secondary"
-                    type="button"
-                    disabled={!settings.aiVoiceOutputEnabled || Boolean(voiceBusyMessageId)}
-                    onClick={() => onPreview(draft, 'grounded')}
-                  >
-                    <Headphones size={15} /> Take A · Grounded
-                  </button>
-                  <button
-                    className="button button--secondary"
-                    type="button"
-                    disabled={!settings.aiVoiceOutputEnabled || Boolean(voiceBusyMessageId)}
-                    onClick={() => onPreview(draft, 'dynamic')}
-                  >
-                    <Sparkles size={15} /> Take B · Dynamic
-                  </button>
-                </div>
-                <div className="ai-voice-forge__actions">
-                  <button
-                    className="button button--secondary"
-                    type="button"
-                    disabled={!settings.aiVoiceOutputEnabled || Boolean(voiceBusyMessageId)}
-                    onClick={() => onPreview(draft)}
-                  >
-                    {voiceBusyMessageId?.startsWith('preview:') ? (
-                      <LoaderCircle className="is-spinning" size={16} />
-                    ) : (
-                      <Headphones size={16} />
-                    )}
-                    Preview saved take
-                  </button>
-                  <button
-                    className="button button--secondary"
-                    type="button"
-                    disabled={saving}
-                    onClick={reset}
-                  >
-                    <RotateCcw size={16} /> Restore canon
-                  </button>
-                  <button
-                    className="button button--primary"
-                    type="button"
-                    disabled={saving}
-                    onClick={save}
-                  >
-                    {saving ? (
-                      <LoaderCircle className="is-spinning" size={16} />
-                    ) : (
-                      <Save size={16} />
-                    )}
-                    Save soulprint
-                  </button>
-                </div>
+                {selectedProvider === 'openai' ? (
+                  <>
+                    <div className="ai-voice-forge__performance-readout">
+                      <span>
+                        <Sparkles size={13} /> Natural-conversation engine
+                      </span>
+                      <strong>
+                        {AI_DELIVERY_OPTIONS.find((option) => option.id === draft.delivery)?.label}{' '}
+                        · {AI_CADENCE_OPTIONS.find((option) => option.id === draft.cadence)?.label}{' '}
+                        ·{' '}
+                        {AI_REGISTER_OPTIONS.find((option) => option.id === draft.register)?.label}{' '}
+                        · ~{Math.round(155 * draft.pace)} WPM
+                      </strong>
+                      <small>
+                        The performance now reacts to celebration, support, accountability,
+                        instruction, and strategy scenes while preserving this Soulprint.
+                      </small>
+                    </div>
+
+                    <div className="ai-voice-forge__sliders">
+                      {performanceSliders.map(({ label, key, min, max, step, value }) => (
+                        <label key={key}>
+                          <span>
+                            {label} <strong>{value(draft)}</strong>
+                          </span>
+                          <input
+                            type="range"
+                            min={min}
+                            max={max}
+                            step={step}
+                            value={draft[key]}
+                            onChange={(event) =>
+                              setDraft({ ...draft, [key]: Number(event.target.value) })
+                            }
+                          />
+                        </label>
+                      ))}
+                    </div>
+
+                    <blockquote>“{canon.audition}”</blockquote>
+                    <div className="ai-voice-forge__casting" aria-label="Compare performance takes">
+                      <span>
+                        <small>CASTING ROOM</small>
+                        <strong>Hear the same line two ways</strong>
+                      </span>
+                      <button
+                        className="button button--secondary"
+                        type="button"
+                        disabled={!settings.aiVoiceOutputEnabled || Boolean(voiceBusyMessageId)}
+                        onClick={() => onPreview(draft, 'grounded')}
+                      >
+                        <Headphones size={15} /> Take A · Grounded
+                      </button>
+                      <button
+                        className="button button--secondary"
+                        type="button"
+                        disabled={!settings.aiVoiceOutputEnabled || Boolean(voiceBusyMessageId)}
+                        onClick={() => onPreview(draft, 'dynamic')}
+                      >
+                        <Sparkles size={15} /> Take B · Dynamic
+                      </button>
+                    </div>
+                    <div className="ai-voice-forge__actions">
+                      <button
+                        className="button button--secondary"
+                        type="button"
+                        disabled={!settings.aiVoiceOutputEnabled || Boolean(voiceBusyMessageId)}
+                        onClick={() => onPreview(draft)}
+                      >
+                        {voiceBusyMessageId?.startsWith('preview:') ? (
+                          <LoaderCircle className="is-spinning" size={16} />
+                        ) : (
+                          <Headphones size={16} />
+                        )}
+                        Preview saved take
+                      </button>
+                      <button
+                        className="button button--secondary"
+                        type="button"
+                        disabled={saving}
+                        onClick={reset}
+                      >
+                        <RotateCcw size={16} /> Restore canon
+                      </button>
+                      <button
+                        className="button button--primary"
+                        type="button"
+                        disabled={saving}
+                        onClick={save}
+                      >
+                        {saving ? (
+                          <LoaderCircle className="is-spinning" size={16} />
+                        ) : (
+                          <Save size={16} />
+                        )}
+                        Save soulprint
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="ai-voice-forge__performance-readout ai-voice-forge__performance-readout--cartesia">
+                      <span>
+                        <Sparkles size={13} /> Cartesia casting
+                      </span>
+                      <strong>
+                        {draft.cartesiaVoiceName ?? 'No voice selected'} ·{' '}
+                        {(draft.cartesiaSpeed ?? 1).toFixed(2)}x
+                      </strong>
+                      <small>
+                        Cartesia supplies the vocal identity. Your complete OpenAI Soulprint remains
+                        saved separately and is used automatically whenever fallback is needed.
+                      </small>
+                    </div>
+                    <blockquote>“{canon.audition}”</blockquote>
+                    <div className="ai-voice-forge__actions">
+                      <button
+                        className="button button--secondary"
+                        type="button"
+                        disabled={
+                          !draft.cartesiaVoiceId ||
+                          !settings.aiVoiceOutputEnabled ||
+                          Boolean(voiceBusyMessageId)
+                        }
+                        onClick={() => onPreview(draft)}
+                      >
+                        {voiceBusyMessageId?.startsWith('preview:') ? (
+                          <LoaderCircle className="is-spinning" size={16} />
+                        ) : (
+                          <Headphones size={16} />
+                        )}
+                        Preview Cartesia voice
+                      </button>
+                      <button
+                        className="button button--primary"
+                        type="button"
+                        disabled={saving || !draft.cartesiaVoiceId}
+                        onClick={save}
+                      >
+                        {saving ? (
+                          <LoaderCircle className="is-spinning" size={16} />
+                        ) : (
+                          <Save size={16} />
+                        )}
+                        Save Cartesia casting
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             ) : (
               <div className="ai-voice-forge__loading">

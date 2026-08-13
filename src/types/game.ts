@@ -1052,6 +1052,7 @@ export interface AiVoiceProfile {
   voice: AiVoiceName;
   cartesiaVoiceId?: string;
   cartesiaVoiceName?: string;
+  cartesiaSpeed?: number;
   accent: AiVoiceAccent;
   delivery: AiVoiceDelivery;
   cadence: AiVoiceCadence;

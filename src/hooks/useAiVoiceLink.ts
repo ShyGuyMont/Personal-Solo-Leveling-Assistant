@@ -263,9 +263,12 @@ export function useAiVoiceLink(input: {
       const profile = profileOverride ?? profiles?.[companionId];
       if (!profile) throw new Error('That companion voice is still initializing.');
       const preferredProvider = input.settings?.aiVoiceProvider ?? 'openai';
+      const effectiveSpeed =
+        preferredProvider === 'cartesia' ? (profile.cartesiaSpeed ?? 1) : profile.pace;
       const effectiveCacheKey = [
         preferredProvider,
         profile.cartesiaVoiceId ?? profile.voice,
+        effectiveSpeed,
         cacheKey,
       ].join(':');
       const cached = audioCacheRef.current.get(effectiveCacheKey);
@@ -425,6 +428,7 @@ export function useAiVoiceLink(input: {
         auditionProfile.id,
         auditionProfile.voice,
         auditionProfile.cartesiaVoiceId ?? 'uncast',
+        auditionProfile.cartesiaSpeed ?? 1,
         auditionProfile.accent,
         auditionProfile.delivery,
         auditionProfile.cadence,

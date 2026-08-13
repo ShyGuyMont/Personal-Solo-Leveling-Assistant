@@ -5329,6 +5329,15 @@ html[data-theme='daybreak'] .about-rank-grid article {
   grid-column: span 2;
 }
 
+.ai-voice-forge__selectors--cartesia {
+  grid-template-columns: minmax(0, 2fr) minmax(180px, 1fr);
+  align-items: start;
+}
+
+.ai-voice-forge__selectors--cartesia .ai-cartesia-casting {
+  grid-column: auto;
+}
+
 .ai-cartesia-casting > span {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
@@ -5354,6 +5363,29 @@ html[data-theme='daybreak'] .about-rank-grid article {
 
 .ai-cartesia-casting input::placeholder {
   color: var(--muted-2);
+}
+
+.ai-cartesia-speed {
+  align-self: stretch;
+  padding: 10px;
+  background: rgba(45, 226, 177, 0.035);
+  border: 1px solid rgba(45, 226, 177, 0.16);
+  border-radius: 8px;
+}
+
+.ai-cartesia-speed > span {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ai-cartesia-speed strong {
+  color: var(--mint);
+}
+
+.ai-cartesia-speed input {
+  width: 100%;
+  accent-color: var(--mint);
 }
 
 .ai-voice-forge__performance-readout {

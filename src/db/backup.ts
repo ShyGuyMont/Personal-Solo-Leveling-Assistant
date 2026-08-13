@@ -508,6 +508,10 @@ function validateData(data: Record<string, unknown[]>) {
           !/^[a-zA-Z0-9_-]{8,128}$/.test(row.cartesiaVoiceId))) ||
       (row.cartesiaVoiceName !== undefined &&
         (typeof row.cartesiaVoiceName !== 'string' || row.cartesiaVoiceName.length > 160)) ||
+      (row.cartesiaSpeed !== undefined &&
+        (!Number.isFinite(row.cartesiaSpeed) ||
+          Number(row.cartesiaSpeed) < 0.75 ||
+          Number(row.cartesiaSpeed) > 1.65)) ||
       !aiVoiceAccents.has(String(row.accent)) ||
       !aiVoiceDeliveries.has(String(row.delivery)) ||
       !aiVoiceCadences.has(String(row.cadence)) ||

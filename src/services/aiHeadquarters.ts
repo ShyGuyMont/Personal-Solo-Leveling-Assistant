@@ -708,7 +708,8 @@ export async function requestAiSpeech(input: {
         register: input.profile.register,
         resonance: input.profile.resonance,
         performanceTake: input.profile.performanceTake,
-        pace: input.profile.pace,
+        pace:
+          input.provider === 'cartesia' ? (input.profile.cartesiaSpeed ?? 1) : input.profile.pace,
         warmth: input.profile.warmth,
         energy: input.profile.energy,
         expressiveness: input.profile.expressiveness,

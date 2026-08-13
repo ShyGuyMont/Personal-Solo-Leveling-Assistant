@@ -436,6 +436,7 @@ export function cloneCanonVoiceProfile(companionId: CompanionId): AiVoiceProfile
     voice: profile.voice,
     cartesiaVoiceId: profile.cartesiaVoiceId,
     cartesiaVoiceName: profile.cartesiaVoiceName,
+    cartesiaSpeed: profile.cartesiaSpeed,
     accent: profile.accent,
     delivery: profile.delivery,
     cadence: profile.cadence,
@@ -490,6 +491,7 @@ export function normalizeAiVoiceProfile(
       typeof value?.cartesiaVoiceName === 'string' && value.cartesiaVoiceName.trim().length <= 160
         ? value.cartesiaVoiceName.trim()
         : undefined,
+    cartesiaSpeed: bounded(value?.cartesiaSpeed, 1, 0.75, 1.65, 2),
     accent: value?.accent && accents.includes(value.accent) ? value.accent : canon.accent,
     delivery:
       value?.delivery && deliveries.includes(value.delivery) ? value.delivery : canon.delivery,

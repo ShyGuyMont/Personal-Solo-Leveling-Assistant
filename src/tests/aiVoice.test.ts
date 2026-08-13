@@ -46,6 +46,7 @@ describe('Voice Link local profiles and usage', () => {
       voice: 'verse',
       cartesiaVoiceId: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b',
       cartesiaVoiceName: 'Tessa',
+      cartesiaSpeed: 1.25,
       accent: 'irish',
       pace: 1.5,
       warmth: 20,
@@ -58,6 +59,7 @@ describe('Voice Link local profiles and usage', () => {
       naturalism: 5,
       pauseDiscipline: 4,
       cartesiaVoiceName: 'Tessa',
+      cartesiaSpeed: 1.25,
     });
     expect((await getAiVoiceProfiles()).snow.voice).toBe('verse');
 

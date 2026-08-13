@@ -138,4 +138,42 @@ describe('AI Headquarters local history', () => {
       scene: 'neutral',
     });
   });
+
+  it('keeps Cartesia speed separate from the tuned OpenAI fallback pace', async () => {
+    let requestBody: Record<string, unknown> | undefined;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_url: string, init: RequestInit) => {
+        requestBody = JSON.parse(String(init.body)) as Record<string, unknown>;
+        return new Response(new Uint8Array([1, 2, 3]), {
+          status: 200,
+          headers: {
+            'content-type': 'audio/wav',
+            'x-ai-model': 'cartesia/sonic-3.5',
+            'x-ai-provider': 'cartesia',
+            'x-ai-characters': '24',
+          },
+        });
+      }),
+    );
+
+    await requestAiSpeech({
+      companionId: 'snow',
+      text: 'We are testing Cartesia speed.',
+      provider: 'cartesia',
+      profile: {
+        ...CANON_VOICE_PROFILES.snow,
+        cartesiaVoiceId: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b',
+        cartesiaSpeed: 0.9,
+        pace: 1.55,
+      },
+    });
+
+    expect(requestBody).toMatchObject({
+      provider: 'cartesia',
+      cartesiaVoiceId: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b',
+      pace: 0.9,
+    });
+    expect(CANON_VOICE_PROFILES.snow.pace).not.toBe(0.9);
+  });
 });
