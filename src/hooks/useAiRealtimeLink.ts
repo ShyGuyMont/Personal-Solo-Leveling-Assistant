@@ -24,6 +24,7 @@ interface RealtimeUsage {
 }
 
 const REALTIME_SESSION_ID = crypto.randomUUID();
+const MICROPHONE_WARMUP_MS = 900;
 
 function numberValue(value: unknown) {
   const number = Number(value);
@@ -64,6 +65,8 @@ export function useAiRealtimeLink(input: {
   const modelRef = useRef('gpt-realtime-2.1-mini');
   const activeRef = useRef(false);
   const timerRef = useRef<number>();
+  const warmupTimerRef = useRef<number>();
+  const mutedRef = useRef(false);
   const startedAtRef = useRef(0);
   const speechStartedAtRef = useRef(0);
   const lastSpeechSecondsRef = useRef(0);
@@ -73,7 +76,9 @@ export function useAiRealtimeLink(input: {
   const stop = useCallback(() => {
     activeRef.current = false;
     if (timerRef.current) window.clearInterval(timerRef.current);
+    if (warmupTimerRef.current) window.clearTimeout(warmupTimerRef.current);
     timerRef.current = undefined;
+    warmupTimerRef.current = undefined;
     channelRef.current?.close();
     peerRef.current?.close();
     streamRef.current?.getTracks().forEach((track) => track.stop());
@@ -88,6 +93,7 @@ export function useAiRealtimeLink(input: {
     companionIdRef.current = undefined;
     transcriptByItemRef.current.clear();
     deliveredTranscriptIdsRef.current.clear();
+    mutedRef.current = false;
     setMuted(false);
     setElapsedSeconds(0);
     setState('idle');
@@ -266,6 +272,9 @@ export function useAiRealtimeLink(input: {
         const stream = await navigator.mediaDevices.getUserMedia({
           audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
         });
+        stream.getAudioTracks().forEach((track) => {
+          track.enabled = false;
+        });
         const peer = new RTCPeerConnection();
         const audio = new Audio();
         audio.autoplay = true;
@@ -333,7 +342,14 @@ export function useAiRealtimeLink(input: {
           () => setElapsedSeconds((performance.now() - startedAtRef.current) / 1_000),
           250,
         );
-        setState('listening');
+        warmupTimerRef.current = window.setTimeout(() => {
+          warmupTimerRef.current = undefined;
+          if (!activeRef.current) return;
+          stream.getAudioTracks().forEach((track) => {
+            track.enabled = !mutedRef.current;
+          });
+          setState('listening');
+        }, MICROPHONE_WARMUP_MS);
         return true;
       } catch (error) {
         stop();
@@ -351,6 +367,7 @@ export function useAiRealtimeLink(input: {
 
   const toggleMute = useCallback(() => {
     const next = !muted;
+    mutedRef.current = next;
     streamRef.current?.getAudioTracks().forEach((track) => {
       track.enabled = !next;
     });

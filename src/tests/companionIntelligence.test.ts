@@ -343,7 +343,10 @@ describe('Companion Soulprint intelligence', () => {
       audio: {
         input: {
           turn_detection: {
-            type: 'semantic_vad',
+            type: 'server_vad',
+            threshold: 0.65,
+            prefix_padding_ms: 300,
+            silence_duration_ms: 650,
             create_response: true,
             interrupt_response: true,
           },
@@ -353,6 +356,8 @@ describe('Companion Soulprint intelligence', () => {
     });
     expect(String(session.instructions)).toContain('You are Vesper, The Spotlight');
     expect(String(session.instructions)).toContain('stop immediately when interrupted');
+    expect(String(session.instructions)).toContain('Speak in English');
+    expect(String(session.instructions)).toContain('Ignore background conversations');
     expect(String(session.instructions)).toContain('Command Link can prepare a confirmation');
     expect(JSON.stringify(session)).not.toContain('test-key');
   });

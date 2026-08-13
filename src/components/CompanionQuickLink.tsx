@@ -1137,7 +1137,7 @@ export function CompanionQuickLink() {
                           : realtimeLink.state === 'thinking'
                             ? `${activeCompanion.name.toUpperCase()} IS THINKING`
                             : realtimeLink.active
-                              ? 'LISTENING · INTERRUPT ANYTIME'
+                              ? 'LISTENING · SPEAK NOW'
                               : 'LIVE CHANNEL STANDBY'}
                     </span>
                     <strong>

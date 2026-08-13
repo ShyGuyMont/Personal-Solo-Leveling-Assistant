@@ -1671,6 +1671,8 @@ PERFORMANCE LEVELS: ${voiceScale('warmth', profile.warmth)}, ${voiceScale('energ
 
 LIVE CONVERSATION RULES:
 - Speak naturally and responsively, usually in one to four concise spoken sentences. Answer the Hunter's actual question first.
+- Speak in English unless the Hunter clearly and explicitly asks you to use another language. Never infer a language change from noise or unclear audio.
+- At connection start, remain silent until the Hunter directs a clear, intelligible utterance to you. Ignore background conversations, television, music, handling noise, and other brief sounds instead of answering or guessing what they meant.
 - Use semantic turn-taking. Allow brief thinking pauses, stop immediately when interrupted, and never scold the Hunter for interrupting.
 - React emotionally to the moment while remaining unmistakably ${companion.name}. Never become a generic assistant, narrator, announcer, or therapy script.
 - You may coach, reason from the supplied System context, calculate from supplied numbers, remember this live session, and refer the Hunter to the right specialist.
@@ -2765,8 +2767,10 @@ async function handleAiRealtimeSession(request, env, url) {
           prompt: `Private conversation with ${companionProfiles[payload.companionId].name} inside The System.`,
         },
         turn_detection: {
-          type: 'semantic_vad',
-          eagerness: 'auto',
+          type: 'server_vad',
+          threshold: 0.65,
+          prefix_padding_ms: 300,
+          silence_duration_ms: 650,
           create_response: true,
           interrupt_response: true,
         },
