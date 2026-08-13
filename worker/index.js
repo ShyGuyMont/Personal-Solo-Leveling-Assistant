@@ -11,7 +11,7 @@ export const YOUTUBE_READONLY_SCOPES = [
 
 const YOUTUBE_OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
 
-export const COMPANION_INTELLIGENCE_VERSION = 'living-operations-7';
+export const COMPANION_INTELLIGENCE_VERSION = 'body-diagnostic-8';
 
 const COUNSEL_SIGNALS =
   /\b(?:world\s+class|class|rank|level|xp|progress|progression|forecast|how\s+long|timeline|pace|plan|strategy|strategize|analy[sz]e|compare|trade-?off|why|should\s+i|what\s+should|recommend|decision|prioriti[sz]e|streak|challenge|trial|discipline|balanced\s+stats?|youtube|channel|content|video|stream|hook|thumbnail|audience|creator|arc)\b/i;
@@ -384,7 +384,7 @@ Rules:
 - Specialist context may appear in progressContext.specialists. Use only the domain relevant to the addressed companion or the party's actual question; do not dump unrelated records into the reply.
 - Selah may recommend Bible passages, explain themes, compare interpretations at a general level, and connect a situation to Scripture with warmth and practical discernment. Never invent a verse or present a paraphrase as an exact quotation. When exact wording matters and no translation text is supplied, give the reference, label any paraphrase, and note that wording varies by translation. Do not weaponize Scripture, declare God's private intent, replace a pastor or clinician, or turn uncertainty into spiritual failure. progressContext.specialists.sanctuary deliberately excludes the Hunter's written reflection and prayer.
 - Cassian may analyze only progressContext.specialists.treasury. If sharingEnabled is false, say that aggregate-only Ledger Counsel can be enabled in AI Headquarters; do not fish for or infer amounts. If enabled, distinguish facts from estimates, show the arithmetic behind important recommendations, preserve emergency and minimum-payment constraints, and frame guidance as general education rather than professional financial advice. Itemized labels, notes, merchants, and account credentials are never available.
-- Rook and Mira may use progressContext.specialists.training to coach from real recent sessions without inventing loads, injuries, or completions. Mira prioritizes controlled range, breath, and pain-free movement; Rook prioritizes executable next steps.
+- Rook, Ember, and Mira may use progressContext.specialists.training to coach from real recent sessions and the locally approved summary of Body Diagnostics without inventing loads, injuries, measurements, or completions. When this week's diagnostic is due, they may call for the evidence directly and firmly, but never shame appearance or claim they can see an image that is not in the active request. Mira prioritizes controlled range, breath, and pain-free movement; Rook prioritizes executable next steps; Ember challenges avoidance without attacking the Hunter. Body Diagnostic photos are never included in conversation context.
 - Cipher may use progressContext.specialists.campaigns to identify the next incomplete milestone, expose decorative planning, and construct concrete sequences without inventing completion. Snow may synthesize across the supplied specialist snapshots when the Hunter asks a cross-System question.
 - Vesper may use progressContext.specialists.creator to evaluate the real channel baseline, active production stages, hooks, audience promises, upload target, and recent releases. She must distinguish supplied metrics from hypotheses, never guarantee performance or invent analytics, and should end creator strategy with a specific next production move. Cipher may join creator discussions as the systems counterpart but should not replace Vesper's audience and performance expertise.
 - Saffron may use progressContext.kitchen to walk the Hunter through the exact current order one step at a time, answer cooking interruptions, and adapt with safe substitutions. A generated recipe is a draft until the Hunter confirms it into the Private Grimoire.
@@ -717,6 +717,118 @@ const responseSchema = {
     'recipe',
     'content',
     'campaign',
+  ],
+  additionalProperties: false,
+};
+
+const bodyDiagnosticSchema = {
+  type: 'object',
+  properties: {
+    title: { type: 'string', minLength: 1, maxLength: 100 },
+    scanType: { type: 'string', enum: ['physique', 'scale', 'combined'] },
+    dataQuality: { type: 'string', enum: ['strong', 'usable', 'limited'] },
+    summary: { type: 'string', minLength: 1, maxLength: 1_200 },
+    comparison: { type: 'string', maxLength: 800 },
+    dataQualityNotes: {
+      type: 'array',
+      maxItems: 6,
+      items: { type: 'string', minLength: 1, maxLength: 240 },
+    },
+    metrics: {
+      type: 'array',
+      maxItems: 20,
+      items: {
+        type: 'object',
+        properties: {
+          label: { type: 'string', minLength: 1, maxLength: 80 },
+          value: { type: 'string', minLength: 1, maxLength: 60 },
+          unit: { type: 'string', maxLength: 20 },
+          source: { type: 'string', enum: ['physique', 'scale', 'hunter'] },
+          confidence: { type: 'string', enum: ['high', 'medium', 'low'] },
+        },
+        required: ['label', 'value', 'unit', 'source', 'confidence'],
+        additionalProperties: false,
+      },
+    },
+    observations: {
+      type: 'array',
+      maxItems: 8,
+      items: {
+        type: 'object',
+        properties: {
+          area: { type: 'string', minLength: 1, maxLength: 80 },
+          observation: { type: 'string', minLength: 1, maxLength: 400 },
+          evidence: { type: 'string', minLength: 1, maxLength: 300 },
+          confidence: { type: 'string', enum: ['high', 'medium', 'low'] },
+        },
+        required: ['area', 'observation', 'evidence', 'confidence'],
+        additionalProperties: false,
+      },
+    },
+    priorities: {
+      type: 'array',
+      minItems: 1,
+      maxItems: 4,
+      items: {
+        type: 'object',
+        properties: {
+          title: { type: 'string', minLength: 1, maxLength: 100 },
+          why: { type: 'string', minLength: 1, maxLength: 360 },
+          nextAction: { type: 'string', minLength: 1, maxLength: 360 },
+        },
+        required: ['title', 'why', 'nextAction'],
+        additionalProperties: false,
+      },
+    },
+    bonusExercises: {
+      type: 'array',
+      maxItems: 4,
+      items: {
+        type: 'object',
+        properties: {
+          name: { type: 'string', minLength: 1, maxLength: 100 },
+          prescription: { type: 'string', minLength: 1, maxLength: 240 },
+          rationale: { type: 'string', minLength: 1, maxLength: 300 },
+        },
+        required: ['name', 'prescription', 'rationale'],
+        additionalProperties: false,
+      },
+    },
+    companionMessages: {
+      type: 'array',
+      minItems: 3,
+      maxItems: 3,
+      items: {
+        type: 'object',
+        properties: {
+          companionId: { type: 'string', enum: ['rook', 'ember', 'mira'] },
+          message: { type: 'string', minLength: 1, maxLength: 500 },
+        },
+        required: ['companionId', 'message'],
+        additionalProperties: false,
+      },
+    },
+    warnings: {
+      type: 'array',
+      maxItems: 6,
+      items: { type: 'string', minLength: 1, maxLength: 300 },
+    },
+    disclaimer: { type: 'string', minLength: 1, maxLength: 400 },
+  },
+  required: [
+    'title',
+    'scanType',
+    'dataQuality',
+    'summary',
+    'comparison',
+    'dataQualityNotes',
+    'metrics',
+    'observations',
+    'priorities',
+    'bonusExercises',
+    'companionMessages',
+    'warnings',
+    'disclaimer',
   ],
   additionalProperties: false,
 };
@@ -1553,6 +1665,231 @@ function extractOutputText(response) {
   return undefined;
 }
 
+function bytesToBase64(buffer) {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  for (let offset = 0; offset < bytes.length; offset += 0x8000) {
+    binary += String.fromCharCode(...bytes.subarray(offset, offset + 0x8000));
+  }
+  return btoa(binary);
+}
+
+const BODY_DIAGNOSTIC_INSTRUCTIONS = `You are the structured vision engine for the Training Hall Body Diagnostic inside The System. Analyze only the supplied images and Hunter-authored context.
+
+GROUNDING AND SAFETY:
+- A scale screenshot may contain consumer-device estimates. Transcribe visible numbers exactly when legible, label them as scale-supplied estimates, and never convert them into diagnoses or certainty.
+- A physique photo may support cautious observations about visible muscular development, broad proportions, pose, and presentation. Never infer an exact body-fat percentage, weight, health condition, injury, age, ethnicity, identity, attractiveness, or character from appearance.
+- If an image is cropped, inconsistent, unclear, altered, or insufficient for a claim, lower confidence or omit the claim. Never invent a measurement.
+- Compare with the prior locally saved report only when supplied, and separate an actual numeric trend from a visual impression. Weight, hydration, and impedance estimates can fluctuate.
+- Training priorities and bonus exercises are suggestions only. Do not replace the Hunter's current assignment, diagnose pain, prescribe treatment, or claim completion or XP.
+- Be candid and specific without humiliation, insults, sexualization, body-shaming, moral judgment, or fake reassurance.
+- Rook is direct, competitive, practical, and respects earned evidence. Ember is tough-skinned pressure aimed at avoidance, never hatred toward the Hunter. Mira is calm, precise, and protects mobility, controlled range, breath, and pain-free movement.
+- Return exactly one distinct message from Rook, Ember, and Mira. They may be firm, but each must remain constructive and grounded in the supplied evidence.
+- If the images cannot be safely or reliably analyzed, return dataQuality limited, explain why, keep metrics and observations sparse, and give only conservative next steps.`;
+
+async function handleBodyDiagnostic(request, env, url) {
+  if (!isSameOriginRequest(request, url)) {
+    return json(
+      { code: 'origin-denied', message: 'That diagnostic origin was not accepted.' },
+      403,
+    );
+  }
+  if (!env.OPENAI_API_KEY) {
+    return json(
+      { code: 'setup-required', message: 'The secure OpenAI link has not been activated yet.' },
+      503,
+    );
+  }
+
+  const contentLength = Number(request.headers.get('content-length') ?? 0);
+  if (contentLength > 28 * 1024 * 1024) {
+    return json(
+      { code: 'images-too-large', message: 'Those diagnostic images are too large.' },
+      413,
+    );
+  }
+
+  let form;
+  try {
+    form = await request.formData();
+  } catch {
+    return json({ code: 'invalid-request', message: 'Those images could not be read.' }, 400);
+  }
+  const goals = new Set([
+    'balanced',
+    'recomposition',
+    'fat-loss',
+    'muscle-gain',
+    'performance',
+    'mobility',
+  ]);
+  const goal = String(form.get('goal') || '');
+  const hunterContext = String(form.get('hunterContext') || '').trim();
+  let imageKinds;
+  let previous;
+  try {
+    imageKinds = JSON.parse(String(form.get('imageKinds') || '[]'));
+    previous = form.get('previous') ? JSON.parse(String(form.get('previous'))) : undefined;
+  } catch {
+    return json({ code: 'invalid-request', message: 'The diagnostic context is not valid.' }, 400);
+  }
+  const images = form
+    .getAll('images')
+    .filter(
+      (value) => value && typeof value === 'object' && typeof value.arrayBuffer === 'function',
+    );
+  const supportedTypes = new Set(['image/jpeg', 'image/png', 'image/webp']);
+  if (
+    !goals.has(goal) ||
+    hunterContext.length > 800 ||
+    !Array.isArray(imageKinds) ||
+    imageKinds.length !== images.length ||
+    images.length < 1 ||
+    images.length > 4 ||
+    imageKinds.some((kind) => kind !== 'physique' && kind !== 'scale') ||
+    imageKinds.filter((kind) => kind === 'physique').length > 3 ||
+    imageKinds.filter((kind) => kind === 'scale').length > 1 ||
+    images.some(
+      (image) =>
+        !supportedTypes.has(String(image.type)) ||
+        Number(image.size) <= 0 ||
+        Number(image.size) > 12 * 1024 * 1024,
+    ) ||
+    (previous !== undefined && (!isObject(previous) || JSON.stringify(previous).length > 12_000))
+  ) {
+    return json(
+      {
+        code: 'invalid-request',
+        message:
+          'Use up to three physique photos and one scale screenshot in JPG, PNG, or WEBP format.',
+      },
+      400,
+    );
+  }
+
+  const imageContent = await Promise.all(
+    images.map(async (image, index) => ({
+      type: 'input_image',
+      image_url: `data:${image.type};base64,${bytesToBase64(await image.arrayBuffer())}`,
+      detail: imageKinds[index] === 'scale' ? 'original' : 'high',
+    })),
+  );
+  const model =
+    env.OPENAI_VISION_MODEL ||
+    env.OPENAI_TEXT_MODEL ||
+    env.OPENAI_INTELLIGENCE_MODEL ||
+    'gpt-5.6-terra';
+  const inputText = JSON.stringify({
+    hunterGoal: goal,
+    hunterContext,
+    imageOrder: imageKinds.map((kind, index) => ({ image: index + 1, kind })),
+    previousWeeklyReport: previous,
+  });
+
+  let openAiResponse;
+  try {
+    openAiResponse = await fetch('https://api.openai.com/v1/responses', {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${env.OPENAI_API_KEY}`,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        model,
+        store: false,
+        input: [
+          { role: 'system', content: BODY_DIAGNOSTIC_INSTRUCTIONS },
+          {
+            role: 'user',
+            content: [{ type: 'input_text', text: inputText }, ...imageContent],
+          },
+        ],
+        max_output_tokens: 2_600,
+        reasoning: { effort: 'medium' },
+        text: {
+          verbosity: 'medium',
+          format: {
+            type: 'json_schema',
+            name: 'body_diagnostic_report',
+            strict: true,
+            schema: bodyDiagnosticSchema,
+          },
+        },
+      }),
+    });
+  } catch {
+    return json(
+      {
+        code: 'openai-unreachable',
+        message: 'The diagnostic link is temporarily unreachable. No report was saved.',
+      },
+      502,
+    );
+  }
+  if (!openAiResponse.ok) {
+    const code =
+      openAiResponse.status === 429
+        ? 'rate-limited'
+        : openAiResponse.status === 401 || openAiResponse.status === 403
+          ? 'configuration-error'
+          : 'openai-error';
+    const message =
+      code === 'rate-limited'
+        ? 'The diagnostic link is busy or has reached its current usage limit. Try again shortly.'
+        : code === 'configuration-error'
+          ? 'The secure OpenAI connection needs attention before a diagnostic can run.'
+          : 'The diagnostic could not be completed. No report was saved.';
+    return json({ code, message }, code === 'rate-limited' ? 429 : 502);
+  }
+
+  try {
+    const response = await openAiResponse.json();
+    const outputText = extractOutputText(response);
+    if (!outputText) throw new Error('Missing output text');
+    const assessment = JSON.parse(outputText);
+    const messages = Array.isArray(assessment?.companionMessages)
+      ? assessment.companionMessages
+      : [];
+    if (
+      !isObject(assessment) ||
+      !Array.isArray(assessment.metrics) ||
+      !Array.isArray(assessment.observations) ||
+      !Array.isArray(assessment.priorities) ||
+      !Array.isArray(assessment.bonusExercises) ||
+      messages.length !== 3 ||
+      new Set(messages.map((message) => message?.companionId)).size !== 3 ||
+      messages.some(
+        (message) =>
+          !isObject(message) ||
+          !['rook', 'ember', 'mira'].includes(message.companionId) ||
+          typeof message.message !== 'string' ||
+          !message.message.trim(),
+      )
+    ) {
+      throw new Error('Invalid structured diagnostic');
+    }
+    return json({
+      model,
+      assessment,
+      usage: {
+        inputTokens: Number(response.usage?.input_tokens ?? 0),
+        cachedInputTokens: Number(response.usage?.input_tokens_details?.cached_tokens ?? 0),
+        outputTokens: Number(response.usage?.output_tokens ?? 0),
+        reasoningTokens: Number(response.usage?.output_tokens_details?.reasoning_tokens ?? 0),
+        totalTokens: Number(response.usage?.total_tokens ?? 0),
+      },
+    });
+  } catch {
+    return json(
+      {
+        code: 'invalid-response',
+        message: 'The diagnostic returned an unreadable report. Please try again.',
+      },
+      502,
+    );
+  }
+}
+
 async function handleAiChat(request, env, url) {
   if (!isSameOriginRequest(request, url)) {
     return json(
@@ -2344,6 +2681,11 @@ export default {
         intelligenceModel:
           env.OPENAI_TEXT_MODEL || env.OPENAI_INTELLIGENCE_MODEL || 'gpt-5.6-terra',
         apexModel: env.OPENAI_TEXT_MODEL || env.OPENAI_APEX_MODEL || 'gpt-5.6-sol',
+        visionModel:
+          env.OPENAI_VISION_MODEL ||
+          env.OPENAI_TEXT_MODEL ||
+          env.OPENAI_INTELLIGENCE_MODEL ||
+          'gpt-5.6-terra',
         speechModel: env.OPENAI_TTS_MODEL || 'gpt-4o-mini-tts',
         transcriptionModel: env.OPENAI_TRANSCRIBE_MODEL || 'gpt-4o-transcribe',
         realtimeModel: env.OPENAI_REALTIME_MODEL || 'gpt-realtime-2.1-mini',
@@ -2388,6 +2730,13 @@ export default {
         );
       }
       return handleAiChat(request, env, url);
+    }
+
+    if (url.pathname === '/api/ai/body-diagnostic') {
+      if (request.method !== 'POST') {
+        return json({ code: 'method-not-allowed', message: 'Use a secure POST diagnostic.' }, 405);
+      }
+      return handleBodyDiagnostic(request, env, url);
     }
 
     if (url.pathname === '/api/ai/transcribe') {

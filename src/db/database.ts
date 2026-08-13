@@ -10,6 +10,7 @@ import type {
   AuditEntry,
   AppMetadata,
   BackupSnapshot,
+  BodyDiagnosticRecord,
   CampfireRecap,
   CampaignArc,
   ChallengeProgress,
@@ -102,6 +103,7 @@ export class SystemDatabase extends Dexie {
   treasuryWeeks!: EntityTable<TreasuryWeek, 'id'>;
   treasuryChallenges!: EntityTable<TreasuryDailyChallenge, 'id'>;
   trainingSessions!: EntityTable<TrainingSession, 'id'>;
+  bodyDiagnostics!: EntityTable<BodyDiagnosticRecord, 'id'>;
   kitchenSessions!: EntityTable<KitchenSession, 'id'>;
   sanctuarySessions!: EntityTable<SanctuarySession, 'id'>;
   aiConversations!: EntityTable<AiConversation, 'id'>;
@@ -744,6 +746,16 @@ export class SystemDatabase extends Dexie {
         await metadata.put({ id: 'schema-seeded', value: 23, updatedAt: now });
         await metadata.put({ id: 'app-version', value: '7.7.0', updatedAt: now });
       });
+    this.version(24)
+      .stores({
+        bodyDiagnostics: 'id,weekStart,weekEnd,date,completedAt',
+      })
+      .upgrade(async (transaction) => {
+        const now = new Date().toISOString();
+        const metadata = transaction.table<AppMetadata, string>('appMetadata');
+        await metadata.put({ id: 'schema-seeded', value: 24, updatedAt: now });
+        await metadata.put({ id: 'app-version', value: '7.8.0', updatedAt: now });
+      });
   }
 }
 
@@ -793,6 +805,7 @@ export const TABLE_NAMES = [
   'treasuryWeeks',
   'treasuryChallenges',
   'trainingSessions',
+  'bodyDiagnostics',
   'kitchenSessions',
   'sanctuarySessions',
   'aiConversations',

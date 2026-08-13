@@ -160,6 +160,19 @@ export interface AiProgressContext {
       privateWritingExcluded: true;
     };
     training: {
+      bodyDiagnostic: {
+        dueThisWeek: boolean;
+        weekStart: LocalDateKey;
+        weeklyXp: number;
+        latest?: {
+          date: LocalDateKey;
+          goal: string;
+          summary: string;
+          priorities: string[];
+          sourceKinds: string[];
+        };
+        photosExcluded: true;
+      };
       recentSessions: Array<{
         date: LocalDateKey;
         location: string;
@@ -291,6 +304,7 @@ export interface AiLinkStatus {
   fastModel?: string;
   intelligenceModel?: string;
   apexModel?: string;
+  visionModel?: string;
   intelligenceVersion?: string;
   speechModel?: string;
   transcriptionModel?: string;
@@ -423,6 +437,7 @@ export async function getAiLinkStatus(): Promise<AiLinkStatus> {
       intelligenceModel:
         typeof payload?.intelligenceModel === 'string' ? payload.intelligenceModel : undefined,
       apexModel: typeof payload?.apexModel === 'string' ? payload.apexModel : undefined,
+      visionModel: typeof payload?.visionModel === 'string' ? payload.visionModel : undefined,
       intelligenceVersion:
         typeof payload?.intelligenceVersion === 'string' ? payload.intelligenceVersion : undefined,
       speechModel: typeof payload?.speechModel === 'string' ? payload.speechModel : undefined,

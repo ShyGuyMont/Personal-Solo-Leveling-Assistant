@@ -1,6 +1,6 @@
-export const APP_VERSION = '7.7.1';
-export const DATABASE_SCHEMA_VERSION = 23;
-export const SAVE_FORMAT_VERSION = 23;
+export const APP_VERSION = '7.8.0';
+export const DATABASE_SCHEMA_VERSION = 24;
+export const SAVE_FORMAT_VERSION = 24;
 
 export interface ReleaseSection {
   title: string;
@@ -9,6 +9,19 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 7.8.0 · Body Diagnostic',
+    detail:
+      'The Training Hall gains a private weekly evidence review where Rook, Ember, and Mira turn physique photos and smart-scale screenshots into a disciplined, non-medical progress report.',
+    points: [
+      'A dedicated Body Diagnostic accepts up to three physique angles and one smart-scale screenshot, with optional Hunter context and goals for balance, recomposition, fat loss, muscle gain, performance, or mobility.',
+      'Terra vision extracts readable scale values, separates visible observations from estimates, identifies data quality, compares against the prior text report, and returns priorities plus optional support work without inventing a diagnosis or exact body-fat reading from appearance.',
+      'Rook, Ember, and Mira each deliver a distinct no-excuses response, and the wider companion intelligence now knows whether the weekly diagnostic is due so accountability can stay direct without body-shaming.',
+      'Completing the optional diagnostic awards 150 account XP exactly once per configured System week; it never completes the Daily Workout mission or awards credit for suggested exercises.',
+      'Submitted images exist only for the active request and are never written to IndexedDB, Archive Shield, conversation history, or the stored diagnostic record; only the report, source types, model usage, and reward proof remain on-device.',
+      'Archive Shield Version 24 validates every nested diagnostic value, preserves portable reports, and rejects impossible records or image-like payload fields.',
+    ],
+  },
   {
     title: 'Version 7.7.1 · System Integrity Sweep',
     detail:

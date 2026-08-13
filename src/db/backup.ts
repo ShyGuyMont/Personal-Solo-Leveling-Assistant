@@ -10,7 +10,7 @@ import type {
   Settings,
 } from '@/types/game';
 
-export const SAVE_VERSION = 23;
+export const SAVE_VERSION = 24;
 export const MAX_IMPORT_BYTES = 32 * 1024 * 1024;
 const MAX_SNAPSHOTS = 5;
 const FORBIDDEN_KEYS = new Set(['__proto__', 'prototype', 'constructor']);
@@ -165,6 +165,7 @@ function migrateData(
   }
   if (version <= 19) data.creatorVideoInsights ??= [];
   if (version <= 22) data.dailyOperations ??= [];
+  if (version <= 23) data.bodyDiagnostics ??= [];
   data.dailyOperations = data.dailyOperations.map((row) => {
     if (!isObject(row) || !isObject(row.pendingProposal)) return row;
     const pendingProposal = row.pendingProposal;
@@ -532,7 +533,7 @@ function validateData(data: Record<string, unknown[]>) {
     }
   }
 
-  const aiUsageKinds = new Set(['text', 'transcription', 'speech', 'realtime']);
+  const aiUsageKinds = new Set(['text', 'vision', 'transcription', 'speech', 'realtime']);
   for (const row of data.aiUsageRecords) {
     if (
       !isObject(row) ||
@@ -565,6 +566,132 @@ function validateData(data: Record<string, unknown[]>) {
       typeof row.exactUsage !== 'boolean'
     ) {
       throw new Error('An AI usage record contains an impossible value.');
+    }
+  }
+
+  const diagnosticGoals = new Set([
+    'balanced',
+    'recomposition',
+    'fat-loss',
+    'muscle-gain',
+    'performance',
+    'mobility',
+  ]);
+  const diagnosticConfidence = new Set(['high', 'medium', 'low']);
+  const diagnosticCompanions = new Set(['rook', 'ember', 'mira']);
+  for (const row of data.bodyDiagnostics) {
+    if (!isObject(row)) {
+      throw new Error('A Training Hall Body Diagnostic contains an impossible value.');
+    }
+    const assessment = isObject(row.assessment) ? row.assessment : undefined;
+    const usage = isObject(row.usage) ? row.usage : undefined;
+    const sourceKinds = Array.isArray(row.sourceKinds) ? row.sourceKinds : [];
+    const metrics = Array.isArray(assessment?.metrics) ? assessment.metrics : [];
+    const observations = Array.isArray(assessment?.observations) ? assessment.observations : [];
+    const priorities = Array.isArray(assessment?.priorities) ? assessment.priorities : [];
+    const bonusExercises = Array.isArray(assessment?.bonusExercises)
+      ? assessment.bonusExercises
+      : [];
+    const companionMessages = Array.isArray(assessment?.companionMessages)
+      ? assessment.companionMessages
+      : [];
+    const stringListIsValid = (value: unknown, maximum: number) =>
+      Array.isArray(value) &&
+      value.length <= maximum &&
+      value.every((item) => typeof item === 'string' && item.trim().length > 0);
+    if (
+      !/^\d{4}-\d{2}-\d{2}$/.test(String(row.weekStart)) ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(String(row.weekEnd)) ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(String(row.date)) ||
+      String(row.weekStart) > String(row.date) ||
+      String(row.date) > String(row.weekEnd) ||
+      !diagnosticGoals.has(String(row.goal)) ||
+      sourceKinds.length < 1 ||
+      sourceKinds.length > 4 ||
+      sourceKinds.filter((kind) => kind === 'physique').length > 3 ||
+      sourceKinds.filter((kind) => kind === 'scale').length > 1 ||
+      sourceKinds.some((kind) => kind !== 'physique' && kind !== 'scale') ||
+      !assessment ||
+      !['physique', 'scale', 'combined'].includes(String(assessment.scanType)) ||
+      !['strong', 'usable', 'limited'].includes(String(assessment.dataQuality)) ||
+      typeof assessment.title !== 'string' ||
+      !assessment.title.trim() ||
+      typeof assessment.summary !== 'string' ||
+      !assessment.summary.trim() ||
+      typeof assessment.comparison !== 'string' ||
+      !stringListIsValid(assessment.dataQualityNotes, 6) ||
+      !stringListIsValid(assessment.warnings, 6) ||
+      typeof assessment.disclaimer !== 'string' ||
+      !assessment.disclaimer.trim() ||
+      metrics.length > 20 ||
+      observations.length > 8 ||
+      priorities.length < 1 ||
+      priorities.length > 4 ||
+      bonusExercises.length > 4 ||
+      companionMessages.length !== 3 ||
+      new Set(companionMessages.map((message) => isObject(message) && message.companionId)).size !==
+        3 ||
+      companionMessages.some(
+        (message) =>
+          !isObject(message) ||
+          !diagnosticCompanions.has(String(message.companionId)) ||
+          typeof message.message !== 'string' ||
+          !message.message.trim(),
+      ) ||
+      metrics.some(
+        (metric) =>
+          !isObject(metric) ||
+          typeof metric.label !== 'string' ||
+          typeof metric.value !== 'string' ||
+          typeof metric.unit !== 'string' ||
+          !['physique', 'scale', 'hunter'].includes(String(metric.source)) ||
+          !diagnosticConfidence.has(String(metric.confidence)),
+      ) ||
+      observations.some(
+        (observation) =>
+          !isObject(observation) ||
+          typeof observation.area !== 'string' ||
+          typeof observation.observation !== 'string' ||
+          typeof observation.evidence !== 'string' ||
+          !diagnosticConfidence.has(String(observation.confidence)),
+      ) ||
+      priorities.some(
+        (priority) =>
+          !isObject(priority) ||
+          typeof priority.title !== 'string' ||
+          !priority.title.trim() ||
+          typeof priority.why !== 'string' ||
+          !priority.why.trim() ||
+          typeof priority.nextAction !== 'string' ||
+          !priority.nextAction.trim(),
+      ) ||
+      bonusExercises.some(
+        (exercise) =>
+          !isObject(exercise) ||
+          typeof exercise.name !== 'string' ||
+          !exercise.name.trim() ||
+          typeof exercise.prescription !== 'string' ||
+          !exercise.prescription.trim() ||
+          typeof exercise.rationale !== 'string' ||
+          !exercise.rationale.trim(),
+      ) ||
+      !usage ||
+      [
+        usage.inputTokens,
+        usage.cachedInputTokens,
+        usage.outputTokens,
+        usage.reasoningTokens,
+        usage.totalTokens,
+        row.rewardXp,
+      ].some((value) => !Number.isFinite(value) || Number(value) < 0) ||
+      typeof row.rewardApplied !== 'boolean' ||
+      typeof row.model !== 'string' ||
+      !row.model.trim() ||
+      typeof row.completedAt !== 'string' ||
+      !Number.isFinite(Date.parse(row.completedAt)) ||
+      Object.keys(row).some((key) => /(?:image|photo|dataurl|base64)/i.test(key))
+    ) {
+      throw new Error('A Training Hall Body Diagnostic contains an impossible value.');
     }
   }
 

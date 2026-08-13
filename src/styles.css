@@ -128,6 +128,577 @@
   border-radius: 10px;
 }
 
+.body-diagnostic-panel {
+  position: relative;
+  margin-top: 14px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 8% 0, rgba(113, 182, 255, 0.13), transparent 31%),
+    radial-gradient(circle at 100% 15%, rgba(255, 104, 69, 0.1), transparent 28%), var(--panel);
+  border-color: rgba(113, 182, 255, 0.24);
+}
+
+.body-diagnostic-panel::before {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  content: '';
+  background: linear-gradient(
+    105deg,
+    transparent 49.8%,
+    rgba(113, 182, 255, 0.035) 50%,
+    transparent 50.2%
+  );
+}
+
+.body-diagnostic-panel--loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 130px;
+  color: var(--muted);
+}
+
+.body-diagnostic-panel__header {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+}
+
+.body-diagnostic-panel__header h2 {
+  margin: 4px 0 5px;
+}
+
+.body-diagnostic-panel__header p:last-child {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.body-diagnostic-panel__seal {
+  display: grid;
+  width: 58px;
+  height: 58px;
+  color: var(--training-blue);
+  place-items: center;
+  background: rgba(113, 182, 255, 0.09);
+  border: 1px solid rgba(113, 182, 255, 0.3);
+  border-radius: 17px;
+  box-shadow:
+    inset 0 0 22px rgba(113, 182, 255, 0.08),
+    0 0 22px rgba(113, 182, 255, 0.08);
+}
+
+.body-diagnostic-panel.is-complete .body-diagnostic-panel__seal {
+  color: var(--training-mint);
+  background: rgba(67, 230, 194, 0.08);
+  border-color: rgba(67, 230, 194, 0.28);
+}
+
+.body-diagnostic-panel__reward {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 2px 7px;
+  align-items: center;
+  padding: 10px 12px;
+  color: var(--training-gold);
+  text-align: right;
+  background: rgba(242, 189, 87, 0.07);
+  border: 1px solid rgba(242, 189, 87, 0.2);
+  border-radius: 12px;
+}
+
+.body-diagnostic-panel__reward small {
+  grid-column: 1 / -1;
+  color: var(--muted-2);
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+}
+
+.body-diagnostic-intake,
+.body-diagnostic-report {
+  position: relative;
+  z-index: 1;
+  margin-top: 18px;
+}
+
+.body-diagnostic-upload-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.body-diagnostic-upload,
+.body-diagnostic-previews__add {
+  position: relative;
+  display: grid;
+  gap: 5px;
+  align-content: center;
+  min-height: 132px;
+  padding: 17px;
+  color: var(--text);
+  cursor: pointer;
+  background: rgba(4, 9, 14, 0.42);
+  border: 1px dashed rgba(113, 182, 255, 0.34);
+  border-radius: 14px;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    transform 160ms ease;
+}
+
+.body-diagnostic-upload:hover,
+.body-diagnostic-upload:focus-within,
+.body-diagnostic-previews__add:hover,
+.body-diagnostic-previews__add:focus-within {
+  background: rgba(113, 182, 255, 0.07);
+  border-color: rgba(113, 182, 255, 0.65);
+  transform: translateY(-1px);
+}
+
+.body-diagnostic-upload svg,
+.body-diagnostic-previews__add svg {
+  color: var(--training-blue);
+}
+
+.body-diagnostic-upload span,
+.body-diagnostic-upload small {
+  color: var(--muted);
+}
+
+.body-diagnostic-upload small {
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.body-diagnostic-upload input,
+.body-diagnostic-previews__add input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.body-diagnostic-previews {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+  margin-top: 10px;
+}
+
+.body-diagnostic-previews figure {
+  position: relative;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  background: #060a0e;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+}
+
+.body-diagnostic-previews img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+}
+
+.body-diagnostic-previews figcaption {
+  padding: 7px 9px;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.65rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.body-diagnostic-previews figure button {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  display: grid;
+  width: 31px;
+  height: 31px;
+  color: #fff;
+  cursor: pointer;
+  place-items: center;
+  background: rgba(3, 7, 10, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 50%;
+}
+
+.body-diagnostic-previews__add {
+  min-height: unset;
+  place-content: center;
+  text-align: center;
+}
+
+.body-diagnostic-fields {
+  display: grid;
+  grid-template-columns: minmax(190px, 0.4fr) minmax(0, 1fr);
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.body-diagnostic-fields .field {
+  margin: 0;
+}
+
+.body-diagnostic-privacy {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 11px;
+  margin-top: 14px;
+  padding: 13px;
+  color: var(--muted);
+  background: rgba(67, 230, 194, 0.045);
+  border: 1px solid rgba(67, 230, 194, 0.16);
+  border-radius: 12px;
+}
+
+.body-diagnostic-privacy svg {
+  color: var(--training-mint);
+}
+
+.body-diagnostic-privacy strong {
+  color: var(--text);
+}
+
+.body-diagnostic-privacy p {
+  margin: 5px 0 0;
+  font-size: 0.72rem;
+  line-height: 1.55;
+}
+
+.body-diagnostic-consent {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin: 13px 0;
+  color: var(--muted);
+  font-size: 0.74rem;
+  line-height: 1.5;
+}
+
+.body-diagnostic-consent input {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: var(--training-mint);
+}
+
+.body-diagnostic-submit {
+  width: 100%;
+  min-height: 50px;
+}
+
+.body-diagnostic-submit-note {
+  display: block;
+  margin-top: 7px;
+  color: var(--muted-2);
+  text-align: center;
+}
+
+.body-diagnostic-report {
+  overflow: hidden;
+  background: rgba(3, 8, 12, 0.43);
+  border: 1px solid rgba(67, 230, 194, 0.17);
+  border-radius: 15px;
+}
+
+.body-diagnostic-report > header {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px;
+}
+
+.body-diagnostic-report > header h3 {
+  margin: 4px 0;
+}
+
+.body-diagnostic-report > header small {
+  color: var(--muted);
+}
+
+.body-diagnostic-report__body {
+  display: grid;
+  gap: 16px;
+  padding: 0 15px 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.body-diagnostic-report__summary {
+  margin: 15px 0 0;
+  font-size: 0.93rem;
+  line-height: 1.7;
+}
+
+.body-diagnostic-callout,
+.body-diagnostic-caveats {
+  padding: 12px 14px;
+  background: rgba(113, 182, 255, 0.055);
+  border-left: 2px solid var(--training-blue);
+  border-radius: 0 10px 10px 0;
+}
+
+.body-diagnostic-callout p,
+.body-diagnostic-caveats p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.body-diagnostic-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.body-diagnostic-metrics > div {
+  display: grid;
+  gap: 4px;
+  padding: 11px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 10px;
+}
+
+.body-diagnostic-metrics span,
+.body-diagnostic-metrics small {
+  color: var(--muted-2);
+  font-size: 0.64rem;
+}
+
+.body-diagnostic-observations,
+.body-diagnostic-exercises {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.body-diagnostic-observations article,
+.body-diagnostic-exercises article {
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 10px;
+}
+
+.body-diagnostic-observations p,
+.body-diagnostic-exercises p {
+  margin: 5px 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.body-diagnostic-observations small,
+.body-diagnostic-exercises span {
+  color: var(--training-blue);
+  font-size: 0.68rem;
+}
+
+.body-diagnostic-priorities {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.body-diagnostic-priorities article {
+  display: grid;
+  grid-template-columns: 29px minmax(0, 1fr);
+  gap: 10px;
+  padding: 11px;
+  background: rgba(255, 104, 69, 0.045);
+  border: 1px solid rgba(255, 104, 69, 0.13);
+  border-radius: 10px;
+}
+
+.body-diagnostic-priorities article > span {
+  display: grid;
+  width: 29px;
+  height: 29px;
+  color: var(--training-ember);
+  place-items: center;
+  border: 1px solid rgba(255, 104, 69, 0.26);
+  border-radius: 9px;
+}
+
+.body-diagnostic-priorities p {
+  margin: 4px 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.body-diagnostic-priorities small {
+  color: var(--training-gold);
+}
+
+.body-diagnostic-commanders {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.body-diagnostic-commanders article {
+  display: grid;
+  grid-template-columns: 47px minmax(0, 1fr);
+  gap: 9px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 11px;
+}
+
+.body-diagnostic-commanders img {
+  width: 47px;
+  height: 58px;
+  object-fit: cover;
+  object-position: top;
+  border-radius: 9px;
+}
+
+.body-diagnostic-commanders p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+.body-diagnostic-caveats {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 9px;
+  border-color: var(--training-gold);
+}
+
+.body-diagnostic-caveats svg {
+  color: var(--training-gold);
+}
+
+.body-diagnostic-disclaimer,
+.body-diagnostic-next {
+  color: var(--muted-2);
+  font-size: 0.67rem;
+  line-height: 1.5;
+}
+
+.body-diagnostic-next {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  margin: 11px 0 0;
+}
+
+.body-diagnostic-reward-notice {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 10px;
+  padding: 12px 14px;
+  color: var(--training-gold);
+  background: rgba(242, 189, 87, 0.08);
+  border: 1px solid rgba(242, 189, 87, 0.22);
+  border-radius: 11px;
+}
+
+.body-diagnostic-reward-notice button {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+  margin-left: auto;
+  color: var(--text);
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+}
+
+@media (max-width: 760px) {
+  .body-diagnostic-panel__header {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .body-diagnostic-panel__reward {
+    grid-column: 1 / -1;
+    grid-template-columns: auto auto minmax(0, 1fr);
+    text-align: left;
+  }
+
+  .body-diagnostic-panel__reward small {
+    grid-column: auto;
+    text-align: right;
+  }
+
+  .body-diagnostic-fields,
+  .body-diagnostic-metrics,
+  .body-diagnostic-commanders {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .body-diagnostic-commanders article:last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 520px) {
+  .body-diagnostic-panel {
+    padding: 15px;
+  }
+
+  .body-diagnostic-panel__header {
+    gap: 10px;
+  }
+
+  .body-diagnostic-panel__seal {
+    width: 48px;
+    height: 48px;
+  }
+
+  .body-diagnostic-upload-grid,
+  .body-diagnostic-fields,
+  .body-diagnostic-observations,
+  .body-diagnostic-exercises,
+  .body-diagnostic-commanders {
+    grid-template-columns: 1fr;
+  }
+
+  .body-diagnostic-previews {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .body-diagnostic-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .body-diagnostic-commanders article:last-child {
+    grid-column: auto;
+  }
+
+  .body-diagnostic-report > header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+.spin {
+  animation: trainingSpinner 0.9s linear infinite;
+}
+
+@keyframes trainingSpinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .training-location-gate,
 .training-briefing,
 .training-circuit,

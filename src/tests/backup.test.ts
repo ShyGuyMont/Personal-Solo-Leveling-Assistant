@@ -290,6 +290,59 @@ describe('save validation and recovery', () => {
       rewardApplied: true,
       updatedAt: now,
     });
+    await db.bodyDiagnostics.put({
+      id: 'body-diagnostic:2026-07-27',
+      weekStart: '2026-07-27',
+      weekEnd: '2026-08-02',
+      date: '2026-08-01',
+      goal: 'balanced',
+      hunterContext: 'Archive the report, never the submitted images.',
+      sourceKinds: ['physique', 'scale'],
+      assessment: {
+        title: 'Protected weekly diagnostic',
+        scanType: 'combined',
+        dataQuality: 'usable',
+        summary: 'A portable text-only baseline was secured.',
+        comparison: 'No prior comparison was available.',
+        dataQualityNotes: ['Smart-scale values are consumer estimates.'],
+        metrics: [
+          {
+            label: 'Scale weight',
+            value: '213.9',
+            unit: 'lb',
+            source: 'scale',
+            confidence: 'high',
+          },
+        ],
+        observations: [],
+        priorities: [
+          {
+            title: 'Repeat consistently',
+            why: 'Trends need comparable evidence.',
+            nextAction: 'Repeat under similar conditions next week.',
+          },
+        ],
+        bonusExercises: [],
+        companionMessages: [
+          { companionId: 'rook', message: 'Baseline secured.' },
+          { companionId: 'ember', message: 'Show up again next week.' },
+          { companionId: 'mira', message: 'Let consistency create clarity.' },
+        ],
+        warnings: [],
+        disclaimer: 'AI training review only; not medical advice.',
+      },
+      model: 'gpt-5.6-terra',
+      usage: {
+        inputTokens: 900,
+        cachedInputTokens: 0,
+        outputTokens: 250,
+        reasoningTokens: 75,
+        totalTokens: 1_150,
+      },
+      rewardApplied: true,
+      rewardXp: 150,
+      completedAt: now,
+    });
     await db.aiConversations.put({
       id: 'ai:backup',
       title: 'A protected council',
@@ -360,7 +413,7 @@ describe('save validation and recovery', () => {
     });
 
     const save = await createSaveFile();
-    expect(save.version).toBe(23);
+    expect(save.version).toBe(24);
     for (const table of [
       'dailyBriefings',
       'dailyOperations',
@@ -370,6 +423,7 @@ describe('save validation and recovery', () => {
       'monthlyCouncils',
       'treasuryTransactions',
       'trainingSessions',
+      'bodyDiagnostics',
       'kitchenSessions',
       'sanctuarySessions',
       'aiConversations',
@@ -392,6 +446,7 @@ describe('save validation and recovery', () => {
         db.monthlyCouncils,
         db.treasuryTransactions,
         db.trainingSessions,
+        db.bodyDiagnostics,
         db.kitchenSessions,
         db.sanctuarySessions,
         db.aiConversations,
@@ -408,6 +463,7 @@ describe('save validation and recovery', () => {
         await db.monthlyCouncils.clear();
         await db.treasuryTransactions.clear();
         await db.trainingSessions.clear();
+        await db.bodyDiagnostics.clear();
         await db.kitchenSessions.clear();
         await db.sanctuarySessions.clear();
         await db.aiConversations.clear();
@@ -433,6 +489,8 @@ describe('save validation and recovery', () => {
     );
     expect((await db.treasuryTransactions.get('treasury:backup'))?.amountCents).toBe(2450);
     expect((await db.trainingSessions.get('2026-08-01'))?.roundsCompleted).toBe(5);
+    expect((await db.bodyDiagnostics.get('body-diagnostic:2026-07-27'))?.rewardXp).toBe(150);
+    expect(JSON.stringify(await db.bodyDiagnostics.toArray())).not.toMatch(/data:image|base64/i);
     expect((await db.kitchenSessions.get('2026-08-01'))?.servingsPrepared).toBe(4);
     expect((await db.kitchenSessions.get('2026-08-01'))?.recipeId).toBe('custom-recipe:backup');
     expect((await db.sanctuarySessions.get('sanctuary:backup'))?.prayer).toBe(
@@ -463,7 +521,7 @@ describe('save validation and recovery', () => {
     save.checksum = await digest(save.data);
 
     const prepared = await prepareSaveImport(asFile(save));
-    expect(prepared.save.version).toBe(23);
+    expect(prepared.save.version).toBe(24);
     expect(prepared.save.data.dailyBriefings).toEqual([]);
     expect(prepared.save.data.dailyOperations).toEqual([]);
     const migrated = prepared.save.data.settings[0] as Record<string, unknown>;
@@ -484,6 +542,7 @@ describe('save validation and recovery', () => {
     expect(prepared.save.data.treasurySettings).toHaveLength(1);
     expect(prepared.save.data.treasuryTransactions).toEqual([]);
     expect(prepared.save.data.trainingSessions).toEqual([]);
+    expect(prepared.save.data.bodyDiagnostics).toEqual([]);
     expect(prepared.save.data.sanctuarySessions).toEqual([]);
     expect(prepared.save.data.kitchenSessions).toEqual([]);
     expect(prepared.save.data.aiConversations).toEqual([]);

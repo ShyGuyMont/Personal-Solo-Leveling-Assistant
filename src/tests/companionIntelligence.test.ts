@@ -210,6 +210,7 @@ describe('Companion Soulprint intelligence', () => {
       fastModel: 'test-model',
       intelligenceModel: 'test-model',
       apexModel: 'test-model',
+      visionModel: 'test-model',
       speechModel: 'gpt-4o-mini-tts',
       transcriptionModel: 'gpt-4o-transcribe',
       realtimeModel: 'gpt-realtime-2.1-mini',
@@ -396,6 +397,109 @@ describe('Companion Soulprint intelligence', () => {
     });
     expect(openAiForm?.get('model')).toBe('gpt-4o-transcribe');
     expect(payload.usage).toMatchObject({ totalTokens: 128, exact: true });
+  });
+
+  it('analyzes bounded diagnostic images with Terra, structured safeguards, and no storage', async () => {
+    let openAiBody: Record<string, unknown> | undefined;
+    const assessment = {
+      title: 'Weekly evidence review',
+      scanType: 'scale',
+      dataQuality: 'usable',
+      summary: 'The screenshot provides a readable consumer-scale baseline.',
+      comparison: 'No prior report was supplied.',
+      dataQualityNotes: ['Consumer smart-scale composition values are estimates.'],
+      metrics: [
+        {
+          label: 'Scale weight',
+          value: '213.9',
+          unit: 'lb',
+          source: 'scale',
+          confidence: 'high',
+        },
+      ],
+      observations: [],
+      priorities: [
+        {
+          title: 'Repeat consistently',
+          why: 'A comparable trend is more useful than one isolated estimate.',
+          nextAction: 'Repeat next week under similar conditions.',
+        },
+      ],
+      bonusExercises: [],
+      companionMessages: [
+        { companionId: 'rook', message: 'Baseline logged. Be here next week.' },
+        { companionId: 'ember', message: 'No hiding from the next check-in.' },
+        { companionId: 'mira', message: 'Consistency will make the signal clearer.' },
+      ],
+      warnings: [],
+      disclaimer: 'AI training review only; not medical advice or a diagnosis.',
+    };
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_url: string, init: RequestInit) => {
+        openAiBody = JSON.parse(String(init.body)) as Record<string, unknown>;
+        return new Response(
+          JSON.stringify({
+            output: [
+              {
+                type: 'message',
+                content: [{ type: 'output_text', text: JSON.stringify(assessment) }],
+              },
+            ],
+            usage: {
+              input_tokens: 900,
+              input_tokens_details: { cached_tokens: 100 },
+              output_tokens: 250,
+              output_tokens_details: { reasoning_tokens: 75 },
+              total_tokens: 1_150,
+            },
+          }),
+          { status: 200, headers: { 'content-type': 'application/json' } },
+        );
+      }),
+    );
+
+    const form = new FormData();
+    form.append('goal', 'balanced');
+    form.append('hunterContext', 'Morning scale reading.');
+    form.append('imageKinds', JSON.stringify(['scale']));
+    const scaleFile = new File([new Uint8Array([137, 80, 78, 71])], 'scale.png', {
+      type: 'image/png',
+    });
+    Object.defineProperty(scaleFile, 'arrayBuffer', {
+      value: async () => new Uint8Array([137, 80, 78, 71]).buffer,
+    });
+    form.append('images', scaleFile);
+    const diagnosticRequest = {
+      url: 'https://system.test/api/ai/body-diagnostic',
+      method: 'POST',
+      headers: new Headers({ origin: 'https://system.test' }),
+      formData: async () => form,
+    } as Request;
+    const response = await intelligence.default.fetch(diagnosticRequest, {
+      OPENAI_API_KEY: 'test-key',
+    });
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({
+      model: 'gpt-5.6-terra',
+      assessment: { title: 'Weekly evidence review' },
+      usage: { inputTokens: 900, cachedInputTokens: 100, reasoningTokens: 75 },
+    });
+    expect(openAiBody).toMatchObject({
+      model: 'gpt-5.6-terra',
+      store: false,
+      reasoning: { effort: 'medium' },
+      text: { format: { type: 'json_schema', name: 'body_diagnostic_report', strict: true } },
+    });
+    const input = openAiBody?.input as Array<{ role: string; content: unknown }>;
+    expect(String(input[0].content)).toContain('Never infer an exact body-fat percentage');
+    const image = (input[1].content as Array<Record<string, unknown>>).find(
+      (item) => item.type === 'input_image',
+    );
+    expect(image).toMatchObject({ detail: 'original' });
+    expect(String(image?.image_url)).toMatch(/^data:image\/png;base64,/);
+    expect(JSON.stringify(openAiBody)).not.toContain('test-key');
   });
 
   it('places the selected soulprint above the Hunter message in the OpenAI request', async () => {

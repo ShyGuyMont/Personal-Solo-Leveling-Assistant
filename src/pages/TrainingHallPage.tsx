@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FavoriteMessageButton } from '@/components/FavoriteMessageButton';
+import { BodyDiagnosticPanel } from '@/components/BodyDiagnosticPanel';
 import { GymDeploymentPanel } from '@/components/GymDeploymentPanel';
 import { MobilityProtocolPanel } from '@/components/MobilityProtocolPanel';
 import { BALANCE } from '@/config/balance';
@@ -151,6 +152,7 @@ export function TrainingHallPage() {
     useState<TrainingSession['conditioningType']>('walk-run');
   const [distance, setDistance] = useState('');
   const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
+  const [diagnosticReward, setDiagnosticReward] = useState('');
   const workoutRecord = todayRecords.find((record) => record.missionId === 'workout');
   const workoutCompleted = workoutRecord?.status === 'completed';
 
@@ -464,6 +466,31 @@ export function TrainingHallPage() {
     </section>
   );
 
+  const renderDiagnostic = () => (
+    <>
+      <BodyDiagnosticPanel
+        systemDate={systemDate}
+        onReward={({ xp, levelsGained }) => {
+          setDiagnosticReward(
+            xp > 0
+              ? `Weekly Body Diagnostic cleared · +${xp} XP${levelsGained ? ` · Level +${levelsGained}` : ''}`
+              : 'Weekly Body Diagnostic secured.',
+          );
+          void refresh();
+        }}
+      />
+      {diagnosticReward && (
+        <div className="body-diagnostic-reward-notice">
+          <Sparkles size={18} />
+          <strong>{diagnosticReward}</strong>
+          <button type="button" onClick={() => setDiagnosticReward('')}>
+            <Check size={15} /> Acknowledge
+          </button>
+        </div>
+      )}
+    </>
+  );
+
   if (workoutCompleted && !todaySessions.length) {
     return (
       <div className="page training-hall-page">
@@ -488,6 +515,7 @@ export function TrainingHallPage() {
             </p>
           </div>
         </section>
+        {renderDiagnostic()}
         {renderHistory()}
       </div>
     );
@@ -533,6 +561,8 @@ export function TrainingHallPage() {
             </button>
           )}
         </section>
+
+        {renderDiagnostic()}
 
         {error && <div className="training-error">{error}</div>}
 
@@ -727,6 +757,8 @@ export function TrainingHallPage() {
           </p>
         </div>
       </section>
+
+      {renderDiagnostic()}
 
       {error && <div className="training-error">{error}</div>}
 

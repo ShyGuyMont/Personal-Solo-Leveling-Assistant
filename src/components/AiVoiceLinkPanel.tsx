@@ -276,9 +276,9 @@ export function AiVoiceLinkPanel({
             </label>
           </div>
           <p className="ai-usage-ledger__note">
-            Text, cache, reasoning, transcription, and Live Link audio token counts come from API
-            responses. Dollar totals apply current model rates locally; generated-speech cost
-            remains an estimate because the speech endpoint returns audio rather than a usage
+            Text, vision, cache, reasoning, transcription, and Live Link audio token counts come
+            from API responses. Dollar totals apply current model rates locally; generated-speech
+            cost remains an estimate because the speech endpoint returns audio rather than a usage
             ledger. This never includes API use outside The System, and the OpenAI Usage dashboard
             remains the billing authority.
           </p>

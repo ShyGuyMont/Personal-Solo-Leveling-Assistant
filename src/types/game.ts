@@ -315,6 +315,79 @@ export interface TrainingSession {
   updatedAt: string;
 }
 
+export type BodyDiagnosticGoal =
+  'balanced' | 'recomposition' | 'fat-loss' | 'muscle-gain' | 'performance' | 'mobility';
+export type BodyDiagnosticSourceKind = 'physique' | 'scale';
+export type BodyDiagnosticConfidence = 'high' | 'medium' | 'low';
+
+export interface BodyDiagnosticMetric {
+  label: string;
+  value: string;
+  unit: string;
+  source: BodyDiagnosticSourceKind | 'hunter';
+  confidence: BodyDiagnosticConfidence;
+}
+
+export interface BodyDiagnosticObservation {
+  area: string;
+  observation: string;
+  evidence: string;
+  confidence: BodyDiagnosticConfidence;
+}
+
+export interface BodyDiagnosticPriority {
+  title: string;
+  why: string;
+  nextAction: string;
+}
+
+export interface BodyDiagnosticExercise {
+  name: string;
+  prescription: string;
+  rationale: string;
+}
+
+export interface BodyDiagnosticAssessment {
+  title: string;
+  scanType: 'physique' | 'scale' | 'combined';
+  dataQuality: 'strong' | 'usable' | 'limited';
+  summary: string;
+  comparison: string;
+  dataQualityNotes: string[];
+  metrics: BodyDiagnosticMetric[];
+  observations: BodyDiagnosticObservation[];
+  priorities: BodyDiagnosticPriority[];
+  bonusExercises: BodyDiagnosticExercise[];
+  companionMessages: Array<{
+    companionId: 'rook' | 'ember' | 'mira';
+    message: string;
+  }>;
+  warnings: string[];
+  disclaimer: string;
+}
+
+export interface BodyDiagnosticRecord {
+  id: string;
+  weekStart: LocalDateKey;
+  weekEnd: LocalDateKey;
+  date: LocalDateKey;
+  goal: BodyDiagnosticGoal;
+  hunterContext?: string;
+  sourceKinds: BodyDiagnosticSourceKind[];
+  assessment: BodyDiagnosticAssessment;
+  model: string;
+  usage: {
+    inputTokens: number;
+    cachedInputTokens: number;
+    outputTokens: number;
+    reasoningTokens: number;
+    totalTokens: number;
+  };
+  rewardApplied: boolean;
+  rewardXp: number;
+  completedAt: string;
+}
+
 export type KitchenRecipeId =
   | 'lemon-chicken-potatoes'
   | 'garlic-shrimp-rice'
@@ -629,6 +702,7 @@ export interface XpTransaction {
     | 'daily-event'
     | 'daily-command'
     | 'training'
+    | 'body-diagnostic'
     | 'kitchen'
     | 'recovery'
     | 'reversal'
@@ -958,7 +1032,7 @@ export interface AiVoiceProfile {
   updatedAt: string;
 }
 
-export type AiUsageKind = 'text' | 'transcription' | 'speech' | 'realtime';
+export type AiUsageKind = 'text' | 'vision' | 'transcription' | 'speech' | 'realtime';
 
 export interface AiUsageRecord {
   id: string;

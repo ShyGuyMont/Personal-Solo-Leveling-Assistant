@@ -17,7 +17,7 @@ The design, writing, interface, icons, animations, and generated tones are origi
 - Weekly Campfire Recaps generated once per completed week from finalized mission data, with an in-character review from every companion and no hidden rewards or penalties
 - Monthly Councils generated after a completed month with fact-aware commentary from all ten companions, permanent history, and an optional next-month intention
 - Snow's optional Daily Command Briefing with Low, Steady, and High capacity planning, broad completion targets, and transparent 1×–2.5× scheduled-mission XP outcomes
-- Rook, Ember, and Mira’s Training Hall with four home circuits, four structured progressive gym sessions, Conditioning, guided randomized mobility/yoga/Pilates protocols, a three-tier multi-path reward ladder, and a full-party post-workout scene
+- Rook, Ember, and Mira’s Training Hall with four home circuits, four structured progressive gym sessions, Conditioning, guided randomized mobility/yoga/Pilates protocols, a three-tier multi-path reward ladder, a full-party post-workout scene, and a private weekly Body Diagnostic
 - Saffron’s Kitchen with eighteen rotating no-bean, no-pea recipes, guided ingredients and steps, substitutions, food-safety and leftover guidance, three rewarded weekly orders, and permanent cooking history
 - Snow and Selah’s Scripture Sanctuary with 96 rotating passage paths, twelve emotional and spiritual concerns, guided reflection, deeper prayer structure, private history, and unlimited no-XP Stronghold support
 - User-authored Campaign Arcs with purpose, companion guidance, optional target dates, milestones, pause/resume, completion, and archive states
@@ -40,6 +40,23 @@ The complete progression system works offline and stores campaign data locally. 
 Headquarters channel uses the private Sites sign-in and a server-side OpenAI connection; it sends
 only the message, limited recent chat context, and a compact progress signal when the user presses
 Send. There is no analytics, advertising, or tracking.
+
+## Version 7.8.0 · Body Diagnostic
+
+The Training Hall now runs one optional Body Diagnostic per configured System week. The Hunter may
+submit up to three physique angles, one smart-scale screenshot, or any smaller combination; choose
+a current goal, add relevant context, and receive a structured Terra vision report from Rook,
+Ember, and Mira. The report distinguishes visible observations from transcribed scale estimates,
+labels evidence confidence, compares against the prior stored report when available, and produces
+specific Training Hall priorities plus optional support work. It does not diagnose health
+conditions or infer an exact body-fat percentage from appearance.
+
+Clearing the weekly diagnostic awards 150 account XP exactly once. It does not complete the Daily
+Workout mission, and its optional exercises do not grant mission credit. The party’s compact AI
+context knows whether the diagnostic is due and can hold the Hunter firmly accountable without
+body-shaming. Submitted images are sent only when the Hunter explicitly consents, are never written
+to the local database or Archive Shield save, and are released after the active request; the
+on-device record retains only the text report, source types, usage, and reward proof.
 
 ## Version 6.4.0 · Awakened Link
 

@@ -63,6 +63,11 @@ export const BALANCE = {
       },
     },
   },
+  bodyDiagnostic: {
+    weeklyAccountXp: 150,
+    maxPhysiqueImages: 3,
+    maxScaleImages: 1,
+  },
   kitchen: {
     rewardedOrdersPerWeek: 3,
     completedOrderAccountXp: 40,

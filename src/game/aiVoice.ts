@@ -134,7 +134,9 @@ export async function getAiUsageSummary(sessionId: string, now = new Date()) {
   const monthRecords = records.filter(
     (record) => validDate(record.createdAt).getTime() >= monthStart,
   );
-  const byKind = (['text', 'transcription', 'speech', 'realtime'] as AiUsageKind[]).reduce(
+  const byKind = (
+    ['text', 'vision', 'transcription', 'speech', 'realtime'] as AiUsageKind[]
+  ).reduce(
     (result, kind) => {
       result[kind] = total(monthRecords.filter((record) => record.kind === kind));
       return result;
