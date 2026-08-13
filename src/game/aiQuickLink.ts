@@ -19,6 +19,7 @@ const COMPANION_ALIASES: Record<string, CompanionId> = {
   amara: 'amara',
   cassian: 'cassian',
   saffron: 'saffron',
+  quill: 'quill',
 };
 
 export interface AddressedQuickLink {
@@ -67,6 +68,11 @@ const ROUTES: Array<QuickNavigationCommand & { patterns: RegExp[] }> = [
     route: '/creator-forge',
     label: 'Creator Forge',
     patterns: [/\bcreator forge\b/i, /\bgreenroom\b/i, /\bcontent board\b/i, /\byoutube studio\b/i],
+  },
+  {
+    route: '/arc-archives',
+    label: 'A.R.C. Archives',
+    patterns: [/\ba\.?r\.?c\.? archives?\b/i, /\bcharacter archives?\b/i, /\bdossier forge\b/i, /\barts codex\b/i],
   },
   { route: '/missions', label: 'Missions', patterns: [/\bmissions?\b/i, /\bquests?\b/i] },
   {
@@ -164,6 +170,7 @@ export function navigationAcknowledgement(companionId: CompanionId, destination:
     amara: `${destination}. Come on, we’ll head there together.`,
     cassian: `${destination}. Opening the correct command channel now.`,
     saffron: `${destination}. Yes, yes—come on. I’m opening it.`,
+    quill: `${destination}? Oh, that is absolutely my door. Opening the archive now!`,
   };
   return acknowledgements[companionId];
 }
@@ -261,6 +268,7 @@ export function commandSuccessAcknowledgement(companionId: CompanionId, action: 
     amara: `${action.missionName} is updated. Your word, your record, your decision.`,
     cassian: `${action.missionName} updated. Confirmed entry; no mystery math.`,
     saffron: `${action.missionName} updated! Finally—an order actually confirmed before somebody touched the ledger.`,
+    quill: `${action.missionName} updated. Confirmed canon for today’s record—no stealth revisions, no ambiguity.`,
   };
   return acknowledgements[companionId];
 }

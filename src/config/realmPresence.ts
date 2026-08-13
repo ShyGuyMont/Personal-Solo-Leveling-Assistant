@@ -50,6 +50,13 @@ export const REALM_PRESENCE: Record<SystemRealm, RealmPresence> = {
     actionLabel: 'Open Creator Forge',
     actionPath: '/creator-forge',
   },
+  arc: {
+    signal: 'Storyspark archive synchronized',
+    message:
+      'The canon is awake. Give me a character, contradiction, plot spark, or half-finished idea and I will find where it belongs—without pretending a guess is already true.',
+    actionLabel: 'Enter A.R.C. Archives',
+    actionPath: '/arc-archives',
+  },
   party: {
     signal: 'All companion links available',
     message:

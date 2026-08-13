@@ -411,9 +411,43 @@ describe('save validation and recovery', () => {
       estimatedCostUsd: 0.0018,
       exactUsage: false,
     });
+    await db.arcCharacters.put({
+      id: 'arc-character-laz',
+      name: 'Laz',
+      alias: 'The Ember Heir',
+      style: 'Nature Flame',
+      faction: 'Radiant Brigade',
+      overallClass: 'A',
+      startingClass: 'C',
+      endingClass: 'World',
+      completion: 84,
+      schemaVersion: 4,
+      sourceFileName: 'laz.json',
+      data: {
+        name: 'Laz',
+        alias: 'The Ember Heir',
+        style: 'Nature Flame',
+        faction: 'Radiant Brigade',
+        starting_class: 'C',
+        ending_class: 'World',
+      },
+      createdAt: now,
+      updatedAt: now,
+    });
+    await db.arcCanonSources.put({
+      id: 'arc-source-nature-flame',
+      title: 'Nature Flame Record',
+      kind: 'world-lore',
+      sourceFileName: 'nature-flame.md',
+      tags: ['Nature Flame'],
+      characterNames: ['Laz'],
+      text: 'Nature Flame is recorded as Laz\'s inherited Style.',
+      createdAt: now,
+      updatedAt: now,
+    });
 
     const save = await createSaveFile();
-    expect(save.version).toBe(24);
+    expect(save.version).toBe(25);
     for (const table of [
       'dailyBriefings',
       'dailyOperations',
@@ -430,6 +464,8 @@ describe('save validation and recovery', () => {
       'aiMemories',
       'aiVoiceProfiles',
       'aiUsageRecords',
+      'arcCharacters',
+      'arcCanonSources',
     ]) {
       expect(save.data[table]).toHaveLength(1);
     }
@@ -453,6 +489,8 @@ describe('save validation and recovery', () => {
         db.aiMemories,
         db.aiVoiceProfiles,
         db.aiUsageRecords,
+        db.arcCharacters,
+        db.arcCanonSources,
       ],
       async () => {
         await db.dailyBriefings.clear();
@@ -470,6 +508,8 @@ describe('save validation and recovery', () => {
         await db.aiMemories.clear();
         await db.aiVoiceProfiles.clear();
         await db.aiUsageRecords.clear();
+        await db.arcCharacters.clear();
+        await db.arcCanonSources.clear();
       },
     );
     await commitPreparedImport(prepared);
@@ -500,6 +540,10 @@ describe('save validation and recovery', () => {
     expect((await db.aiMemories.get('ai-memory:backup'))?.status).toBe('approved');
     expect((await db.aiVoiceProfiles.get('snow'))?.accent).toBe('irish');
     expect((await db.aiUsageRecords.get('ai-usage:backup'))?.characters).toBe(120);
+    expect((await db.arcCharacters.get('arc-character-laz'))?.style).toBe('Nature Flame');
+    expect((await db.arcCanonSources.get('arc-source-nature-flame'))?.characterNames).toEqual([
+      'Laz',
+    ]);
   });
 
   it('migrates a Version 2.1 save to Version 4.0 without losing the existing party', async () => {
@@ -521,7 +565,7 @@ describe('save validation and recovery', () => {
     save.checksum = await digest(save.data);
 
     const prepared = await prepareSaveImport(asFile(save));
-    expect(prepared.save.version).toBe(24);
+    expect(prepared.save.version).toBe(25);
     expect(prepared.save.data.dailyBriefings).toEqual([]);
     expect(prepared.save.data.dailyOperations).toEqual([]);
     const migrated = prepared.save.data.settings[0] as Record<string, unknown>;
@@ -529,6 +573,7 @@ describe('save validation and recovery', () => {
     expect(migrated.enabledCompanionIds).toContain('cassian');
     expect(migrated.enabledCompanionIds).toContain('saffron');
     expect(migrated.enabledCompanionIds).toContain('mira');
+    expect(migrated.enabledCompanionIds).toContain('quill');
     expect(migrated.dailyBriefingEnabled).toBe(true);
     expect(migrated.aiLinkMode).toBe('offline');
     expect(migrated.aiDataSharingAcknowledged).toBe(false);

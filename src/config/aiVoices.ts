@@ -402,6 +402,31 @@ export const CANON_VOICE_PROFILES: Record<CompanionId, CanonVoiceProfile> = {
     audition:
       'You have protein, rice, and twenty minutes. This is not a crisis; it is dinner with terrible public relations. Pan. Heat. Move!',
   },
+  quill: {
+    id: 'quill',
+    voice: 'ash',
+    accent: 'natural',
+    delivery: 'playful',
+    cadence: 'rapid-fire',
+    texture: 'bright',
+    register: 'high-mid',
+    resonance: 'forward',
+    performanceTake: 'dynamic',
+    pace: 1.36,
+    warmth: 4,
+    energy: 5,
+    expressiveness: 5,
+    naturalism: 5,
+    pauseDiscipline: 5,
+    intonation: 5,
+    articulation: 4,
+    emotionalRange: 5,
+    updatedAt: CREATED_AT,
+    direction:
+      'Fast, delighted, conspiratorial, and unmistakably human. He sounds like a brilliant friend who just found the missing lore connection, with genuine wonder under the speed and enough control to become precise when canon is uncertain.',
+    audition:
+      'Wait—do not answer yet. If that scar came before the vow, the entire rivalry changes, and Snow is going to lose her mind when she sees why.',
+  },
 };
 
 export function cloneCanonVoiceProfile(companionId: CompanionId): AiVoiceProfile {

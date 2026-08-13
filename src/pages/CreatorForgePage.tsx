@@ -1,6 +1,7 @@
 import {
   ArrowLeft,
   BarChart3,
+  BookOpenCheck,
   ChevronRight,
   CirclePlay,
   FileUp,
@@ -366,6 +367,9 @@ export function CreatorForgePage() {
             >
               <Plus size={18} /> Capture an idea
             </button>
+            <Link to="/arc-archives" className="secondary-button">
+              <BookOpenCheck size={18} /> Enter A.R.C. Archives
+            </Link>
           </div>
         </div>
         <div className={`creator-signal creator-signal--${summary.momentum}`}>

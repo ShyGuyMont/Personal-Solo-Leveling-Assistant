@@ -39,6 +39,7 @@ describe('Party Expansion', () => {
         'mira',
         'cassian',
         'saffron',
+        'quill',
       ]);
       expect(Object.values(dialogue).every((pool) => pool.length >= 3)).toBe(true);
     }
@@ -59,6 +60,7 @@ describe('Party Expansion', () => {
       'amara',
       'cassian',
       'saffron',
+      'quill',
       'snow',
     ]);
     expect(focused).toHaveLength(2);
@@ -128,6 +130,7 @@ describe('Party Expansion', () => {
       'amara',
       'cassian',
       'saffron',
+      'quill',
     ]);
   });
 });

@@ -22,6 +22,7 @@ const PARTY_ORDER: CompanionId[] = [
   'amara',
   'cassian',
   'saffron',
+  'quill',
 ];
 
 function chooseMessage(

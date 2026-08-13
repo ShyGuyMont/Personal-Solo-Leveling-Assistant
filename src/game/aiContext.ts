@@ -6,6 +6,7 @@ import { buildQuickLinkActionCatalog } from '@/game/aiQuickLink';
 import { getCustomKitchenRecipes } from '@/game/kitchenGrimoire';
 import { getDailyOperations } from '@/game/dailyOperations';
 import { getBodyDiagnosticData } from '@/game/bodyDiagnostic';
+import { buildArcKnowledgeContext } from '@/game/arcArchives';
 import { resolveKitchenSessionRecipe } from '@/game/kitchen';
 import { accountXpForLevel, totalXpAtLevel } from '@/game/xp';
 import type { AiProgressContext } from '@/services/aiHeadquarters';
@@ -34,6 +35,7 @@ export interface AiContextSource {
   challenges: ChallengeProgress[];
   systemDate: LocalDateKey;
   enabledCompanionIds: Settings['enabledCompanionIds'];
+  query?: string;
 }
 
 function roundedAverage(total: number, divisor: number) {
@@ -51,6 +53,26 @@ function sumBy<T>(items: T[], value: (item: T) => number) {
 
 function directorNote(value: string | undefined) {
   return (value ?? '').trim().slice(0, 420);
+}
+
+const ARC_KNOWLEDGE_SIGNALS =
+  /\b(?:a\.?r\.?c\.?|arc|art(?:s)?\s+codex|canon|character|continuity|dossier|faction|lore|plot|story|style|worldbuild(?:ing)?)\b/i;
+
+function shouldShareArcKnowledge(source: AiContextSource) {
+  if (source.audience === 'quill') return true;
+  if (source.audience !== 'snow' && source.audience !== 'party') return false;
+  return ARC_KNOWLEDGE_SIGNALS.test(source.query ?? '');
+}
+
+function emptyArcKnowledgeContext() {
+  return {
+    library: { characterCount: 0, canonSourceCount: 0 },
+    retrievalQuery: '',
+    relevantCharacters: [],
+    relevantCanonSources: [],
+    grounding:
+      'No A.R.C. records were shared because this conversation did not request archive knowledge.',
+  };
 }
 
 export async function buildAiProgressContext(source: AiContextSource): Promise<AiProgressContext> {
@@ -81,6 +103,7 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
     creatorVideoInsights,
     dailyOperations,
     bodyDiagnostic,
+    arcKnowledge,
   ] = await Promise.all([
     db.dailyReviews.where('date').aboveOrEqual(recentStart).toArray(),
     db.dailyMissions.where('date').aboveOrEqual(recentStart).toArray(),
@@ -107,6 +130,9 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
     db.creatorVideoInsights.orderBy('views').reverse().limit(10).toArray(),
     getDailyOperations(source.systemDate),
     getBodyDiagnosticData(source.systemDate),
+    shouldShareArcKnowledge(source)
+      ? buildArcKnowledgeContext(source.query ?? '')
+      : Promise.resolve(emptyArcKnowledgeContext()),
   ]);
 
   const available = source.missions.filter((mission) => mission.enabled && !mission.archived);
@@ -456,6 +482,7 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
           }),
         milestoneNotesExcluded: true,
       },
+      arc: arcKnowledge,
       creator: {
         identity: {
           channelName: creatorSettings?.channelName.slice(0, 160) ?? '',

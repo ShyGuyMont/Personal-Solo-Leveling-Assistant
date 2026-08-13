@@ -198,6 +198,29 @@ export interface AiProgressContext {
       }>;
       milestoneNotesExcluded: true;
     };
+    arc: {
+      library: { characterCount: number; canonSourceCount: number };
+      retrievalQuery: string;
+      relevantCharacters: Array<{
+        source: string;
+        name: string;
+        alias: string;
+        style: string;
+        faction: string;
+        overallClass: string;
+        startingClass: string;
+        endingClass: string;
+        dossier: Record<string, unknown>;
+      }>;
+      relevantCanonSources: Array<{
+        source: string;
+        kind: string;
+        tags: string[];
+        characterNames: string[];
+        excerpt: string;
+      }>;
+      grounding: string;
+    };
     creator: {
       identity: {
         channelName: string;

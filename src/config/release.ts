@@ -1,6 +1,6 @@
-export const APP_VERSION = '7.8.0';
-export const DATABASE_SCHEMA_VERSION = 24;
-export const SAVE_FORMAT_VERSION = 24;
+export const APP_VERSION = '8.0.0';
+export const DATABASE_SCHEMA_VERSION = 25;
+export const SAVE_FORMAT_VERSION = 25;
 
 export interface ReleaseSection {
   title: string;
@@ -9,6 +9,19 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 8.0.0 · A.R.C. Archives',
+    detail:
+      'The complete A.R.C. character system joins The System as a private creative realm, while Quill brings source-grounded canon recall, continuity counsel, and unapologetic story-room energy to the party.',
+    points: [
+      'The original five-section Character Archives, printable profile, 0–1000 Graced stat engine, Starting and Ending Story Classes, transcendence rules, and all 152 Arts now run inside the linked Dossier Forge.',
+      'Imported v4 and legacy JSON dossiers enter a searchable on-device Character Library; saving in the Forge synchronizes the record, and an existing character name updates instead of silently creating duplicates.',
+      'The Canon Vault accepts Text, Markdown, JSON, and pasted source records with explicit types, tags, and character references, while the Continuity Scanner flags gaps and collisions without rewriting canon.',
+      'Quill, The Storyspark, becomes the eleventh companion with a complete Soulprint, Quick Link and Voice Link access, support dialogue, party chemistry, progression reactions, Campfires, Councils, and milestone celebrations.',
+      'A.R.C. retrieval is topic-gated and source-aware: only Quill—or Snow and the Party during an explicit A.R.C. conversation—receives compact relevant records, with established canon separated from inference and new ideas.',
+      'Archive Shield format 25 validates and preserves Character Library and Canon Vault records alongside the full campaign, while imported lore remains private on this device until the Hunter intentionally asks for online counsel.',
+    ],
+  },
   {
     title: 'Version 7.8.0 · Body Diagnostic',
     detail:

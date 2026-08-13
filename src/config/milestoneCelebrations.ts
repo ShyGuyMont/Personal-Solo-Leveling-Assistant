@@ -141,6 +141,20 @@ const MILESTONE_LINES: Record<CompanionId, Record<'rank' | 'level' | 'achievemen
       'Achievement secured! I expect pride, gratitude, and an honest appetite. No minimizing any of them.',
     ],
   },
+  quill: {
+    rank: [
+      'New class! That is a full chapter break, not a footnote. Snow, we need a title before the Hunter pretends this is normal.',
+      'Classification advanced. The protagonist energy is becoming statistically difficult to deny.',
+    ],
+    level: [
+      'Major threshold! I am filing this under “proof the long arc was working even between the dramatic scenes.”',
+      'Level milestone confirmed. Quiet continuity became visible canon—my favorite kind of reveal.',
+    ],
+    achievement: [
+      'Archive marker secured! Do not skip the celebration scene; readers notice when the hero refuses to receive the win.',
+      'Achievement recorded. The story changed because you kept writing it with actual choices.',
+    ],
+  },
 };
 
 function hash(value: string) {
@@ -170,6 +184,7 @@ export function getMilestoneCelebration(event: ProgressionEvent) {
       'amara',
       'cassian',
       'saffron',
+      'quill',
     ] as CompanionId[]
   ).map((companionId) => {
     const pool = MILESTONE_LINES[companionId][kind];

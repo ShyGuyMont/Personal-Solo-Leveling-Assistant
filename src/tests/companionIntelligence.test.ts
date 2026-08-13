@@ -100,9 +100,9 @@ describe('Companion Soulprint intelligence', () => {
     expect(await response.json()).toMatchObject({ code: 'authentication-required' });
   });
 
-  it('gives all ten companions complete and distinct identity directions', () => {
+  it('gives all eleven companions complete and distinct identity directions', () => {
     expect(Object.keys(intelligence.companionProfiles)).toEqual(intelligence.companionIds);
-    expect(intelligence.companionIds).toHaveLength(10);
+    expect(intelligence.companionIds).toHaveLength(11);
 
     const performances = new Set<string>();
     for (const id of intelligence.companionIds) {
@@ -120,7 +120,7 @@ describe('Companion Soulprint intelligence', () => {
       }
       performances.add(profile.performance);
     }
-    expect(performances.size).toBe(10);
+    expect(performances.size).toBe(11);
     expect(intelligence.aiVoiceNames).toHaveLength(13);
     expect(intelligence.aiVoiceAccents.natural).toMatch(/without imposing/i);
   });

@@ -99,6 +99,7 @@ const POST_TRAINING_STATES: Record<CompanionId, string> = {
   amara: 'Disheveled · openly proud',
   cassian: 'Physically insolvent · floor-bound',
   saffron: 'Famished · threatening the recovery meal',
+  quill: 'Breathless · calling the final round a plot twist',
 };
 
 function formatClock(totalSeconds: number) {

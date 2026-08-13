@@ -46,7 +46,8 @@ export type CompanionId =
   | 'mira'
   | 'amara'
   | 'cassian'
-  | 'saffron';
+  | 'saffron'
+  | 'quill';
 export type CompanionMode = 'off' | 'quiet' | 'balanced' | 'talkative';
 export type AiLinkMode = 'offline' | 'online';
 export type AiVoiceName =
@@ -513,6 +514,44 @@ export interface CreatorProject {
   createdAt: string;
   updatedAt: string;
   publishedAt?: string;
+}
+
+export type ArcCanonSourceKind =
+  | 'character-dossier'
+  | 'world-lore'
+  | 'faction'
+  | 'location'
+  | 'timeline'
+  | 'plot'
+  | 'reference';
+
+export interface ArcCharacterRecord {
+  id: string;
+  name: string;
+  alias: string;
+  style: string;
+  faction: string;
+  overallClass: string;
+  startingClass: string;
+  endingClass: string;
+  completion: number;
+  schemaVersion: number;
+  sourceFileName?: string;
+  data: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ArcCanonSource {
+  id: string;
+  title: string;
+  kind: ArcCanonSourceKind;
+  sourceFileName?: string;
+  tags: string[];
+  characterNames: string[];
+  text: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export type SanctuaryMode = 'study' | 'stronghold';

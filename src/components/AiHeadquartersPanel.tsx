@@ -304,6 +304,7 @@ export function AiHeadquartersPanel() {
           challenges,
           systemDate,
           enabledCompanionIds: enabledCompanions.map((companion) => companion.id),
+          query: message,
         }),
       });
       void voiceLink.trackTextUsage(result).catch(() => undefined);

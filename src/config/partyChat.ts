@@ -94,10 +94,11 @@ export interface MoodDialogue {
   amara: string[];
   cassian: string[];
   saffron: string[];
+  quill: string[];
   'snow-close': string[];
 }
 
-const BASE_PARTY_DIALOGUE: Record<MoodId, Omit<MoodDialogue, 'mira' | 'cassian' | 'saffron'>> = {
+const BASE_PARTY_DIALOGUE: Record<MoodId, Omit<MoodDialogue, 'mira' | 'cassian' | 'saffron' | 'quill'>> = {
   energized: {
     snow: [
       'I can feel that energy from here. I am glad you brought it to us—let’s point it somewhere that matters.',
@@ -789,6 +790,19 @@ const MIRA_PARTY_DIALOGUE: Record<MoodId, string[]> = {
   ],
 };
 
+const QUILL_PARTY_DIALOGUE: Record<MoodId, string[]> = {
+  energized: ['Excellent! Point that energy at one unfinished character thread before it escapes into seventeen new ones.', 'Story-room signal is bright. Give me a mystery, a dossier, or the scene you cannot stop seeing.', 'This is excellent chapter energy. Choose the reveal you keep circling and let us find the record it needs.', 'Snow, clear the spoiler table. The Hunter just walked in looking like a plot decision is about to happen.'],
+  proud: ['You should be proud. This is the part Snow and I would underline before the next chapter tries to distract you.', 'Archive marker! Say what you did out loud so the record cannot be minimized later.', 'That win belongs in the timeline exactly as it happened—no shrinking it into a footnote afterward.', 'I know a character-growth beat when I see one. Stay here long enough to let it become part of the story.'],
+  good: ['Good is perfect story-room weather. Curious enough to explore, steady enough not to canonize the first wild idea.', 'The archive feels alive today. We can enjoy the world without forcing it to become a deadline.', 'A steady mind can hear the quiet questions. Which character has been waiting patiently for you to notice them?', 'Nothing is on fire. Wonderful. We can make one careful canon decision and actually enjoy making it.'],
+  okay: ['Okay is a valid place to write from. One familiar character, one honest question, no mythology overhaul required.', 'We can keep this small: open one record, recover one thread, leave the world a little clearer than we found it.', 'No legendary inspiration roll required. One paragraph of clean archive truth is enough movement for today.', 'Bring me the easiest dossier to love. We can visit the world without demanding a major reveal from it.'],
+  tired: ['Then no deep continuity excavation. Capture the idea, label it unconfirmed, and let tomorrow’s brain earn the red string.', 'Tired authors deserve safe notes. One sentence in the vault beats a brilliant idea trusted to memory.', 'We are doing archive triage: save the spark, name the character, close the file before the idea becomes homework.', 'Snow has confiscated my conspiracy board. Fair. Give us one spoiler and then choose rest on purpose.'],
+  stressed: ['Do not retcon under pressure. We file the loud thoughts as possibilities and wait for the archive to become readable again.', 'The world can wait. Save the spark, close the trial, and let Snow help us lower the volume before we decide what is true.', 'Stress is not an editor. It can submit notes, but it does not get final canon authority tonight.', 'Put every urgent idea in the unconfirmed tray. None of them disappear because we refused to decide while overwhelmed.'],
+  frustrated: ['Good—frustration found a story knot. We are not cutting it blindly; we are tracing where the thread actually starts.', 'Name the contradiction, the missing record, and the feeling you wanted the scene to land. One of those is usually the real problem.', 'If the scene will not move, something upstream may be false. Let us check the character desire before rewriting the whole world.', 'I can handle a broken plot. I cannot handle us pretending the break is mysterious when one honest question can expose it.'],
+  discouraged: ['The archive is larger than today’s silence. One character still matters, one thread still glows, and the author is still here.', 'Do not measure a world by the pages you did not write this week. Open the last thing that made you grin and start there.', 'A.R.C. has survived unfinished chapters before. Your return is already a new line in the record.', 'The spark is not gone; it is under pressure. Let us find the smallest piece of this world that still feels alive.'],
+  lonely: ['Snow and I are absolutely available for spoilers. Bring us the scene you wish somebody else already understood.', 'Stories are company too, but you do not have to hide inside one. Stay with the party while we visit the world together.', 'Tell us about the character nobody else knows properly yet. We will meet them with the excitement they deserve.', 'The archive has seats. Snow brought the calm; I brought approximately too many questions. You do not have to imagine alone tonight.'],
+  unsure: ['Uncertainty is story fuel if we label it correctly. Canon, inference, possibility—three shelves, no forced answer.', 'Give me the facts we know and the question that will not leave. We can admire the mystery without faking a solution.', 'Not knowing can be intentional mystery or missing documentation. The first step is deciding which one we are actually looking at.', 'We can test possibilities without adopting them. That is what the proposal shelf is for, and yes, it is my favorite shelf.'],
+};
+
 export const PARTY_DIALOGUE = Object.fromEntries(
   PARTY_MOODS.map(({ id }) => [
     id,
@@ -797,6 +811,7 @@ export const PARTY_DIALOGUE = Object.fromEntries(
       mira: MIRA_PARTY_DIALOGUE[id],
       cassian: CASSIAN_PARTY_DIALOGUE[id],
       saffron: SAFFRON_PARTY_DIALOGUE[id],
+      quill: QUILL_PARTY_DIALOGUE[id],
     },
   ]),
 ) as Record<MoodId, MoodDialogue>;

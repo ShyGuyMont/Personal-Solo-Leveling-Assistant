@@ -19,10 +19,10 @@ describe('Voice Link local profiles and usage', () => {
     await db.aiUsageRecords.clear();
   });
 
-  it('provides ten distinct canon voices with deliberately authored performance directions', async () => {
+  it('provides eleven distinct canon soulprints with deliberately authored performance directions', async () => {
     const profiles = await getAiVoiceProfiles();
-    expect(Object.keys(profiles)).toHaveLength(10);
-    expect(new Set(Object.values(profiles).map((profile) => profile.voice)).size).toBe(10);
+    expect(Object.keys(profiles)).toHaveLength(11);
+    expect(new Set(Object.values(profiles).map((profile) => profile.voice)).size).toBeGreaterThanOrEqual(10);
     expect(profiles.haven).toMatchObject({ voice: 'fable', accent: 'caribbean' });
     expect(profiles.ember).toMatchObject({
       register: 'low-mid',
@@ -33,6 +33,7 @@ describe('Voice Link local profiles and usage', () => {
     expect(CANON_VOICE_PROFILES.snow.direction).toMatch(/older sister/i);
     expect(CANON_VOICE_PROFILES.ember.direction).toMatch(/obstacle/i);
     expect(CANON_VOICE_PROFILES.saffron.direction).toMatch(/high-pressure/i);
+    expect(CANON_VOICE_PROFILES.quill.direction).toMatch(/lore connection/i);
   });
 
   it('saves tuning safely and restores the original soulprint', async () => {

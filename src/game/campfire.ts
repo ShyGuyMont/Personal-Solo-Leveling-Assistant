@@ -217,6 +217,22 @@ function saffronLines(metrics: CampfireMetrics) {
   ];
 }
 
+function quillLines(metrics: CampfireMetrics) {
+  const creatorWork = metrics.categoryCompleted.creator ?? 0;
+  if (creatorWork) {
+    return [
+      `${creatorWork} creator objective${creatorWork === 1 ? '' : 's'} entered the record this week. That is not “thinking about the story”—that is the story receiving actual pages.`,
+      `Archive report: ${creatorWork} creative completion${creatorWork === 1 ? '' : 's'}. Keep the thread that felt most alive and file the question it opened before next week gets loud.`,
+      `${creatorWork} times, an idea survived contact with action. Snow, I am calling that a successful chapter even if the Hunter refuses to name it dramatically.`,
+    ];
+  }
+  return [
+    'The creative archive was quiet this week. No guilt montage—open one character record, recover one unfinished thread, and let five minutes count as re-entry.',
+    'No creator objective reached the record. The world is still there; next week only needs one protected story-room appointment and one honest question.',
+    'A.R.C. did not vanish because the week got full. Save one spark early next cycle before memory tries to become the entire archive.',
+  ];
+}
+
 function closingLines(metrics: CampfireMetrics) {
   const focus = metrics.focusCategory
     ? CATEGORY_LABELS[metrics.focusCategory]
@@ -263,6 +279,7 @@ export function buildCampfireMessages(
     { companionId: 'amara', role: 'response', pool: amaraLines(metrics), slot: 'amara' },
     { companionId: 'cassian', role: 'response', pool: cassianLines(metrics), slot: 'cassian' },
     { companionId: 'saffron', role: 'response', pool: saffronLines(metrics), slot: 'saffron' },
+    { companionId: 'quill', role: 'response', pool: quillLines(metrics), slot: 'quill' },
     { companionId: 'snow', role: 'closing', pool: closingLines(metrics), slot: 'snow-close' },
   ];
   return entries.map((entry, order) => {

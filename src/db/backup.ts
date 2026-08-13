@@ -10,7 +10,7 @@ import type {
   Settings,
 } from '@/types/game';
 
-export const SAVE_VERSION = 24;
+export const SAVE_VERSION = 25;
 export const MAX_IMPORT_BYTES = 32 * 1024 * 1024;
 const MAX_SNAPSHOTS = 5;
 const FORBIDDEN_KEYS = new Set(['__proto__', 'prototype', 'constructor']);
@@ -166,6 +166,10 @@ function migrateData(
   if (version <= 19) data.creatorVideoInsights ??= [];
   if (version <= 22) data.dailyOperations ??= [];
   if (version <= 23) data.bodyDiagnostics ??= [];
+  if (version <= 24) {
+    data.arcCharacters ??= [];
+    data.arcCanonSources ??= [];
+  }
   data.dailyOperations = data.dailyOperations.map((row) => {
     if (!isObject(row) || !isObject(row.pendingProposal)) return row;
     const pendingProposal = row.pendingProposal;
@@ -266,6 +270,8 @@ function migrateData(
           : withCassian;
       const withMira =
         version <= 12 && !withSaffron.includes('mira') ? [...withSaffron, 'mira'] : withSaffron;
+      const withQuill =
+        version <= 24 && !withMira.includes('quill') ? [...withMira, 'quill'] : withMira;
       return {
         privacyScreenEnabled: false,
         sensitiveMissionAlias: 'Integrity Protocol',
@@ -286,7 +292,7 @@ function migrateData(
         aiUsageWarningUsd: 5,
         aiSoulprintNotes: {},
         ...row,
-        enabledCompanionIds: ['snow', ...withMira.filter((id) => id !== 'snow')],
+        enabledCompanionIds: ['snow', ...withQuill.filter((id) => id !== 'snow')],
       };
     }
     return row;
@@ -349,6 +355,7 @@ function validateData(data: Record<string, unknown[]>) {
     'amara',
     'cassian',
     'saffron',
+    'quill',
   ]);
   if (!isObject(settings.aiSoulprintNotes)) {
     throw new Error('The Soulprint Studio setting is not valid.');
@@ -692,6 +699,76 @@ function validateData(data: Record<string, unknown[]>) {
       Object.keys(row).some((key) => /(?:image|photo|dataurl|base64)/i.test(key))
     ) {
       throw new Error('A Training Hall Body Diagnostic contains an impossible value.');
+    }
+  }
+
+  const arcSourceKinds = new Set([
+    'character-dossier',
+    'world-lore',
+    'faction',
+    'location',
+    'timeline',
+    'plot',
+    'reference',
+  ]);
+  for (const row of data.arcCharacters) {
+    if (
+      !isObject(row) ||
+      typeof row.name !== 'string' ||
+      !row.name.trim() ||
+      row.name.length > 200 ||
+      typeof row.alias !== 'string' ||
+      row.alias.length > 240 ||
+      typeof row.style !== 'string' ||
+      row.style.length > 100 ||
+      typeof row.faction !== 'string' ||
+      row.faction.length > 240 ||
+      typeof row.overallClass !== 'string' ||
+      row.overallClass.length > 80 ||
+      typeof row.startingClass !== 'string' ||
+      row.startingClass.length > 80 ||
+      typeof row.endingClass !== 'string' ||
+      row.endingClass.length > 80 ||
+      !Number.isFinite(row.completion) ||
+      Number(row.completion) < 0 ||
+      Number(row.completion) > 100 ||
+      !Number.isInteger(row.schemaVersion) ||
+      Number(row.schemaVersion) < 1 ||
+      Number(row.schemaVersion) > 20 ||
+      !isObject(row.data) ||
+      JSON.stringify(row.data).length > 2_500_000 ||
+      typeof row.createdAt !== 'string' ||
+      !Number.isFinite(Date.parse(row.createdAt)) ||
+      typeof row.updatedAt !== 'string' ||
+      !Number.isFinite(Date.parse(row.updatedAt))
+    ) {
+      throw new Error('An A.R.C. character dossier contains an impossible value.');
+    }
+  }
+  for (const row of data.arcCanonSources) {
+    if (!isObject(row)) {
+      throw new Error('An A.R.C. canon source contains an impossible value.');
+    }
+    const tags = Array.isArray(row.tags) ? row.tags : [];
+    const characterNames = Array.isArray(row.characterNames) ? row.characterNames : [];
+    if (
+      typeof row.title !== 'string' ||
+      !row.title.trim() ||
+      row.title.length > 240 ||
+      !arcSourceKinds.has(String(row.kind)) ||
+      tags.length > 80 ||
+      tags.some((tag: unknown) => typeof tag !== 'string' || tag.length > 100) ||
+      characterNames.length > 120 ||
+      characterNames.some((name: unknown) => typeof name !== 'string' || name.length > 200) ||
+      typeof row.text !== 'string' ||
+      !row.text.trim() ||
+      row.text.length > 2_500_000 ||
+      typeof row.createdAt !== 'string' ||
+      !Number.isFinite(Date.parse(row.createdAt)) ||
+      typeof row.updatedAt !== 'string' ||
+      !Number.isFinite(Date.parse(row.updatedAt))
+    ) {
+      throw new Error('An A.R.C. canon source contains an impossible value.');
     }
   }
 
@@ -1157,6 +1234,7 @@ function validateData(data: Record<string, unknown[]>) {
     'amara',
     'cassian',
     'saffron',
+    'quill',
   ]);
   for (const row of data.sanctuarySessions) {
     if (!isObject(row)) {

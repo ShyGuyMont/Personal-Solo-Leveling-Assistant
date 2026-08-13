@@ -54,6 +54,7 @@ export function createDefaultSettings(): Settings {
       'amara',
       'cassian',
       'saffron',
+      'quill',
     ],
     notificationsEnabled: false,
     advancedBalanceUnlocked: false,

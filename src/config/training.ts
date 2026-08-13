@@ -921,6 +921,12 @@ export const TRAINING_DEBRIEF_LINES: Record<CompanionId, string[]> = {
     'The party gave everything. Your next orders are water, food, and rest. Yes, those are direct orders.',
     'I am exhausted, furious at the last set, and very proud of you. The Kitchen will translate all three feelings into dinner.',
   ],
+  quill: [
+    'That final round had setup, escalation, betrayal, and a deeply satisfying ending. I would analyze it more if my lungs were accepting notes.',
+    'The training arc is complete. Rook says it was form under pressure. I say it was character development with mountain climbers.',
+    'I logged the session as canon. Snow has forbidden me from naming the cooldown “Volume Two.” For now.',
+    'You kept going after the scene stopped looking heroic. That is usually where the real story lives.',
+  ],
 };
 
 export function getTrainingCircuit(id: TrainingCircuitId) {
