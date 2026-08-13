@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Create, save, and print detailed A.R.C. character archive profiles."
+    />
+    <meta name="theme-color" content="#181713" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="A.R.C. Character Archives" />
+    <meta
+      property="og:description"
+      content="Build the person behind the power with a detailed, printable character dossier."
+    />
+    <meta property="og:image" content="og.png" />
+    <meta
+      property="og:image:alt"
+      content="A.R.C. Character Archives — Character Dossier"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="A.R.C. Character Archives" />
+    <meta
+      name="twitter:description"
+      content="Build the person behind the power with a detailed, printable character dossier."
+    />
+    <meta name="twitter:image" content="og.png" />
+    <title>A.R.C. Character Archives</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app" id="app" data-mobile-view="edit">
+      <header class="topbar">
+        <a class="brand" href="#workspace" aria-label="A.R.C. Character Archives home">
+          <span class="brand-mark" aria-hidden="true">A</span>
+          <span class="brand-copy">
+            <strong>A.R.C.</strong>
+            <small>Character Archives</small>
+          </span>
+        </a>
+
+        <div class="document-status" aria-live="polite">
+          <span class="status-light"></span>
+          <span id="statusText">Unsaved working file</span>
+        </div>
+
+        <div class="actions" aria-label="Archive actions">
+          <button
+            id="artsCodexBtn"
+            class="button button-secondary"
+            type="button"
+            aria-haspopup="dialog"
+            aria-controls="artsCodex"
+          >
+            <span aria-hidden="true">✦</span>
+            Arts Codex
+          </button>
+          <label class="button button-secondary" for="jsonFile">
+            <span aria-hidden="true">↥</span>
+            Load JSON
+          </label>
+          <input id="jsonFile" type="file" accept=".json,application/json" hidden />
+          <button id="saveJsonBtn" class="button button-secondary" type="button">
+            <span aria-hidden="true">↓</span>
+            Save JSON
+          </button>
+          <button id="printBtn" class="button button-primary" type="button">
+            Export PDF
+            <span aria-hidden="true">↗</span>
+          </button>
+        </div>
+      </header>
+
+      <div class="mobile-view-switcher" aria-label="Workspace view">
+        <button type="button" data-view="edit" class="is-active">Build profile</button>
+        <button type="button" data-view="preview">View archive</button>
+      </div>
+
+      <main class="workspace" id="workspace">
+        <aside class="archive-nav" aria-label="Profile sections">
+          <div class="archive-intro">
+            <span class="eyebrow">A.R.C. Records Division</span>
+            <h1>Character<br />Dossier</h1>
+            <p>
+              Build a complete record of who they are, what shaped them, and what
+              they can become.
+            </p>
+          </div>
+
+          <nav id="sectionNav" class="section-nav"></nav>
+
+          <div class="completion">
+            <div class="completion-heading">
+              <span>Archive completion</span>
+              <strong id="completionValue">0%</strong>
+            </div>
+            <div
+              class="completion-track"
+              role="progressbar"
+              aria-label="Profile completion"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow="0"
+              id="completionTrack"
+            >
+              <span id="completionBar"></span>
+            </div>
+            <small>Progress is measured from the details you choose to complete.</small>
+          </div>
+        </aside>
+
+        <section class="builder-panel" aria-label="Profile builder">
+          <div class="builder-header">
+            <div>
+              <span class="eyebrow" id="sectionEyebrow">File section 01</span>
+              <h2 id="sectionTitle">The Basics</h2>
+              <p id="sectionDescription"></p>
+            </div>
+            <span class="section-count" id="sectionCount">01 / 05</span>
+          </div>
+
+          <div id="formRoot" class="form-root"></div>
+
+          <footer class="builder-footer">
+            <button id="previousSectionBtn" class="button button-secondary" type="button">
+              ← Previous
+            </button>
+            <button id="nextSectionBtn" class="button button-primary" type="button">
+              Next section →
+            </button>
+          </footer>
+        </section>
+
+        <section class="preview-panel" aria-label="Character sheet preview">
+          <div class="preview-toolbar">
+            <div>
+              <span class="eyebrow">Live archive document</span>
+              <strong id="archiveCode">ARC–UNFILED</strong>
+            </div>
+            <span class="live-badge"><i></i> Live preview</span>
+          </div>
+          <article id="previewRoot" class="sheet"></article>
+        </section>
+      </main>
+
+      <section
+        id="artsCodex"
+        class="arts-codex"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="artsCodexTitle"
+        hidden
+      >
+        <div class="codex-shell">
+          <header class="codex-header">
+            <div class="codex-title-block">
+              <span class="eyebrow">A.R.C. Power Records</span>
+              <h2 id="artsCodexTitle">Arts Codex</h2>
+              <p>Every recorded Art, from field-ready techniques to Forbidden catastrophes.</p>
+            </div>
+            <button
+              id="closeArtsCodexBtn"
+              class="codex-close"
+              type="button"
+              aria-label="Close Arts Codex"
+            >
+              <span aria-hidden="true">×</span>
+              Close
+            </button>
+          </header>
+
+          <div class="codex-body">
+            <aside class="codex-sidebar" aria-label="Arts Codex filters">
+              <div class="codex-rule">
+                <span class="eyebrow">Core archive rule</span>
+                <strong>One Art. One Style.</strong>
+                <p>
+                  Arts never mix Styles. Every entry clearly favors Lightning,
+                  Fire, Water, Wind, or Earth.
+                </p>
+              </div>
+
+              <label class="codex-search" for="codexSearchInput">
+                <span>Search the archive</span>
+                <input
+                  id="codexSearchInput"
+                  type="search"
+                  autocomplete="off"
+                  placeholder="Name, effect, use, limitation…"
+                />
+                <button id="clearCodexSearchBtn" type="button" hidden>Clear search</button>
+              </label>
+
+              <fieldset class="codex-filter-group">
+                <legend>Style</legend>
+                <div id="codexStyleFilters" class="codex-filter-list"></div>
+              </fieldset>
+
+              <fieldset class="codex-filter-group">
+                <legend>Classification</legend>
+                <div id="codexTierFilters" class="codex-filter-list"></div>
+              </fieldset>
+            </aside>
+
+            <main class="codex-main">
+              <section id="codexStyleGuide" class="codex-style-guide"></section>
+              <div class="codex-results-heading">
+                <div>
+                  <span class="eyebrow">Matching records</span>
+                  <h3 id="codexResultsTitle">All Arts</h3>
+                </div>
+                <strong id="codexResultsCount" aria-live="polite"></strong>
+              </div>
+              <div id="codexResults" class="codex-results"></div>
+              <p id="codexEmpty" class="codex-empty" hidden>
+                No Arts match those filters. Try a different Style, classification,
+                or search term.
+              </p>
+            </main>
+          </div>
+        </div>
+      </section>
+
+      <dialog id="artDetailDialog" class="art-detail-dialog">
+        <article class="art-detail-shell">
+          <header class="art-detail-header">
+            <div>
+              <div id="artDetailBadges" class="art-detail-badges"></div>
+              <h2 id="artDetailTitle">Art details</h2>
+            </div>
+            <button
+              id="closeArtDetailBtn"
+              class="art-detail-close"
+              type="button"
+              aria-label="Close Art details"
+            >
+              ×
+            </button>
+          </header>
+          <div id="artDetailContent" class="art-detail-content"></div>
+          <footer class="art-detail-footer">
+            <p id="artDetailSelectionNote"></p>
+            <button id="toggleArtSelectionBtn" class="button button-primary" type="button">
+              Add to character
+            </button>
+          </footer>
+        </article>
+      </dialog>
+
+      <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+    </div>
+
+    <script src="arts-descriptions.js"></script>
+    <script src="arts-details.js"></script>
+    <script src="catalogs.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

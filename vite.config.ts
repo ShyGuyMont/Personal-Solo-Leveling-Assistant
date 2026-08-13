@@ -44,6 +44,7 @@ export default defineConfig({
       workbox: {
         cleanupOutdatedCaches: true,
         globPatterns: ['**/*.{js,css,html,ico,jpg,jpeg,png,webp,woff2,ttf}'],
+        globIgnores: ['arc-archives/**'],
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
         navigateFallback: 'index.html',
         navigateFallbackDenylist: [/^\/api\//],

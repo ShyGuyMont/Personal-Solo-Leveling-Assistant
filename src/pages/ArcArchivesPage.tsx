@@ -17,11 +17,15 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { getCompanion, getCompanionImage } from '@/config/companions';
+import { createArcForgeDocument } from '@/arcEngine/document';
 import { db } from '@/db/database';
 import {
   downloadArcDossier,
+  downloadArcKnowledgePack,
   importArcCanonFile,
   importArcDossierFile,
+  importArcKnowledgePackFile,
+  importArcWordFile,
   saveArcCanonSource,
   saveArcCharacter,
   scanArcContinuity,
@@ -53,6 +57,7 @@ export function ArcArchivesPage() {
   const [sourceTags, setSourceTags] = useState('');
   const [sourceCharacters, setSourceCharacters] = useState('');
   const [sourceText, setSourceText] = useState('');
+  const forgeDocument = useMemo(createArcForgeDocument, []);
 
   async function refresh() {
     const [nextCharacters, nextSources] = await Promise.all([
@@ -168,23 +173,33 @@ export function ArcArchivesPage() {
     let imported = 0;
     for (const file of files) {
       try {
-        if (file.name.toLowerCase().endsWith('.json')) {
+        if (file.name.toLowerCase().endsWith('.docx')) {
+          await importArcWordFile(file, 'reference');
+          imported += 1;
+        } else if (file.name.toLowerCase().endsWith('.json')) {
           try {
             await importArcDossierFile(file);
+            imported += 1;
           } catch {
-            await importArcCanonFile(file, 'reference');
+            try {
+              const records = await importArcKnowledgePackFile(file);
+              imported += records.length;
+            } catch {
+              await importArcCanonFile(file, 'reference');
+              imported += 1;
+            }
           }
         } else {
           await importArcCanonFile(file, 'reference');
+          imported += 1;
         }
-        imported += 1;
       } catch (error) {
         setNotice(error instanceof Error ? error.message : `${file.name} could not be imported.`);
         return;
       }
     }
     await refresh();
-    setNotice(`${imported} archive source${imported === 1 ? '' : 's'} indexed locally.`);
+    setNotice(`${imported} archive record${imported === 1 ? '' : 's'} indexed locally.`);
   }
 
   async function addManualSource() {
@@ -356,7 +371,7 @@ export function ArcArchivesPage() {
             <iframe
               ref={frameRef}
               title="A.R.C. Character Dossier Forge"
-              src={`${import.meta.env.BASE_URL}arc-archives/index.html?embedded=1`}
+              srcDoc={forgeDocument}
               onLoad={synchronizePendingDossier}
             />
           </div>
@@ -369,12 +384,19 @@ export function ArcArchivesPage() {
             <div>
               <span className="section-kicker">LOCAL RETRIEVAL · SOURCE-AWARE</span>
               <h2>Canon Vault</h2>
-              <p>Quill retrieves only the records relevant to your question and labels established canon, inference, and new ideas separately.</p>
+              <p>Import Word, Text, Markdown, or JSON records. Quill retrieves only relevant sources and labels established canon, inference, and new ideas separately.</p>
             </div>
-            <label className="button">
-              <FilePlus2 size={17} /> Import text records
-              <input type="file" accept=".txt,.md,.json,text/plain,text/markdown,application/json" multiple hidden onChange={importCanon} />
-            </label>
+            <div className="arc-forge-actions">
+              {sources.length > 0 && (
+                <button className="button button--ghost" onClick={() => downloadArcKnowledgePack(sources)}>
+                  <Download size={17} /> Export Knowledge Pack
+                </button>
+              )}
+              <label className="button">
+                <FilePlus2 size={17} /> Import lore files
+                <input type="file" accept=".docx,.txt,.md,.json,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,text/markdown,application/json" multiple hidden onChange={importCanon} />
+              </label>
+            </div>
           </header>
           <div className="arc-vault-layout">
             <div className="arc-source-form">
@@ -396,7 +418,7 @@ export function ArcArchivesPage() {
                   <small>{[...source.tags, ...source.characterNames].slice(0, 8).join(' · ') || 'No index tags yet'}</small>
                 </article>
               ))}
-              {!filteredSources.length && <div className="arc-empty arc-empty--compact"><BookOpen size={28} /><h3>No canon sources filed yet.</h3><p>Text, Markdown, and JSON are supported in this first secure intake.</p></div>}
+              {!filteredSources.length && <div className="arc-empty arc-empty--compact"><BookOpen size={28} /><h3>No canon sources filed yet.</h3><p>Modern Word (.docx), Text, Markdown, JSON, and single-file Quill Knowledge Packs are supported.</p></div>}
             </div>
           </div>
         </section>

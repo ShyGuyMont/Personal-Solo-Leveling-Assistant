@@ -6,6 +6,10 @@ import type {
 } from '@/types/game';
 
 const MAX_ARC_FILE_BYTES = 2_500_000;
+const MAX_ARC_WORD_FILE_BYTES = 12 * 1024 * 1024;
+const MAX_ARC_KNOWLEDGE_PACK_BYTES = 18 * 1024 * 1024;
+const MAX_ARC_KNOWLEDGE_PACK_TEXT = 12_000_000;
+const MAX_ARC_KNOWLEDGE_PACK_SOURCES = 300;
 const FORBIDDEN_KEYS = new Set(['__proto__', 'prototype', 'constructor']);
 
 function isObject(value: unknown): value is Record<string, unknown> {
@@ -155,6 +159,133 @@ export async function importArcCanonFile(file: File, kind: ArcCanonSourceKind = 
     text,
     sourceFileName: file.name,
   });
+}
+
+function readFileAsArrayBuffer(file: File) {
+  if (typeof file.arrayBuffer === 'function') return file.arrayBuffer();
+  return new Promise<ArrayBuffer>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error(`${file.name} could not be read.`));
+    reader.onload = () => {
+      if (reader.result instanceof ArrayBuffer) resolve(reader.result);
+      else reject(new Error(`${file.name} could not be read as a Word document.`));
+    };
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+export async function importArcWordFile(file: File, kind: ArcCanonSourceKind = 'reference') {
+  if (!file.name.toLowerCase().endsWith('.docx')) {
+    throw new Error('Only modern .docx Word files are supported. Legacy .doc files must be saved as .docx first.');
+  }
+  if (file.size > MAX_ARC_WORD_FILE_BYTES) {
+    throw new Error(`${file.name} is larger than the 12 MB Word-document limit.`);
+  }
+  const mammoth = await import('mammoth');
+  const result = await mammoth.extractRawText({ arrayBuffer: await readFileAsArrayBuffer(file) });
+  const text = result.value
+    .replace(/\r\n?/g, '\n')
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+  if (!text) throw new Error(`${file.name} does not contain readable Word text.`);
+  return saveArcCanonSource({
+    title: file.name.replace(/\.docx$/i, ''),
+    kind,
+    text,
+    tags: ['Word import'],
+    sourceFileName: file.name,
+  });
+}
+
+function isArcCanonSourceKind(value: unknown): value is ArcCanonSourceKind {
+  return ['world-lore', 'faction', 'location', 'timeline', 'plot', 'reference'].includes(
+    String(value),
+  );
+}
+
+export async function importArcKnowledgePackFile(file: File) {
+  if (file.size > MAX_ARC_KNOWLEDGE_PACK_BYTES) {
+    throw new Error(`${file.name} is larger than the 18 MB Quill Knowledge Pack limit.`);
+  }
+  const payload = safeParse(await file.text());
+  if (!isObject(payload) || payload.schema !== 'ARC_Knowledge_Pack' || payload.version !== 1) {
+    throw new Error('That JSON is not a Quill Knowledge Pack.');
+  }
+  if (!Array.isArray(payload.sources) || !payload.sources.length) {
+    throw new Error('That Quill Knowledge Pack contains no canon sources.');
+  }
+  if (payload.sources.length > MAX_ARC_KNOWLEDGE_PACK_SOURCES) {
+    throw new Error(`A Quill Knowledge Pack can contain at most ${MAX_ARC_KNOWLEDGE_PACK_SOURCES} sources.`);
+  }
+
+  const inputs = payload.sources.map((value, index) => {
+    if (!isObject(value)) throw new Error(`Knowledge Pack source ${index + 1} is not valid.`);
+    const title = cleanText(value.title, 240);
+    const text = cleanText(value.text, MAX_ARC_FILE_BYTES);
+    if (!title || !text) {
+      throw new Error(`Knowledge Pack source ${index + 1} needs both a title and readable text.`);
+    }
+    const kind = isArcCanonSourceKind(value.kind) ? value.kind : 'reference';
+    return {
+      title,
+      kind,
+      text,
+      tags: Array.isArray(value.tags)
+        ? value.tags.map((tag) => cleanText(tag, 120)).filter(Boolean)
+        : [],
+      characterNames: Array.isArray(value.characterNames)
+        ? value.characterNames.map((name) => cleanText(name, 160)).filter(Boolean)
+        : [],
+      sourceFileName: cleanText(value.sourceFileName, 260) || file.name,
+    };
+  });
+  const totalText = inputs.reduce((total, input) => total + input.text.length, 0);
+  if (totalText > MAX_ARC_KNOWLEDGE_PACK_TEXT) {
+    throw new Error('That Quill Knowledge Pack contains more than 12 million characters of lore.');
+  }
+
+  const now = new Date().toISOString();
+  const ids = inputs.map((input) => `arc-source-${slug(input.title) || crypto.randomUUID()}`);
+  const existing = await db.arcCanonSources.bulkGet(ids);
+  const records: ArcCanonSource[] = inputs.map((input, index) => ({
+    id: ids[index],
+    title: input.title,
+    kind: input.kind,
+    sourceFileName: input.sourceFileName,
+    tags: [...new Set(input.tags)].slice(0, 80),
+    characterNames: [...new Set(input.characterNames)].slice(0, 120),
+    text: input.text,
+    createdAt: existing[index]?.createdAt ?? now,
+    updatedAt: now,
+  }));
+  await db.arcCanonSources.bulkPut(records);
+  window.dispatchEvent(new CustomEvent('system:arc-archives-changed'));
+  return records;
+}
+
+export function downloadArcKnowledgePack(sources: ArcCanonSource[]) {
+  const payload = {
+    schema: 'ARC_Knowledge_Pack',
+    version: 1,
+    createdAt: new Date().toISOString(),
+    sources: sources.map((source) => ({
+      title: source.title,
+      kind: source.kind,
+      tags: source.tags,
+      characterNames: source.characterNames,
+      text: source.text,
+      sourceFileName: source.sourceFileName,
+    })),
+  };
+  const url = URL.createObjectURL(
+    new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' }),
+  );
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'quill-knowledge-pack.json';
+  link.click();
+  window.setTimeout(() => URL.revokeObjectURL(url), 0);
 }
 
 export function downloadArcDossier(record: ArcCharacterRecord) {

@@ -14,9 +14,10 @@ export const RELEASE_SECTIONS: ReleaseSection[] = [
     detail:
       'The complete A.R.C. character system joins The System as a private creative realm, while Quill brings source-grounded canon recall, continuity counsel, and unapologetic story-room energy to the party.',
     points: [
-      'The original five-section Character Archives, printable profile, 0–1000 Graced stat engine, Starting and Ending Story Classes, transcendence rules, and all 152 Arts now run inside the linked Dossier Forge.',
+      'The original five-section Character Archives, printable profile, 0–1000 Graced stat engine, Starting and Ending Story Classes, transcendence rules, and all 152 Arts now run inside the compiled Dossier Forge without depending on nested host routes.',
       'Imported v4 and legacy JSON dossiers enter a searchable on-device Character Library; saving in the Forge synchronizes the record, and an existing character name updates instead of silently creating duplicates.',
-      'The Canon Vault accepts Text, Markdown, JSON, and pasted source records with explicit types, tags, and character references, while the Continuity Scanner flags gaps and collisions without rewriting canon.',
+      'The Canon Vault accepts modern Word (.docx), Text, Markdown, JSON, and pasted source records with explicit types, tags, and character references, while the Continuity Scanner flags gaps and collisions without rewriting canon.',
+      'A portable Quill Knowledge Pack can carry up to 300 organized lore sources in one JSON file, making laptop-to-phone transfer possible without replacing missions, progression, settings, or any unrelated campaign data.',
       'Quill, The Storyspark, becomes the eleventh companion with a complete Soulprint, Quick Link and Voice Link access, support dialogue, party chemistry, progression reactions, Campfires, Councils, and milestone celebrations.',
       'A.R.C. retrieval is topic-gated and source-aware: only Quill—or Snow and the Party during an explicit A.R.C. conversation—receives compact relevant records, with established canon separated from inference and new ideas.',
       'Archive Shield format 25 validates and preserves Character Library and Canon Vault records alongside the full campaign, while imported lore remains private on this device until the Hunter intentionally asks for online counsel.',

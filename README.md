@@ -50,13 +50,14 @@ available through the embedded Dossier Forge. Saving JSON in the Forge also sync
 character into a searchable on-device Character Library; existing names update instead of creating
 silent duplicate records.
 
-The new Canon Vault accepts local Text, Markdown, JSON, and pasted source records with types, tags,
+The new Canon Vault accepts local Word (.docx), Text, Markdown, JSON, and pasted source records with types, tags,
 and character references. Quill retrieves only the records relevant to the current question, names
 the local dossier or canon source behind established facts, and separates confirmed canon from
 inference and new ideas. A non-destructive Continuity Scanner flags structural gaps, duplicate
 identities, and canon records that reference characters without dossiers. It never rewrites A.R.C.
 automatically. Imported dossiers and canon sources stay in IndexedDB and are included in Archive
-Shield format 25.
+Shield format 25. A Quill Knowledge Pack can move up to 300 organized lore sources between devices
+as one JSON file without replacing unrelated campaign progress.
 
 **Quill, The Storyspark** is the eleventh companion: a hyperactive Filipino lore specialist for
 A.R.C. canon, character dossiers, Arts, plot architecture, continuity, and worldbuilding. He is

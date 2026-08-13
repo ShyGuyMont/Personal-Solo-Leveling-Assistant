@@ -1,11 +1,20 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { db } from '@/db/database';
 import {
   buildArcKnowledgeContext,
+  importArcKnowledgePackFile,
+  importArcWordFile,
   saveArcCanonSource,
   saveArcCharacter,
   scanArcContinuity,
 } from '@/game/arcArchives';
+
+vi.mock('mammoth', () => ({
+  extractRawText: vi.fn(async () => ({
+    value: 'THE RADIANT BRIGADE\n\nLaz inherits Nature Flame through the Brigade line.\n',
+    messages: [],
+  })),
+}));
 
 function dossier(name: string, overrides: Record<string, unknown> = {}) {
   return {
@@ -88,5 +97,56 @@ describe('A.R.C. Archives', () => {
 
     expect(findings.some((finding) => finding.title.includes('open dossier fields'))).toBe(true);
     expect(findings.some((finding) => finding.detail.includes('Lucius'))).toBe(true);
+  });
+
+  it('extracts a modern Word document into a text-only canon source', async () => {
+    const record = await importArcWordFile(
+      new File(['word-package'], 'Radiant Brigade.docx', {
+        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      }),
+      'faction',
+    );
+
+    expect(record.title).toBe('Radiant Brigade');
+    expect(record.kind).toBe('faction');
+    expect(record.tags).toContain('Word import');
+    expect(record.text).toContain('Laz inherits Nature Flame');
+    expect(JSON.stringify(record)).not.toContain('word-package');
+  });
+
+  it('imports a Quill Knowledge Pack as individually searchable canon sources', async () => {
+    const payload = JSON.stringify({
+      schema: 'ARC_Knowledge_Pack',
+      version: 1,
+      sources: [
+        {
+          title: 'Realm Springs',
+          kind: 'world-lore',
+          tags: ['Nature Realm'],
+          characterNames: [],
+          text: 'Realm Springs connect Earth to the five elemental subrealms.',
+          sourceFileName: 'world.docx',
+        },
+        {
+          title: 'Brigade Command',
+          kind: 'faction',
+          tags: ['Brigade'],
+          characterNames: ['Leonidas'],
+          text: 'Leonidas serves as Grand Commander for most of the story.',
+          sourceFileName: 'brigade.docx',
+        },
+      ],
+    });
+    const file = new File([payload], 'quill-knowledge-pack.json', {
+      type: 'application/json',
+    });
+    Object.defineProperty(file, 'text', { value: async () => payload });
+
+    const records = await importArcKnowledgePackFile(file);
+    const context = await buildArcKnowledgeContext('Who is the Brigade Grand Commander?');
+
+    expect(records).toHaveLength(2);
+    expect(await db.arcCanonSources.count()).toBe(2);
+    expect(context.relevantCanonSources[0]?.source).toBe('Canon source: Brigade Command');
   });
 });
