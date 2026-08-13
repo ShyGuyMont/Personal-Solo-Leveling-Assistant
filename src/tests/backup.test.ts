@@ -445,9 +445,26 @@ describe('save validation and recovery', () => {
       createdAt: now,
       updatedAt: now,
     });
+    await db.calendarEvents.put({
+      id: 'calendar:backup',
+      title: 'Protect the training block',
+      description: 'Portable Calendar Command verification.',
+      category: 'training',
+      startAt: '2026-08-15T22:00:00.000Z',
+      endAt: '2026-08-15T23:00:00.000Z',
+      allDay: false,
+      recurrence: 'weekly',
+      recurrenceInterval: 1,
+      recurrenceEndsOn: '2026-09-15',
+      location: 'Training Hall',
+      source: 'kairo',
+      status: 'scheduled',
+      createdAt: now,
+      updatedAt: now,
+    });
 
     const save = await createSaveFile();
-    expect(save.version).toBe(26);
+    expect(save.version).toBe(27);
     for (const table of [
       'dailyBriefings',
       'dailyOperations',
@@ -466,6 +483,7 @@ describe('save validation and recovery', () => {
       'aiUsageRecords',
       'arcCharacters',
       'arcCanonSources',
+      'calendarEvents',
     ]) {
       expect(save.data[table]).toHaveLength(1);
     }
@@ -491,6 +509,7 @@ describe('save validation and recovery', () => {
         db.aiUsageRecords,
         db.arcCharacters,
         db.arcCanonSources,
+        db.calendarEvents,
       ],
       async () => {
         await db.dailyBriefings.clear();
@@ -510,6 +529,7 @@ describe('save validation and recovery', () => {
         await db.aiUsageRecords.clear();
         await db.arcCharacters.clear();
         await db.arcCanonSources.clear();
+        await db.calendarEvents.clear();
       },
     );
     await commitPreparedImport(prepared);
@@ -544,6 +564,7 @@ describe('save validation and recovery', () => {
     expect((await db.arcCanonSources.get('arc-source-nature-flame'))?.characterNames).toEqual([
       'Laz',
     ]);
+    expect((await db.calendarEvents.get('calendar:backup'))?.source).toBe('kairo');
   });
 
   it('migrates a Version 2.1 save to Version 4.0 without losing the existing party', async () => {
@@ -565,7 +586,7 @@ describe('save validation and recovery', () => {
     save.checksum = await digest(save.data);
 
     const prepared = await prepareSaveImport(asFile(save));
-    expect(prepared.save.version).toBe(26);
+    expect(prepared.save.version).toBe(27);
     expect(prepared.save.data.dailyBriefings).toEqual([]);
     expect(prepared.save.data.dailyOperations).toEqual([]);
     const migrated = prepared.save.data.settings[0] as Record<string, unknown>;
@@ -574,6 +595,7 @@ describe('save validation and recovery', () => {
     expect(migrated.enabledCompanionIds).toContain('saffron');
     expect(migrated.enabledCompanionIds).toContain('mira');
     expect(migrated.enabledCompanionIds).toContain('quill');
+    expect(migrated.enabledCompanionIds).toContain('kairo');
     expect(migrated.dailyBriefingEnabled).toBe(true);
     expect(migrated.aiLinkMode).toBe('offline');
     expect(migrated.aiDataSharingAcknowledged).toBe(false);
@@ -592,8 +614,11 @@ describe('save validation and recovery', () => {
     expect(prepared.save.data.kitchenSessions).toEqual([]);
     expect(prepared.save.data.aiConversations).toEqual([]);
     expect(prepared.save.data.aiMemories).toEqual([]);
-    expect(prepared.save.data.aiVoiceProfiles).toEqual([]);
+    expect(prepared.save.data.aiVoiceProfiles).toContainEqual(
+      expect.objectContaining({ id: 'kairo' }),
+    );
     expect(prepared.save.data.aiUsageRecords).toEqual([]);
+    expect(prepared.save.data.calendarEvents).toEqual([]);
   });
 
   it('rejects malformed AI Headquarters messages even when the checksum matches', async () => {

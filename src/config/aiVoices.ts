@@ -427,6 +427,31 @@ export const CANON_VOICE_PROFILES: Record<CompanionId, CanonVoiceProfile> = {
     audition:
       'Wait—do not answer yet. If that scar came before the vow, the entire rivalry changes, and Snow is going to lose her mind when she sees why.',
   },
+  kairo: {
+    id: 'kairo',
+    voice: 'cedar',
+    accent: 'natural',
+    delivery: 'conversational',
+    cadence: 'measured',
+    texture: 'smooth',
+    register: 'low-mid',
+    resonance: 'balanced',
+    performanceTake: 'grounded',
+    pace: 1.08,
+    warmth: 3,
+    energy: 2,
+    expressiveness: 3,
+    naturalism: 5,
+    pauseDiscipline: 5,
+    intonation: 3,
+    articulation: 5,
+    emotionalRange: 3,
+    updatedAt: CREATED_AT,
+    direction:
+      'A calm, clever schedule keeper speaking beside Snow: warm low-mid register, effortless precision, subtle dry humor, and humane authority. Exact without sounding robotic, corporate, servile, hurried, or obsessed with productivity.',
+    audition:
+      'You have two commitments trying to occupy the same hour. I can protect either one, but time has declined your request to become fictional. Which promise holds?',
+  },
 };
 
 export function cloneCanonVoiceProfile(companionId: CompanionId): AiVoiceProfile {

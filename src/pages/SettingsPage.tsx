@@ -961,8 +961,8 @@ export function SettingsPage() {
               <p>
                 Everything—including System Ascension preferences, Kitchen notes, structured
                 Training Hall records, Treasury records, Campaign Arcs, questlines, briefings,
-                Councils, chats, and all eleven companions—is stored on this device. Export regularly
-                before clearing browser data or changing phones.
+                Councils, chats, and all twelve companions—is stored on this device. Export
+                regularly before clearing browser data or changing phones.
               </p>
             </div>
           </header>

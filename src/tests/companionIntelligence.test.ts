@@ -112,9 +112,9 @@ describe('Companion Soulprint intelligence', () => {
     expect(await response.json()).toMatchObject({ code: 'authentication-required' });
   });
 
-  it('gives all eleven companions complete and distinct identity directions', () => {
+  it('gives all twelve companions complete and distinct identity directions', () => {
     expect(Object.keys(intelligence.companionProfiles)).toEqual(intelligence.companionIds);
-    expect(intelligence.companionIds).toHaveLength(11);
+    expect(intelligence.companionIds).toHaveLength(12);
 
     const performances = new Set<string>();
     for (const id of intelligence.companionIds) {
@@ -132,7 +132,7 @@ describe('Companion Soulprint intelligence', () => {
       }
       performances.add(profile.performance);
     }
-    expect(performances.size).toBe(11);
+    expect(performances.size).toBe(12);
     expect(intelligence.aiVoiceNames).toHaveLength(13);
     expect(intelligence.aiVoiceAccents.natural).toMatch(/without imposing/i);
   });
@@ -264,6 +264,25 @@ describe('Companion Soulprint intelligence', () => {
     expect(
       intelligence.selectIntelligenceRoute({ audience: 'party', message: 'What do you think?' }),
     ).toMatchObject({ workload: 'party-council', maxOutputTokens: 4_800 });
+  });
+
+  it('routes calendar counsel and scheduling commands through Kairo without bypassing confirmation', () => {
+    expect(
+      intelligence.selectIntelligenceRoute({
+        audience: 'kairo',
+        message: 'What does my schedule look like tomorrow?',
+      }),
+    ).toMatchObject({ workload: 'calendar-counsel' });
+    expect(
+      intelligence.selectIntelligenceRoute({
+        audience: 'snow',
+        message: 'Schedule training tomorrow at 6 PM.',
+        commandMode: 'propose',
+      }),
+    ).toMatchObject({ workload: 'calendar-command' });
+    expect(
+      intelligence.buildSystemInstructions('kairo', ['kairo'], 'propose', 'calendar-command'),
+    ).toContain('Hunter must confirm');
   });
 
   it('requires a visible confirmation for commands and Private Grimoire recipes', () => {

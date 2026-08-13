@@ -927,6 +927,12 @@ export const TRAINING_DEBRIEF_LINES: Record<CompanionId, string[]> = {
     'I logged the session as canon. Snow has forbidden me from naming the cooldown “Volume Two.” For now.',
     'You kept going after the scene stopped looking heroic. That is usually where the real story lives.',
   ],
+  kairo: [
+    'Timer stopped. {minutes} minutes became real evidence, and the recovery window is now protected.',
+    'The session ran long enough to matter and ended soon enough to remain useful. Excellent time discipline.',
+    'I blocked the next few minutes from all heroic scheduling. Breathe first; optimization can file an appeal.',
+    '{rounds} rounds recorded. The calendar cannot perform a repetition, but it can make sure the next one has room to exist.',
+  ],
 };
 
 export function getTrainingCircuit(id: TrainingCircuitId) {

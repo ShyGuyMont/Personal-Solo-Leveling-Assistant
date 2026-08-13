@@ -8,6 +8,7 @@ export type SystemRealm =
   | 'treasury'
   | 'creator'
   | 'arc'
+  | 'calendar'
   | 'party'
   | 'campaign'
   | 'archive'
@@ -32,6 +33,7 @@ export const REALM_LABELS: Record<SystemRealm, string> = {
   treasury: 'Treasury Command',
   creator: 'Creator Forge',
   arc: 'A.R.C. Archives',
+  calendar: 'Calendar Command',
   party: 'Party Headquarters',
   campaign: 'Campaign Command',
   archive: 'Memory Archive',
@@ -46,6 +48,7 @@ export const REALM_COMPANIONS: Record<SystemRealm, CompanionId> = {
   treasury: 'cassian',
   creator: 'haven',
   arc: 'quill',
+  calendar: 'kairo',
   party: 'snow',
   campaign: 'cipher',
   archive: 'snow',
@@ -59,6 +62,7 @@ export function getSystemRealm(path: string): SystemRealm {
   if (path.startsWith('/treasury')) return 'treasury';
   if (path.startsWith('/creator-forge')) return 'creator';
   if (path.startsWith('/arc-archives')) return 'arc';
+  if (path.startsWith('/calendar')) return 'calendar';
   if (path.startsWith('/headquarters') || path.startsWith('/party-chat')) return 'party';
   if (path.startsWith('/campaigns')) return 'campaign';
   if (path.startsWith('/archive')) return 'archive';

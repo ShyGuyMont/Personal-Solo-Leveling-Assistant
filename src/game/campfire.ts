@@ -233,6 +233,14 @@ function quillLines(metrics: CampfireMetrics) {
   ];
 }
 
+function kairoLines(metrics: CampfireMetrics) {
+  return [
+    `This week recorded ${metrics.recordedDays} finalized day${metrics.recordedDays === 1 ? '' : 's'}. Keep the time blocks that survived reality; redesign the ones that required a fictional version of you.`,
+    `Calendar note: ${metrics.completedMissions} commitments became proof. Next week needs one protected priority and enough margin that Snow does not have to rescue the entire afternoon.`,
+    'The timeline is not asking for perfection. It is asking which rhythms deserve another honest appointment next week.',
+  ];
+}
+
 function closingLines(metrics: CampfireMetrics) {
   const focus = metrics.focusCategory
     ? CATEGORY_LABELS[metrics.focusCategory]
@@ -280,6 +288,7 @@ export function buildCampfireMessages(
     { companionId: 'cassian', role: 'response', pool: cassianLines(metrics), slot: 'cassian' },
     { companionId: 'saffron', role: 'response', pool: saffronLines(metrics), slot: 'saffron' },
     { companionId: 'quill', role: 'response', pool: quillLines(metrics), slot: 'quill' },
+    { companionId: 'kairo', role: 'response', pool: kairoLines(metrics), slot: 'kairo' },
     { companionId: 'snow', role: 'closing', pool: closingLines(metrics), slot: 'snow-close' },
   ];
   return entries.map((entry, order) => {

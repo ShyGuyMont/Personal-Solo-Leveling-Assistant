@@ -55,6 +55,7 @@ export function createDefaultSettings(): Settings {
       'cassian',
       'saffron',
       'quill',
+      'kairo',
     ],
     notificationsEnabled: false,
     advancedBalanceUnlocked: false,

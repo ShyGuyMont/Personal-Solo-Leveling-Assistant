@@ -147,6 +147,41 @@ export interface AiProgressContext {
       preparationNotes: string[];
     };
   };
+  calendar: {
+    sharedWithScheduleKeeper: boolean;
+    timeZone: string;
+    now: string;
+    privacy: string;
+    today: LocalDateKey;
+    upcoming: Array<{
+      eventId: string;
+      title: string;
+      description: string;
+      category: string;
+      startAt: string;
+      endAt: string;
+      allDay: boolean;
+      recurrence: boolean;
+      location: string;
+      status: string;
+      source: string;
+    }>;
+    conflicts: Array<{
+      firstEventId: string;
+      firstTitle: string;
+      secondEventId: string;
+      secondTitle: string;
+      date: LocalDateKey;
+    }>;
+    nextEvent?: {
+      eventId: string;
+      title: string;
+      startAt: string;
+      endAt: string;
+      allDay: boolean;
+    };
+    focusWindows: Array<{ startAt: string; endAt: string; minutes: number }>;
+  };
   specialists: {
     sanctuary: {
       recentSessions: Array<{
@@ -351,7 +386,9 @@ export interface AiHeadquartersReply {
     | 'content-forge'
     | 'campaign-forge'
     | 'arc-forge'
-    | 'ledger-review';
+    | 'ledger-review'
+    | 'calendar-counsel'
+    | 'calendar-command';
   title: string;
   replies: Array<{
     companionId: CompanionId;
@@ -411,6 +448,21 @@ export interface AiHeadquartersReply {
       nextAction: string;
       notes: string;
     }>;
+    confirmation: string;
+  };
+  calendarProposal?: {
+    action: 'create' | 'update' | 'cancel';
+    eventId: string;
+    title: string;
+    description: string;
+    category: 'personal' | 'work' | 'training' | 'faith' | 'creator' | 'appointment' | 'deadline';
+    startAt: string;
+    endAt: string;
+    allDay: boolean;
+    recurrence: 'none' | 'daily' | 'weekly' | 'monthly';
+    recurrenceInterval: number;
+    recurrenceEndsOn: string;
+    location: string;
     confirmation: string;
   };
   usage?: {
@@ -635,6 +687,10 @@ export async function requestAiHeadquartersReply(input: {
     campaignProposal:
       payload.campaignProposal && typeof payload.campaignProposal === 'object'
         ? (payload.campaignProposal as AiHeadquartersReply['campaignProposal'])
+        : undefined,
+    calendarProposal:
+      payload.calendarProposal && typeof payload.calendarProposal === 'object'
+        ? (payload.calendarProposal as AiHeadquartersReply['calendarProposal'])
         : undefined,
   };
 }

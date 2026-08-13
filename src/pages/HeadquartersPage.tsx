@@ -252,7 +252,7 @@ export function HeadquartersPage() {
             <p className="eyebrow">MONTHLY COUNCIL</p>
             <h2>The first council is still gathering.</h2>
             <p>
-              After a calendar month with at least one finalized Daily Review, all eleven companions
+              After a calendar month with at least one finalized Daily Review, all twelve companions
               will assemble with a fact-based review and space for your next intention.
             </p>
           </div>
@@ -301,7 +301,7 @@ export function HeadquartersPage() {
             <p className="eyebrow">WEEKLY CAMPFIRE</p>
             <h2>The first recap is still gathering.</h2>
             <p>
-              After a completed week with at least one finalized Daily Review, all eleven companions
+              After a completed week with at least one finalized Daily Review, all twelve companions
               will meet here with comments based on the real record.
             </p>
           </div>

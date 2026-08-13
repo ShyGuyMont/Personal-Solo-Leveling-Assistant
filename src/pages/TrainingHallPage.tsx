@@ -89,6 +89,7 @@ const LOCATION_OPTIONS: Array<{
 ];
 
 const POST_TRAINING_STATES: Record<CompanionId, string> = {
+  kairo: 'Clock stopped · recovery window protected',
   snow: 'Breathless · still watching over everyone',
   rook: 'Spent · pretending this was tactical',
   selah: 'Recovering · already stretching',

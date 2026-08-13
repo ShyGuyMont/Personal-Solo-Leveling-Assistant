@@ -177,6 +177,14 @@ function quillCouncil(metrics: MonthlyCouncilMetrics) {
   ];
 }
 
+function kairoCouncil(metrics: MonthlyCouncilMetrics) {
+  return [
+    `${metrics.recordedDays} finalized day${metrics.recordedDays === 1 ? '' : 's'} entered the month. The useful pattern is not a perfect calendar; it is the time you repeatedly protected for what mattered.`,
+    `The month contained ${metrics.completedMissions} completed commitments across ${metrics.recordedDays} recorded days. Next cycle needs realistic durations, protected transitions, and fewer promises competing for the same hour.`,
+    `Calendar review complete. Preserve the rhythms that survived difficult days, not merely the plan that looked impressive before the month began.`,
+  ];
+}
+
 function snowClosing(metrics: MonthlyCouncilMetrics) {
   const focus = metrics.focusCategory
     ? CATEGORY_LABELS[metrics.focusCategory]
@@ -227,6 +235,7 @@ export function buildMonthlyCouncilMessages(
     { companionId: 'cassian', role: 'response', slot: 'cassian', pool: cassianCouncil(metrics) },
     { companionId: 'saffron', role: 'response', slot: 'saffron', pool: saffronCouncil(metrics) },
     { companionId: 'quill', role: 'response', slot: 'quill', pool: quillCouncil(metrics) },
+    { companionId: 'kairo', role: 'response', slot: 'kairo', pool: kairoCouncil(metrics) },
     { companionId: 'snow', role: 'closing', slot: 'snow-close', pool: snowClosing(metrics) },
   ];
   return entries.map((entry, order) => ({

@@ -10,7 +10,7 @@ import type {
   Settings,
 } from '@/types/game';
 
-export const SAVE_VERSION = 26;
+export const SAVE_VERSION = 27;
 export const MAX_IMPORT_BYTES = 32 * 1024 * 1024;
 const MAX_SNAPSHOTS = 5;
 const FORBIDDEN_KEYS = new Set(['__proto__', 'prototype', 'constructor']);
@@ -170,6 +170,7 @@ function migrateData(
     data.arcCharacters ??= [];
     data.arcCanonSources ??= [];
   }
+  if (version <= 26) data.calendarEvents ??= [];
   data.dailyOperations = data.dailyOperations.map((row) => {
     if (!isObject(row) || !isObject(row.pendingProposal)) return row;
     const pendingProposal = row.pendingProposal;
@@ -210,6 +211,9 @@ function migrateData(
       ...row,
     };
   });
+  if (!data.aiVoiceProfiles.some((row) => isObject(row) && row.id === 'kairo')) {
+    data.aiVoiceProfiles.push(cloneCanonVoiceProfile('kairo'));
+  }
   const migrationTime = new Date().toISOString();
   if (!data.creatorSettings.some((row) => isObject(row) && row.id === 'primary')) {
     data.creatorSettings.push({
@@ -272,6 +276,8 @@ function migrateData(
         version <= 12 && !withSaffron.includes('mira') ? [...withSaffron, 'mira'] : withSaffron;
       const withQuill =
         version <= 24 && !withMira.includes('quill') ? [...withMira, 'quill'] : withMira;
+      const withKairo =
+        version <= 26 && !withQuill.includes('kairo') ? [...withQuill, 'kairo'] : withQuill;
       return {
         privacyScreenEnabled: false,
         sensitiveMissionAlias: 'Integrity Protocol',
@@ -294,7 +300,7 @@ function migrateData(
         aiUsageWarningUsd: 5,
         aiSoulprintNotes: {},
         ...row,
-        enabledCompanionIds: ['snow', ...withQuill.filter((id) => id !== 'snow')],
+        enabledCompanionIds: ['snow', ...withKairo.filter((id) => id !== 'snow')],
       };
     }
     return row;
@@ -360,6 +366,7 @@ function validateData(data: Record<string, unknown[]>) {
     'cassian',
     'saffron',
     'quill',
+    'kairo',
   ]);
   if (!isObject(settings.aiSoulprintNotes)) {
     throw new Error('The Soulprint Studio setting is not valid.');
@@ -1249,6 +1256,7 @@ function validateData(data: Record<string, unknown[]>) {
     'cassian',
     'saffron',
     'quill',
+    'kairo',
   ]);
   for (const row of data.sanctuarySessions) {
     if (!isObject(row)) {
@@ -1289,6 +1297,52 @@ function validateData(data: Record<string, unknown[]>) {
         (typeof row.nextAction !== 'string' || row.nextAction.length > 500))
     ) {
       throw new Error('A Scripture Sanctuary record contains an impossible value.');
+    }
+  }
+
+  const calendarCategories = new Set([
+    'personal',
+    'work',
+    'training',
+    'faith',
+    'creator',
+    'appointment',
+    'deadline',
+  ]);
+  const calendarRecurrences = new Set(['none', 'daily', 'weekly', 'monthly']);
+  const calendarStatuses = new Set(['scheduled', 'completed', 'canceled']);
+  const calendarSources = new Set(['hunter', 'kairo', 'snow']);
+  for (const row of data.calendarEvents) {
+    const start = isObject(row) ? Date.parse(String(row.startAt)) : Number.NaN;
+    const end = isObject(row) ? Date.parse(String(row.endAt)) : Number.NaN;
+    if (
+      !isObject(row) ||
+      typeof row.title !== 'string' ||
+      !row.title.trim() ||
+      row.title.length > 160 ||
+      typeof row.description !== 'string' ||
+      row.description.length > 2_000 ||
+      !calendarCategories.has(String(row.category)) ||
+      !Number.isFinite(start) ||
+      !Number.isFinite(end) ||
+      end <= start ||
+      end - start > 366 * 86_400_000 ||
+      typeof row.allDay !== 'boolean' ||
+      !calendarRecurrences.has(String(row.recurrence)) ||
+      !Number.isInteger(row.recurrenceInterval) ||
+      Number(row.recurrenceInterval) < 1 ||
+      Number(row.recurrenceInterval) > 12 ||
+      (row.recurrenceEndsOn !== undefined && !validDate(row.recurrenceEndsOn)) ||
+      typeof row.location !== 'string' ||
+      row.location.length > 240 ||
+      !calendarSources.has(String(row.source)) ||
+      !calendarStatuses.has(String(row.status)) ||
+      typeof row.createdAt !== 'string' ||
+      !Number.isFinite(Date.parse(row.createdAt)) ||
+      typeof row.updatedAt !== 'string' ||
+      !Number.isFinite(Date.parse(row.updatedAt))
+    ) {
+      throw new Error('A Calendar Command entry contains an impossible value.');
     }
   }
 

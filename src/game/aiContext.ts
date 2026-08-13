@@ -6,6 +6,7 @@ import { buildQuickLinkActionCatalog } from '@/game/aiQuickLink';
 import { getCustomKitchenRecipes } from '@/game/kitchenGrimoire';
 import { getDailyOperations } from '@/game/dailyOperations';
 import { getBodyDiagnosticData } from '@/game/bodyDiagnostic';
+import { buildCalendarBriefing, expandCalendarEvents, localDateKeyForDate } from '@/game/calendar';
 import { buildArcKnowledgeContext } from '@/game/arcArchives';
 import { resolveKitchenSessionRecipe } from '@/game/kitchen';
 import { accountXpForLevel, totalXpAtLevel } from '@/game/xp';
@@ -75,6 +76,10 @@ function emptyArcKnowledgeContext() {
   };
 }
 
+function shouldShareCalendar(source: AiContextSource) {
+  return source.audience === 'kairo' || source.audience === 'snow' || source.audience === 'party';
+}
+
 export async function buildAiProgressContext(source: AiContextSource): Promise<AiProgressContext> {
   const recentStart = addDays(source.systemDate, -29);
   const treasurySharingAllowed =
@@ -104,6 +109,7 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
     dailyOperations,
     bodyDiagnostic,
     arcKnowledge,
+    calendarEvents,
   ] = await Promise.all([
     db.dailyReviews.where('date').aboveOrEqual(recentStart).toArray(),
     db.dailyMissions.where('date').aboveOrEqual(recentStart).toArray(),
@@ -133,6 +139,7 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
     shouldShareArcKnowledge(source)
       ? buildArcKnowledgeContext(source.query ?? '')
       : Promise.resolve(emptyArcKnowledgeContext()),
+    shouldShareCalendar(source) ? db.calendarEvents.toArray() : Promise.resolve([]),
   ]);
 
   const available = source.missions.filter((mission) => mission.enabled && !mission.archived);
@@ -212,6 +219,14 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
   const debtAprs = activeDebts
     .map((debt) => debt.aprBasisPoints)
     .filter((value): value is number => typeof value === 'number');
+  const calendarNow = new Date();
+  const calendarStart = new Date(`${source.systemDate}T00:00:00`);
+  const calendarEnd = new Date(calendarStart);
+  calendarEnd.setDate(calendarEnd.getDate() + 30);
+  const calendarOccurrences = shouldShareCalendar(source)
+    ? expandCalendarEvents(calendarEvents, calendarStart, calendarEnd).slice(0, 80)
+    : [];
+  const calendarBriefing = buildCalendarBriefing(calendarEvents, source.systemDate, calendarNow);
 
   return {
     hunter: {
@@ -401,6 +416,45 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
             preparationNotes: dailyOperations.preparationNotes,
           }
         : undefined,
+    },
+    calendar: {
+      sharedWithScheduleKeeper: shouldShareCalendar(source),
+      timeZone: source.settings.timeZone,
+      now: calendarNow.toISOString(),
+      privacy: shouldShareCalendar(source)
+        ? 'Only the next 30 days of locally stored schedule records are shared in this Kairo, Snow, or Party request. Calendar records remain on-device outside this explicit online conversation.'
+        : 'Calendar records were not shared with this companion.',
+      today: source.systemDate,
+      upcoming: calendarOccurrences.map((event) => ({
+        eventId: event.eventId,
+        title: event.title.slice(0, 160),
+        description: event.description.slice(0, 600),
+        category: event.category,
+        startAt: event.startAt,
+        endAt: event.endAt,
+        allDay: event.allDay,
+        recurrence: event.recurring,
+        location: event.location.slice(0, 240),
+        status: event.status,
+        source: event.source,
+      })),
+      conflicts: calendarBriefing.conflicts.slice(0, 12).map((conflict) => ({
+        firstEventId: conflict.first.eventId,
+        firstTitle: conflict.first.title,
+        secondEventId: conflict.second.eventId,
+        secondTitle: conflict.second.title,
+        date: localDateKeyForDate(new Date(conflict.first.startAt)),
+      })),
+      nextEvent: calendarBriefing.next
+        ? {
+            eventId: calendarBriefing.next.eventId,
+            title: calendarBriefing.next.title,
+            startAt: calendarBriefing.next.startAt,
+            endAt: calendarBriefing.next.endAt,
+            allDay: calendarBriefing.next.allDay,
+          }
+        : undefined,
+      focusWindows: calendarBriefing.focusWindows.slice(0, 4),
     },
     specialists: {
       sanctuary: {

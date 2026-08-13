@@ -13,6 +13,7 @@ import type {
   AppMetadata,
   BackupSnapshot,
   BodyDiagnosticRecord,
+  CalendarEvent,
   CampfireRecap,
   CampaignArc,
   ChallengeProgress,
@@ -118,6 +119,7 @@ export class SystemDatabase extends Dexie {
   creatorSnapshots!: EntityTable<CreatorChannelSnapshot, 'id'>;
   creatorProjects!: EntityTable<CreatorProject, 'id'>;
   creatorVideoInsights!: EntityTable<CreatorVideoInsight, 'id'>;
+  calendarEvents!: EntityTable<CalendarEvent, 'id'>;
   appMetadata!: EntityTable<AppMetadata, 'id'>;
 
   constructor(name = 'the-system-db') {
@@ -800,6 +802,25 @@ export class SystemDatabase extends Dexie {
         await metadata.put({ id: 'schema-seeded', value: 26, updatedAt: now });
         await metadata.put({ id: 'app-version', value: '8.0.0', updatedAt: now });
       });
+    this.version(27)
+      .stores({
+        calendarEvents: 'id,startAt,endAt,status,category,updatedAt',
+      })
+      .upgrade(async (transaction) => {
+        const settings = transaction.table<Settings, string>('settings');
+        const current = await settings.get('primary');
+        if (current) {
+          await settings.update('primary', {
+            enabledCompanionIds: Array.from(
+              new Set([...(current.enabledCompanionIds ?? []), 'kairo']),
+            ) as Settings['enabledCompanionIds'],
+          });
+        }
+        const now = new Date().toISOString();
+        const metadata = transaction.table<AppMetadata, string>('appMetadata');
+        await metadata.put({ id: 'schema-seeded', value: 27, updatedAt: now });
+        await metadata.put({ id: 'app-version', value: '8.0.0', updatedAt: now });
+      });
   }
 }
 
@@ -862,6 +883,7 @@ export const TABLE_NAMES = [
   'creatorSnapshots',
   'creatorProjects',
   'creatorVideoInsights',
+  'calendarEvents',
   'appMetadata',
 ] as const;
 

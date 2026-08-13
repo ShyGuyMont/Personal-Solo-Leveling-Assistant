@@ -47,7 +47,8 @@ export type CompanionId =
   | 'amara'
   | 'cassian'
   | 'saffron'
-  | 'quill';
+  | 'quill'
+  | 'kairo';
 export type CompanionMode = 'off' | 'quiet' | 'balanced' | 'talkative';
 export type AiLinkMode = 'offline' | 'online';
 export type AiVoiceProvider = 'openai' | 'cartesia';
@@ -1424,6 +1425,45 @@ export interface TreasuryWeekSummary {
   noEatingOutWins: number;
   challengeFailures: number;
   stabilityScore: number;
+}
+
+export type CalendarEventCategory =
+  'personal' | 'work' | 'training' | 'faith' | 'creator' | 'appointment' | 'deadline';
+export type CalendarRecurrence = 'none' | 'daily' | 'weekly' | 'monthly';
+export type CalendarEventStatus = 'scheduled' | 'completed' | 'canceled';
+export type CalendarEventSource = 'hunter' | 'kairo' | 'snow';
+
+export interface CalendarEvent {
+  id: string;
+  title: string;
+  description: string;
+  category: CalendarEventCategory;
+  startAt: string;
+  endAt: string;
+  allDay: boolean;
+  recurrence: CalendarRecurrence;
+  recurrenceInterval: number;
+  recurrenceEndsOn?: LocalDateKey;
+  location: string;
+  source: CalendarEventSource;
+  status: CalendarEventStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CalendarEventOccurrence {
+  occurrenceId: string;
+  eventId: string;
+  title: string;
+  description: string;
+  category: CalendarEventCategory;
+  startAt: string;
+  endAt: string;
+  allDay: boolean;
+  location: string;
+  source: CalendarEventSource;
+  status: CalendarEventStatus;
+  recurring: boolean;
 }
 
 export interface AppMetadata {

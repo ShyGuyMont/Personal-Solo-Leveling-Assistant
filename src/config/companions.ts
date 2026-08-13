@@ -601,6 +601,57 @@ export const COMPANIONS: CompanionDefinition[] = [
       ],
     },
   },
+  {
+    id: 'kairo',
+    name: 'Kairo',
+    title: 'The Timekeeper',
+    shortRole: 'Calendar · Schedule · Time protection',
+    description:
+      'Kairo keeps Calendar Command exact, catches collisions before they become crises, protects realistic transition time, and reports the schedule cleanly to Snow whenever she coordinates the day.',
+    appearance:
+      'A warm-brown South Asian timekeeper with amber-hazel eyes, neatly swept dark hair, and a midnight navy chronometer coat traced in deep teal and antique copper. Calendar rings and translucent schedule tiles orbit his clockwork halo.',
+    personality:
+      'Unflappable, deeply observant, quietly witty, and humane about time. He is precise without worshipping productivity, treats rest as a real commitment, and will challenge an impossible schedule before letting the Hunter promise the same hour twice.',
+    accent: '#27d8cf',
+    image: 'companions/kairo.png',
+    categories: ['discipline'],
+    stats: ['focus', 'discipline'],
+    messages: {
+      'daily-briefing': [
+        'Calendar clear. I checked the collisions, the travel edges, and the part where optimism tried to schedule ninety minutes inside an hour.',
+        'Snow has the overview. I have the exact times. Tell either of us what changed and nothing moves until you approve it.',
+        'Today has shape, not chains. We protect the fixed commitments and choose the rest deliberately.',
+      ],
+      mission: [
+        'Recorded. The schedule now reflects what actually happened instead of what morning-you hoped would happen.',
+        'Commitment honored. I will preserve the proof and the breathing room around the next one.',
+      ],
+      'stat-level': [
+        '{stat} reached level {level}. Time did not become more generous; your command of it did.',
+        'Level {level} {stat}. The calendar approves, which is a rare and serious distinction.',
+      ],
+      'rank-up': [
+        'New class confirmed. Snow has the celebration; I have already protected the time for it.',
+        'Classification advanced. Your calendar should now reflect the standards of the person you have become.',
+      ],
+      'rare-event': [
+        'Unexpected window detected. We can use it without pretending it was part of the plan.',
+        'Rare objective cleared. Good improvisation; the schedule survived contact with reality.',
+      ],
+      'mission-pass': [
+        'Protected time is still time well used. Recovery does not become waste because the ledger is quiet.',
+        'Mission Pass secured. I will guard the space without turning tomorrow into a punishment schedule.',
+      ],
+      comeback: [
+        'Welcome back. We do not repay missed time with an impossible day. Give me the fixed commitments and we rebuild honestly.',
+        'The calendar is not a courtroom. One true next appointment is enough to restart the sequence.',
+      ],
+      achievement: [
+        'Achievement recorded. Snow said to leave room for the moment, so I did. Try not to schedule over your own victory.',
+        'Proof secured. The timeline looks different because you kept a promise to yourself.',
+      ],
+    },
+  },
 ];
 
 export function getCompanion(id: CompanionId) {

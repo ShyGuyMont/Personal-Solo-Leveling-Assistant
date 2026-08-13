@@ -20,6 +20,7 @@ const COMPANION_ALIASES: Record<string, CompanionId> = {
   cassian: 'cassian',
   saffron: 'saffron',
   quill: 'quill',
+  kairo: 'kairo',
 };
 
 export interface AddressedQuickLink {
@@ -49,6 +50,11 @@ export interface QuickLinkAction {
 
 const ROUTES: Array<QuickNavigationCommand & { patterns: RegExp[] }> = [
   {
+    route: '/calendar',
+    label: 'Calendar Command',
+    patterns: [/\bcalendar\b/i, /\bschedule\b/i, /\bagenda\b/i],
+  },
+  {
     route: '/training-hall',
     label: 'Training Hall',
     patterns: [/\btraining hall\b/i, /\bgym\b/i, /\btraining\b/i, /\bworkout\b/i],
@@ -72,7 +78,12 @@ const ROUTES: Array<QuickNavigationCommand & { patterns: RegExp[] }> = [
   {
     route: '/arc-archives',
     label: 'A.R.C. Archives',
-    patterns: [/\ba\.?r\.?c\.? archives?\b/i, /\bcharacter archives?\b/i, /\bdossier forge\b/i, /\barts codex\b/i],
+    patterns: [
+      /\ba\.?r\.?c\.? archives?\b/i,
+      /\bcharacter archives?\b/i,
+      /\bdossier forge\b/i,
+      /\barts codex\b/i,
+    ],
   },
   { route: '/missions', label: 'Missions', patterns: [/\bmissions?\b/i, /\bquests?\b/i] },
   {
@@ -160,6 +171,7 @@ export function parseQuickNavigationCommand(message: string): QuickNavigationCom
 
 export function navigationAcknowledgement(companionId: CompanionId, destination: string) {
   const acknowledgements: Record<CompanionId, string> = {
+    kairo: `${destination}. The route is clear; opening it now.`,
     snow: `${destination}. Yeah, I’ve got you—opening it now.`,
     rook: `${destination}. Good. We’re moving.`,
     selah: `${destination}. I’ll meet you there.`,
@@ -258,6 +270,7 @@ export function buildQuickLinkActionCatalog(
 
 export function commandSuccessAcknowledgement(companionId: CompanionId, action: QuickLinkAction) {
   const acknowledgements: Record<CompanionId, string> = {
+    kairo: `${action.missionName} is synchronized. Confirmed record, exact time, no hidden edits.`,
     snow: `${action.missionName} is updated. Clean, confirmed, and actually in the record now.`,
     rook: `${action.missionName} updated. That one is real now—not talk.`,
     selah: `${action.missionName} has been updated. Honest record, clear next step.`,

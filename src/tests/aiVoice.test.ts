@@ -20,9 +20,9 @@ describe('Voice Link local profiles and usage', () => {
     await db.aiUsageRecords.clear();
   });
 
-  it('provides eleven distinct canon soulprints with deliberately authored performance directions', async () => {
+  it('provides twelve distinct canon soulprints with deliberately authored performance directions', async () => {
     const profiles = await getAiVoiceProfiles();
-    expect(Object.keys(profiles)).toHaveLength(11);
+    expect(Object.keys(profiles)).toHaveLength(12);
     expect(
       new Set(Object.values(profiles).map((profile) => profile.voice)).size,
     ).toBeGreaterThanOrEqual(10);
@@ -37,6 +37,7 @@ describe('Voice Link local profiles and usage', () => {
     expect(CANON_VOICE_PROFILES.ember.direction).toMatch(/Australian.*obstacle/i);
     expect(CANON_VOICE_PROFILES.saffron.direction).toMatch(/high-pressure/i);
     expect(CANON_VOICE_PROFILES.quill.direction).toMatch(/lore connection/i);
+    expect(CANON_VOICE_PROFILES.kairo.direction).toMatch(/time|calendar|schedule/i);
   });
 
   it('saves tuning safely and restores the original soulprint', async () => {

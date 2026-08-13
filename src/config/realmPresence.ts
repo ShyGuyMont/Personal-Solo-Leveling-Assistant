@@ -57,6 +57,13 @@ export const REALM_PRESENCE: Record<SystemRealm, RealmPresence> = {
     actionLabel: 'Enter A.R.C. Archives',
     actionPath: '/arc-archives',
   },
+  calendar: {
+    signal: 'Timekeeper chronicle synchronized',
+    message:
+      'The schedule is exact, the conflicts are visible, and nothing moves without your confirmation. Tell me what changed.',
+    actionLabel: 'Open Calendar Command',
+    actionPath: '/calendar',
+  },
   party: {
     signal: 'All companion links available',
     message:

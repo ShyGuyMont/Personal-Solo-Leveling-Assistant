@@ -57,7 +57,10 @@ type SupportSpeaker = CompanionId | 'snow-close';
 
 const BASE_SUPPORT_DIALOGUE: Record<
   SupportTopicId,
-  Record<Exclude<SupportSpeaker, 'mira' | 'cassian' | 'saffron' | 'quill'>, readonly string[]>
+  Record<
+    Exclude<SupportSpeaker, 'mira' | 'cassian' | 'saffron' | 'quill' | 'kairo'>,
+    readonly string[]
+  >
 > = {
   motivation: {
     snow: [
@@ -445,6 +448,39 @@ const QUILL_SUPPORT_DIALOGUE: Record<SupportTopicId, readonly string[]> = {
   ],
 };
 
+const KAIRO_SUPPORT_DIALOGUE: Record<SupportTopicId, readonly string[]> = {
+  motivation: [
+    'Give the next action a real start and end. Time becomes less intimidating when it has edges.',
+    'Protect twenty minutes, remove the imaginary requirement to finish everything, and begin inside the window you actually own.',
+    'The calendar is not asking for heroics. It is asking which promise receives the next honest block of time.',
+  ],
+  'make-a-plan': [
+    'First, mark what is fixed. Second, choose one priority. Third, leave enough transition time that the plan survives being lived.',
+    'We can fit three meaningful things or seven fictional ones. I recommend the version that still exists by noon.',
+    'Give every commitment a duration, every transition a margin, and every optional task permission to remain optional.',
+  ],
+  'faith-perspective': [
+    'Time is stewardship, not ownership. Protect the faithful commitment, then release the demand to control every hour.',
+    'Rest and worship do not need to defend their productivity. Put them on the calendar as real parts of a whole life.',
+    'A faithful day can be smaller than an impressive one. Schedule the next true responsibility and leave room to receive what you cannot plan.',
+  ],
+  'calm-down': [
+    'Nothing else enters the calendar for ten minutes. We will let the alarm settle before deciding what the day can actually hold.',
+    'Name the next fixed commitment. Everything else can wait outside the room while your nervous system catches up.',
+    'A crowded mind is not an accurate schedule. Breathe first; then we separate what is due from what is merely loud.',
+  ],
+  recover: [
+    'We do not repay lost time by stealing from recovery. Keep the next necessary promise and move the rest honestly.',
+    'The calendar is not a courtroom. One missed block becomes information, not a sentence imposed on tomorrow.',
+    'Protect sleep, food, and the minimum true responsibility. Recovery works better when it has an actual appointment.',
+  ],
+  celebrate: [
+    'The win gets its own block. You are not allowed to schedule directly over the evidence that the work mattered.',
+    'Achievement confirmed. I have checked the timeline; this deserves more than six seconds before the next objective.',
+    'Snow has the celebration. I have removed the phrase “quickly check one more thing” from the next half hour.',
+  ],
+};
+
 export const SUPPORT_DIALOGUE = Object.fromEntries(
   SUPPORT_TOPICS.map(({ id }) => [
     id,
@@ -454,6 +490,7 @@ export const SUPPORT_DIALOGUE = Object.fromEntries(
       cassian: CASSIAN_SUPPORT_DIALOGUE[id],
       saffron: SAFFRON_SUPPORT_DIALOGUE[id],
       quill: QUILL_SUPPORT_DIALOGUE[id],
+      kairo: KAIRO_SUPPORT_DIALOGUE[id],
     },
   ]),
 ) as Record<SupportTopicId, Record<SupportSpeaker, readonly string[]>>;

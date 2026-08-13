@@ -95,10 +95,14 @@ export interface MoodDialogue {
   cassian: string[];
   saffron: string[];
   quill: string[];
+  kairo: string[];
   'snow-close': string[];
 }
 
-const BASE_PARTY_DIALOGUE: Record<MoodId, Omit<MoodDialogue, 'mira' | 'cassian' | 'saffron' | 'quill'>> = {
+const BASE_PARTY_DIALOGUE: Record<
+  MoodId,
+  Omit<MoodDialogue, 'mira' | 'cassian' | 'saffron' | 'quill' | 'kairo'>
+> = {
   energized: {
     snow: [
       'I can feel that energy from here. I am glad you brought it to us—let’s point it somewhere that matters.',
@@ -791,16 +795,129 @@ const MIRA_PARTY_DIALOGUE: Record<MoodId, string[]> = {
 };
 
 const QUILL_PARTY_DIALOGUE: Record<MoodId, string[]> = {
-  energized: ['Excellent! Point that energy at one unfinished character thread before it escapes into seventeen new ones.', 'Story-room signal is bright. Give me a mystery, a dossier, or the scene you cannot stop seeing.', 'This is excellent chapter energy. Choose the reveal you keep circling and let us find the record it needs.', 'Snow, clear the spoiler table. The Hunter just walked in looking like a plot decision is about to happen.'],
-  proud: ['You should be proud. This is the part Snow and I would underline before the next chapter tries to distract you.', 'Archive marker! Say what you did out loud so the record cannot be minimized later.', 'That win belongs in the timeline exactly as it happened—no shrinking it into a footnote afterward.', 'I know a character-growth beat when I see one. Stay here long enough to let it become part of the story.'],
-  good: ['Good is perfect story-room weather. Curious enough to explore, steady enough not to canonize the first wild idea.', 'The archive feels alive today. We can enjoy the world without forcing it to become a deadline.', 'A steady mind can hear the quiet questions. Which character has been waiting patiently for you to notice them?', 'Nothing is on fire. Wonderful. We can make one careful canon decision and actually enjoy making it.'],
-  okay: ['Okay is a valid place to write from. One familiar character, one honest question, no mythology overhaul required.', 'We can keep this small: open one record, recover one thread, leave the world a little clearer than we found it.', 'No legendary inspiration roll required. One paragraph of clean archive truth is enough movement for today.', 'Bring me the easiest dossier to love. We can visit the world without demanding a major reveal from it.'],
-  tired: ['Then no deep continuity excavation. Capture the idea, label it unconfirmed, and let tomorrow’s brain earn the red string.', 'Tired authors deserve safe notes. One sentence in the vault beats a brilliant idea trusted to memory.', 'We are doing archive triage: save the spark, name the character, close the file before the idea becomes homework.', 'Snow has confiscated my conspiracy board. Fair. Give us one spoiler and then choose rest on purpose.'],
-  stressed: ['Do not retcon under pressure. We file the loud thoughts as possibilities and wait for the archive to become readable again.', 'The world can wait. Save the spark, close the trial, and let Snow help us lower the volume before we decide what is true.', 'Stress is not an editor. It can submit notes, but it does not get final canon authority tonight.', 'Put every urgent idea in the unconfirmed tray. None of them disappear because we refused to decide while overwhelmed.'],
-  frustrated: ['Good—frustration found a story knot. We are not cutting it blindly; we are tracing where the thread actually starts.', 'Name the contradiction, the missing record, and the feeling you wanted the scene to land. One of those is usually the real problem.', 'If the scene will not move, something upstream may be false. Let us check the character desire before rewriting the whole world.', 'I can handle a broken plot. I cannot handle us pretending the break is mysterious when one honest question can expose it.'],
-  discouraged: ['The archive is larger than today’s silence. One character still matters, one thread still glows, and the author is still here.', 'Do not measure a world by the pages you did not write this week. Open the last thing that made you grin and start there.', 'A.R.C. has survived unfinished chapters before. Your return is already a new line in the record.', 'The spark is not gone; it is under pressure. Let us find the smallest piece of this world that still feels alive.'],
-  lonely: ['Snow and I are absolutely available for spoilers. Bring us the scene you wish somebody else already understood.', 'Stories are company too, but you do not have to hide inside one. Stay with the party while we visit the world together.', 'Tell us about the character nobody else knows properly yet. We will meet them with the excitement they deserve.', 'The archive has seats. Snow brought the calm; I brought approximately too many questions. You do not have to imagine alone tonight.'],
-  unsure: ['Uncertainty is story fuel if we label it correctly. Canon, inference, possibility—three shelves, no forced answer.', 'Give me the facts we know and the question that will not leave. We can admire the mystery without faking a solution.', 'Not knowing can be intentional mystery or missing documentation. The first step is deciding which one we are actually looking at.', 'We can test possibilities without adopting them. That is what the proposal shelf is for, and yes, it is my favorite shelf.'],
+  energized: [
+    'Excellent! Point that energy at one unfinished character thread before it escapes into seventeen new ones.',
+    'Story-room signal is bright. Give me a mystery, a dossier, or the scene you cannot stop seeing.',
+    'This is excellent chapter energy. Choose the reveal you keep circling and let us find the record it needs.',
+    'Snow, clear the spoiler table. The Hunter just walked in looking like a plot decision is about to happen.',
+  ],
+  proud: [
+    'You should be proud. This is the part Snow and I would underline before the next chapter tries to distract you.',
+    'Archive marker! Say what you did out loud so the record cannot be minimized later.',
+    'That win belongs in the timeline exactly as it happened—no shrinking it into a footnote afterward.',
+    'I know a character-growth beat when I see one. Stay here long enough to let it become part of the story.',
+  ],
+  good: [
+    'Good is perfect story-room weather. Curious enough to explore, steady enough not to canonize the first wild idea.',
+    'The archive feels alive today. We can enjoy the world without forcing it to become a deadline.',
+    'A steady mind can hear the quiet questions. Which character has been waiting patiently for you to notice them?',
+    'Nothing is on fire. Wonderful. We can make one careful canon decision and actually enjoy making it.',
+  ],
+  okay: [
+    'Okay is a valid place to write from. One familiar character, one honest question, no mythology overhaul required.',
+    'We can keep this small: open one record, recover one thread, leave the world a little clearer than we found it.',
+    'No legendary inspiration roll required. One paragraph of clean archive truth is enough movement for today.',
+    'Bring me the easiest dossier to love. We can visit the world without demanding a major reveal from it.',
+  ],
+  tired: [
+    'Then no deep continuity excavation. Capture the idea, label it unconfirmed, and let tomorrow’s brain earn the red string.',
+    'Tired authors deserve safe notes. One sentence in the vault beats a brilliant idea trusted to memory.',
+    'We are doing archive triage: save the spark, name the character, close the file before the idea becomes homework.',
+    'Snow has confiscated my conspiracy board. Fair. Give us one spoiler and then choose rest on purpose.',
+  ],
+  stressed: [
+    'Do not retcon under pressure. We file the loud thoughts as possibilities and wait for the archive to become readable again.',
+    'The world can wait. Save the spark, close the trial, and let Snow help us lower the volume before we decide what is true.',
+    'Stress is not an editor. It can submit notes, but it does not get final canon authority tonight.',
+    'Put every urgent idea in the unconfirmed tray. None of them disappear because we refused to decide while overwhelmed.',
+  ],
+  frustrated: [
+    'Good—frustration found a story knot. We are not cutting it blindly; we are tracing where the thread actually starts.',
+    'Name the contradiction, the missing record, and the feeling you wanted the scene to land. One of those is usually the real problem.',
+    'If the scene will not move, something upstream may be false. Let us check the character desire before rewriting the whole world.',
+    'I can handle a broken plot. I cannot handle us pretending the break is mysterious when one honest question can expose it.',
+  ],
+  discouraged: [
+    'The archive is larger than today’s silence. One character still matters, one thread still glows, and the author is still here.',
+    'Do not measure a world by the pages you did not write this week. Open the last thing that made you grin and start there.',
+    'A.R.C. has survived unfinished chapters before. Your return is already a new line in the record.',
+    'The spark is not gone; it is under pressure. Let us find the smallest piece of this world that still feels alive.',
+  ],
+  lonely: [
+    'Snow and I are absolutely available for spoilers. Bring us the scene you wish somebody else already understood.',
+    'Stories are company too, but you do not have to hide inside one. Stay with the party while we visit the world together.',
+    'Tell us about the character nobody else knows properly yet. We will meet them with the excitement they deserve.',
+    'The archive has seats. Snow brought the calm; I brought approximately too many questions. You do not have to imagine alone tonight.',
+  ],
+  unsure: [
+    'Uncertainty is story fuel if we label it correctly. Canon, inference, possibility—three shelves, no forced answer.',
+    'Give me the facts we know and the question that will not leave. We can admire the mystery without faking a solution.',
+    'Not knowing can be intentional mystery or missing documentation. The first step is deciding which one we are actually looking at.',
+    'We can test possibilities without adopting them. That is what the proposal shelf is for, and yes, it is my favorite shelf.',
+  ],
+};
+
+const KAIRO_PARTY_DIALOGUE: Record<MoodId, string[]> = {
+  energized: [
+    'Excellent. Protect the first meaningful block before that energy volunteers for seventeen unrelated appointments.',
+    'The schedule has room for ambition today. It does not have room for time travel, so choose the best target.',
+    'Momentum noted. I can give it direction without filling every open minute just because you happen to feel powerful.',
+    'Snow can choose the mission; I will protect the hour. Let us put this energy somewhere tomorrow can recognize.',
+  ],
+  proud: [
+    'The timeline supports your pride. This did not happen at once; it happened in kept blocks no one else could see.',
+    'Snow asked me to leave the next few minutes open. Apparently victory is allowed to occupy time without justifying itself.',
+    'I checked the record. You made room for this result repeatedly, and today you get to enjoy the compound interest.',
+    'Consider this achievement officially timestamped. No minimizing it later when the next deadline starts making noise.',
+  ],
+  good: [
+    'A steady day is excellent scheduling material. One fixed commitment, one meaningful priority, and enough margin to enjoy both.',
+    'The calendar is clear enough to breathe today. Let us keep it that way instead of rewarding calm with unnecessary crowding.',
+    'Good days are where durable rhythms are built. Choose one repeatable block and leave the rest flexible enough to stay human.',
+    'Nothing is colliding, nothing is overdue, and Snow is suspicious of how pleased that makes me. Let us preserve it.',
+  ],
+  okay: [
+    'Okay does not need an ambitious rewrite. Protect the fixed promises and give the rest of the day realistic edges.',
+    'We can work with okay. One true next appointment and one open window are enough structure.',
+    'An ordinary day can still be well kept. Tell me what must happen, and I will stop the optional work from impersonating urgency.',
+    'No dramatic rescheduling required. We anchor the next commitment, keep a little margin, and let okay carry its own weight.',
+  ],
+  tired: [
+    'Then the schedule gets smaller, not crueler. Protect what is fixed and stop borrowing hours from recovery.',
+    'Fatigue makes every task look equally urgent. The calendar disagrees. We will keep the real deadline and release the performance.',
+    'I am marking your estimates with a fatigue multiplier. That is not weakness; it is the mathematics of having a body.',
+    'Snow handles the mercy. I handle the boundary: tonight is not allowed to steal from tomorrow without a very good reason.',
+  ],
+  stressed: [
+    'A crowded mind is not an accurate agenda. Give me the fixed time first; everything else can wait outside the calculation.',
+    'I see the collision. Snow has the human context; I have the exact hour. We will untangle one commitment at a time.',
+    'List the appointments, not the fears. I can sequence the first group; Snow can help with everything the clock cannot measure.',
+    'The schedule is information, not a verdict. We will separate a real deadline from every anxious thought wearing its uniform.',
+  ],
+  frustrated: [
+    'Time did not betray you; the estimate did. Good. Estimates can be corrected without putting your worth on trial.',
+    'The schedule failed contact with reality. We edit the plan, preserve the promise that matters, and refuse the shame surcharge.',
+    'A missed block is evidence for the next estimate, not permission to sentence the entire day.',
+    'Give me the obstacle and the remaining time. I will rebuild the route without pretending the original plan is sacred.',
+  ],
+  discouraged: [
+    'The timeline contains more kept promises than this moment can remember. We will use one of them as the next anchor.',
+    'A quiet week is still time lived. Choose one small commitment worth protecting and let evidence restart there.',
+    'You do not need a perfect month to prove the next thirty minutes matter. Let us reserve them for something believable.',
+    'The calendar is not keeping score against you. It is waiting for one honest promise we can help you keep.',
+  ],
+  lonely: [
+    'Open time does not have to become isolation or labor. Put one real point of connection on the schedule and let it count.',
+    'The party is here now. No need to optimize the evening while company is already occupying it.',
+    'If there is someone safe you miss, we can protect a small window to reach out without turning connection into another quota.',
+    'Snow says presence first, planning second. I have placed that instruction above the agenda for once.',
+  ],
+  unsure: [
+    'Uncertainty can remain unscheduled for a moment. Tell me what is fixed, and we will let the open space stay honest.',
+    'When the answer is unclear, the calendar should reflect possibility, not pretend a decision has already been made.',
+    'A tentative block can stay tentative. We can reserve room without manufacturing certainty you do not have yet.',
+    'Give me the earliest truth and the latest acceptable outcome. The space between them can remain a window, not a promise.',
+  ],
 };
 
 export const PARTY_DIALOGUE = Object.fromEntries(
@@ -812,6 +929,7 @@ export const PARTY_DIALOGUE = Object.fromEntries(
       cassian: CASSIAN_PARTY_DIALOGUE[id],
       saffron: SAFFRON_PARTY_DIALOGUE[id],
       quill: QUILL_PARTY_DIALOGUE[id],
+      kairo: KAIRO_PARTY_DIALOGUE[id],
     },
   ]),
 ) as Record<MoodId, MoodDialogue>;

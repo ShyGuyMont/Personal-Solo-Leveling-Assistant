@@ -25,6 +25,7 @@ const PARTY_ORDER: Array<{
   { slot: 'cassian', companionId: 'cassian', role: 'response' },
   { slot: 'saffron', companionId: 'saffron', role: 'response' },
   { slot: 'quill', companionId: 'quill', role: 'response' },
+  { slot: 'kairo', companionId: 'kairo', role: 'response' },
   { slot: 'snow-close', companionId: 'snow', role: 'closing' },
 ];
 

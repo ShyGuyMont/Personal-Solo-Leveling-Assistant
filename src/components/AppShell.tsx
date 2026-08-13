@@ -1,6 +1,6 @@
 import {
-  Archive,
   BookHeart,
+  CalendarDays,
   CircleGauge,
   CircleHelp,
   ChefHat,
@@ -35,7 +35,7 @@ const NAV = [
   { to: '/sanctuary', label: 'Sanctuary', icon: BookHeart },
   { to: '/kitchen', label: 'Kitchen', icon: ChefHat },
   { to: '/treasury', label: 'Treasury', icon: WalletCards },
-  { to: '/archive', label: 'Archive', icon: Archive },
+  { to: '/calendar', label: 'Calendar', icon: CalendarDays },
 ];
 
 const CompanionQuickLink = lazy(() =>

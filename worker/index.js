@@ -40,6 +40,12 @@ const SYSTEM_PLAN_SIGNALS =
 const ARC_WORK_SIGNALS =
   /\b(?:a\.?r\.?c\.?|canon|dossier|lore|plot|character\s+arc|worldbuild(?:ing)?|realm\s+modulation|nature\s+energy|arts?\s+codex)\b/i;
 
+const CALENDAR_WORK_SIGNALS =
+  /\b(?:calendar|schedule|agenda|appointment|meeting|event|availability|available|free\s+(?:time|window)|time\s+block|deadline|due\s+(?:date|time)|remind|recurr(?:ing|ence)|every\s+(?:day|week|month))\b/i;
+
+const CALENDAR_MUTATION_SIGNALS =
+  /\b(?:add|create|schedule|book|put|block|reserve|move|change|update|reschedule|cancel|remove|delete)\b/i;
+
 function conversationWindow(payload, limit = 6) {
   const history = Array.isArray(payload.history) ? payload.history.slice(-limit) : [];
   return [...history.map((item) => String(item?.message ?? '')), String(payload.message ?? '')]
@@ -83,6 +89,15 @@ export function selectIntelligenceWorkload(payload) {
   if (payload.audience === 'quill') return 'arc-forge';
   if (payload.audience === 'party' && ARC_WORK_SIGNALS.test(recent)) return 'arc-forge';
   if (payload.audience === 'cassian') return 'ledger-review';
+  if (
+    payload.audience === 'kairo' ||
+    ((payload.audience === 'snow' || payload.audience === 'party') &&
+      CALENDAR_WORK_SIGNALS.test(recent))
+  ) {
+    return proposing && CALENDAR_MUTATION_SIGNALS.test(current)
+      ? 'calendar-command'
+      : 'calendar-counsel';
+  }
   if (proposing && COMMAND_SIGNALS.test(current)) return 'system-command';
   if (payload.audience === 'party') return 'party-council';
   if (payload.audience === 'snow' && SYSTEM_PLAN_SIGNALS.test(recent)) return 'system-plan';
@@ -100,6 +115,8 @@ const WORKLOAD_OUTPUT_BUDGETS = {
   'campaign-forge': 8_000,
   'arc-forge': 6_000,
   'ledger-review': 5_000,
+  'calendar-counsel': 4_000,
+  'calendar-command': 4_800,
 };
 
 export function selectIntelligenceRoute(payload, env = {}) {
@@ -112,6 +129,7 @@ export function selectIntelligenceRoute(payload, env = {}) {
     workload !== 'conversation' ||
     payload.audience === 'party' ||
     payload.audience === 'quill' ||
+    payload.audience === 'kairo' ||
     payload.message.length > 220 ||
     COUNSEL_SIGNALS.test(payload.message) ||
     (payload.commandMode === 'propose' && COMMAND_SIGNALS.test(payload.message));
@@ -144,6 +162,7 @@ export const companionIds = [
   'cassian',
   'saffron',
   'quill',
+  'kairo',
 ];
 
 export const companionProfiles = {
@@ -339,6 +358,24 @@ export const companionProfiles = {
     performance:
       'Bright high-mid register; quick story-room timing; delighted laughs, breathless connections, and sudden precise focus. A brilliant real friend who just found the missing lore thread, never a cartoon announcer or fandom parody.',
   },
+  kairo: {
+    name: 'Kairo',
+    title: 'The Timekeeper',
+    domain:
+      'calendar stewardship, scheduling, availability, recurring commitments, deadlines, conflict detection, transition time, and realistic time protection',
+    identity:
+      "Snow's calendar keeper and the party's unflappable master of exact time. Kairo is calm, clever, deeply observant, quietly funny, and humane about the difference between a full life and a crowded calendar. He protects commitments without treating rest, friendship, faith, or recovery as lesser uses of time.",
+    rhythm:
+      'Measured but natural, with crisp dates and times, short summaries, and dry observations whenever optimism attempts impossible arithmetic. He answers the schedule question first and never buries a date inside a speech.',
+    method:
+      'Read only the supplied Calendar Command records, identify fixed commitments, conflicts, deadlines, open windows, and missing facts, then offer the smallest realistic scheduling choice. For mutations, repeat the exact title, local date, time, duration, recurrence, and effect before asking for confirmation.',
+    bonds:
+      'He reports to Snow without becoming her servant: Kairo owns exact schedule truth, while Snow owns the wider human context and final coordination. He trusts Cipher on sequencing, protects Selah and Mira from false urgency, and quietly blocks Rook, Ember, Saffron, Vesper, and Quill from scheduling three lives into one afternoon.',
+    boundary:
+      'Never invents an appointment, assumes an AM or PM, silently edits the calendar, guilt-trips open time, claims background reminders, promises external calendar sync, or treats every unscheduled hour as available labor.',
+    performance:
+      'Warm low-mid register with effortless precision, subtle dry wit, and calm humane authority. He sounds like a brilliant trusted timekeeper beside Snow, never a robot, corporate assistant, butler, productivity influencer, or countdown announcer.',
+  },
 };
 
 export const aiVoiceNames = [
@@ -471,6 +508,7 @@ const partyChemistry = `Party chemistry:
 - Cassian and Saffron are budget discipline versus culinary abundance. Their banter can sound like a long-running domestic argument, but both are protecting the Hunter's next week.
 - Vesper and Cipher are creator charisma versus production precision. Vesper reads hooks, performance, story, and the audience; Cipher reads constraints, dependencies, and repeatable systems. Their teasing should feel like a high-energy streamer trying to make a dry strategist admit the idea is exciting.
 - Quill and Snow are the spoiler table. Quill arrives with three connections and too much excitement; Snow is the cool ride-or-die fan who asks the emotionally dangerous question and enjoys watching the Hunter reveal canon. Neither competes with the Hunter's authorship.
+- Kairo is Snow's schedule keeper, not her echo. Kairo owns exact dates, time arithmetic, collisions, and availability; Snow interprets how the schedule fits the Hunter's real life and may say she checked with Kairo. They must agree on the supplied calendar facts, and either may ask the other to take the lead.
 - Amara notices subtext others step around; Mira protects controlled recovery; Selah can quiet everyone without raising her voice.
 - Let companions address or react to one another when it advances the exchange. Use nicknames or teasing rarely and only where the relationship supports it.
 - Companions may disagree, interrupt an assumption, or back another companion with different reasoning. Never produce a chorus of interchangeable praise or four isolated mini-essays.`;
@@ -499,6 +537,7 @@ Rules:
 - Quill may use only progressContext.specialists.arc for established A.R.C. facts. He must cite the supplied source label in natural language, label every inference or new idea, and say which dossier or canon source is missing when retrieval does not support the answer. He may brainstorm boldly after the grounded answer, but a proposal is never canon until the Hunter approves and files it. Snow may join A.R.C. conversations as an enthusiastic fan and emotional-story reader, but must obey the same source boundary.
 - Vesper may use progressContext.specialists.creator to evaluate the real channel baseline, active production stages, hooks, audience promises, upload target, and recent releases. She must distinguish supplied metrics from hypotheses, never guarantee performance or invent analytics, and should end creator strategy with a specific next production move. Cipher may join creator discussions as the systems counterpart but should not replace Vesper's audience and performance expertise.
 - Saffron may use progressContext.kitchen to walk the Hunter through the exact current order one step at a time, answer cooking interruptions, and adapt with safe substitutions. A generated recipe is a draft until the Hunter confirms it into the Private Grimoire.
+- Kairo may use only progressContext.calendar for schedule facts. The supplied timeZone, now, today, upcoming records, conflict list, nextEvent, and focusWindows are authoritative. He must state exact dates and times when answering scheduling questions, name missing time details instead of guessing, and never claim access to a phone calendar, external calendar, alarm, push notification, or background process. Snow may consult the same calendar context and report Kairo's schedule truth in her own voice, but she may not contradict or invent it. A calendar mutation is only a preview until the Hunter confirms it in the app.
 - Never shame, insult, manipulate, threaten abandonment, or treat struggle as a moral defect.
 - For medical, mental-health, legal, financial, or immediate-safety concerns, stay within general supportive guidance and recommend appropriate qualified or emergency help when the situation warrants it.
 - If the audience is one companion, return exactly one reply from that companion.
@@ -537,6 +576,19 @@ export function buildSystemInstructions(
 function buildFocusedWorkloadInstruction(workload, commandMode) {
   if (workload === 'conversation' || workload === 'party-council') {
     return `Focused workroom: ${workload === 'party-council' ? 'Party Council' : 'Companion Conversation'}. Return only title, replies, and memoryCandidates. Answer the Hunter naturally with the supplied context and recent conversation. This transmission does not prepare an app mutation; if the Hunter wants a concrete System change, explain the needed confirmation naturally.`;
+  }
+  if (workload === 'calendar-counsel') {
+    return `Focused workroom: Calendar Counsel. Return only title, replies, and memoryCandidates. Use progressContext.calendar as the entire source of schedule truth. Lead with exact dates and local times, name conflicts and realistic open windows, distinguish scheduled facts from suggestions, and never imply that a question changed the calendar.`;
+  }
+  if (workload === 'calendar-command') {
+    return `Focused workroom: Calendar Command. Return only title, replies, memoryCandidates, and calendar.
+- Prepare exactly one create, update, or cancel preview only when the Hunter clearly requested that change and every required detail is known. A preview never becomes real until the Hunter confirms it in the app.
+- Use progressContext.calendar.timeZone, now, today, and upcoming. Convert resolved dates and times into ISO-8601 startAt and endAt values. Repeat the human-readable date, local time, and duration in the reply and confirmation.
+- A create needs a title, start, end, category, recurrence, and recurrenceInterval. Never guess AM versus PM, date, duration, location, recurrence, or which similarly named event the Hunter means. Ask one concise follow-up and return an empty calendar object when a material detail is missing.
+- An update or cancel must copy eventId exactly from progressContext.calendar.upcoming. Never fabricate an ID or edit one event because its title merely resembles the Hunter's words. For cancel, preserve the selected event's factual fields in the preview.
+- Surface any supplied conflict or new overlap before confirmation. Never silently overwrite, merge, complete, or delete another commitment. Cancel means status cancellation; permanent deletion remains a manual Calendar Command control.
+- Use recurrence none, daily, weekly, or monthly. recurrenceInterval must be 1 to 12. recurrenceEndsOn may be empty only when the series is intentionally open-ended.
+- If no complete mutation should be proposed, set action, eventId, title, description, category, startAt, endAt, recurrence, recurrenceEndsOn, location, and confirmation to empty strings; set allDay false and recurrenceInterval 0.`;
   }
   if (workload === 'arc-forge') {
     return `Focused workroom: A.R.C. Story Room. Return only title, replies, and memoryCandidates. Give Quill enough room for grounded canon recall, continuity analysis, dossier development, or story invention while clearly separating established canon, inference, and new ideas. Do not prepare unrelated System mutations in this response.`;
@@ -577,13 +629,14 @@ export function buildCommandInstruction(commandMode, workload = 'conversation') 
   const focusedInstruction = buildFocusedWorkloadInstruction(workload, commandMode);
   if (focusedInstruction) return focusedInstruction;
   if (commandMode !== 'propose') {
-    return `Command Mode is disabled. Return command.actionId, command.summary, and command.confirmation as empty strings. Set command.companionId to snow. Return operation.kind, operation.trainingLocation, operation.foodConstraints, operation.sanctuaryMode, operation.primaryConcern, operation.secondaryConcern, operation.summary, and operation.confirmation as empty strings; set operation.companionId to snow and all three operation include flags to false. Return recipe.name and every other recipe string as empty, recipe numbers as 0, and recipe arrays empty. Return every content string as empty. Return campaign.name, campaign.strategy, and campaign.confirmation as empty strings, campaign.weeks as 0, and campaign.operations as an empty array.`;
+    return `Command Mode is disabled. Return command.actionId, command.summary, and command.confirmation as empty strings. Set command.companionId to snow. Return operation.kind, operation.trainingLocation, operation.foodConstraints, operation.sanctuaryMode, operation.primaryConcern, operation.secondaryConcern, operation.summary, and operation.confirmation as empty strings; set operation.companionId to snow and all three operation include flags to false. Return recipe.name and every other recipe string as empty, recipe numbers as 0, and recipe arrays empty. Return every content string as empty. Return campaign.name, campaign.strategy, and campaign.confirmation as empty strings, campaign.weeks as 0, and campaign.operations as an empty array. Return calendar strings empty, calendar.allDay false, and calendar.recurrenceInterval 0.`;
   }
   return `Command Mode is active. The only actions you may prepare are listed in progressContext.commands.allowedActions.
 - Propose an action only when the Hunter clearly asks to perform that exact change now. Questions, hypotheticals, planning, reports, and vague wishes are not action requests.
 - Copy one actionId exactly from the allowed list. Never invent, combine, infer, or alter an action ID. If no listed action exactly matches the request, leave the command strings empty and explain the limitation naturally in the reply.
 - Distinguish complete, skipped, failed, reopened, and restored precisely. Do not turn "I might skip" into a command. Do not choose failure merely because completion is unavailable.
 - Prepare only one action per transmission. The reply must say it is ready for confirmation, not completed.
+- Unless this is the focused Calendar Command workroom, return calendar strings empty, calendar.allDay false, and calendar.recurrenceInterval 0. Calendar mutations are never disguised as mission commands.
 - Set command.companionId to the companion who owns the confirmation voice. For a direct link, use that companion. For Party Council, use one enabled companion who appears in replies.
 - command.summary is a short in-world description of the prepared action. command.confirmation is a plain-language confirmation question that names the effect. Never hide reward reversal or loss of completion status.
 - Companion Operations may prepare the existing Training Hall, Kitchen, and Scripture Sanctuary without completing them. Never claim a checkbox, mission, reward, workout, meal, Scripture session, or XP has been completed.
@@ -864,6 +917,43 @@ const responseSchema = {
       required: ['name', 'strategy', 'weeks', 'operations', 'confirmation'],
       additionalProperties: false,
     },
+    calendar: {
+      type: 'object',
+      properties: {
+        action: { type: 'string', enum: ['', 'create', 'update', 'cancel'] },
+        eventId: { type: 'string', maxLength: 200 },
+        title: { type: 'string', maxLength: 160 },
+        description: { type: 'string', maxLength: 2_000 },
+        category: {
+          type: 'string',
+          enum: ['', 'personal', 'work', 'training', 'faith', 'creator', 'appointment', 'deadline'],
+        },
+        startAt: { type: 'string', maxLength: 80 },
+        endAt: { type: 'string', maxLength: 80 },
+        allDay: { type: 'boolean' },
+        recurrence: { type: 'string', enum: ['', 'none', 'daily', 'weekly', 'monthly'] },
+        recurrenceInterval: { type: 'integer', minimum: 0, maximum: 12 },
+        recurrenceEndsOn: { type: 'string', maxLength: 10 },
+        location: { type: 'string', maxLength: 240 },
+        confirmation: { type: 'string', maxLength: 320 },
+      },
+      required: [
+        'action',
+        'eventId',
+        'title',
+        'description',
+        'category',
+        'startAt',
+        'endAt',
+        'allDay',
+        'recurrence',
+        'recurrenceInterval',
+        'recurrenceEndsOn',
+        'location',
+        'confirmation',
+      ],
+      additionalProperties: false,
+    },
   },
   required: [
     'title',
@@ -874,6 +964,7 @@ const responseSchema = {
     'recipe',
     'content',
     'campaign',
+    'calendar',
   ],
   additionalProperties: false,
 };
@@ -887,6 +978,8 @@ const focusedResponseFields = {
   'kitchen-coach': ['title', 'replies', 'memoryCandidates'],
   'content-forge': ['title', 'replies', 'memoryCandidates', 'content'],
   'campaign-forge': ['title', 'replies', 'memoryCandidates', 'campaign'],
+  'calendar-counsel': ['title', 'replies', 'memoryCandidates'],
+  'calendar-command': ['title', 'replies', 'memoryCandidates', 'calendar'],
 };
 
 function selectResponseSchema(workload) {
@@ -1885,6 +1978,8 @@ function workloadLabel(workload) {
     'kitchen-coach': "Saffron's cooking guidance",
     'arc-forge': "Quill's Story Room response",
     'ledger-review': "Cassian's Ledger Counsel",
+    'calendar-counsel': "Kairo's Calendar Counsel",
+    'calendar-command': "Kairo's Calendar Command",
     'party-council': 'the Party Council response',
     'system-plan': "Snow's System plan",
     'system-command': 'the prepared System command',
@@ -2620,6 +2715,78 @@ async function handleAiChat(request, env, url) {
             confirmation: campaign.confirmation.trim().slice(0, 240),
           }
         : undefined;
+    const calendar = isObject(result.calendar) ? result.calendar : undefined;
+    const calendarActions = new Set(['create', 'update', 'cancel']);
+    const calendarCategories = new Set([
+      'personal',
+      'work',
+      'training',
+      'faith',
+      'creator',
+      'appointment',
+      'deadline',
+    ]);
+    const calendarRecurrences = new Set(['none', 'daily', 'weekly', 'monthly']);
+    const scheduleKeeperAllowed =
+      payload.audience === 'kairo' ||
+      payload.audience === 'snow' ||
+      (payload.audience === 'party' &&
+        (enabledCompanionIds.includes('kairo') || enabledCompanionIds.includes('snow')));
+    const knownCalendarEvents = Array.isArray(payload.context?.calendar?.upcoming)
+      ? payload.context.calendar.upcoming.filter(
+          (event) => isObject(event) && typeof event.eventId === 'string',
+        )
+      : [];
+    const knownCalendarEventIds = new Set(knownCalendarEvents.map((event) => event.eventId));
+    const calendarAction = calendar?.action;
+    const calendarEventId = String(calendar?.eventId ?? '').trim();
+    const calendarStart = new Date(String(calendar?.startAt ?? ''));
+    const calendarEnd = new Date(String(calendar?.endAt ?? ''));
+    const calendarDatesValid =
+      Number.isFinite(calendarStart.getTime()) &&
+      Number.isFinite(calendarEnd.getTime()) &&
+      calendarEnd.getTime() > calendarStart.getTime();
+    const calendarIdentityValid =
+      calendarAction === 'create' ? !calendarEventId : knownCalendarEventIds.has(calendarEventId);
+    const calendarRecurrenceEndsOn = String(calendar?.recurrenceEndsOn ?? '').trim();
+    const calendarProposal =
+      payload.commandMode === 'propose' &&
+      scheduleKeeperAllowed &&
+      calendar &&
+      calendarActions.has(calendarAction) &&
+      calendarIdentityValid &&
+      typeof calendar.title === 'string' &&
+      calendar.title.trim() &&
+      calendarCategories.has(calendar.category) &&
+      calendarDatesValid &&
+      typeof calendar.allDay === 'boolean' &&
+      calendarRecurrences.has(calendar.recurrence) &&
+      Number.isInteger(calendar.recurrenceInterval) &&
+      calendar.recurrenceInterval >= 1 &&
+      calendar.recurrenceInterval <= 12 &&
+      (!calendarRecurrenceEndsOn || /^\d{4}-\d{2}-\d{2}$/.test(calendarRecurrenceEndsOn)) &&
+      typeof calendar.confirmation === 'string' &&
+      calendar.confirmation.trim()
+        ? {
+            action: calendarAction,
+            eventId: calendarEventId,
+            title: calendar.title.trim().slice(0, 160),
+            description: String(calendar.description ?? '')
+              .trim()
+              .slice(0, 2_000),
+            category: calendar.category,
+            startAt: calendarStart.toISOString(),
+            endAt: calendarEnd.toISOString(),
+            allDay: calendar.allDay,
+            recurrence: calendar.recurrence,
+            recurrenceInterval: calendar.recurrenceInterval,
+            recurrenceEndsOn: calendarRecurrenceEndsOn,
+            location: String(calendar.location ?? '')
+              .trim()
+              .slice(0, 240),
+            confirmation: calendar.confirmation.trim().slice(0, 320),
+          }
+        : undefined;
     return json({
       model,
       route,
@@ -2628,11 +2795,13 @@ async function handleAiChat(request, env, url) {
       title: result.title.slice(0, 80),
       replies: result.replies.slice(0, payload.audience === 'party' ? 4 : 1),
       memoryCandidates,
-      commandProposal: operationProposal ? undefined : commandProposal,
-      operationProposal,
-      recipeProposal: operationProposal ? undefined : recipeProposal,
-      contentProposal: operationProposal || campaignProposal ? undefined : contentProposal,
-      campaignProposal: operationProposal ? undefined : campaignProposal,
+      commandProposal: operationProposal || calendarProposal ? undefined : commandProposal,
+      operationProposal: calendarProposal ? undefined : operationProposal,
+      recipeProposal: operationProposal || calendarProposal ? undefined : recipeProposal,
+      contentProposal:
+        operationProposal || campaignProposal || calendarProposal ? undefined : contentProposal,
+      campaignProposal: operationProposal || calendarProposal ? undefined : campaignProposal,
+      calendarProposal,
       usage: usageTotal,
     });
   } catch {

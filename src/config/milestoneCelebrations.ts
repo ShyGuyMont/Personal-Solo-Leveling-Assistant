@@ -155,6 +155,20 @@ const MILESTONE_LINES: Record<CompanionId, Record<'rank' | 'level' | 'achievemen
       'Achievement recorded. The story changed because you kept writing it with actual choices.',
     ],
   },
+  kairo: {
+    rank: [
+      'New class confirmed. Snow has the celebration; I protected the time. Do not schedule over your own victory.',
+      'Classification advanced. The timeline now has a clean before and after.',
+    ],
+    level: [
+      'Threshold crossed. Time did not become easier; your use of it became stronger.',
+      'Level milestone secured. The calendar has been collecting the proof one kept promise at a time.',
+    ],
+    achievement: [
+      'Achievement recorded. This is why I refuse to label every open hour as unfinished work.',
+      'Proof secured in the timeline. Pause long enough to recognize what changed.',
+    ],
+  },
 };
 
 function hash(value: string) {
@@ -185,6 +199,7 @@ export function getMilestoneCelebration(event: ProgressionEvent) {
       'cassian',
       'saffron',
       'quill',
+      'kairo',
     ] as CompanionId[]
   ).map((companionId) => {
     const pool = MILESTONE_LINES[companionId][kind];

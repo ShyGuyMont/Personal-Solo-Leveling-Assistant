@@ -1,5 +1,6 @@
 import {
   ArrowUpRight,
+  CalendarCheck2,
   Check,
   Headphones,
   LoaderCircle,
@@ -29,6 +30,7 @@ import {
   saveAiMemoryCandidates,
 } from '@/game/aiHeadquarters';
 import { buildAiProgressContext } from '@/game/aiContext';
+import { applyCalendarProposal } from '@/game/calendar';
 import { saveCreatorCampaign, saveCreatorProject } from '@/game/creatorForge';
 import {
   addDailyOperationNote,
@@ -102,6 +104,9 @@ export function CompanionQuickLink() {
     useState<NonNullable<AiHeadquartersReply['contentProposal']>>();
   const [pendingCampaign, setPendingCampaign] =
     useState<NonNullable<AiHeadquartersReply['campaignProposal']>>();
+  const [pendingCalendar, setPendingCalendar] =
+    useState<NonNullable<AiHeadquartersReply['calendarProposal']>>();
+  const [pendingCalendarOwner, setPendingCalendarOwner] = useState<'kairo' | 'snow'>('kairo');
   const [executingAction, setExecutingAction] = useState(false);
   const [continuityTurns, setContinuityTurns] = useState(0);
   const [activeCompanionId, setActiveCompanionId] = useState<CompanionId>('snow');
@@ -181,6 +186,7 @@ export function CompanionQuickLink() {
       setPendingRecipe(undefined);
       setPendingContent(undefined);
       setPendingCampaign(undefined);
+      setPendingCalendar(undefined);
       setDraft(typeof detail.initialDraft === 'string' ? detail.initialDraft.slice(0, 4_000) : '');
       setContinuityTurns(0);
       setLinkMode('command');
@@ -263,6 +269,7 @@ export function CompanionQuickLink() {
       setPendingRecipe(undefined);
       setPendingContent(undefined);
       setPendingCampaign(undefined);
+      setPendingCalendar(undefined);
       setSending(true);
       setNotice(
         addressed.audience === 'party'
@@ -385,12 +392,19 @@ export function CompanionQuickLink() {
           setPendingCampaign(result.campaignProposal);
           setActiveCompanionId('haven');
         }
+        if (result.calendarProposal) {
+          const owner = addressed.audience === 'snow' ? 'snow' : 'kairo';
+          setPendingCalendar(result.calendarProposal);
+          setPendingCalendarOwner(owner);
+          setActiveCompanionId(owner);
+        }
         setNotice(
           proposedAction ||
             result.operationProposal ||
             result.recipeProposal ||
             result.contentProposal ||
-            result.campaignProposal
+            result.campaignProposal ||
+            result.calendarProposal
             ? 'Command prepared. Nothing changes until you confirm it below.'
             : result.route === 'sovereign'
               ? `${result.model} · Sovereign counsel route`
@@ -839,6 +853,50 @@ export function CompanionQuickLink() {
     }
   }
 
+  async function savePendingCalendar() {
+    if (!pendingCalendar || executingAction || executionLockRef.current) return;
+    executionLockRef.current = true;
+    setExecutingAction(true);
+    let saved = false;
+    try {
+      const event = await applyCalendarProposal(pendingCalendar, pendingCalendarOwner);
+      saved = true;
+      setPendingCalendar(undefined);
+      const localDateTime = new Intl.DateTimeFormat('en-US', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        hour: pendingCalendar.allDay ? undefined : 'numeric',
+        minute: pendingCalendar.allDay ? undefined : '2-digit',
+        timeZone: settings?.timeZone,
+      }).format(new Date(pendingCalendar.startAt));
+      const actionLine =
+        pendingCalendar.action === 'create'
+          ? `${event.title} is secured for ${localDateTime}.`
+          : pendingCalendar.action === 'update'
+            ? `${event.title} is updated for ${localDateTime}.`
+            : `${event.title} is canceled. The record remains visible instead of disappearing.`;
+      await appendLocalAcknowledgement(
+        pendingCalendarOwner,
+        pendingCalendarOwner === 'snow'
+          ? `${actionLine} Kairo has the same confirmed record now.`
+          : `${actionLine} Snow's schedule view is synchronized too.`,
+      );
+      setNotice('Calendar command confirmed · local schedule synchronized.');
+    } catch (error) {
+      setNotice(
+        saved
+          ? 'Calendar changed locally. Only the companion acknowledgement failed to save.'
+          : error instanceof Error
+            ? error.message
+            : 'That calendar command could not be applied.',
+      );
+    } finally {
+      executionLockRef.current = false;
+      setExecutingAction(false);
+    }
+  }
+
   async function beginListening() {
     if (
       !deviceOnline ||
@@ -942,6 +1000,7 @@ export function CompanionQuickLink() {
     setPendingRecipe(undefined);
     setPendingContent(undefined);
     setPendingCampaign(undefined);
+    setPendingCalendar(undefined);
     setLinkMode(next);
     setNotice(
       next === 'live'
@@ -1528,6 +1587,116 @@ export function CompanionQuickLink() {
                       onClick={() => {
                         setPendingCampaign(undefined);
                         setNotice('Campaign dismissed. Creator Forge was not changed.');
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </section>
+              )}
+
+              {linkMode === 'command' && pendingCalendar && (
+                <section
+                  className="quick-link__command quick-link__calendar-command"
+                  aria-live="polite"
+                >
+                  <header>
+                    <span>
+                      <CalendarCheck2 size={15} />{' '}
+                      {pendingCalendarOwner === 'snow'
+                        ? "SNOW + KAIRO'S SCHEDULE LINK"
+                        : "KAIRO'S CALENDAR COMMAND"}
+                    </span>
+                    <small>PREVIEW · CONFIRMATION REQUIRED</small>
+                  </header>
+                  <strong>{pendingCalendar.title}</strong>
+                  <p>{pendingCalendar.description || pendingCalendar.confirmation}</p>
+                  <div className="quick-link__recipe-meta">
+                    <span>{pendingCalendar.action}</span>
+                    <span>{pendingCalendar.category}</span>
+                    <span>
+                      {pendingCalendar.allDay
+                        ? new Intl.DateTimeFormat('en-US', {
+                            weekday: 'short',
+                            month: 'short',
+                            day: 'numeric',
+                            timeZone: settings?.timeZone,
+                          }).format(new Date(pendingCalendar.startAt))
+                        : new Intl.DateTimeFormat('en-US', {
+                            weekday: 'short',
+                            month: 'short',
+                            day: 'numeric',
+                            hour: 'numeric',
+                            minute: '2-digit',
+                            timeZone: settings?.timeZone,
+                          }).format(new Date(pendingCalendar.startAt))}
+                    </span>
+                    {pendingCalendar.recurrence !== 'none' && (
+                      <span>
+                        every{' '}
+                        {pendingCalendar.recurrenceInterval > 1
+                          ? `${pendingCalendar.recurrenceInterval} `
+                          : ''}
+                        {pendingCalendar.recurrence.replace('ly', '')}
+                      </span>
+                    )}
+                  </div>
+                  <dl>
+                    <div>
+                      <dt>TIME WINDOW</dt>
+                      <dd>
+                        {pendingCalendar.allDay
+                          ? 'Protected for the complete day'
+                          : `${new Intl.DateTimeFormat('en-US', {
+                              hour: 'numeric',
+                              minute: '2-digit',
+                              timeZone: settings?.timeZone,
+                            }).format(new Date(pendingCalendar.startAt))}–${new Intl.DateTimeFormat(
+                              'en-US',
+                              {
+                                hour: 'numeric',
+                                minute: '2-digit',
+                                timeZone: settings?.timeZone,
+                              },
+                            ).format(new Date(pendingCalendar.endAt))}`}
+                      </dd>
+                    </div>
+                    {pendingCalendar.location && (
+                      <div>
+                        <dt>LOCATION</dt>
+                        <dd>{pendingCalendar.location}</dd>
+                      </div>
+                    )}
+                    <div>
+                      <dt>COMPANION CHECK</dt>
+                      <dd>{pendingCalendar.confirmation}</dd>
+                    </div>
+                  </dl>
+                  <div className="quick-link__command-actions">
+                    <button
+                      type="button"
+                      className="button button--primary"
+                      disabled={executingAction}
+                      onClick={() => void savePendingCalendar()}
+                    >
+                      {executingAction ? (
+                        <LoaderCircle className="is-spinning" size={15} />
+                      ) : (
+                        <Check size={15} />
+                      )}
+                      {pendingCalendar.action === 'cancel'
+                        ? 'Confirm cancellation'
+                        : pendingCalendar.action === 'update'
+                          ? 'Confirm changes'
+                          : 'Add to Calendar'}
+                    </button>
+                    <button
+                      type="button"
+                      className="button button--ghost"
+                      disabled={executingAction}
+                      onClick={() => {
+                        setPendingCalendar(undefined);
+                        setNotice('Calendar preview dismissed. No schedule record changed.');
                       }}
                     >
                       Cancel
