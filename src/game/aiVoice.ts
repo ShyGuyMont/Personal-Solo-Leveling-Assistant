@@ -10,7 +10,12 @@ export interface AiUsageTotals {
   estimatedCostUsd: number;
   calls: number;
   inputTokens: number;
+  cachedInputTokens: number;
   outputTokens: number;
+  reasoningTokens: number;
+  audioInputTokens: number;
+  cachedAudioInputTokens: number;
+  audioOutputTokens: number;
   totalTokens: number;
   characters: number;
   audioSeconds: number;
@@ -21,13 +26,19 @@ export interface AiUsageSummary {
   today: AiUsageTotals;
   month: AiUsageTotals;
   byKind: Record<AiUsageKind, AiUsageTotals>;
+  byModel: Record<string, AiUsageTotals>;
 }
 
 const EMPTY_TOTALS: AiUsageTotals = {
   estimatedCostUsd: 0,
   calls: 0,
   inputTokens: 0,
+  cachedInputTokens: 0,
   outputTokens: 0,
+  reasoningTokens: 0,
+  audioInputTokens: 0,
+  cachedAudioInputTokens: 0,
+  audioOutputTokens: 0,
   totalTokens: 0,
   characters: 0,
   audioSeconds: 0,
@@ -39,7 +50,12 @@ function total(records: AiUsageRecord[]): AiUsageTotals {
       estimatedCostUsd: sum.estimatedCostUsd + record.estimatedCostUsd,
       calls: sum.calls + 1,
       inputTokens: sum.inputTokens + record.inputTokens,
+      cachedInputTokens: sum.cachedInputTokens + (record.cachedInputTokens ?? 0),
       outputTokens: sum.outputTokens + record.outputTokens,
+      reasoningTokens: sum.reasoningTokens + (record.reasoningTokens ?? 0),
+      audioInputTokens: sum.audioInputTokens + (record.audioInputTokens ?? 0),
+      cachedAudioInputTokens: sum.cachedAudioInputTokens + (record.cachedAudioInputTokens ?? 0),
+      audioOutputTokens: sum.audioOutputTokens + (record.audioOutputTokens ?? 0),
       totalTokens: sum.totalTokens + record.totalTokens,
       characters: sum.characters + record.characters,
       audioSeconds: sum.audioSeconds + record.audioSeconds,
@@ -92,13 +108,19 @@ export async function recordAiUsage(
     id: input.id ?? crypto.randomUUID(),
     createdAt: input.createdAt ?? new Date().toISOString(),
     inputTokens: Math.max(0, Math.round(input.inputTokens || 0)),
+    cachedInputTokens: Math.max(0, Math.round(input.cachedInputTokens || 0)),
     outputTokens: Math.max(0, Math.round(input.outputTokens || 0)),
+    reasoningTokens: Math.max(0, Math.round(input.reasoningTokens || 0)),
+    audioInputTokens: Math.max(0, Math.round(input.audioInputTokens || 0)),
+    cachedAudioInputTokens: Math.max(0, Math.round(input.cachedAudioInputTokens || 0)),
+    audioOutputTokens: Math.max(0, Math.round(input.audioOutputTokens || 0)),
     totalTokens: Math.max(0, Math.round(input.totalTokens || 0)),
     characters: Math.max(0, Math.round(input.characters || 0)),
     audioSeconds: Math.max(0, Number((input.audioSeconds || 0).toFixed(2))),
     estimatedCostUsd: Math.max(0, Number((input.estimatedCostUsd || 0).toFixed(8))),
   };
   await db.aiUsageRecords.put(record);
+  if (typeof window !== 'undefined') window.dispatchEvent(new Event('system:ai-usage-changed'));
   return record;
 }
 
@@ -106,33 +128,57 @@ export async function getAiUsageSummary(sessionId: string, now = new Date()) {
   const records = await db.aiUsageRecords.toArray();
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
-  const byKind = (['text', 'transcription', 'speech'] as AiUsageKind[]).reduce(
+  const todayRecords = records.filter(
+    (record) => validDate(record.createdAt).getTime() >= todayStart,
+  );
+  const monthRecords = records.filter(
+    (record) => validDate(record.createdAt).getTime() >= monthStart,
+  );
+  const byKind = (['text', 'transcription', 'speech', 'realtime'] as AiUsageKind[]).reduce(
     (result, kind) => {
-      result[kind] = total(records.filter((record) => record.kind === kind));
+      result[kind] = total(monthRecords.filter((record) => record.kind === kind));
       return result;
     },
     {} as Record<AiUsageKind, AiUsageTotals>,
   );
+  const recordsByModel = monthRecords.reduce<Record<string, AiUsageRecord[]>>((result, record) => {
+    (result[record.model] ??= []).push(record);
+    return result;
+  }, {});
+  const byModel = Object.fromEntries(
+    Object.entries(recordsByModel).map(([model, modelRecords]) => [model, total(modelRecords)]),
+  );
 
   return {
     session: total(records.filter((record) => record.sessionId === sessionId)),
-    today: total(records.filter((record) => validDate(record.createdAt).getTime() >= todayStart)),
-    month: total(records.filter((record) => validDate(record.createdAt).getTime() >= monthStart)),
+    today: total(todayRecords),
+    month: total(monthRecords),
     byKind,
+    byModel,
   } satisfies AiUsageSummary;
 }
 
-const TEXT_PRICES: Record<string, { input: number; output: number }> = {
-  'gpt-5.6-luna': { input: 1, output: 6 },
-  'gpt-5.6-terra': { input: 2.5, output: 15 },
-  'gpt-5.6-sol': { input: 5, output: 30 },
-  'gpt-5.6': { input: 5, output: 30 },
+const TEXT_PRICES: Record<string, { input: number; cachedInput: number; output: number }> = {
+  'gpt-5.6-luna': { input: 0.2, cachedInput: 0.02, output: 1.2 },
+  'gpt-5.6-terra': { input: 2, cachedInput: 0.2, output: 12 },
+  'gpt-5.6-sol': { input: 5, cachedInput: 0.5, output: 30 },
+  'gpt-5.6': { input: 5, cachedInput: 0.5, output: 30 },
 };
 
-export function estimateTextCostUsd(model: string, inputTokens: number, outputTokens: number) {
+export function estimateTextCostUsd(
+  model: string,
+  inputTokens: number,
+  outputTokens: number,
+  cachedInputTokens = 0,
+) {
   const price = TEXT_PRICES[model] ?? TEXT_PRICES['gpt-5.6-luna'];
+  const cached = Math.min(Math.max(0, cachedInputTokens), Math.max(0, inputTokens));
+  const uncached = Math.max(0, inputTokens) - cached;
   return (
-    (Math.max(0, inputTokens) * price.input + Math.max(0, outputTokens) * price.output) / 1_000_000
+    (uncached * price.input +
+      cached * price.cachedInput +
+      Math.max(0, outputTokens) * price.output) /
+    1_000_000
   );
 }
 
@@ -142,6 +188,63 @@ export function estimateTranscriptionCostUsd(audioSeconds: number) {
 
 export function estimateSpeechCostUsd(characters: number) {
   return (Math.max(0, characters) / 1_000_000) * 15;
+}
+
+const REALTIME_PRICES: Record<
+  string,
+  {
+    textInput: number;
+    cachedTextInput: number;
+    textOutput: number;
+    audioInput: number;
+    cachedAudioInput: number;
+    audioOutput: number;
+  }
+> = {
+  'gpt-realtime-2.1-mini': {
+    textInput: 0.6,
+    cachedTextInput: 0.06,
+    textOutput: 2.4,
+    audioInput: 10,
+    cachedAudioInput: 0.3,
+    audioOutput: 20,
+  },
+  'gpt-realtime-2.1': {
+    textInput: 4,
+    cachedTextInput: 0.4,
+    textOutput: 24,
+    audioInput: 32,
+    cachedAudioInput: 0.4,
+    audioOutput: 64,
+  },
+};
+
+export function estimateRealtimeCostUsd(input: {
+  model: string;
+  inputTokens: number;
+  cachedInputTokens?: number;
+  outputTokens: number;
+  audioInputTokens?: number;
+  cachedAudioInputTokens?: number;
+  audioOutputTokens?: number;
+}) {
+  const price = REALTIME_PRICES[input.model] ?? REALTIME_PRICES['gpt-realtime-2.1-mini'];
+  const audioInput = Math.min(input.audioInputTokens ?? 0, input.inputTokens);
+  const audioOutput = Math.min(input.audioOutputTokens ?? 0, input.outputTokens);
+  const textInput = Math.max(0, input.inputTokens - audioInput);
+  const textOutput = Math.max(0, input.outputTokens - audioOutput);
+  const cachedAudio = Math.min(input.cachedAudioInputTokens ?? 0, audioInput);
+  const cachedAll = Math.min(input.cachedInputTokens ?? 0, input.inputTokens);
+  const cachedText = Math.min(Math.max(0, cachedAll - cachedAudio), textInput);
+  return (
+    ((textInput - cachedText) * price.textInput +
+      cachedText * price.cachedTextInput +
+      textOutput * price.textOutput +
+      (audioInput - cachedAudio) * price.audioInput +
+      cachedAudio * price.cachedAudioInput +
+      audioOutput * price.audioOutput) /
+    1_000_000
+  );
 }
 
 export function formatEstimatedSpend(value: number) {

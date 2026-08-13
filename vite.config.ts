@@ -45,6 +45,7 @@ export default defineConfig({
         cleanupOutdatedCaches: true,
         globPatterns: ['**/*.{js,css,html,ico,jpg,jpeg,png,webp,woff2,ttf}'],
         navigateFallback: 'index.html',
+        navigateFallbackDenylist: [/^\/api\//],
       },
       devOptions: {
         enabled: true,
@@ -66,6 +67,7 @@ export default defineConfig({
             return 'react-vendor';
           }
           if (id.includes('/dexie/') || id.includes('/zustand/')) return 'data-vendor';
+          if (id.includes('/lucide-react/')) return 'ui-vendor';
           return undefined;
         },
       },

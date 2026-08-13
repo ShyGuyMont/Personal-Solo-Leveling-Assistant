@@ -81,9 +81,9 @@ const BASE_SUPPORT_DIALOGUE: Record<
       'Motivation is an unreliable contractor. Fortunately, we only need a defined task, a short timer, and permission to stop afterward.',
     ],
     haven: [
-      'Make the next step kind enough that you can actually take it. Progress built with self-respect lasts longer than progress built through contempt.',
-      'Low energy changes the size of the step, not your right to begin. Choose something gentle, specific, and finishable.',
-      'You do not have to bully yourself into motion. Clear a little space, take one breath, and choose the next caring action.',
+      'Motivation can wait backstage. Give the creator board one tiny visible move: a title, a voice note, or the first ten seconds.',
+      'Your audience cannot connect with perfect intentions. Choose one idea with a real promise and move it one production stage.',
+      'No creator montage required. Open the file, make one decision, and let the next decision meet you there.',
     ],
     ember: [
       'Lock in on one target, not the whole mountain. Make it small enough to start now and meaningful enough to count.',
@@ -123,9 +123,9 @@ const BASE_SUPPORT_DIALOGUE: Record<
       'Estimate each task, cut the optimistic numbers in half, then double the time. Congratulations, the schedule is now acquainted with reality.',
     ],
     haven: [
-      'Build a plan that the tired version of you can still follow. A humane plan survives contact with a real day.',
-      'Include recovery as an action, not a reward you must earn after depletion. Rest placed on purpose protects everything around it.',
-      'If the list still feels crushing, remove one item without apology. Capacity is information, not a character flaw.',
+      'Creator plan: audience, promise, hook, next action. If a step does not move one of those, Cipher can explain why it is decorative.',
+      'Choose one flagship operation and one low-energy backup. Your content system should survive a real week, not an imaginary studio retreat.',
+      'Put the release on the board, then work backward until today has one physical task you can actually finish.',
     ],
     ember: [
       'Cut it down to one must-hit target, one backup, and a stopping point. Everything else can wait outside the ring.',
@@ -165,9 +165,9 @@ const BASE_SUPPORT_DIALOGUE: Record<
       'The plan serves the mission; the mission does not own you. Reconnect the task to its reason, or revise it if the reason no longer holds.',
     ],
     haven: [
-      'Make room for grief, uncertainty, or disappointment without treating them as spiritual failure. Honest feelings can sit beside living faith.',
-      'Grace is not a loophole in the journey. It is part of the ground you are walking on, especially when your footing feels weak.',
-      'Return to what is gentle and true: you are allowed to need help, to pause, and to begin again without earning permission.',
+      'If faith is part of the story, do not package it into certainty you do not have. Honest wrestling can serve people better than a polished answer.',
+      'Your creator voice does not have to perform wisdom. Let Selah guard the Scripture and let your lived question remain honest.',
+      'Make the message human before you make it impressive. The audience can feel when truth has been edited into a pose.',
     ],
     ember: [
       'Your faith does not become fake because the week got messy. Return honestly, receive grace, and let the next faithful act burn clean.',
@@ -207,9 +207,9 @@ const BASE_SUPPORT_DIALOGUE: Record<
       'Do not solve hypothetical disasters while activated. Record them for later analysis; right now the task is one breath and one physical anchor.',
     ],
     haven: [
-      'Name five things you can see, then notice where your body is supported. We are reminding the present moment that you are here with it.',
-      'You do not have to justify needing calm. Reduce the noise, soften the demand, and choose the safest gentle thing available.',
-      'If someone trustworthy is nearby, consider telling them you could use a little company. Regulation does not always have to be solitary.',
+      'Close the analytics. The audience is not grading this breath. Decide whether today is for making, packaging, or stepping away.',
+      'Camera off. Shoulders down. The channel survives a pause, and the creator matters more than the dashboard.',
+      'You do not have to solve your whole content future while overwhelmed. Preserve the idea, leave one next-action note, and exit the greenroom cleanly.',
     ],
     ember: [
       'Nothing gets solved while every alarm is screaming. Put both feet down, breathe out slowly, and cancel every nonessential decision.',
@@ -249,9 +249,9 @@ const BASE_SUPPORT_DIALOGUE: Record<
       'Do not restart at maximum difficulty. Re-establish the process at a level you can repeat, then scale after stability returns.',
     ],
     haven: [
-      'Recovery is not time stolen from progress. It is how progress becomes survivable. Choose what would help you feel safe enough to begin again.',
-      'Speak to yourself as you would to someone you love after the same day. Keep the accountability; remove the cruelty.',
-      'Repair what you can, release what you cannot repair tonight, and let rest be part of the response rather than an escape from it.',
+      'No apology upload. Restart the creator signal with one honest move small enough to finish before fear builds a new strategy deck.',
+      'A break in publishing is data, not identity. Name what broke—idea supply, energy, production, packaging, or nerve—and repair only that link.',
+      'Return quietly if you need to. The audience does not require a rebrand; it requires something real enough to meet.',
     ],
     ember: [
       'We are not building a comeback out of self-hatred. Keep the lesson, protect the person, and choose one reachable re-entry move.',
@@ -291,9 +291,9 @@ const BASE_SUPPORT_DIALOGUE: Record<
       'A measurable win with emotional significance. Rare, efficient, and entirely deserved. I recommend celebration before optimization resumes.',
     ],
     haven: [
-      'Let the good feeling land in your body. You are allowed to be proud without turning the moment into pressure to perform again immediately.',
-      'Notice who helped, what you learned, and what this says about your capacity. Joy can be part of recovery too.',
-      'Save this memory carefully. On a hard day, it may remind you that your life contains more than the hardest chapter.',
+      'Roll the victory clip. What made people stop, stay, or respond—and what part felt most like you?',
+      'Celebrate the release before the dashboard becomes a judge. Then save one lesson for the next operation.',
+      'The creator showed up and the work became public. That deserves a spotlight, not an immediate demand for the sequel.',
     ],
     ember: [
       'That is what I am talking about. Do not mumble the victory—name what you did and let yourself own the heat.',

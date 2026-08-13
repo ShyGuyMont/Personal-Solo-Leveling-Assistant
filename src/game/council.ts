@@ -65,24 +65,29 @@ function selahCouncil(metrics: MonthlyCouncilMetrics) {
 }
 
 function cipherCouncil(metrics: MonthlyCouncilMetrics) {
-  const execution = categoryCount(metrics, 'discipline') + categoryCount(metrics, 'creator');
+  const execution = categoryCount(metrics, 'discipline');
   return execution
     ? [
-        `${execution} Discipline and Creator missions converted intention into evidence. Preserve the process that shipped; redesign any step that repeatedly required ideal conditions.`,
+        `${execution} Discipline missions converted intention into evidence. Preserve the process that held; redesign any step that repeatedly required ideal conditions.`,
         `Execution total: ${execution}. The next campaign should have one visible priority, a smaller definition of done, and fewer simultaneous fronts.`,
         `${execution} output-oriented objectives cleared. We now possess enough data to repeat what worked and stop romanticizing the bottlenecks.`,
       ]
     : [
-        'No Discipline or Creator completion entered the monthly record. Recommendation: choose one tiny artifact with a visible finish line and permit an imperfect first version.',
+        'No Discipline completion entered the monthly record. Recommendation: choose one tiny artifact with a visible finish line and permit an imperfect first version.',
       ];
 }
 
 function havenCouncil(metrics: MonthlyCouncilMetrics) {
-  return [
-    `${metrics.recordedDays} days were faced honestly enough to finalize. Whatever the rate, the person carrying the record deserves a plan that can survive contact with a real life.`,
-    `This month included ${metrics.perfectDays} Perfect Day${metrics.perfectDays === 1 ? '' : 's'}, but I am equally interested in the imperfect days you reviewed without disappearing. That is whole-person progress.`,
-    `The record has edges and limits, which means it belongs to a human life. Keep accountability; remove any plan that requires cruelty to function.`,
-  ];
+  const creator = categoryCount(metrics, 'creator');
+  return creator
+    ? [
+        `${creator} Creator missions hit the board this month. Now tell me which hook, format, or story earned the strongest response—and which draft is still hiding backstage.`,
+        `Creator signal: ${creator}. Good. Preserve the voice people recognize, sharpen the audience promise, and give next month one release worth building toward.`,
+        `${creator} pieces of creator proof became real. Cipher will study the system; I want the courage, personality, and audience connection to survive the optimization.`,
+      ]
+    : [
+        'The creator signal was quiet this month. No apology campaign. Open the greenroom, choose one idea people would genuinely care about, and move it one visible stage.',
+      ];
 }
 
 function emberCouncil(metrics: MonthlyCouncilMetrics) {

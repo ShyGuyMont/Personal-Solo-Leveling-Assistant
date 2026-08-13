@@ -1,11 +1,6 @@
 import { db } from '@/db/database';
 import { createId } from '@/utils/id';
-import type {
-  ArcMilestone,
-  CampaignArc,
-  CompanionId,
-  LocalDateKey,
-} from '@/types/game';
+import type { ArcMilestone, CampaignArc, CompanionId, LocalDateKey } from '@/types/game';
 
 export interface CampaignArcDraft {
   name: string;

@@ -67,7 +67,9 @@ export async function decodeAudioBlob(blob: Blob) {
   try {
     return await context.decodeAudioData(await blob.arrayBuffer());
   } catch {
-    throw new Error('This browser could not decode the companion voice. Reload the update and try again.');
+    throw new Error(
+      'This browser could not decode the companion voice. Reload the update and try again.',
+    );
   }
 }
 
@@ -179,10 +181,7 @@ export async function playSpeakerTest(volume = 0.7) {
   return true;
 }
 
-export function playTone(
-  kind: 'complete' | 'level' | 'warning',
-  volume = 0.55,
-) {
+export function playTone(kind: 'complete' | 'level' | 'warning', volume = 0.55) {
   const context = getAudioContext();
   if (!context) return false;
   if (context.state !== 'running') void context.resume().catch(() => undefined);

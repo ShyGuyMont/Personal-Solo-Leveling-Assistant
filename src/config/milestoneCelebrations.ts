@@ -59,16 +59,16 @@ const MILESTONE_LINES: Record<CompanionId, Record<'rank' | 'level' | 'achievemen
   },
   haven: {
     rank: [
-      'You reached a higher class without leaving your humanity behind. That matters to me.',
-      'Celebrate the strength—and the ways you learned to care for the person carrying it.',
+      'New class, bigger room. Keep your voice. The spotlight should reveal you, not replace you.',
+      'Classification advanced! Somebody cue the creator reel—and Cipher, no, it does not need a spreadsheet first.',
     ],
     level: [
-      'You grew, rested, returned, and grew again. This milestone includes every part.',
-      'A major level is not one perfect day. It is many imperfect days that did not get the last word.',
+      'Major level unlocked. Your instincts are sharper; now give them a release people can actually meet.',
+      'That level is proof the creator signal kept returning. Save the lesson and make the next idea brave enough to use it.',
     ],
     achievement: [
-      'Keep this memory somewhere gentle. It may become shelter on a harder day.',
-      'You are allowed to feel proud without immediately asking what you must prove next.',
+      'Achievement live. Let the win have its close-up before you start cutting the next trailer.',
+      'You made something worth remembering. Good—now stop acting surprised when your work leaves a mark.',
     ],
   },
   ember: {

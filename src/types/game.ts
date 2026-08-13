@@ -83,6 +83,20 @@ export type AiVoiceDelivery =
   | 'intimate';
 export type AiVoiceCadence = 'natural' | 'clipped' | 'flowing' | 'measured' | 'rapid-fire';
 export type AiVoiceTexture = 'clean' | 'smooth' | 'airy' | 'textured' | 'grounded' | 'bright';
+export type AiVoiceRegister = 'low' | 'low-mid' | 'mid' | 'high-mid' | 'high';
+export type AiVoiceResonance = 'chest' | 'balanced' | 'forward' | 'head';
+export type AiVoiceTake = 'grounded' | 'balanced' | 'dynamic';
+export type AiVoiceScene =
+  'neutral' | 'celebration' | 'support' | 'accountability' | 'instruction' | 'strategy';
+export interface AiSoulprintNotes {
+  humor: string;
+  challenge: string;
+  care: string;
+  casual: string;
+  conflict: string;
+  bonds: string;
+  never: string;
+}
 export type MoodId =
   | 'energized'
   | 'proud'
@@ -173,10 +187,12 @@ export interface Settings {
   aiLinkMode: AiLinkMode;
   aiDataSharingAcknowledged: boolean;
   aiRelationshipMemoryEnabled: boolean;
+  aiTreasurySharingEnabled: boolean;
   aiVoiceOutputEnabled: boolean;
   aiVoiceAutoPlay: boolean;
   aiVoiceDisclosureAcknowledged: boolean;
   aiUsageWarningUsd: number;
+  aiSoulprintNotes: Partial<Record<CompanionId, AiSoulprintNotes>>;
 }
 
 export interface StatReward {
@@ -323,7 +339,8 @@ export type KitchenSessionStatus = 'assigned' | 'completed' | 'declined';
 export interface KitchenSession {
   id: LocalDateKey;
   date: LocalDateKey;
-  recipeId: KitchenRecipeId;
+  recipeId: string;
+  customRecipeSnapshot?: CustomKitchenRecipe;
   status: KitchenSessionStatus;
   assignmentVariant: number;
   rerollUsed: boolean;
@@ -337,6 +354,92 @@ export interface KitchenSession {
   note?: string;
   rewardApplied: boolean;
   updatedAt: string;
+}
+
+export interface CustomKitchenRecipe {
+  id: string;
+  name: string;
+  codename: string;
+  servings: number;
+  prepMinutes: number;
+  cookMinutes: number;
+  costTier: '$' | '$$' | '$$$';
+  equipment: string;
+  plate: string;
+  ingredients: string[];
+  steps: string[];
+  swaps: string[];
+  storage: string;
+  safety: string;
+  dailyRotationEnabled: boolean;
+  sourceCompanionId: 'saffron';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type CreatorPlatform = 'youtube' | 'youtube-shorts' | 'arc' | 'other';
+export type CreatorContentType =
+  'long-form' | 'short-form' | 'livestream' | 'community-post' | 'arc-project' | 'other';
+export type CreatorProjectStatus =
+  'idea' | 'script' | 'record' | 'edit' | 'thumbnail' | 'scheduled' | 'published' | 'paused';
+export type CreatorSnapshotSource = 'manual' | 'studio-csv' | 'youtube-api';
+
+export interface CreatorSettings {
+  id: 'primary';
+  channelName: string;
+  channelHandle: string;
+  channelUrl: string;
+  weeklyUploadTarget: number;
+  currentArcFocus: string;
+  accountabilityMode: 'supportive' | 'direct' | 'relentless';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreatorChannelSnapshot {
+  id: string;
+  capturedAt: string;
+  source: CreatorSnapshotSource;
+  periodDays: number;
+  subscribers?: number;
+  views?: number;
+  watchHours?: number;
+  impressions?: number;
+  clickThroughRate?: number;
+  averageViewDurationSeconds?: number;
+  uploads?: number;
+  note?: string;
+}
+
+export interface CreatorVideoInsight {
+  id: string;
+  videoId: string;
+  title: string;
+  publishedAt?: string;
+  periodDays: number;
+  views?: number;
+  watchHours?: number;
+  averageViewDurationSeconds?: number;
+  averageViewPercentage?: number;
+  likes?: number;
+  comments?: number;
+  capturedAt: string;
+}
+
+export interface CreatorProject {
+  id: string;
+  title: string;
+  platform: CreatorPlatform;
+  contentType: CreatorContentType;
+  status: CreatorProjectStatus;
+  pillar: string;
+  hook: string;
+  audiencePromise: string;
+  nextAction: string;
+  notes: string;
+  createdAt: string;
+  updatedAt: string;
+  publishedAt?: string;
 }
 
 export type SanctuaryMode = 'study' | 'stronghold';
@@ -372,6 +475,73 @@ export interface SanctuarySession {
   nextAction?: string;
   outcome?: 'steadier' | 'moved' | 'connected' | 'need-support';
   bibleMissionCredited: boolean;
+}
+
+export type CompanionOperationKind =
+  'assemble-day' | 'prepare-training' | 'prepare-kitchen' | 'prepare-sanctuary';
+
+export interface CompanionOperationRequest {
+  kind: CompanionOperationKind;
+  companionId: CompanionId;
+  includeTraining: boolean;
+  trainingLocation?: TrainingLocation;
+  includeKitchen: boolean;
+  foodConstraints?: string;
+  includeSanctuary: boolean;
+  sanctuaryMode?: SanctuaryMode;
+  primaryConcern?: SanctuaryConcern;
+  secondaryConcern?: SanctuaryConcern;
+  summary: string;
+  confirmation: string;
+}
+
+export type PreparedOperationState = 'ready' | 'active' | 'completed' | 'changed';
+
+export interface PreparedTrainingOperation {
+  sessionId: string;
+  location: TrainingLocation;
+  label: string;
+  detail: string;
+  companionIds: CompanionId[];
+  state?: PreparedOperationState;
+}
+
+export interface PreparedKitchenOperation {
+  sessionId: LocalDateKey;
+  recipeId: string;
+  label: string;
+  detail: string;
+  customRecipe: boolean;
+  constraints?: string;
+  companionIds: CompanionId[];
+  state?: PreparedOperationState;
+}
+
+export interface PreparedSanctuaryOperation {
+  sessionId: string;
+  mode: SanctuaryMode;
+  label: string;
+  detail: string;
+  companionIds: CompanionId[];
+  state?: PreparedOperationState;
+}
+
+export interface DailyOperationsRecord {
+  id: LocalDateKey;
+  date: LocalDateKey;
+  status: 'awaiting-confirmation' | 'preparing' | 'ready' | 'partial';
+  sourceCompanionId: CompanionId;
+  conversationId?: string;
+  pendingProposal?: CompanionOperationRequest;
+  training?: PreparedTrainingOperation;
+  kitchen?: PreparedKitchenOperation;
+  sanctuary?: PreparedSanctuaryOperation;
+  pendingMissionCount: number;
+  completedMissionCount: number;
+  preparationNotes: string[];
+  createdAt: string;
+  updatedAt: string;
+  preparedAt?: string;
 }
 
 export interface DailyMissionRecord {
@@ -773,16 +943,22 @@ export interface AiVoiceProfile {
   delivery: AiVoiceDelivery;
   cadence: AiVoiceCadence;
   texture: AiVoiceTexture;
+  register: AiVoiceRegister;
+  resonance: AiVoiceResonance;
+  performanceTake: AiVoiceTake;
   pace: number;
   warmth: number;
   energy: number;
   expressiveness: number;
   naturalism: number;
   pauseDiscipline: number;
+  intonation: number;
+  articulation: number;
+  emotionalRange: number;
   updatedAt: string;
 }
 
-export type AiUsageKind = 'text' | 'transcription' | 'speech';
+export type AiUsageKind = 'text' | 'transcription' | 'speech' | 'realtime';
 
 export interface AiUsageRecord {
   id: string;
@@ -792,7 +968,12 @@ export interface AiUsageRecord {
   model: string;
   companionId?: CompanionId;
   inputTokens: number;
+  cachedInputTokens?: number;
   outputTokens: number;
+  reasoningTokens?: number;
+  audioInputTokens?: number;
+  cachedAudioInputTokens?: number;
+  audioOutputTokens?: number;
   totalTokens: number;
   characters: number;
   audioSeconds: number;

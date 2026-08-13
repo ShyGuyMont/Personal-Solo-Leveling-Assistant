@@ -1,6 +1,6 @@
-export const APP_VERSION = '6.7.2';
-export const DATABASE_SCHEMA_VERSION = 16;
-export const SAVE_FORMAT_VERSION = 16;
+export const APP_VERSION = '7.7.1';
+export const DATABASE_SCHEMA_VERSION = 23;
+export const SAVE_FORMAT_VERSION = 23;
 
 export interface ReleaseSection {
   title: string;
@@ -9,6 +9,151 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 7.7.1 · System Integrity Sweep',
+    detail:
+      'A full-system reliability pass makes Party Operations, mobile voice, Archive Shield, updates, and private AI boundaries match the behavior the interface promises.',
+    points: [
+      'The Daily Operations board now reconciles against the real Training, Kitchen, Sanctuary, and mission records, so completed, active, changed, and ready assignments never remain frozen in their original state.',
+      'Snow can truly leave Training untouched during a multi-realm assembly, and already-completed work is acknowledged as complete instead of being described as newly rolled or prepared.',
+      'Interrupted party preparation recovers into a visible, retryable partial briefing instead of leaving the System permanently stuck in an assembling state.',
+      'Quick Link now starts microphone capture directly from the Hunter’s tap, preserves staged preparation across mode changes, and locks confirmation and dismissal against rapid duplicate execution.',
+      'Archive Shield validates the nested contents of Party Operations records and safely upgrades staged Version 7.7 proposals without weakening save compatibility.',
+      'Private AI and Studio mutations reject cross-site browser submissions more defensively, while current model rates, local usage estimates, offline authority, and confirmation gates remain intact.',
+      'Update guidance now reflects the private Sites release channel, and stale release labels no longer point the Hunter toward the retired GitHub Pages path.',
+    ],
+  },
+  {
+    title: 'Version 7.7.0 · Party Operations',
+    detail:
+      'Snow and the specialists can now prepare the real daily realms together while every original roll, interactive screen, offline path, completion rule, and reward boundary remains authoritative.',
+    points: [
+      'Ask Snow to assemble the day and she first gathers the missing choices—Training path, food boundaries, and optional Sanctuary focus—before presenting one explicit permission to wake the party.',
+      'A confirmed assembly uses the existing Training Hall, Kitchen, and Scripture Sanctuary engines, then preloads their real resumable sessions so the proper workout, recipe checklist, or guided study is waiting when its realm opens.',
+      'Rook, Ember, Mira, Saffron, and Selah can prepare their own domains through direct Quick Link conversations, while every companion shares one persistent on-device operations record for the System day.',
+      'Visible party coordination reports only assignments that actually reached local storage; incompatible active work is preserved and shown as a clear flag instead of being silently overwritten.',
+      'Food constraints can send Saffron back to the current Kitchen Order; when it conflicts, she can forge a complete replacement recipe, save it to the Private Grimoire, and load its normal ingredient and cooking checklists.',
+      'Preparation never checks a box, marks a mission complete, awards XP, records spending, or claims work on the Hunter’s behalf, and every prepared realm continues working offline after assembly.',
+    ],
+  },
+  {
+    title: 'Version 7.6.1 · Worthy Trials',
+    detail:
+      'Optional challenges now pay like genuine side campaigns, while World Class forecasts separate the designed two-year journey from a still-forming personal pace sample.',
+    points: [
+      'Every optional Weekly, Monthly, Boss, and Recovery challenge awards 50% more account XP and 50% more stat XP; mandatory Class Trial rewards remain unchanged.',
+      'Existing active challenges receive the new rewards automatically because their authoritative templates refresh on launch, while already-claimed rewards remain safely unchanged.',
+      'World Class answers now lead with the designed 620–725-day sustainable range and identify 570 days as the near-perfect theoretical floor before discussing personal pace.',
+      'Personal forecasts disclose the exact finalized-day sample and label fewer than 21 days as an early baseline rather than projecting one starting week as destiny.',
+      'The party still reports every hard Class gate and recent-pace calculation honestly, but it can no longer confuse a secondary extrapolation with the System’s intended progression curve.',
+    ],
+  },
+  {
+    title: 'Version 7.6.0 · Living Grimoire',
+    detail:
+      "Saffron's personal recipes become complete Kitchen Orders instead of static notes, joining her Daily Rotation and opening into the same guided cooking console as every canon meal.",
+    points: [
+      'Every confirmed Saffron creation now enters Daily Rotation automatically, while a visible per-recipe control can keep any personal meal saved without allowing it to appear as a surprise order.',
+      'Cook with Saffron can launch any personal or canon Grimoire recipe as today’s active order, with a clear warning before replacing unfinished checklist progress.',
+      'Personal orders inherit ingredient gathering checks, numbered method checks, on-device progress persistence, serving and effort review, completion reactions, weekly reward limits, and Kitchen history.',
+      'A protected recipe snapshot travels with each personal order so its name, ingredients, method, safety guidance, and archive record survive even if the original Grimoire entry is later removed.',
+      'The rotation counter now reflects the real combined pool of canon meals and enabled personal creations, while completed custom orders use the recipe’s true name in the XP ledger and AI System context.',
+    ],
+  },
+  {
+    title: 'Version 7.5.0 · Living Voice Ascension',
+    detail:
+      'Voice Forge III gives every companion a sharper vocal identity while Live Link turns a selected one-on-one channel into a natural, interruptible conversation instead of a chain of recordings.',
+    points: [
+      'Every Soulprint now includes vocal register, resonance, intonation, articulation, emotional range, and a grounded, balanced, or dynamic canon take so Snow, Ember, Saffron, and the full party separate more clearly in sound as well as personality.',
+      'The native speech speed control is now driven directly by the Forge pace slider, while scene intelligence automatically shifts celebration, support, accountability, instruction, and strategy delivery without breaking character.',
+      'A dual-take Casting Room lets the Hunter audition the same canon line as a restrained Grounded take or a vivid Dynamic take before choosing the saved performance.',
+      'Live Link opens an optional one-on-one WebRTC conversation with natural turn detection, interruption, responsive audio, visible local transcripts, mute and end controls, and the current System context available to the selected companion.',
+      'Command Link, Party Council, typed messages, confirmed app actions, and the complete offline campaign remain intact; Live Link cannot silently change campaign data and clearly hands actions back to the confirmation-gated Command Link.',
+      'Realtime text and audio tokens are added to the local Usage Ledger with model-specific estimates while OpenAI remains the billing authority.',
+    ],
+  },
+  {
+    title: 'Version 7.4.0 · Creator Reawakening',
+    detail:
+      'Creator Forge becomes a historical intelligence chamber that helps Vesper understand what the channel has been, diagnose the quiet season, and build the next comeback arc with the Hunter in control.',
+    points: [
+      'The secure read-only Studio Link now synchronizes 28-day, 90-day, and 365-day channel signals plus a ranked one-year Content Vault without adding any Google permissions.',
+      'History Lens lets the Hunter compare recent momentum against the deeper channel story while Vesper receives a compact evidence map of real windows and proven videos instead of guessing from one quiet month.',
+      'The Reawakening Briefing turns upload cadence, active production, and historical standouts into an honest comeback diagnosis, one strategic focus, and one immediate physical move.',
+      'A dedicated Reawakening Council opens Vesper with the live Studio evidence already in context and can prepare a complete two-to-four-week campaign for one visible confirmation before any project reaches the local board.',
+      'The Idea Lab can hand any proven video directly to Vesper for a successor concept while historical insights remain on-device, travel with the full save, and never grant upload, edit, comment, or delete access.',
+    ],
+  },
+  {
+    title: 'Version 7.3.1 · Creator Route',
+    detail:
+      'Creator Forge becomes a primary daily destination while Status returns to the compact crown control in the top command row.',
+    points: [
+      'Creator Forge replaces Status in the persistent bottom navigation so channel signals, production operations, and Vesper are always one tap away.',
+      'The crown returns as a compact top Status and Class-progression control that remains clear without overcrowding the mobile header.',
+      'Every destination, progression record, Studio connection, and offline campaign behavior remains unchanged; this patch only improves navigation priority.',
+    ],
+  },
+  {
+    title: 'Version 7.3.0 · Studio Link',
+    detail:
+      'Creator Forge gains a private read-only YouTube Studio connection so Vesper can reason from fresh channel signals without receiving Google credentials or gaining control of the channel.',
+    points: [
+      'Secure Google authorization connects the signed-in Hunter to one YouTube channel with only channel-read and analytics-read permissions; uploads, edits, comments, deletions, and account management remain impossible.',
+      'One-tap Studio synchronization captures the latest 28-day views, watch hours, average view duration, upload count, and current subscriber signal into the existing on-device Creator Forge history.',
+      'Vesper can discuss the synchronized baseline alongside active projects, hooks, audience promises, publishing momentum, and weekly targets while clearly separating supplied facts from strategy hypotheses.',
+      'Google refresh access is encrypted behind the private gateway, never enters the browser save or OpenAI context, and can be revoked with a visible Disconnect control while existing local snapshots remain yours.',
+      'Manual entry and CSV import remain available for reach impressions, thumbnail click-through rate, historical backfill, or fully offline creator tracking.',
+    ],
+  },
+  {
+    title: 'Version 7.2.0 · Creator Awakening',
+    detail:
+      'Vesper takes the spotlight as a complete YouTube and content-creation specialist while Creator Forge turns audience strategy, channel signals, and production momentum into a living offline-first command realm.',
+    points: [
+      'Haven is completely reborn as Vesper, The Spotlight: a charismatic creator and streamer specialist with an original chibi portrait, electric-chartreuse identity, expressive voice canon, complete offline dialogue, and deeply grounded online intelligence.',
+      'Creator Forge · The Greenroom adds a local production pipeline from idea through publish, a creator identity and upload target, channel momentum accountability, and an honest Vesper–Cipher partnership between audience instinct and execution systems.',
+      'YouTube Studio snapshots can be entered manually or imported from a Studio CSV without storing a Google password; views, watch time, impressions, click-through rate, average view duration, uploads, and subscriber signals remain in the full campaign save.',
+      'Vesper can reason from real Creator Forge projects and aggregate channel signals, then prepare a complete content operation for confirmation into the local board without inventing analytics or claiming a release already happened.',
+      'Quick Link is now a real short conversation instead of a one-message transmission: unaddressed follow-ups stay with the active companion, the visible exchange remains intact, and Saffron can gather recipe details across multiple turns before preparing the Grimoire preview.',
+    ],
+  },
+  {
+    title: 'Version 7.1.0 · Command Ascension',
+    detail:
+      'The party evolves from conversation into a specialist command intelligence with controlled actions, deeper live context, and a new Sovereign reasoning tier.',
+    points: [
+      'Quick Link now preserves recent conversation continuity, understands direct mission commands, and presents every campaign-changing action in a confirmation-gated Command Deck before touching local data.',
+      'Saffron can explain today’s Kitchen Order step by step or design a complete personal recipe; confirmed creations are stored in her on-device Private Grimoire and remain fully removable.',
+      'Selah receives compact Sanctuary context for grounded Scripture guidance, while Rook, Mira, Cipher, and Snow can reason from relevant live Training, Campaign, and cross-System signals.',
+      'Cassian Ledger Counsel is separately opt-in and transmits only calculated totals and targets—never merchant labels, transaction notes, bill names, debt names, or the full ledger.',
+      'The intelligence router now uses Luna for fast conversation, Terra for deeper counsel, and Sol only for explicit sovereign analysis, with the selected model and usage recorded in the local ledger.',
+    ],
+  },
+  {
+    title: 'Version 7.0.1 · Quick Link Stabilization',
+    detail:
+      'Quick Link now behaves like a true mobile command sheet while the complete AI Headquarters remains one tap away beside it.',
+    points: [
+      'AI HQ and Quick Link are separate controls in the top command bar, preserving the full conversation chamber alongside the instant voice channel.',
+      'The Quick Link sheet is mounted above the entire interface with safe-area spacing, contained touch scrolling, a persistent close control, and a fully reachable microphone on iPhone.',
+      'Microphone capture begins directly from the Hunter’s tap instead of waiting on a network readiness check, and the listening state clearly explains how to finish and send the transmission.',
+    ],
+  },
+  {
+    title: 'Version 7.0.0 · Awakened Intelligence',
+    detail:
+      'The party becomes a voice-first command intelligence with real progression awareness, adaptive reasoning, and Hunter-directed personalities.',
+    points: [
+      'Companion Quick Link turns the top command control into a one-touch voice channel: address any companion or the full party by name, receive an immediate voiced answer, and keep the complete exchange in local Headquarters history.',
+      'Spoken System navigation works naturally—commands such as “Snow, take me to the Training Hall” route locally without spending a text-intelligence call, while typed Quick Link remains available as a stable fallback.',
+      'The intelligence engine now selects fast Luna responses for ordinary direct conversation and stronger Terra counsel for Party Council, Class forecasts, planning, comparison, and progression analysis.',
+      'Every companion can be personally directed in Soulprint Studio through editable humor, accountability, care, off-duty personality, disagreement, party bonds, and never-break-character notes without weakening canon identity or safety boundaries.',
+      'Companions now understand the full Class roadmap, remaining World Class gates, lifetime progression, recent thirty-day pace, challenges, training, Kitchen, Sanctuary, and stat momentum instead of answering from level alone.',
+      'The local usage ledger now identifies every model and separates input, cached input, output, and reasoning tokens; current OpenAI rates drive app estimates while the OpenAI dashboard remains the authoritative bill.',
+    ],
+  },
   {
     title: 'Version 6.7.2 · Living Performance',
     detail:

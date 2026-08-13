@@ -74,7 +74,7 @@ function specialistLines(
       selah:
         'No Faith mission reached the finalized record this week. The return can be quiet: one prayer, one passage, one faithful pause.',
       haven:
-        'No Character mission reached the finalized record this week. One small act of care—for yourself or someone else—is enough to reopen the path.',
+        'No Creator mission reached the finalized record this week. Open the greenroom, choose one idea with a real audience promise, and move it one production step.',
     } as const;
     return [empty[companionId]];
   }
@@ -90,25 +90,25 @@ function specialistLines(
       `${completed} faithful actions reached the record. May the visible work point you back toward the deeper source that sustained it.`,
     ],
     haven: [
-      `${completed} of ${available} ${label} missions completed. I care about the good those choices created and the person who had to carry them.`,
-      `Character record: ${completed}/${available}. Keep accountability humane; lasting goodness grows better without cruelty beside it.`,
-      `${completed} acts on the Character path became part of the week. Quiet care counts, especially when no one else sees it.`,
+      `${completed} of ${available} ${label} missions cleared. The creator signal is real; now study which idea, hook, or production step actually created movement.`,
+      `Creator record: ${completed}/${available}. Keep the personality, tighten the promise, and stop giving unfinished drafts permanent backstage passes.`,
+      `${completed} creator operations became proof this week. That is the audience learning where to find you—keep the next signal specific.`,
     ],
   } as const;
   return [...pools[companionId]];
 }
 
 function cipherLines(metrics: CampfireMetrics) {
-  const { completed, available } = categoryRate(metrics, ['discipline', 'creator']);
+  const { completed, available } = categoryRate(metrics, ['discipline']);
   if (!available) {
     return [
-      'No Discipline or Creator missions reached the finalized record. Recommendation: define one tiny output with a visible finish line and execute before optimization begins.',
+      'No Discipline mission reached the finalized record. Recommendation: define one tiny output with a visible finish line and execute before optimization begins.',
     ];
   }
   return [
-    `Discipline and Creator output closed at ${completed}/${available}. Keep the process that produced completion; redesign any step that repeatedly depended on perfect conditions.`,
+    `Discipline output closed at ${completed}/${available}. Keep the process that produced completion; redesign any step that repeatedly depended on perfect conditions.`,
     `${completed} execution-based missions became proof this week. The unfinished ${available - completed} are useful design feedback, not an invitation to insult the operator.`,
-    `Operational review: ${completed}/${available} across Discipline and Creator work. Next cycle needs one clear priority, a smaller definition of done, and fewer negotiations.`,
+    `Operational review: ${completed}/${available} across Discipline work. Next cycle needs one clear priority, a smaller definition of done, and fewer negotiations.`,
   ];
 }
 
@@ -255,7 +255,7 @@ export function buildCampfireMessages(
     {
       companionId: 'haven',
       role: 'response',
-      pool: specialistLines(metrics, 'character', 'haven'),
+      pool: specialistLines(metrics, 'creator', 'haven'),
       slot: 'haven',
     },
     { companionId: 'ember', role: 'response', pool: emberLines(metrics), slot: 'ember' },

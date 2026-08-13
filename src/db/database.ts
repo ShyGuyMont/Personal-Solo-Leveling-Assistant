@@ -16,8 +16,13 @@ import type {
   ChallengeTemplate,
   CosmeticDefinition,
   CosmeticUnlock,
+  CreatorChannelSnapshot,
+  CreatorProject,
+  CreatorSettings,
+  CreatorVideoInsight,
   DailyMissionRecord,
   DailyCommandBriefing,
+  DailyOperationsRecord,
   DailyEventRecord,
   DailyReview,
   LevelHistory,
@@ -84,6 +89,7 @@ export class SystemDatabase extends Dexie {
   partyBanters!: EntityTable<PartyBanter, 'id'>;
   campfireRecaps!: EntityTable<CampfireRecap, 'id'>;
   dailyBriefings!: EntityTable<DailyCommandBriefing, 'id'>;
+  dailyOperations!: EntityTable<DailyOperationsRecord, 'id'>;
   campaignArcs!: EntityTable<CampaignArc, 'id'>;
   arcMilestones!: EntityTable<ArcMilestone, 'id'>;
   companionQuestProgress!: EntityTable<CompanionQuestProgress, 'id'>;
@@ -102,6 +108,10 @@ export class SystemDatabase extends Dexie {
   aiMemories!: EntityTable<AiRelationshipMemory, 'id'>;
   aiVoiceProfiles!: EntityTable<AiVoiceProfile, 'id'>;
   aiUsageRecords!: EntityTable<AiUsageRecord, 'id'>;
+  creatorSettings!: EntityTable<CreatorSettings, 'id'>;
+  creatorSnapshots!: EntityTable<CreatorChannelSnapshot, 'id'>;
+  creatorProjects!: EntityTable<CreatorProject, 'id'>;
+  creatorVideoInsights!: EntityTable<CreatorVideoInsight, 'id'>;
   appMetadata!: EntityTable<AppMetadata, 'id'>;
 
   constructor(name = 'the-system-db') {
@@ -612,6 +622,128 @@ export class SystemDatabase extends Dexie {
         await metadata.put({ id: 'schema-seeded', value: 16, updatedAt: now });
         await metadata.put({ id: 'app-version', value: '6.7.2', updatedAt: now });
       });
+    this.version(17)
+      .stores({
+        aiUsageRecords: 'id,kind,sessionId,createdAt,model,companionId',
+      })
+      .upgrade(async (transaction) => {
+        const now = new Date().toISOString();
+        const settings = transaction.table<Settings, string>('settings');
+        const current = await settings.get('primary');
+        if (current) {
+          await settings.update('primary', {
+            aiSoulprintNotes: current.aiSoulprintNotes ?? {},
+          });
+        }
+        const metadata = transaction.table<AppMetadata, string>('appMetadata');
+        await metadata.put({ id: 'schema-seeded', value: 17, updatedAt: now });
+        await metadata.put({ id: 'app-version', value: '7.0.0', updatedAt: now });
+      });
+    this.version(18)
+      .stores({
+        settings: 'id',
+      })
+      .upgrade(async (transaction) => {
+        const now = new Date().toISOString();
+        const settings = transaction.table<Settings, string>('settings');
+        const current = await settings.get('primary');
+        if (current) {
+          await settings.update('primary', {
+            aiTreasurySharingEnabled: current.aiTreasurySharingEnabled ?? false,
+          });
+        }
+        const metadata = transaction.table<AppMetadata, string>('appMetadata');
+        await metadata.put({ id: 'schema-seeded', value: 18, updatedAt: now });
+        await metadata.put({ id: 'app-version', value: '7.1.0', updatedAt: now });
+      });
+    this.version(19)
+      .stores({
+        creatorSettings: 'id',
+        creatorSnapshots: 'id,capturedAt,source',
+        creatorProjects: 'id,status,platform,updatedAt,publishedAt',
+        aiVoiceProfiles: 'id,voice,accent,updatedAt',
+      })
+      .upgrade(async (transaction) => {
+        const now = new Date().toISOString();
+        const creatorSettings = transaction.table<CreatorSettings, string>('creatorSettings');
+        await creatorSettings.put({
+          id: 'primary',
+          channelName: '',
+          channelHandle: '',
+          channelUrl: '',
+          weeklyUploadTarget: 1,
+          currentArcFocus: '',
+          accountabilityMode: 'direct',
+          createdAt: now,
+          updatedAt: now,
+        });
+        const voiceProfiles = transaction.table<AiVoiceProfile, string>('aiVoiceProfiles');
+        await voiceProfiles.put({
+          id: 'haven',
+          voice: 'fable',
+          accent: 'caribbean',
+          delivery: 'playful',
+          cadence: 'rapid-fire',
+          texture: 'bright',
+          register: 'high-mid',
+          resonance: 'forward',
+          performanceTake: 'dynamic',
+          pace: 1.2,
+          warmth: 4,
+          energy: 5,
+          expressiveness: 5,
+          naturalism: 5,
+          pauseDiscipline: 4,
+          intonation: 5,
+          articulation: 4,
+          emotionalRange: 5,
+          updatedAt: now,
+        });
+        const metadata = transaction.table<AppMetadata, string>('appMetadata');
+        await metadata.put({ id: 'schema-seeded', value: 19, updatedAt: now });
+        await metadata.put({ id: 'app-version', value: '7.2.0', updatedAt: now });
+      });
+    this.version(20)
+      .stores({
+        creatorVideoInsights: 'id,videoId,capturedAt,views,publishedAt',
+      })
+      .upgrade(async (transaction) => {
+        const now = new Date().toISOString();
+        const metadata = transaction.table<AppMetadata, string>('appMetadata');
+        await metadata.put({ id: 'schema-seeded', value: 20, updatedAt: now });
+        await metadata.put({ id: 'app-version', value: '7.4.0', updatedAt: now });
+      });
+    this.version(21)
+      .stores({
+        aiVoiceProfiles: 'id,voice,accent,updatedAt',
+        aiUsageRecords: 'id,kind,sessionId,createdAt,model,companionId',
+      })
+      .upgrade(async (transaction) => {
+        const now = new Date().toISOString();
+        const metadata = transaction.table<AppMetadata, string>('appMetadata');
+        await metadata.put({ id: 'schema-seeded', value: 21, updatedAt: now });
+        await metadata.put({ id: 'app-version', value: '7.5.0', updatedAt: now });
+      });
+    this.version(22)
+      .stores({
+        kitchenSessions: 'id,date,status,recipeId,[date+status]',
+      })
+      .upgrade(async (transaction) => {
+        const now = new Date().toISOString();
+        const metadata = transaction.table<AppMetadata, string>('appMetadata');
+        await metadata.put({ id: 'schema-seeded', value: 22, updatedAt: now });
+        await metadata.put({ id: 'app-version', value: '7.6.1', updatedAt: now });
+      });
+    this.version(23)
+      .stores({
+        dailyOperations: 'id,date,status,sourceCompanionId,updatedAt',
+      })
+      .upgrade(async (transaction) => {
+        const now = new Date().toISOString();
+        const metadata = transaction.table<AppMetadata, string>('appMetadata');
+        await metadata.put({ id: 'schema-seeded', value: 23, updatedAt: now });
+        await metadata.put({ id: 'app-version', value: '7.7.0', updatedAt: now });
+      });
   }
 }
 
@@ -648,6 +780,7 @@ export const TABLE_NAMES = [
   'partyBanters',
   'campfireRecaps',
   'dailyBriefings',
+  'dailyOperations',
   'campaignArcs',
   'arcMilestones',
   'companionQuestProgress',
@@ -666,6 +799,10 @@ export const TABLE_NAMES = [
   'aiMemories',
   'aiVoiceProfiles',
   'aiUsageRecords',
+  'creatorSettings',
+  'creatorSnapshots',
+  'creatorProjects',
+  'creatorVideoInsights',
   'appMetadata',
 ] as const;
 

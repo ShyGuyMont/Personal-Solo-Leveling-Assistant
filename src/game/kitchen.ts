@@ -3,11 +3,12 @@ import { KITCHEN_RECIPES, getKitchenRecipe } from '@/config/kitchen';
 import { db } from '@/db/database';
 import { queueCompanionReaction } from '@/game/companions';
 import { putLevelHistory } from '@/game/engine';
+import { getCustomKitchenRecipes } from '@/game/kitchenGrimoire';
 import { applyStatChange } from '@/game/stats';
 import { applyAccountXp } from '@/game/xp';
 import { addDays, startOfWeek } from '@/utils/date';
 import { stableId } from '@/utils/id';
-import type { KitchenRecipeId, KitchenSession, LocalDateKey, StatName } from '@/types/game';
+import type { CustomKitchenRecipe, KitchenSession, LocalDateKey, StatName } from '@/types/game';
 
 function randomIndex(length: number) {
   if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
@@ -18,20 +19,37 @@ function randomIndex(length: number) {
   return Math.min(length - 1, Math.floor(Math.random() * length));
 }
 
-async function drawRecipe(date: LocalDateKey, blockedId?: KitchenRecipeId) {
-  const history = await db.kitchenSessions.where('date').below(date).reverse().limit(60).toArray();
+interface KitchenRecipeDraw {
+  id: string;
+  customRecipeSnapshot?: CustomKitchenRecipe;
+}
+
+export function resolveKitchenSessionRecipe(session: KitchenSession | undefined) {
+  if (!session) return undefined;
+  return getKitchenRecipe(session.recipeId) ?? session.customRecipeSnapshot;
+}
+
+async function drawRecipe(date: LocalDateKey, blockedId?: string): Promise<KitchenRecipeDraw> {
+  const [history, customRecipes] = await Promise.all([
+    db.kitchenSessions.where('date').below(date).reverse().limit(60).toArray(),
+    getCustomKitchenRecipes(),
+  ]);
   const recentIds = new Set(history.slice(0, 3).map((session) => session.recipeId));
   if (blockedId) recentIds.add(blockedId);
-  const counts = new Map<KitchenRecipeId, number>();
+  const counts = new Map<string, number>();
   for (const session of history)
     counts.set(session.recipeId, (counts.get(session.recipeId) ?? 0) + 1);
-  const eligible = KITCHEN_RECIPES.filter((recipe) => !recentIds.has(recipe.id));
-  const pool = eligible.length
-    ? eligible
-    : KITCHEN_RECIPES.filter((recipe) => recipe.id !== blockedId);
+  const recipes: KitchenRecipeDraw[] = [
+    ...KITCHEN_RECIPES.map((recipe) => ({ id: recipe.id })),
+    ...customRecipes
+      .filter((recipe) => recipe.dailyRotationEnabled)
+      .map((recipe) => ({ id: recipe.id, customRecipeSnapshot: recipe })),
+  ];
+  const eligible = recipes.filter((recipe) => !recentIds.has(recipe.id));
+  const pool = eligible.length ? eligible : recipes.filter((recipe) => recipe.id !== blockedId);
   const minimumUse = Math.min(...pool.map((recipe) => counts.get(recipe.id) ?? 0));
   const leastUsed = pool.filter((recipe) => (counts.get(recipe.id) ?? 0) === minimumUse);
-  return leastUsed[randomIndex(leastUsed.length)].id;
+  return leastUsed[randomIndex(leastUsed.length)];
 }
 
 export async function getKitchenData(date: LocalDateKey) {
@@ -65,14 +83,49 @@ export async function assignKitchenOrder(date: LocalDateKey, reroll = false) {
   if (reroll && existing?.rerollUsed)
     throw new Error('Today’s ingredient swap has already been used.');
   const now = new Date().toISOString();
-  const recipeId = await drawRecipe(date, reroll ? existing?.recipeId : undefined);
+  const drawnRecipe = await drawRecipe(date, reroll ? existing?.recipeId : undefined);
+  const next: KitchenSession = {
+    id: date,
+    date,
+    recipeId: drawnRecipe.id,
+    customRecipeSnapshot: drawnRecipe.customRecipeSnapshot,
+    status: 'assigned',
+    assignmentVariant: existing?.assignmentVariant ?? randomIndex(6),
+    rerollUsed: Boolean(existing),
+    assignedAt: existing?.assignedAt ?? now,
+    ingredientChecks: {},
+    stepChecks: {},
+    rewardApplied: false,
+    updatedAt: now,
+  };
+  await db.kitchenSessions.put(next);
+  return next;
+}
+
+export async function assignSpecificKitchenOrder(date: LocalDateKey, recipeId: string) {
+  const existing = await db.kitchenSessions.get(date);
+  if (existing?.status === 'completed' || existing?.status === 'declined') {
+    throw new Error(
+      "Today's Kitchen Order is already closed. Saffron can guide this recipe as tomorrow's order.",
+    );
+  }
+  if (existing?.recipeId === recipeId) return existing;
+  const builtInRecipe = getKitchenRecipe(recipeId);
+  const customRecipe = builtInRecipe
+    ? undefined
+    : (await getCustomKitchenRecipes()).find((recipe) => recipe.id === recipeId);
+  if (!builtInRecipe && !customRecipe) {
+    throw new Error("That recipe is no longer available in Saffron's Grimoire.");
+  }
+  const now = new Date().toISOString();
   const next: KitchenSession = {
     id: date,
     date,
     recipeId,
+    customRecipeSnapshot: customRecipe,
     status: 'assigned',
     assignmentVariant: existing?.assignmentVariant ?? randomIndex(6),
-    rerollUsed: Boolean(existing),
+    rerollUsed: existing?.rerollUsed ?? false,
     assignedAt: existing?.assignedAt ?? now,
     ingredientChecks: {},
     stepChecks: {},
@@ -132,6 +185,7 @@ export async function completeKitchenOrder(input: {
   const data = await getKitchenData(input.date);
   const rewardApplied = data.rewardAvailable;
   const rewardId = stableId('kitchen', input.date, session.recipeId, 'reward');
+  const recipeName = resolveKitchenSessionRecipe(session)?.name ?? 'Personal Recipe';
   const now = new Date().toISOString();
   let levelsGained = 0;
   await db.transaction(
@@ -170,7 +224,7 @@ export async function completeKitchenOrder(input: {
           date: input.date,
           timestamp: now,
           sourceId: session.recipeId,
-          note: `${getKitchenRecipe(session.recipeId).name} Kitchen Order completed`,
+          note: `${recipeName} Kitchen Order completed`,
         });
         await putLevelHistory(nextProgression, progression.level, input.date, rewardId, now);
         for (const [statName, amount] of Object.entries(BALANCE.kitchen.completedOrderStatXp) as [

@@ -28,6 +28,19 @@ const rewardMap: Record<string, StatReward[]> = {
   ],
 };
 
+const OPTIONAL_CHALLENGE_REWARD_MULTIPLIER = 1.5;
+
+function boostOptionalChallengeRewards(challenge: ChallengeTemplate): ChallengeTemplate {
+  return {
+    ...challenge,
+    accountXp: Math.round(challenge.accountXp * OPTIONAL_CHALLENGE_REWARD_MULTIPLIER),
+    statRewards: challenge.statRewards.map((reward) => ({
+      ...reward,
+      xp: Math.round(reward.xp * OPTIONAL_CHALLENGE_REWARD_MULTIPLIER),
+    })),
+  };
+}
+
 function missionChallenge(
   id: string,
   name: string,
@@ -80,7 +93,7 @@ function rateChallenge(
   };
 }
 
-export const WEEKLY_CHALLENGES: ChallengeTemplate[] = [
+const WEEKLY_CHALLENGE_DEFINITIONS: ChallengeTemplate[] = [
   {
     id: 'w-faith-6',
     name: 'Twin Lights',
@@ -429,7 +442,9 @@ export const WEEKLY_CHALLENGES: ChallengeTemplate[] = [
   },
 ];
 
-export const MONTHLY_CHALLENGES: ChallengeTemplate[] = [
+export const WEEKLY_CHALLENGES = WEEKLY_CHALLENGE_DEFINITIONS.map(boostOptionalChallengeRewards);
+
+const MONTHLY_CHALLENGE_DEFINITIONS: ChallengeTemplate[] = [
   missionChallenge(
     'm-workout-12',
     'Tempered Frame',
@@ -655,7 +670,9 @@ export const MONTHLY_CHALLENGES: ChallengeTemplate[] = [
   },
 ];
 
-export const BOSS_CHALLENGES: ChallengeTemplate[] = [
+export const MONTHLY_CHALLENGES = MONTHLY_CHALLENGE_DEFINITIONS.map(boostOptionalChallengeRewards);
+
+const BOSS_CHALLENGE_DEFINITIONS: ChallengeTemplate[] = [
   {
     id: 'boss-awakening',
     name: 'Seven-Day Awakening',
@@ -749,7 +766,9 @@ export const BOSS_CHALLENGES: ChallengeTemplate[] = [
   },
 ];
 
-export const RECOVERY_CHALLENGES: ChallengeTemplate[] = [
+export const BOSS_CHALLENGES = BOSS_CHALLENGE_DEFINITIONS.map(boostOptionalChallengeRewards);
+
+const RECOVERY_CHALLENGE_DEFINITIONS: ChallengeTemplate[] = [
   missionChallenge(
     'recovery-one',
     'Recovery Step',
@@ -867,6 +886,10 @@ export const RECOVERY_CHALLENGES: ChallengeTemplate[] = [
   accountXp: 20,
   statRewards: [{ stat: 'discipline' as const, xp: 5 }],
 }));
+
+export const RECOVERY_CHALLENGES = RECOVERY_CHALLENGE_DEFINITIONS.map(
+  boostOptionalChallengeRewards,
+);
 
 export const RANK_TRIALS: ChallengeTemplate[] = [
   {

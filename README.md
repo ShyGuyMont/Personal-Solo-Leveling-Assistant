@@ -56,6 +56,116 @@ Completed AI conversations are stored on-device, included in Archive Shield expo
 offline. Readiness checks, usage-limit guidance, and failure-safe local saving keep a broken or
 unconfigured online link from affecting the campaign.
 
+## Version 7.3.0 · Studio Link
+
+Creator Forge can now connect directly to the Hunter's YouTube Studio channel through a private,
+read-only Google authorization. A secure sync captures the current subscriber signal and the latest
+28 days of views, watch time, average view duration, and upload pace into the existing on-device
+Creator Forge history. Vesper can discuss those supplied numbers alongside active projects and
+publishing targets without inventing analytics or claiming access to the complete Studio account.
+
+The Google refresh credential is encrypted behind the private Sites gateway. It never enters the
+browser save, Archive Shield export, or Vesper/OpenAI context. The requested permissions cannot
+upload, edit, delete, comment, or manage the channel, and a visible disconnect action revokes the
+link while preserving already-synchronized local snapshots. Manual entry and CSV import remain
+available for reach impressions, thumbnail click-through rate, and fully offline tracking.
+
+## Version 7.3.1 · Creator Route
+
+Creator Forge now occupies the persistent Creator slot in the bottom navigation, making Vesper,
+channel signals, and the production pipeline one tap away. Status remains fully available through
+the restored crown control in the top command row, preserving Class progression without spending a
+primary daily-navigation slot. This is a navigation-only update and changes no campaign data.
+
+## Version 7.4.0 · Creator Reawakening
+
+Creator Forge now sees the channel as a story instead of a single quiet month. The secure read-only
+Studio Link synchronizes 28-day, 90-day, and 365-day analytics windows plus a ranked one-year
+Content Vault of proven videos. History Lens lets the Hunter move between those horizons, and
+Vesper receives the same compact evidence map whenever she is invited into an online creator
+conversation. No new Google permissions are requested.
+
+Vesper's Reawakening Briefing diagnoses whether the channel is dormant, returning, or active;
+separates real evidence from strategy hypotheses; and names one immediate physical move. A
+dedicated Reawakening Council can prepare a complete two-to-four-week campaign with two to eight
+sequenced releases. The entire campaign appears as a preview and reaches the local Creator Forge
+board only after one explicit confirmation. Every proven video can also open the Idea Lab for a
+fresh successor concept without treating the old title as a template.
+
+Historical video insights remain on-device, travel in Archive Shield saves, and never grant upload,
+edit, comment, delete, or account-management access. Google credentials remain encrypted behind
+the private gateway and never enter the browser save or OpenAI context.
+
+## Version 7.7.1 · System Integrity Sweep
+
+The full System has been audited across progression, Party Operations, AI commands, persistence,
+mobile interaction, update behavior, and private server boundaries. The Daily Operations board now
+reconciles with the actual Training, Kitchen, Sanctuary, and mission records instead of preserving a
+stale preparation snapshot. Completed work is identified honestly, interrupted preparation recovers
+cleanly, and Snow can assemble only the realms the Hunter requests—including leaving Training
+untouched.
+
+Quick Link preserves mobile microphone activation from the original tap, prevents rapid duplicate
+operation execution, and keeps staged permission visible across mode changes. Archive Shield now
+validates nested Party Operations data and migrates earlier Version 7.7 proposals safely. Private AI
+write endpoints reject cross-site browser submissions more defensively, while the original offline
+campaign, explicit confirmations, reward boundaries, and local data ownership remain unchanged.
+
+## Version 7.7.0 · Party Operations
+
+Snow and the specialist companions can now prepare the actual daily realms together without replacing the System's original rituals or granting themselves completion authority.
+
+- **Ask before waking the party:** Snow gathers Training location, food boundaries, and an optional Sanctuary mode and concern across a continuing Quick Link conversation, then shows one clear preparation confirmation.
+- **Real section preloading:** A confirmed operation uses the existing Training Hall, Kitchen, and Sanctuary engines. Opening a realm later resumes the exact assigned workout, cooking checklist, or Scripture session that the party prepared.
+- **Shared daily state:** Snow, Rook, Ember, Mira, Saffron, and Selah operate from one durable on-device daily record, so a direct specialist request and a later Snow briefing cannot quietly create conflicting versions of the day.
+- **Visible coordination:** The confirmed assembly appears as a genuine party exchange and a dashboard operations board with direct Begin, Cook, and Enter controls. Companions report only preparation that actually succeeded.
+- **Responsive Kitchen orders:** Saffron can check a confirmed food boundary against the rolled meal and, when needed, forge a complete replacement that enters the Private Grimoire and opens in the normal ingredient-and-step console.
+- **Authority stays with the Hunter:** Operations may prepare and navigate, but never claim completion, check a box, award XP, record spending, replace incompatible active work, or alter the campaign without the required confirmation.
+- **Offline foundation preserved:** Once prepared, every realm remains available through its original offline-first interaction and completion flow.
+
+## Version 7.6.1 · Worthy Trials
+
+Weekly, Monthly, Boss, and Recovery challenges are optional side campaigns, so their account and
+stat rewards now receive a full 50% increase. Class Trials remain unchanged because they are
+mandatory progression gates. Active optional challenges inherit the increased reward before they
+are claimed; rewards already claimed are never rewritten or duplicated.
+
+World Class forecasts now lead with the progression model the System was actually balanced around:
+a sustainable 620–725-day path at roughly 75–90% consistency, with 570 days identified only as a
+near-perfect theoretical floor. The party still shows the Hunter’s real recent pace, but it must
+name the finalized-day sample and treat fewer than 21 days as an early baseline rather than a
+reliable five-year prediction.
+
+## Version 7.6.0 · Living Grimoire
+
+Saffron’s Private Grimoire is now part of the working Kitchen instead of a static recipe shelf.
+Every confirmed personal creation joins Daily Rotation by default, with an individual control to
+keep it saved but out of surprise assignments. **Cook with Saffron** can turn any personal or canon
+recipe into today’s guided Kitchen Order, including ingredient gathering checks, numbered method
+checks, saved progress, serving and effort review, completion reactions, weekly reward limits, and
+the normal Provision Archive.
+
+Each personal order carries a protected recipe snapshot so its instructions and history remain
+readable even if the source entry is later removed from the Grimoire. The Kitchen’s visible
+rotation count, XP ledger notes, archives, and AI context all understand the combined canon and
+personal recipe pool.
+
+## Version 7.5.0 · Living Voice Ascension
+
+Voice Forge III gives all ten companion Soulprints a deeper vocal fingerprint: register,
+resonance, intonation, articulation, emotional range, and a grounded, balanced, or dynamic acting
+take now join the established base voice, accent, cadence, texture, warmth, and energy controls.
+The pace slider also drives the speech model's native speed control, and the Casting Room can
+compare restrained and vivid auditions of the same canon line before saving a performance.
+
+Quick Link now contains both the established confirmation-gated Command Link and an optional Live
+Link. Live Link opens a private one-on-one WebRTC conversation with semantic turn-taking,
+interruptible companion speech, visible on-device transcripts, mute and end controls, the selected
+companion's complete Soulprint, and the current compact System context. It cannot silently change
+campaign records; app actions remain in Command Link, party conversations remain available, and
+the entire offline campaign continues without AI. Realtime text and audio tokens are recorded in
+the local Usage Ledger with model-specific estimates.
+
 ## Version 6.3.0 · Stillpoint Protocol
 
 Version 6.3 welcomes **Mira, The Stillpoint**, as the Training Hall’s third commander. Recovery is
@@ -111,7 +221,7 @@ Version 6.0.2 makes the party more observant without making the System harsher. 
 looks only at the app’s existing finalized stat-neglect and momentum record. Once a path crosses a
 humane attention threshold, its specialist speaks in their own voice and offers one useful route
 back: Rook handles the physical path, Selah the spiritual path, Cipher execution and creative work,
-Haven character, Amara empathy, and Cassian stewardship. If several paths slip together, Ember can
+Vesper creativity, Amara empathy and character, and Cassian stewardship. If several paths slip together, Ember can
 open a small-target re-entry signal and Snow can widen the support response. These pulses award no
 XP, remove no XP, create no failure, and continue to honor Off, Quiet, Balanced, Talkative,
 individual companion controls, and Reduced Motion.
@@ -230,8 +340,8 @@ Class gates and the development pacing simulator were also rebalanced for the ex
 - **Snow, The Constant** is the primary whole-journey companion. She greets each new System day and supports major milestones, difficult seasons, and victories. She has long black hair, a pearl-white and navy support jacket, and an ice-blue System halo.
 - **Rook, The Vanguard** supports Strength, Endurance, and Vitality. He is bold, competitive, and protective, with graphite-and-gold armor and amber energy.
 - **Selah, The Beacon** supports Faith, Wisdom, and spiritual consistency. She is warm and grounded, with long braids, an ivory-and-navy mantle, and a sun-gold halo.
-- **Cipher, The Strategist** supports Discipline, Focus, Willpower, Creativity, YouTube, and ARC work. They are precise, dryly funny, and demanding, with a navy tech jacket and violet-cyan tactical glyphs.
-- **Haven, The Guardian** supports Character, Recovery, balance, and comebacks. He is patient and quietly humorous, with silver-streaked hair, a teal field coat, and a translucent shield glow.
+- **Cipher, The Strategist** supports Discipline, Focus, Willpower, production systems, and ARC architecture. He is precise, dryly funny, and demanding, with a navy tech jacket and violet-cyan tactical glyphs.
+- **Vesper, The Spotlight** supports Creativity, YouTube, audience strategy, hooks, camera confidence, content packaging, and publishing momentum. She is charismatic, quick-witted, and camera-ready, with warm brown skin, amber-gold eyes, a high curly ponytail, a graphite broadcast jacket, and an electric-chartreuse creator halo.
 - **Ember, The Ignition** supports accountability, re-entry, and locking back in after momentum slips. She is fiery, blunt, and fiercely supportive, with copper-red hair, amber eyes, charcoal-and-crimson gear, and an ember-orange System halo.
 - **Mira, The Stillpoint** supports mobility, flexibility, breath, yoga, Pilates, and calm core control. She is serene, gently playful, and impossible to rush, with fair skin, long black hair, luminous purple eyes, pearl-and-indigo movement gear, and a violet System halo.
 - **Amara, The Heartweaver** supports Empathy, relationships, communication, repair, healthy boundaries, belonging, and shame-free sexual-integrity support in the Sanctuary. She is warm, perceptive, and playfully romantic, with warm olive skin, wavy chestnut hair, luminous pink eyes, rose-and-plum battle attire, and a radiant pink System halo.
@@ -260,7 +370,7 @@ Every companion also has one authored five-chapter questline:
 - Rook — **Tempered Foundation**
 - Selah — **Rooted in Light**
 - Cipher — **Signal to Reality**
-- Haven — **Shelter Without Stagnation**
+- Vesper — **Spotlight Protocol**
 - Ember — **Reignite Protocol**
 - Amara — **The Courage to Connect**
 - Cassian — **The Keeper's Ledger**
@@ -306,36 +416,24 @@ pnpm run icons
 
 `pnpm run test:simulator` verifies deterministic pacing at 7, 30, and 90 days, one year, and five years across several completion rates. Simulator code is not imported into the production app. `pnpm run icons` regenerates the original local icons without downloading art.
 
-The production output is `dist/`. Relative assets and hash routing allow it to run from a GitHub repository subpath.
+The production output is `dist/`. Relative assets and hash routing allow it to run from the private Sites address.
 
-## Put it on an iPhone with GitHub Pages
+## Put it on an iPhone with private Sites hosting
 
-An iPhone cannot install this app directly from the Windows project folder. Safari requires an HTTPS address. The included GitHub Pages workflow supplies that address without a paid host.
+The production app is published through the private Sites project and requires the owner’s sign-in.
+Open its HTTPS address in Safari, complete the private sign-in, tap Safari’s **Share** button, choose
+**Add to Home Screen**, and tap **Add**. Launch The System from that icon.
 
-1. Create a new, empty GitHub repository. Do not add a README or license during repository creation.
-2. Open a terminal in this project folder and push the project:
+After one successful online load, the app shell and complete core campaign work offline. Campaign
+data stays on that iPhone—not in the source repository or hosting service. AI Headquarters and
+YouTube Studio synchronization are optional online features. Export a save before clearing Safari
+data or changing phones.
 
-   ```bash
-   git init
-   git add .
-   git commit -m "Initial phone-ready release"
-   git branch -M main
-   git remote add origin https://github.com/YOUR-NAME/YOUR-REPOSITORY.git
-   git push -u origin main
-   ```
-
-3. On GitHub, open **Settings → Pages**.
-4. Under **Build and deployment**, set **Source** to **GitHub Actions**.
-5. Open **Actions** and wait for “Deploy The System to GitHub Pages” to finish.
-6. Open the deployment URL on the iPhone in Safari. It will resemble `https://YOUR-NAME.github.io/YOUR-REPOSITORY/`.
-7. Tap Safari’s **Share** button, choose **Add to Home Screen**, and tap **Add**.
-8. Launch The System from its Home Screen icon.
-
-After one successful online load, the app shell works offline. Campaign data stays on that iPhone—not in GitHub or on a server. Export a save before clearing Safari data or changing phones.
-
-If the workflow is unavailable, enable Actions under **Settings → Actions → General**. If the site is blank, confirm Pages uses GitHub Actions, confirm the workflow uploaded `dist/`, and hard-refresh once after deployment.
-
-When updating an existing installation, commit and push the changed project through GitHub Desktop, wait for the Pages workflow to succeed, then open the app online once. Open **Update Center** and choose **Check for update** if the prompt does not appear automatically. The service worker installs the release without deleting or re-adding the home-screen app. Earlier saves are migrated automatically to the version 10 database, but exporting through Archive Shield before any major update is still recommended.
+When a new private Sites release is published, open the app online once. Use **Update Center → Check
+for update** if the prompt does not appear automatically. The service worker installs the release
+without deleting or re-adding the home-screen app, and earlier saves migrate automatically to the
+current Version 23 format. Exporting through Archive Shield before any major update is still
+recommended.
 
 ## Save, restore, and reset
 
@@ -400,6 +498,6 @@ All campaign data and private notes stay in IndexedDB unless explicitly exported
 
 Imported JSON is size-limited, parsed as data rather than code, rejects prototype-related property names, validates required data and impossible negative values, and never becomes HTML. A restrictive Content Security Policy is declared in `index.html`.
 
-Run `pnpm audit` before releases and review dependency changes in `pnpm-lock.yaml`. A compromised phone, browser extension, exported-file location, or GitHub account is outside the protection an offline web app can provide.
+Run `pnpm audit` before releases and review dependency changes in `pnpm-lock.yaml`. A compromised phone, browser extension, exported-file location, hosting sign-in, OpenAI account, or connected Google account is outside the protection an offline web app can provide.
 
 The app does not diagnose health, prescribe dangerous exercise, use monetary penalties, or connect spiritual or sexual setbacks to exercise punishment. Recovery language is constructive and non-shaming. Static iPhone PWAs cannot guarantee scheduled background notifications, so the app keeps notification permissions off and does not promise reminders it cannot reliably deliver.

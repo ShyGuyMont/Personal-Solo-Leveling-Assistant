@@ -1,8 +1,9 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { CANON_VOICE_PROFILES } from '@/config/aiVoices';
+import { CANON_VOICE_PROFILES, inferAiVoiceScene } from '@/config/aiVoices';
 import { db } from '@/db/database';
 import {
   estimateSpeechCostUsd,
+  estimateRealtimeCostUsd,
   estimateTextCostUsd,
   getAiUsageSummary,
   getAiVoiceProfiles,
@@ -18,11 +19,17 @@ describe('Voice Link local profiles and usage', () => {
     await db.aiUsageRecords.clear();
   });
 
-  it('provides ten distinct canon voices without inferring accents from appearance', async () => {
+  it('provides ten distinct canon voices with deliberately authored performance directions', async () => {
     const profiles = await getAiVoiceProfiles();
     expect(Object.keys(profiles)).toHaveLength(10);
     expect(new Set(Object.values(profiles).map((profile) => profile.voice)).size).toBe(10);
-    expect(Object.values(profiles).every((profile) => profile.accent === 'natural')).toBe(true);
+    expect(profiles.haven).toMatchObject({ voice: 'fable', accent: 'caribbean' });
+    expect(profiles.ember).toMatchObject({
+      register: 'low-mid',
+      resonance: 'chest',
+      performanceTake: 'dynamic',
+    });
+    expect(profiles.snow.performanceTake).not.toBe(profiles.saffron.performanceTake);
     expect(CANON_VOICE_PROFILES.snow.direction).toMatch(/older sister/i);
     expect(CANON_VOICE_PROFILES.ember.direction).toMatch(/obstacle/i);
     expect(CANON_VOICE_PROFILES.saffron.direction).toMatch(/high-pressure/i);
@@ -73,7 +80,35 @@ describe('Voice Link local profiles and usage', () => {
       texture: CANON_VOICE_PROFILES.snow.texture,
       naturalism: CANON_VOICE_PROFILES.snow.naturalism,
       pauseDiscipline: CANON_VOICE_PROFILES.snow.pauseDiscipline,
+      register: CANON_VOICE_PROFILES.snow.register,
+      resonance: CANON_VOICE_PROFILES.snow.resonance,
+      performanceTake: CANON_VOICE_PROFILES.snow.performanceTake,
+      intonation: CANON_VOICE_PROFILES.snow.intonation,
+      articulation: CANON_VOICE_PROFILES.snow.articulation,
+      emotionalRange: CANON_VOICE_PROFILES.snow.emotionalRange,
     });
+  });
+
+  it('selects an emotional scene without changing the companion soulprint', () => {
+    expect(inferAiVoiceScene('I am proud of you. You crushed that level up.')).toBe('celebration');
+    expect(inferAiVoiceScene('Breathe. I know this feels overwhelming.')).toBe('support');
+    expect(inferAiVoiceScene('No excuses. Do it now.')).toBe('accountability');
+    expect(inferAiVoiceScene('First, hold this stretch for thirty seconds.')).toBe('instruction');
+    expect(inferAiVoiceScene('Let us compare the best path to World Class.')).toBe('strategy');
+  });
+
+  it('prices mixed realtime text and audio tokens without double counting cached input', () => {
+    expect(
+      estimateRealtimeCostUsd({
+        model: 'gpt-realtime-2.1-mini',
+        inputTokens: 1_000,
+        cachedInputTokens: 400,
+        outputTokens: 500,
+        audioInputTokens: 800,
+        cachedAudioInputTokens: 300,
+        audioOutputTokens: 400,
+      }),
+    ).toBeCloseTo(0.013396, 8);
   });
 
   it('separates session, daily, and monthly usage while keeping spend clearly estimated', async () => {
@@ -84,11 +119,13 @@ describe('Voice Link local profiles and usage', () => {
       createdAt: '2026-08-11T14:00:00.000Z',
       model: 'gpt-5.6-luna',
       inputTokens: 1_000,
+      cachedInputTokens: 500,
       outputTokens: 500,
+      reasoningTokens: 25,
       totalTokens: 1_500,
       characters: 0,
       audioSeconds: 0,
-      estimatedCostUsd: estimateTextCostUsd('gpt-5.6-luna', 1_000, 500),
+      estimatedCostUsd: estimateTextCostUsd('gpt-5.6-luna', 1_000, 500, 500),
       exactUsage: true,
     });
     await recordAiUsage({
@@ -129,7 +166,12 @@ describe('Voice Link local profiles and usage', () => {
     expect(summary.today.calls).toBe(1);
     expect(summary.month.calls).toBe(2);
     expect(summary.month.totalTokens).toBe(1_500);
+    expect(summary.month.cachedInputTokens).toBe(500);
+    expect(summary.month.reasoningTokens).toBe(25);
     expect(summary.month.audioSeconds).toBe(60);
     expect(summary.month.estimatedCostUsd).toBeGreaterThan(0);
+    expect(summary.byModel['gpt-5.6-luna'].calls).toBe(1);
+    expect(estimateTextCostUsd('gpt-5.6-luna', 1_000, 500)).toBeCloseTo(0.0008, 8);
+    expect(estimateTextCostUsd('gpt-5.6-luna', 1_000, 500, 500)).toBeCloseTo(0.00071, 8);
   });
 });

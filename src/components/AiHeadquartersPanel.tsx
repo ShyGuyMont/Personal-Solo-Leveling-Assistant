@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { AiVoiceLinkPanel } from '@/components/AiVoiceLinkPanel';
+import { AiSoulprintStudio } from '@/components/AiSoulprintStudio';
 import { COMPANIONS, getCompanion, getCompanionImage } from '@/config/companions';
 import { db } from '@/db/database';
 import {
@@ -37,11 +38,11 @@ import {
   saveAiMemoryCandidates,
   saveAiConversation,
 } from '@/game/aiHeadquarters';
+import { buildAiProgressContext } from '@/game/aiContext';
 import {
   getAiLinkStatus,
   requestAiHeadquartersReply,
   type AiLinkStatus,
-  type AiProgressContext,
 } from '@/services/aiHeadquarters';
 import { useGameStore } from '@/store/useGameStore';
 import { useAiVoiceLink } from '@/hooks/useAiVoiceLink';
@@ -50,8 +51,17 @@ import { scrollChatViewportToBottom } from '@/utils/scroll';
 import type { AiConversation, AiConversationAudience, AiRelationshipMemory } from '@/types/game';
 
 export function AiHeadquartersPanel() {
-  const { profile, settings, progression, missions, todayRecords, stats, systemDate, refresh } =
-    useGameStore();
+  const {
+    profile,
+    settings,
+    progression,
+    missions,
+    todayRecords,
+    stats,
+    challenges,
+    systemDate,
+    refresh,
+  } = useGameStore();
   const [conversations, setConversations] = useState<AiConversation[]>([]);
   const [activeId, setActiveId] = useState<string>();
   const [draft, setDraft] = useState('');
@@ -105,6 +115,20 @@ export function AiHeadquartersPanel() {
     return () => {
       active = false;
     };
+  }, []);
+
+  useEffect(() => {
+    const update = (event: Event) => {
+      const conversationId = (event as CustomEvent<{ id?: string }>).detail?.id;
+      void getRecentAiConversations().then((items) => {
+        setConversations(items);
+        if (conversationId && items.some((item) => item.id === conversationId)) {
+          setActiveId(conversationId);
+        }
+      });
+    };
+    window.addEventListener('system:ai-conversations-changed', update);
+    return () => window.removeEventListener('system:ai-conversations-changed', update);
   }, []);
 
   useEffect(() => {
@@ -206,6 +230,16 @@ export function AiHeadquartersPanel() {
     );
   }
 
+  async function setTreasurySharingEnabled(enabled: boolean) {
+    await db.settings.update('primary', { aiTreasurySharingEnabled: enabled });
+    await refresh();
+    setNotice(
+      enabled
+        ? 'Cassian Ledger Counsel enabled. Only calculated totals and targets may enter his context.'
+        : 'Cassian Ledger Counsel paused. No Treasury figures will be included online.',
+    );
+  }
+
   async function approveMemory(id: string) {
     await approveAiRelationshipMemory(id);
     await refreshMemoryLedger();
@@ -240,64 +274,6 @@ export function AiHeadquartersPanel() {
     });
   }
 
-  function buildProgressContext(): AiProgressContext {
-    const available = missions.filter((mission) => mission.enabled && !mission.archived);
-    const completed = new Set(
-      todayRecords
-        .filter((record) => record.status === 'completed')
-        .map((record) => record.missionId),
-    );
-    const approvedMemories = memoryLedger
-      .filter(
-        (memory) =>
-          memory.status === 'approved' &&
-          (currentConversation.audience === 'party' ||
-            memory.scope === 'party' ||
-            memory.scope === currentConversation.audience),
-      )
-      .slice(0, 12);
-    return {
-      hunter: {
-        firstName: currentProfile.displayName.trim().split(/\s+/)[0] || 'Hunter',
-        systemTitle: currentProfile.systemTitle,
-        level: currentProgression.level,
-        class: currentProgression.rank,
-        startingFocus: currentProfile.startingFocus,
-      },
-      today: {
-        date: systemDate,
-        completedMissions: available.filter((mission) => completed.has(mission.id)).length,
-        availableMissions: available.length,
-        pendingMissionNames: available
-          .filter((mission) => !completed.has(mission.id))
-          .slice(0, 12)
-          .map((mission) => mission.name),
-      },
-      momentum: stats.map((stat) => ({
-        stat: stat.name,
-        level: stat.level,
-        trend: stat.trend,
-        neglectedDays: stat.neglectedDays,
-      })),
-      party: {
-        enabledCompanionIds: enabledCompanions.map((companion) => companion.id),
-      },
-      state: {
-        recoveryActive: currentSettings.recoveryMode.active,
-      },
-      bondMemory: {
-        enabled: currentSettings.aiRelationshipMemoryEnabled,
-        approved: currentSettings.aiRelationshipMemoryEnabled
-          ? approvedMemories.map((memory) => ({
-              fact: memory.fact,
-              category: memory.category,
-              scope: memory.scope,
-            }))
-          : [],
-      },
-    };
-  }
-
   async function sendMessage() {
     const message = draft.trim();
     if (!message || sending || !linkReady) return;
@@ -317,7 +293,18 @@ export function AiHeadquartersPanel() {
         audience: currentConversation.audience,
         message,
         history: currentConversation.messages,
-        context: buildProgressContext(),
+        context: await buildAiProgressContext({
+          audience: currentConversation.audience,
+          profile: currentProfile,
+          settings: currentSettings,
+          progression: currentProgression,
+          missions,
+          todayRecords,
+          stats,
+          challenges,
+          systemDate,
+          enabledCompanionIds: enabledCompanions.map((companion) => companion.id),
+        }),
       });
       void voiceLink.trackTextUsage(result).catch(() => undefined);
       const memoryAdditions = currentSettings.aiRelationshipMemoryEnabled
@@ -400,11 +387,11 @@ export function AiHeadquartersPanel() {
             <span>
               <strong>Online mode is opt-in.</strong>
               <small>
-                When you press Send, only your first name, message, up to 16 recent chat messages,
-                and a compact Class, level, focus, recovery, mission, and stat signal go to OpenAI.
-                Notes, journals, Treasury amounts, and your save file stay local. Bond Memory
-                remains off until you enable it, and only memories you approve may be included
-                later.
+                When you press Send, only your first name, message, up to 16 recent chat messages, a
+                compact Class roadmap, recent progress counters, mission and stat signals, and the
+                Director's Notes for the companions you called go to OpenAI. Journals, Kitchen
+                notes, itemized Treasury records, and your save file stay local. Bond Memory and
+                Cassian Ledger Counsel remain off until you enable them separately.
               </small>
             </span>
           </div>
@@ -506,6 +493,38 @@ export function AiHeadquartersPanel() {
           )}
         </section>
       )}
+
+      {onlineMode && (
+        <section
+          className={`ai-ledger-counsel ${currentSettings.aiTreasurySharingEnabled ? 'is-enabled' : ''}`}
+        >
+          <span className="ai-ledger-counsel__icon">
+            <ShieldCheck size={19} />
+          </span>
+          <span>
+            <strong>Cassian Ledger Counsel</strong>
+            <small>
+              {currentSettings.aiTreasurySharingEnabled
+                ? 'Enabled · calculated totals and targets only'
+                : 'Private by default · no Treasury figures leave this device'}
+            </small>
+            <p>
+              When enabled, Cassian can reason from 30-day income and spending totals, current
+              targets, debt totals, and savings progress. Labels, notes, merchants, bill names, debt
+              names, and individual transactions are never included.
+            </p>
+          </span>
+          <button
+            className="button button--secondary"
+            type="button"
+            onClick={() => setTreasurySharingEnabled(!currentSettings.aiTreasurySharingEnabled)}
+          >
+            {currentSettings.aiTreasurySharingEnabled ? 'Pause counsel' : 'Enable counsel'}
+          </button>
+        </section>
+      )}
+
+      <AiSoulprintStudio settings={currentSettings} refresh={refresh} onNotice={setNotice} />
 
       {onlineMode && (
         <AiVoiceLinkPanel

@@ -28,7 +28,7 @@ const BASE_PARTY_BANTER: Record<MissionCategory, BanterExchange[]> = {
           message: 'Good work. Now recover like someone who intends to be strong again tomorrow.',
         },
         {
-          companionId: 'haven',
+          companionId: 'mira',
           message:
             'I was about to say the same thing, only with fewer orders and considerably more water.',
         },
@@ -97,7 +97,7 @@ const BASE_PARTY_BANTER: Record<MissionCategory, BanterExchange[]> = {
       id: 'faith-rest',
       messages: [
         {
-          companionId: 'haven',
+          companionId: 'snow',
           message: 'That choice made room inside the day instead of taking more from it.',
         },
         {
@@ -165,7 +165,7 @@ const BASE_PARTY_BANTER: Record<MissionCategory, BanterExchange[]> = {
       messages: [
         { companionId: 'rook', message: 'Objective handled. What is next?' },
         {
-          companionId: 'haven',
+          companionId: 'snow',
           message: 'A breath. The answer is a breath, and then we can discuss what is next.',
         },
       ],
@@ -204,12 +204,13 @@ const BASE_PARTY_BANTER: Record<MissionCategory, BanterExchange[]> = {
       id: 'creator-real',
       messages: [
         {
-          companionId: 'cipher',
-          message: 'The idea is no longer trapped in your head. Statistically, that is enormous.',
+          companionId: 'haven',
+          message:
+            'The idea escaped your head and found a spotlight. That is a creator signal, baby.',
         },
         {
-          companionId: 'snow',
-          message: 'Emotionally, too. You made part of your world real today.',
+          companionId: 'cipher',
+          message: 'Her terminology is imprecise. Her conclusion is correct.',
         },
       ],
     },
@@ -217,22 +218,26 @@ const BASE_PARTY_BANTER: Record<MissionCategory, BanterExchange[]> = {
       id: 'creator-rough',
       messages: [
         {
-          companionId: 'cipher',
-          message: 'A rough version exists. Perfection has officially lost its veto power.',
+          companionId: 'haven',
+          message:
+            'A rough cut! Perfect. Now we have something to charm, sharpen, and actually release.',
         },
         {
-          companionId: 'rook',
-          message: 'Good. Something real can be strengthened. An untouched idea cannot.',
+          companionId: 'cipher',
+          message: 'Precisely. Perfection has officially lost its veto power.',
         },
       ],
     },
     {
       id: 'creator-arc',
       messages: [
-        { companionId: 'snow', message: 'Another piece of the vision crossed over into reality.' },
+        {
+          companionId: 'haven',
+          message: 'ARC just gained another scene people can actually step into.',
+        },
         {
           companionId: 'cipher',
-          message: 'I have already updated the plan to account for your increasing competence.',
+          message: 'And I have updated the dependency map before Vesper invents a launch event.',
         },
       ],
     },
@@ -240,12 +245,12 @@ const BASE_PARTY_BANTER: Record<MissionCategory, BanterExchange[]> = {
       id: 'creator-finished',
       messages: [
         {
-          companionId: 'ember',
-          message: 'Something real exists now. Perfection can complain from outside the room.',
+          companionId: 'haven',
+          message: 'Something real exists now. Give it a title worthy of stopping the scroll.',
         },
         {
           companionId: 'cipher',
-          message: 'Agreed. Finished output remains statistically difficult to argue with.',
+          message: 'After the export finishes. She has attempted to title unsaved files before.',
         },
       ],
     },
@@ -253,14 +258,14 @@ const BASE_PARTY_BANTER: Record<MissionCategory, BanterExchange[]> = {
       id: 'creator-shared',
       messages: [
         {
-          companionId: 'cipher',
+          companionId: 'haven',
           message:
-            'Creation complete. Distribution and feedback are now statistically permissible.',
+            'Creation complete. Now let the audience meet it before you edit the personality out.',
         },
         {
-          companionId: 'amara',
+          companionId: 'cipher',
           message:
-            'He means it is safe to let someone see your heart in the work. I mean it more beautifully.',
+            'Distribution authorized. I will be measuring what actually teaches us something.',
         },
       ],
     },
@@ -270,7 +275,7 @@ const BASE_PARTY_BANTER: Record<MissionCategory, BanterExchange[]> = {
       id: 'character-strength',
       messages: [
         {
-          companionId: 'haven',
+          companionId: 'amara',
           message: 'That choice made someone’s world a little safer or kinder.',
         },
         { companionId: 'rook', message: 'Then it counts as strength. No debate required.' },
@@ -280,7 +285,7 @@ const BASE_PARTY_BANTER: Record<MissionCategory, BanterExchange[]> = {
       id: 'character-unseen',
       messages: [
         {
-          companionId: 'haven',
+          companionId: 'amara',
           message: 'The best parts of character often grow when nobody applauds.',
         },
         { companionId: 'snow', message: 'Good thing the party was paying attention.' },
@@ -294,7 +299,7 @@ const BASE_PARTY_BANTER: Record<MissionCategory, BanterExchange[]> = {
           message: 'Goodness offered freely tends to travel farther than we can see.',
         },
         {
-          companionId: 'haven',
+          companionId: 'snow',
           message: 'And today, the first part of that journey began with you.',
         },
       ],
@@ -303,7 +308,7 @@ const BASE_PARTY_BANTER: Record<MissionCategory, BanterExchange[]> = {
       id: 'character-fire',
       messages: [
         {
-          companionId: 'haven',
+          companionId: 'amara',
           message: 'Strength is most trustworthy when it leaves someone safer.',
         },
         {
@@ -321,7 +326,7 @@ const BASE_PARTY_BANTER: Record<MissionCategory, BanterExchange[]> = {
             'Care with boundaries, honesty without cruelty, courage without performance—that is relationship strength.',
         },
         {
-          companionId: 'haven',
+          companionId: 'snow',
           message:
             'And the kind of strength that leaves both people more whole. Welcome to the watch, Heartweaver.',
         },

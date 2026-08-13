@@ -72,8 +72,16 @@ export const BALANCE = {
       discipline: 8,
     },
   },
-  weeklyChallengeAccountXp: [100, 150, 220, 300, 420],
-  monthlyChallengeAccountXp: [350, 500, 700, 950, 1250],
+  weeklyChallengeAccountXp: [150, 225, 330, 450, 630],
+  monthlyChallengeAccountXp: [525, 750, 1050, 1425, 1875],
+} as const;
+
+export const WORLD_CLASS_PACING = {
+  theoreticalFastestDays: 570,
+  sustainableFastDays: 620,
+  sustainableSteadyDays: 725,
+  minimumReliableForecastDays: 21,
+  designedConsistencyRange: '75–90%',
 } as const;
 
 export const PERFECT_DAY_STAT_REWARDS: Partial<Record<StatName, number>> = {

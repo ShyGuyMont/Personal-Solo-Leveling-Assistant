@@ -54,6 +54,24 @@ export async function getRecentAiConversations(limit = 12) {
   return db.aiConversations.orderBy('updatedAt').reverse().limit(limit).toArray();
 }
 
+export async function getAiConversation(id: string) {
+  return db.aiConversations.get(id);
+}
+
+export async function getContinuingAiConversation(
+  audience: AiConversationAudience,
+  now = new Date(),
+  maxAgeHours = 12,
+) {
+  const conversations = await db.aiConversations.where('audience').equals(audience).toArray();
+  const latest = conversations.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))[0];
+  if (!latest) return createAiConversation(audience, now.toISOString());
+  const age = now.getTime() - new Date(latest.updatedAt).getTime();
+  return age >= 0 && age <= maxAgeHours * 60 * 60 * 1_000
+    ? latest
+    : createAiConversation(audience, now.toISOString());
+}
+
 export async function saveAiConversation(conversation: AiConversation) {
   await db.aiConversations.put(conversation);
   return conversation;

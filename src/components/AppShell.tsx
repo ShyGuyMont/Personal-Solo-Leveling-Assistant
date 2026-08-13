@@ -4,13 +4,15 @@ import {
   CircleGauge,
   CircleHelp,
   ChefHat,
+  Crown,
   Dumbbell,
   ListChecks,
   MessagesSquare,
-  Shield,
+  Mic,
   WalletCards,
+  Video,
 } from 'lucide-react';
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState, type ReactNode } from 'react';
 import { CompanionPresence, RealmTransition, SystemHud } from '@/components/LivingSystemLayer';
 import { SystemMark } from '@/components/SystemMark';
 import { SystemParticleField } from '@/components/SystemParticleField';
@@ -28,13 +30,19 @@ import { primeAudioOutput } from '@/utils/audio';
 const NAV = [
   { to: '/', label: 'System', icon: CircleGauge },
   { to: '/missions', label: 'Missions', icon: ListChecks },
-  { to: '/status', label: 'Status', icon: Shield },
+  { to: '/creator-forge', label: 'Creator', icon: Video },
   { to: '/training-hall', label: 'Training', icon: Dumbbell },
   { to: '/sanctuary', label: 'Sanctuary', icon: BookHeart },
   { to: '/kitchen', label: 'Kitchen', icon: ChefHat },
   { to: '/treasury', label: 'Treasury', icon: WalletCards },
   { to: '/archive', label: 'Archive', icon: Archive },
 ];
+
+const CompanionQuickLink = lazy(() =>
+  import('@/components/CompanionQuickLink').then((module) => ({
+    default: module.CompanionQuickLink,
+  })),
+);
 
 export function AppShell({ children }: { children: ReactNode }) {
   const path = useRoutePath();
@@ -158,7 +166,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <SystemMark small />
           <span>
             <span className="brand__name">THE SYSTEM</span>
-            <span className="brand__tag">V{APP_VERSION} · LIVING PERFORMANCE</span>
+            <span className="brand__tag">V{APP_VERSION} · REAWAKENING</span>
           </span>
         </NavLink>
         <div className="app-header__actions">
@@ -170,16 +178,35 @@ export function AppShell({ children }: { children: ReactNode }) {
             onClick={(event) => {
               if (path !== '/headquarters') return;
               event.preventDefault();
-              document.getElementById('ai-headquarters')?.scrollIntoView({
-                behavior: settings?.reducedMotion ? 'auto' : 'smooth',
-                block: 'start',
-              });
+              document
+                .getElementById('ai-headquarters')
+                ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }}
           >
             <MessagesSquare size={15} aria-hidden="true" />
             <span>AI HQ</span>
             <i aria-hidden="true" />
           </Link>
+          <Suspense
+            fallback={
+              <span className="header-ai-link header-quick-link is-loading" aria-hidden="true">
+                <Mic size={15} />
+                <span>QUICK LINK</span>
+                <i />
+              </span>
+            }
+          >
+            <CompanionQuickLink />
+          </Suspense>
+          <NavLink
+            to="/status"
+            className="header-status-link"
+            aria-label="Open Status and Class progression"
+            title="Status and Class progression"
+          >
+            <Crown size={19} strokeWidth={1.8} aria-hidden="true" />
+            <span className="sr-only">Status</span>
+          </NavLink>
           <NavLink to="/about" className="header-help" aria-label="About and help">
             <CircleHelp size={20} />
             <span>HELP</span>

@@ -1,7 +1,10 @@
+import { inferAiVoiceScene } from '@/config/aiVoices';
 import type {
   AiConversationAudience,
   AiConversationMessage,
   AiVoiceProfile,
+  AiVoiceScene,
+  CompanionOperationRequest,
   CompanionId,
   Focus,
   LocalDateKey,
@@ -23,6 +26,68 @@ export interface AiProgressContext {
     availableMissions: number;
     pendingMissionNames: string[];
   };
+  progression: {
+    totalXp: number;
+    currentLevelXp: number;
+    xpToNextLevel: number;
+    lifetimeMissionCompletions: number;
+    completedDays: number;
+    perfectDays: number;
+    currentDayStreak: number;
+    currentPerfectStreak: number;
+    xpMultiplier: number;
+  };
+  classification: {
+    nextClass?: Rank;
+    qualifiedForNextClass: boolean;
+    trialStatus: 'locked' | 'available' | 'active' | 'completed' | 'cooldown' | 'none';
+    nextRequirements: Array<{
+      label: string;
+      current: number;
+      target: number;
+      remaining: number;
+      met: boolean;
+      display?: string;
+    }>;
+    roadmap: Array<{
+      class: Rank;
+      minimumLevel: number;
+      lifetimeCompletions: number;
+      completedDays: number;
+      disciplineLevel: number;
+      balancedStatLevel: number;
+      balancedStatsRequired: number;
+      challengesCompleted: number;
+      requiresTrial: boolean;
+    }>;
+    worldClass: {
+      remainingLevels: number;
+      remainingXpToMinimumLevel: number;
+      remainingMissionCompletions: number;
+      remainingCompletedDays: number;
+      remainingDisciplineLevels: number;
+      remainingBalancedStats: number;
+      remainingChallenges: number;
+      designedTheoreticalFastestDays: number;
+      designedSustainableRangeDays: { minimum: number; maximum: number };
+      designedConsistencyRange: string;
+      lowerBoundCompletedDaysAtRecentPace: number;
+      recentPaceSampleDays: number;
+      recentPaceConfidence: 'early' | 'developing' | 'established';
+      forecastCaveat: string;
+    };
+  };
+  recentThirtyDays: {
+    finalizedDays: number;
+    missionsCompleted: number;
+    xpEarned: number;
+    averageXpPerCompletedDay: number;
+    averageMissionsPerCompletedDay: number;
+    perfectDays: number;
+    trainingSessions: number;
+    kitchenOrders: number;
+    sanctuarySessions: number;
+  };
   momentum: Array<{
     stat: StatName;
     level: number;
@@ -31,6 +96,16 @@ export interface AiProgressContext {
   }>;
   party: {
     enabledCompanionIds: CompanionId[];
+    directorNotes: Array<{
+      companionId: CompanionId;
+      humor: string;
+      challenge: string;
+      care: string;
+      casual: string;
+      conflict: string;
+      bonds: string;
+      never: string;
+    }>;
   };
   state: {
     recoveryActive: boolean;
@@ -43,19 +118,189 @@ export interface AiProgressContext {
       scope: AiConversationAudience;
     }>;
   };
+  kitchen: {
+    todayOrder?: {
+      status: 'assigned' | 'completed' | 'declined';
+      name: string;
+      codename: string;
+      totalMinutes: number;
+      servings: number;
+      equipment: string;
+      ingredients: string[];
+      steps: string[];
+      completedStepNumbers: number[];
+      storage: string;
+      safety: string;
+    };
+    savedRecipeNames: string[];
+  };
+  operations: {
+    today?: {
+      status: 'awaiting-confirmation' | 'preparing' | 'ready' | 'partial';
+      sourceCompanionId: CompanionId;
+      training?: { location: string; label: string; detail: string; state?: string };
+      kitchen?: { label: string; detail: string; constraints?: string; state?: string };
+      sanctuary?: { mode: string; label: string; detail: string; state?: string };
+      pendingMissionCount: number;
+      completedMissionCount: number;
+      preparationNotes: string[];
+    };
+  };
+  specialists: {
+    sanctuary: {
+      recentSessions: Array<{
+        date: LocalDateKey;
+        mode: 'study' | 'stronghold';
+        status: 'active' | 'completed' | 'abandoned';
+        concerns: string[];
+        passageIds: string[];
+        nextAction?: string;
+        outcome?: string;
+      }>;
+      privateWritingExcluded: true;
+    };
+    training: {
+      recentSessions: Array<{
+        date: LocalDateKey;
+        location: string;
+        status: string;
+        circuitId?: string;
+        plannedMinutes?: number;
+        loggedMinutes?: number;
+        roundsCompleted?: number;
+        recoveryProtocol?: string;
+      }>;
+      privateNotesExcluded: true;
+    };
+    campaigns: {
+      activeArcs: Array<{
+        id: string;
+        name: string;
+        purpose: string;
+        category: string;
+        companionId: CompanionId;
+        targetDate?: LocalDateKey;
+        incompleteMilestones: string[];
+        completedMilestones: number;
+      }>;
+      milestoneNotesExcluded: true;
+    };
+    creator: {
+      identity: {
+        channelName: string;
+        channelHandle: string;
+        weeklyUploadTarget: number;
+        currentArcFocus: string;
+        accountabilityMode: string;
+      };
+      latestSnapshot?: {
+        capturedAt: string;
+        periodDays: number;
+        subscribers?: number;
+        views?: number;
+        watchHours?: number;
+        impressions?: number;
+        clickThroughRate?: number;
+        averageViewDurationSeconds?: number;
+        uploads?: number;
+      };
+      historyWindows: Array<{
+        periodDays: number;
+        views?: number;
+        watchHours?: number;
+        averageViewDurationSeconds?: number;
+        uploads?: number;
+      }>;
+      provenVideos: Array<{
+        title: string;
+        publishedAt?: string;
+        periodDays: number;
+        views?: number;
+        watchHours?: number;
+        averageViewPercentage?: number;
+        likes?: number;
+        comments?: number;
+      }>;
+      activeProjects: Array<{
+        id: string;
+        title: string;
+        platform: string;
+        contentType: string;
+        status: string;
+        pillar: string;
+        hook: string;
+        audiencePromise: string;
+        nextAction: string;
+        updatedAt: string;
+      }>;
+      recentlyPublished: Array<{
+        title: string;
+        platform: string;
+        publishedAt?: string;
+      }>;
+      privateNotesExcluded: true;
+    };
+    treasury: {
+      sharingEnabled: boolean;
+      privacy: string;
+      recentThirtyDays?: {
+        incomeCents: number;
+        expenseCents: number;
+        diningCents: number;
+        groceriesCents: number;
+        debtPaymentCents: number;
+        savingsCents: number;
+      };
+      currentWeek?: {
+        status: string;
+        spendingLimitCents: number;
+        diningLimitCents: number;
+        savingsTargetCents: number;
+        debtTargetCents: number;
+        spendingSoFarCents: number;
+        diningSoFarCents: number;
+      };
+      obligations?: {
+        activeBillCount: number;
+        knownBillAmountCents: number;
+        activeDebtCount: number;
+        debtBalanceCents: number;
+        minimumPaymentsCents: number;
+        aprRangeBasisPoints?: [number, number];
+        activeSavingsGoalCount: number;
+        savingsCurrentCents: number;
+        savingsTargetCents: number;
+      };
+    };
+  };
+  commands: {
+    confirmationRequired: true;
+    allowedActions: Array<{
+      actionId: string;
+      label: string;
+      description: string;
+      impact: string;
+    }>;
+  };
 }
 
 export interface AiLinkStatus {
   ok: boolean;
   configured: boolean;
   model?: string;
+  fastModel?: string;
+  intelligenceModel?: string;
+  apexModel?: string;
   intelligenceVersion?: string;
   speechModel?: string;
   transcriptionModel?: string;
+  realtimeModel?: string;
 }
 
 export interface AiHeadquartersReply {
   model: string;
+  route?: 'quick' | 'counsel' | 'sovereign';
+  reasoningEffort?: 'low' | 'medium' | 'high';
   title: string;
   replies: Array<{
     companionId: CompanionId;
@@ -65,10 +310,64 @@ export interface AiHeadquartersReply {
     fact: string;
     category: 'preference' | 'goal' | 'boundary' | 'background' | 'commitment';
   }>;
+  commandProposal?: {
+    actionId: string;
+    companionId: CompanionId;
+    summary: string;
+    confirmation: string;
+  };
+  operationProposal?: CompanionOperationRequest;
+  recipeProposal?: {
+    name: string;
+    codename: string;
+    servings: number;
+    prepMinutes: number;
+    cookMinutes: number;
+    costTier: '$' | '$$' | '$$$';
+    equipment: string;
+    plate: string;
+    ingredients: string[];
+    steps: string[];
+    swaps: string[];
+    storage: string;
+    safety: string;
+    confirmation: string;
+  };
+  contentProposal?: {
+    title: string;
+    platform: 'youtube' | 'youtube-shorts' | 'arc' | 'other';
+    contentType:
+      'long-form' | 'short-form' | 'livestream' | 'community-post' | 'arc-project' | 'other';
+    pillar: string;
+    hook: string;
+    audiencePromise: string;
+    nextAction: string;
+    notes: string;
+    confirmation: string;
+  };
+  campaignProposal?: {
+    name: string;
+    strategy: string;
+    weeks: number;
+    operations: Array<{
+      title: string;
+      platform: 'youtube' | 'youtube-shorts' | 'arc' | 'other';
+      contentType:
+        'long-form' | 'short-form' | 'livestream' | 'community-post' | 'arc-project' | 'other';
+      pillar: string;
+      hook: string;
+      audiencePromise: string;
+      nextAction: string;
+      notes: string;
+    }>;
+    confirmation: string;
+  };
   usage?: {
     inputTokens: number;
     outputTokens: number;
     totalTokens: number;
+    cachedInputTokens: number;
+    reasoningTokens: number;
   };
 }
 
@@ -120,11 +419,16 @@ export async function getAiLinkStatus(): Promise<AiLinkStatus> {
       ok: response.ok && payload?.ok === true,
       configured: response.ok && payload?.configured === true,
       model: typeof payload?.model === 'string' ? payload.model : undefined,
+      fastModel: typeof payload?.fastModel === 'string' ? payload.fastModel : undefined,
+      intelligenceModel:
+        typeof payload?.intelligenceModel === 'string' ? payload.intelligenceModel : undefined,
+      apexModel: typeof payload?.apexModel === 'string' ? payload.apexModel : undefined,
       intelligenceVersion:
         typeof payload?.intelligenceVersion === 'string' ? payload.intelligenceVersion : undefined,
       speechModel: typeof payload?.speechModel === 'string' ? payload.speechModel : undefined,
       transcriptionModel:
         typeof payload?.transcriptionModel === 'string' ? payload.transcriptionModel : undefined,
+      realtimeModel: typeof payload?.realtimeModel === 'string' ? payload.realtimeModel : undefined,
     };
   } catch {
     return { ok: false, configured: false };
@@ -136,6 +440,7 @@ export async function requestAiHeadquartersReply(input: {
   message: string;
   history: AiConversationMessage[];
   context: AiProgressContext;
+  commandMode?: 'none' | 'propose';
 }): Promise<AiHeadquartersReply> {
   let response: Response;
   try {
@@ -154,6 +459,7 @@ export async function requestAiHeadquartersReply(input: {
           message: item.message.slice(0, 4_000),
         })),
         context: input.context,
+        commandMode: input.commandMode ?? 'none',
       }),
     });
   } catch {
@@ -180,9 +486,48 @@ export async function requestAiHeadquartersReply(input: {
   return {
     ...(payload as unknown as AiHeadquartersReply),
     model: typeof payload.model === 'string' ? payload.model : 'unknown',
+    route:
+      payload.route === 'sovereign'
+        ? 'sovereign'
+        : payload.route === 'counsel'
+          ? 'counsel'
+          : 'quick',
+    reasoningEffort:
+      payload.reasoningEffort === 'high'
+        ? 'high'
+        : payload.reasoningEffort === 'medium'
+          ? 'medium'
+          : 'low',
     memoryCandidates: Array.isArray(payload.memoryCandidates)
       ? (payload.memoryCandidates as AiHeadquartersReply['memoryCandidates'])
       : [],
+    commandProposal:
+      payload.commandProposal && typeof payload.commandProposal === 'object'
+        ? (payload.commandProposal as AiHeadquartersReply['commandProposal'])
+        : undefined,
+    operationProposal:
+      payload.operationProposal && typeof payload.operationProposal === 'object'
+        ? ({
+            ...(payload.operationProposal as Record<string, unknown>),
+            includeTraining:
+              typeof (payload.operationProposal as Record<string, unknown>).includeTraining ===
+              'boolean'
+                ? (payload.operationProposal as Record<string, unknown>).includeTraining
+                : Boolean((payload.operationProposal as Record<string, unknown>).trainingLocation),
+          } as AiHeadquartersReply['operationProposal'])
+        : undefined,
+    recipeProposal:
+      payload.recipeProposal && typeof payload.recipeProposal === 'object'
+        ? (payload.recipeProposal as AiHeadquartersReply['recipeProposal'])
+        : undefined,
+    contentProposal:
+      payload.contentProposal && typeof payload.contentProposal === 'object'
+        ? (payload.contentProposal as AiHeadquartersReply['contentProposal'])
+        : undefined,
+    campaignProposal:
+      payload.campaignProposal && typeof payload.campaignProposal === 'object'
+        ? (payload.campaignProposal as AiHeadquartersReply['campaignProposal'])
+        : undefined,
   };
 }
 
@@ -242,6 +587,7 @@ export async function requestAiSpeech(input: {
   companionId: CompanionId;
   text: string;
   profile: AiVoiceProfile;
+  scene?: AiVoiceScene;
 }): Promise<AiSpeechResult> {
   let response: Response;
   try {
@@ -259,12 +605,19 @@ export async function requestAiSpeech(input: {
         delivery: input.profile.delivery,
         cadence: input.profile.cadence,
         texture: input.profile.texture,
+        register: input.profile.register,
+        resonance: input.profile.resonance,
+        performanceTake: input.profile.performanceTake,
         pace: input.profile.pace,
         warmth: input.profile.warmth,
         energy: input.profile.energy,
         expressiveness: input.profile.expressiveness,
         naturalism: input.profile.naturalism,
         pauseDiscipline: input.profile.pauseDiscipline,
+        intonation: input.profile.intonation,
+        articulation: input.profile.articulation,
+        emotionalRange: input.profile.emotionalRange,
+        scene: input.scene ?? inferAiVoiceScene(input.text),
       }),
     });
   } catch {

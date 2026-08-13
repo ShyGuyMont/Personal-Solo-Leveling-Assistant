@@ -55,6 +55,38 @@ describe('save validation and recovery', () => {
     await expect(prepareSaveImport(asFile(save))).rejects.toThrow(/impossible totalXp/);
   });
 
+  it('migrates a staged Party Operations proposal from an earlier 7.7 save', async () => {
+    const save = await createSaveFile();
+    const now = new Date().toISOString();
+    save.data.dailyOperations = [
+      {
+        id: '2026-08-12',
+        date: '2026-08-12',
+        status: 'awaiting-confirmation',
+        sourceCompanionId: 'snow',
+        pendingProposal: {
+          kind: 'assemble-day',
+          companionId: 'snow',
+          trainingLocation: 'home',
+          includeKitchen: false,
+          includeSanctuary: false,
+          summary: 'Prepare Training.',
+          confirmation: 'Prepare the real Training assignment?',
+        },
+        pendingMissionCount: 5,
+        completedMissionCount: 0,
+        preparationNotes: [],
+        createdAt: now,
+        updatedAt: now,
+      },
+    ];
+    save.checksum = await digest(save.data);
+
+    const prepared = await prepareSaveImport(asFile(save));
+    const operation = prepared.save.data.dailyOperations[0] as Record<string, unknown>;
+    expect(operation.pendingProposal).toMatchObject({ includeTraining: true });
+  });
+
   it('retains only the five newest automatic snapshots', async () => {
     for (let index = 0; index < 7; index += 1) {
       await createLocalSnapshot('manual');
@@ -81,6 +113,26 @@ describe('save validation and recovery', () => {
       snowMessage: 'Protected briefing record.',
       createdAt: now,
       updatedAt: now,
+    });
+    await db.dailyOperations.put({
+      id: '2026-08-01',
+      date: '2026-08-01',
+      status: 'ready',
+      sourceCompanionId: 'snow',
+      conversationId: 'ai:backup',
+      training: {
+        sessionId: '2026-08-01',
+        location: 'home',
+        label: 'Iron Foundation',
+        detail: '20-minute home deployment',
+        companionIds: ['rook', 'ember'],
+      },
+      pendingMissionCount: 5,
+      completedMissionCount: 1,
+      preparationNotes: [],
+      createdAt: now,
+      updatedAt: now,
+      preparedAt: now,
     });
     await db.campaignArcs.put({
       id: 'arc:backup',
@@ -203,7 +255,27 @@ describe('save validation and recovery', () => {
     await db.kitchenSessions.put({
       id: '2026-08-01',
       date: '2026-08-01',
-      recipeId: 'freezer-breakfast-burritos',
+      recipeId: 'custom-recipe:backup',
+      customRecipeSnapshot: {
+        id: 'custom-recipe:backup',
+        name: 'Archive Shield Skillet',
+        codename: 'PORTABLE PROVISION',
+        servings: 4,
+        prepMinutes: 10,
+        cookMinutes: 20,
+        costTier: '$',
+        equipment: 'Skillet',
+        plate: 'Chicken, rice, and vegetables.',
+        ingredients: ['1 lb chicken', '2 cups rice', '2 cups vegetables'],
+        steps: ['Cook chicken to 165°F.', 'Cook vegetables.', 'Serve over rice.'],
+        swaps: ['Use turkey.'],
+        storage: 'Refrigerate promptly.',
+        safety: 'Chicken must reach 165°F.',
+        dailyRotationEnabled: true,
+        sourceCompanionId: 'saffron',
+        createdAt: now,
+        updatedAt: now,
+      },
       status: 'completed',
       assignmentVariant: 2,
       rerollUsed: false,
@@ -257,12 +329,18 @@ describe('save validation and recovery', () => {
       delivery: 'conversational',
       cadence: 'flowing',
       texture: 'smooth',
+      register: 'low-mid',
+      resonance: 'balanced',
+      performanceTake: 'balanced',
       pace: 0.95,
       warmth: 5,
       energy: 2,
       expressiveness: 3,
       naturalism: 5,
       pauseDiscipline: 4,
+      intonation: 4,
+      articulation: 4,
+      emotionalRange: 4,
       updatedAt: now,
     });
     await db.aiUsageRecords.put({
@@ -282,9 +360,10 @@ describe('save validation and recovery', () => {
     });
 
     const save = await createSaveFile();
-    expect(save.version).toBe(16);
+    expect(save.version).toBe(23);
     for (const table of [
       'dailyBriefings',
+      'dailyOperations',
       'campaignArcs',
       'arcMilestones',
       'companionQuestProgress',
@@ -306,6 +385,7 @@ describe('save validation and recovery', () => {
       'rw',
       [
         db.dailyBriefings,
+        db.dailyOperations,
         db.campaignArcs,
         db.arcMilestones,
         db.companionQuestProgress,
@@ -321,6 +401,7 @@ describe('save validation and recovery', () => {
       ],
       async () => {
         await db.dailyBriefings.clear();
+        await db.dailyOperations.clear();
         await db.campaignArcs.clear();
         await db.arcMilestones.clear();
         await db.companionQuestProgress.clear();
@@ -341,6 +422,7 @@ describe('save validation and recovery', () => {
       'prayer',
       'movement',
     ]);
+    expect((await db.dailyOperations.get('2026-08-01'))?.training?.label).toBe('Iron Foundation');
     expect((await db.campaignArcs.get('arc:backup'))?.purpose).toBe('Verify complete portability.');
     expect((await db.arcMilestones.get('arc-mark:backup'))?.status).toBe('completed');
     expect(
@@ -352,9 +434,7 @@ describe('save validation and recovery', () => {
     expect((await db.treasuryTransactions.get('treasury:backup'))?.amountCents).toBe(2450);
     expect((await db.trainingSessions.get('2026-08-01'))?.roundsCompleted).toBe(5);
     expect((await db.kitchenSessions.get('2026-08-01'))?.servingsPrepared).toBe(4);
-    expect((await db.kitchenSessions.get('2026-08-01'))?.recipeId).toBe(
-      'freezer-breakfast-burritos',
-    );
+    expect((await db.kitchenSessions.get('2026-08-01'))?.recipeId).toBe('custom-recipe:backup');
     expect((await db.sanctuarySessions.get('sanctuary:backup'))?.prayer).toBe(
       'Help me move toward honest connection.',
     );
@@ -383,8 +463,9 @@ describe('save validation and recovery', () => {
     save.checksum = await digest(save.data);
 
     const prepared = await prepareSaveImport(asFile(save));
-    expect(prepared.save.version).toBe(16);
+    expect(prepared.save.version).toBe(23);
     expect(prepared.save.data.dailyBriefings).toEqual([]);
+    expect(prepared.save.data.dailyOperations).toEqual([]);
     const migrated = prepared.save.data.settings[0] as Record<string, unknown>;
     expect(migrated.enabledCompanionIds).toContain('amara');
     expect(migrated.enabledCompanionIds).toContain('cassian');
@@ -394,10 +475,12 @@ describe('save validation and recovery', () => {
     expect(migrated.aiLinkMode).toBe('offline');
     expect(migrated.aiDataSharingAcknowledged).toBe(false);
     expect(migrated.aiRelationshipMemoryEnabled).toBe(false);
+    expect(migrated.aiTreasurySharingEnabled).toBe(false);
     expect(migrated.aiVoiceOutputEnabled).toBe(false);
     expect(migrated.aiVoiceAutoPlay).toBe(false);
     expect(migrated.aiVoiceDisclosureAcknowledged).toBe(false);
     expect(migrated.aiUsageWarningUsd).toBe(5);
+    expect(migrated.aiSoulprintNotes).toEqual({});
     expect(prepared.save.data.treasurySettings).toHaveLength(1);
     expect(prepared.save.data.treasuryTransactions).toEqual([]);
     expect(prepared.save.data.trainingSessions).toEqual([]);
@@ -448,6 +531,34 @@ describe('save validation and recovery', () => {
     ];
     save.checksum = await digest(save.data);
     await expect(prepareSaveImport(asFile(save))).rejects.toThrow(/Treasury ledger entry/i);
+  });
+
+  it('rejects malformed nested Party Operations assignments even when the checksum matches', async () => {
+    const save = await createSaveFile();
+    const now = new Date().toISOString();
+    save.data.dailyOperations = [
+      {
+        id: '2026-08-12',
+        date: '2026-08-12',
+        status: 'ready',
+        sourceCompanionId: 'snow',
+        training: {
+          sessionId: '2026-08-12',
+          location: 'teleportation',
+          label: 'Impossible path',
+          detail: 'This should never load.',
+          companionIds: ['rook'],
+        },
+        pendingMissionCount: 5,
+        completedMissionCount: 0,
+        preparationNotes: [],
+        createdAt: now,
+        updatedAt: now,
+      },
+    ];
+    save.checksum = await digest(save.data);
+
+    await expect(prepareSaveImport(asFile(save))).rejects.toThrow(/prepared Training/i);
   });
 
   it('rejects impossible Sanctuary credit even when the checksum matches', async () => {

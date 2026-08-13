@@ -16,14 +16,36 @@ interface Soulprint {
 
 interface CompanionIntelligenceModule {
   COMPANION_INTELLIGENCE_VERSION: string;
+  YOUTUBE_READONLY_SCOPES: string[];
   companionIds: string[];
   companionProfiles: Record<string, Soulprint>;
   aiVoiceNames: string[];
   aiVoiceAccents: Record<string, string>;
+  getRealtimeVoice: (voice: string) => string;
+  buildRealtimeInstructions: (
+    profile: Record<string, unknown>,
+    context: Record<string, unknown>,
+  ) => string;
   baseInstructions: string;
   formatCompanionProfiles: () => string;
   buildAudienceInstruction: (audience: string, enabledIds?: string[]) => string;
-  buildSystemInstructions: (audience: string, enabledIds?: string[]) => string;
+  buildSystemInstructions: (
+    audience: string,
+    enabledIds?: string[],
+    commandMode?: 'none' | 'propose',
+  ) => string;
+  selectIntelligenceRoute: (
+    payload: { audience: string; message: string },
+    env?: Record<string, string>,
+  ) => { route: string; model: string; reasoningEffort: string };
+  buildYouTubeAnalyticsWindow: (
+    now?: Date,
+    periodDays?: number,
+  ) => {
+    startDate: string;
+    endDate: string;
+    periodDays: number;
+  };
   default: {
     fetch: (request: Request, env: Record<string, unknown>) => Promise<Response>;
   };
@@ -41,6 +63,43 @@ afterEach(() => {
 });
 
 describe('Companion Soulprint intelligence', () => {
+  it('keeps the YouTube Studio link strictly read-only', () => {
+    expect(intelligence.YOUTUBE_READONLY_SCOPES).toEqual([
+      'https://www.googleapis.com/auth/youtube.readonly',
+      'https://www.googleapis.com/auth/yt-analytics.readonly',
+    ]);
+    expect(intelligence.YOUTUBE_READONLY_SCOPES.join(' ')).not.toMatch(
+      /youtube\.upload|youtube\.force-ssl|youtubepartner|monetary/i,
+    );
+  });
+
+  it('builds an inclusive 28-day Studio analytics window across month boundaries', () => {
+    expect(intelligence.buildYouTubeAnalyticsWindow(new Date('2026-08-12T23:59:59.000Z'))).toEqual({
+      startDate: '2026-07-16',
+      endDate: '2026-08-12',
+      periodDays: 28,
+    });
+  });
+
+  it('builds the inclusive one-year History Lens window without changing permissions', () => {
+    expect(
+      intelligence.buildYouTubeAnalyticsWindow(new Date('2026-08-12T23:59:59.000Z'), 365),
+    ).toEqual({
+      startDate: '2025-08-13',
+      endDate: '2026-08-12',
+      periodDays: 365,
+    });
+  });
+
+  it('requires an authenticated Sites owner before revealing Studio link status', async () => {
+    const response = await intelligence.default.fetch(
+      new Request('https://system.test/api/youtube/status'),
+      {},
+    );
+    expect(response.status).toBe(401);
+    expect(await response.json()).toMatchObject({ code: 'authentication-required' });
+  });
+
   it('gives all ten companions complete and distinct identity directions', () => {
     expect(Object.keys(intelligence.companionProfiles)).toEqual(intelligence.companionIds);
     expect(intelligence.companionIds).toHaveLength(10);
@@ -75,6 +134,57 @@ describe('Companion Soulprint intelligence', () => {
     expect(intelligence.formatCompanionProfiles()).toContain('Relational signature:');
     expect(intelligence.baseInstructions).toContain('Approved Bond Memory');
     expect(intelligence.baseInstructions).toContain('memoryCandidates');
+    expect(intelligence.baseInstructions).toContain("Director's Notes");
+    expect(intelligence.baseInstructions).toContain('classification roadmap');
+    expect(intelligence.baseInstructions).toContain('Selah may recommend Bible passages');
+    expect(intelligence.baseInstructions).toContain('Cassian may analyze only');
+  });
+
+  it('requires one visible confirmation for a complete Reawakening campaign', () => {
+    const instructions = intelligence.buildSystemInstructions('haven', ['haven'], 'propose');
+    expect(instructions).toContain('2 to 4 weeks');
+    expect(instructions).toContain('Never return both content and campaign proposals');
+    expect(instructions).toContain(
+      'only a preview until the Hunter confirms the entire sequence once',
+    );
+  });
+
+  it('routes casual direct talk economically and deeper counsel to Terra', () => {
+    expect(
+      intelligence.selectIntelligenceRoute({ audience: 'snow', message: 'How are you today?' }),
+    ).toEqual({ route: 'quick', model: 'gpt-5.6-luna', reasoningEffort: 'low' });
+    expect(
+      intelligence.selectIntelligenceRoute({
+        audience: 'snow',
+        message: 'How long until I reach World Class at my current pace?',
+      }),
+    ).toEqual({ route: 'counsel', model: 'gpt-5.6-terra', reasoningEffort: 'medium' });
+    expect(
+      intelligence.selectIntelligenceRoute({ audience: 'party', message: 'What do you think?' }),
+    ).toMatchObject({ route: 'counsel', model: 'gpt-5.6-terra' });
+    expect(
+      intelligence.selectIntelligenceRoute(
+        { audience: 'party', message: 'Help me plan.' },
+        { OPENAI_TEXT_MODEL: 'forced-model' },
+      ).model,
+    ).toBe('forced-model');
+    expect(
+      intelligence.selectIntelligenceRoute({
+        audience: 'snow',
+        message: 'Give me sovereign counsel and a comprehensive 90 day strategy.',
+      }),
+    ).toEqual({ route: 'sovereign', model: 'gpt-5.6-sol', reasoningEffort: 'high' });
+  });
+
+  it('requires a visible confirmation for commands and Private Grimoire recipes', () => {
+    const instructions = intelligence.buildSystemInstructions('saffron', ['saffron'], 'propose');
+    expect(instructions).toContain('only actions you may prepare');
+    expect(instructions).toContain('Hunter must confirm');
+    expect(instructions).toContain('Private Grimoire');
+    expect(instructions).toContain('walk through today');
+    expect(instructions).toContain('Companion Operations');
+    expect(instructions).toContain('wake the party');
+    expect(instructions).toContain('may not finish');
   });
 
   it('builds focused solo channels and non-repetitive party councils', () => {
@@ -97,8 +207,12 @@ describe('Companion Soulprint intelligence', () => {
       ok: true,
       configured: true,
       intelligenceVersion: intelligence.COMPANION_INTELLIGENCE_VERSION,
+      fastModel: 'test-model',
+      intelligenceModel: 'test-model',
+      apexModel: 'test-model',
       speechModel: 'gpt-4o-mini-tts',
       transcriptionModel: 'gpt-4o-transcribe',
+      realtimeModel: 'gpt-realtime-2.1-mini',
     });
   });
 
@@ -127,12 +241,19 @@ describe('Companion Soulprint intelligence', () => {
           delivery: 'intense',
           cadence: 'rapid-fire',
           texture: 'bright',
+          register: 'low-mid',
+          resonance: 'chest',
+          performanceTake: 'dynamic',
           pace: 1.28,
           warmth: 2,
           energy: 5,
           expressiveness: 5,
           naturalism: 5,
           pauseDiscipline: 5,
+          intonation: 4,
+          articulation: 4,
+          emotionalRange: 5,
+          scene: 'accountability',
         }),
       }),
       { OPENAI_API_KEY: 'test-key' },
@@ -145,6 +266,7 @@ describe('Companion Soulprint intelligence', () => {
       voice: 'nova',
       input: 'One move. Right now.',
       response_format: 'wav',
+      speed: 1.28,
     });
     expect(response.headers.get('content-type')).toContain('audio/wav');
     expect(String(openAiBody?.instructions)).toContain('Ember, The Ignition');
@@ -154,10 +276,84 @@ describe('Companion Soulprint intelligence', () => {
     expect(String(openAiBody?.instructions)).toContain('focused emotional pressure');
     expect(String(openAiBody?.instructions)).toContain('minimal dead air');
     expect(String(openAiBody?.instructions)).toContain('crisp energized clarity');
+    expect(String(openAiBody?.instructions)).toContain('rich low-mid register');
+    expect(String(openAiBody?.instructions)).toContain('bold emotional contrast');
+    expect(String(openAiBody?.instructions)).toContain('Challenge the obstacle or avoidance');
     expect(String(openAiBody?.instructions)).toContain('restrained warmth');
     expect(String(openAiBody?.instructions)).toContain('maximum energy');
     expect(String(openAiBody?.instructions)).toContain('no over-enunciation');
     expect(JSON.stringify(openAiBody)).not.toContain('test-key');
+  });
+
+  it('opens a one-on-one WebRTC session with semantic turns and the forged soulprint', async () => {
+    let openAiForm: FormData | undefined;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_url: string, init: RequestInit) => {
+        openAiForm = init.body as FormData;
+        return new Response('v=0\r\no=openai 1 1 IN IP4 127.0.0.1', {
+          status: 200,
+          headers: { 'content-type': 'application/sdp' },
+        });
+      }),
+    );
+    const profile = {
+      companionId: 'haven',
+      voice: 'fable',
+      accent: 'caribbean',
+      delivery: 'playful',
+      cadence: 'rapid-fire',
+      texture: 'bright',
+      register: 'high-mid',
+      resonance: 'forward',
+      performanceTake: 'dynamic',
+      pace: 1.2,
+      warmth: 4,
+      energy: 5,
+      expressiveness: 5,
+      naturalism: 5,
+      pauseDiscipline: 4,
+      intonation: 5,
+      articulation: 4,
+      emotionalRange: 5,
+    };
+    const response = await intelligence.default.fetch(
+      new Request('https://system.test/api/ai/realtime/session', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', origin: 'https://system.test' },
+        body: JSON.stringify({
+          sdp: 'v=0\r\no=hunter 1 1 IN IP4 127.0.0.1',
+          companionId: 'haven',
+          profile,
+          context: { hunter: { firstName: 'Jay' }, party: { directorNotes: [] } },
+        }),
+      }),
+      { OPENAI_API_KEY: 'test-key' },
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('x-ai-model')).toBe('gpt-realtime-2.1-mini');
+    expect(response.headers.get('x-ai-voice')).toBe('verse');
+    const session = JSON.parse(String(openAiForm?.get('session'))) as Record<string, unknown>;
+    expect(session).toMatchObject({
+      type: 'realtime',
+      model: 'gpt-realtime-2.1-mini',
+      output_modalities: ['audio'],
+      audio: {
+        input: {
+          turn_detection: {
+            type: 'semantic_vad',
+            create_response: true,
+            interrupt_response: true,
+          },
+        },
+        output: { voice: 'verse', speed: 1.2 },
+      },
+    });
+    expect(String(session.instructions)).toContain('You are Vesper, The Spotlight');
+    expect(String(session.instructions)).toContain('stop immediately when interrupted');
+    expect(String(session.instructions)).toContain('Command Link can prepare a confirmation');
+    expect(JSON.stringify(session)).not.toContain('test-key');
   });
 
   it('transcribes a bounded microphone recording with app-only usage metadata', async () => {
@@ -225,7 +421,13 @@ describe('Companion Soulprint intelligence', () => {
                 ],
               },
             ],
-            usage: { input_tokens: 100, output_tokens: 10, total_tokens: 110 },
+            usage: {
+              input_tokens: 100,
+              input_tokens_details: { cached_tokens: 60 },
+              output_tokens: 10,
+              output_tokens_details: { reasoning_tokens: 4 },
+              total_tokens: 110,
+            },
           }),
           { status: 200, headers: { 'content-type': 'application/json' } },
         );
@@ -273,6 +475,112 @@ describe('Companion Soulprint intelligence', () => {
     expect(input[0].content).toContain('[rook] Rook — The Vanguard');
     expect(input[0].content).not.toContain('[snow] Snow — The Constant');
     expect(input[1].content).toContain('What is 5 + 5?');
+    expect(await response.clone().json()).toMatchObject({
+      route: 'quick',
+      reasoningEffort: 'low',
+      usage: { cachedInputTokens: 60, reasoningTokens: 4 },
+    });
+  });
+
+  it('returns a bounded Party Operations proposal that can leave Training untouched', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        async () =>
+          new Response(
+            JSON.stringify({
+              output: [
+                {
+                  type: 'message',
+                  content: [
+                    {
+                      type: 'output_text',
+                      text: JSON.stringify({
+                        title: 'Daily Command Assembly',
+                        replies: [
+                          {
+                            companionId: 'snow',
+                            message: 'Everything is ready for your permission, not completion.',
+                          },
+                        ],
+                        memoryCandidates: [],
+                        command: {
+                          actionId: '',
+                          companionId: 'snow',
+                          summary: '',
+                          confirmation: '',
+                        },
+                        operation: {
+                          kind: 'assemble-day',
+                          companionId: 'snow',
+                          includeTraining: false,
+                          trainingLocation: '',
+                          includeKitchen: true,
+                          foodConstraints: 'No chicken today',
+                          includeSanctuary: true,
+                          sanctuaryMode: 'study',
+                          primaryConcern: 'focus',
+                          secondaryConcern: '',
+                          summary: 'Wake the party and prepare Kitchen and Sanctuary.',
+                          confirmation: 'Should I wake everyone and prepare those assignments?',
+                        },
+                      }),
+                    },
+                  ],
+                },
+              ],
+            }),
+            { status: 200, headers: { 'content-type': 'application/json' } },
+          ),
+      ),
+    );
+
+    const response = await intelligence.default.fetch(
+      new Request('https://system.test/api/ai/chat', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', origin: 'https://system.test' },
+        body: JSON.stringify({
+          audience: 'snow',
+          message:
+            'Leave Training alone, but prepare no chicken and a study for focus. Wake them up.',
+          history: [],
+          context: {
+            party: { enabledCompanionIds: ['snow', 'rook', 'ember', 'saffron', 'selah'] },
+            bondMemory: { enabled: false, approved: [] },
+            commands: { allowedActions: [] },
+          },
+          commandMode: 'propose',
+        }),
+      }),
+      { OPENAI_API_KEY: 'test-key', OPENAI_TEXT_MODEL: 'test-model' },
+    );
+
+    expect(await response.json()).toMatchObject({
+      operationProposal: {
+        kind: 'assemble-day',
+        companionId: 'snow',
+        includeTraining: false,
+        includeKitchen: true,
+        foodConstraints: 'No chicken today',
+        includeSanctuary: true,
+        sanctuaryMode: 'study',
+        primaryConcern: 'focus',
+      },
+    });
+  });
+
+  it('rejects cross-site AI submissions even when the Origin header is absent', async () => {
+    const response = await intelligence.default.fetch(
+      new Request('https://system.test/api/ai/chat', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'sec-fetch-site': 'cross-site' },
+        body: '{}',
+      }),
+      { OPENAI_API_KEY: 'test-key' },
+    );
+
+    expect(response.status).toBe(403);
+    expect(await response.json()).toMatchObject({ code: 'origin-denied' });
   });
 
   it('returns local memory suggestions only when Bond Memory is enabled', async () => {

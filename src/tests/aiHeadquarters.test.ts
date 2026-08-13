@@ -101,12 +101,18 @@ describe('AI Headquarters local history', () => {
         delivery: 'playful',
         cadence: 'rapid-fire',
         texture: 'textured',
+        register: 'high-mid',
+        resonance: 'forward',
+        performanceTake: 'dynamic',
         pace: 1.55,
         warmth: 2,
         energy: 4,
         expressiveness: 5,
         naturalism: 4,
         pauseDiscipline: 5,
+        intonation: 5,
+        articulation: 4,
+        emotionalRange: 5,
       },
     });
 
@@ -117,12 +123,19 @@ describe('AI Headquarters local history', () => {
       delivery: 'playful',
       cadence: 'rapid-fire',
       texture: 'textured',
+      register: 'high-mid',
+      resonance: 'forward',
+      performanceTake: 'dynamic',
       pace: 1.55,
       warmth: 2,
       energy: 4,
       expressiveness: 5,
       naturalism: 4,
       pauseDiscipline: 5,
+      intonation: 5,
+      articulation: 4,
+      emotionalRange: 5,
+      scene: 'neutral',
     });
   });
 });

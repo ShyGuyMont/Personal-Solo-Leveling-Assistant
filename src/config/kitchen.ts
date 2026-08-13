@@ -838,6 +838,6 @@ export const SAFFRON_COMPLETION_LINES = [
   'Order complete. I will allow one moment of celebration before I inspect how you stored the leftovers!',
 ] as const;
 
-export function getKitchenRecipe(id: KitchenRecipeId) {
-  return KITCHEN_RECIPES.find((recipe) => recipe.id === id)!;
+export function getKitchenRecipe(id: string) {
+  return KITCHEN_RECIPES.find((recipe) => recipe.id === id);
 }

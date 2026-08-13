@@ -10,7 +10,7 @@ import type {
   Settings,
 } from '@/types/game';
 
-export const SAVE_VERSION = 16;
+export const SAVE_VERSION = 23;
 export const MAX_IMPORT_BYTES = 32 * 1024 * 1024;
 const MAX_SNAPSHOTS = 5;
 const FORBIDDEN_KEYS = new Set(['__proto__', 'prototype', 'constructor']);
@@ -59,6 +59,32 @@ async function readFileText(file: File) {
 
 function isObject(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+}
+
+function isValidCustomKitchenRecipe(value: unknown) {
+  if (!isObject(value)) return false;
+  const strings = ['id', 'name', 'codename', 'equipment', 'plate', 'storage', 'safety'];
+  const lists = ['ingredients', 'steps', 'swaps'];
+  return (
+    strings.every((key) => typeof value[key] === 'string') &&
+    lists.every(
+      (key) =>
+        Array.isArray(value[key]) &&
+        (value[key] as unknown[]).every((item) => typeof item === 'string'),
+    ) &&
+    (value.costTier === '$' || value.costTier === '$$' || value.costTier === '$$$') &&
+    Number.isInteger(value.servings) &&
+    Number(value.servings) >= 1 &&
+    Number(value.servings) <= 20 &&
+    Number.isInteger(value.prepMinutes) &&
+    Number(value.prepMinutes) >= 0 &&
+    Number(value.prepMinutes) <= 240 &&
+    Number.isInteger(value.cookMinutes) &&
+    Number(value.cookMinutes) >= 0 &&
+    Number(value.cookMinutes) <= 480 &&
+    typeof value.dailyRotationEnabled === 'boolean' &&
+    value.sourceCompanionId === 'saffron'
+  );
 }
 
 function requiredSingleton<T>(data: Record<string, unknown[]>, table: string, id = 'primary') {
@@ -132,6 +158,28 @@ function migrateData(
     data.aiVoiceProfiles ??= [];
     data.aiUsageRecords ??= [];
   }
+  if (version <= 18) {
+    data.creatorSettings ??= [];
+    data.creatorSnapshots ??= [];
+    data.creatorProjects ??= [];
+  }
+  if (version <= 19) data.creatorVideoInsights ??= [];
+  if (version <= 22) data.dailyOperations ??= [];
+  data.dailyOperations = data.dailyOperations.map((row) => {
+    if (!isObject(row) || !isObject(row.pendingProposal)) return row;
+    const pendingProposal = row.pendingProposal;
+    return {
+      ...row,
+      pendingProposal: {
+        ...pendingProposal,
+        includeTraining:
+          typeof pendingProposal.includeTraining === 'boolean'
+            ? pendingProposal.includeTraining
+            : pendingProposal.kind === 'prepare-training' ||
+              typeof pendingProposal.trainingLocation === 'string',
+      },
+    };
+  });
   data.aiVoiceProfiles = data.aiVoiceProfiles.map((row) => {
     if (
       !isObject(row) ||
@@ -141,16 +189,36 @@ function migrateData(
       return row;
     }
     const canon = cloneCanonVoiceProfile(row.id as CompanionId);
+    if (version <= 18 && row.id === 'haven') return canon;
     return {
       delivery: canon.delivery,
       cadence: canon.cadence,
       texture: canon.texture,
+      register: canon.register,
+      resonance: canon.resonance,
+      performanceTake: canon.performanceTake,
       naturalism: canon.naturalism,
       pauseDiscipline: canon.pauseDiscipline,
+      intonation: canon.intonation,
+      articulation: canon.articulation,
+      emotionalRange: canon.emotionalRange,
       ...row,
     };
   });
   const migrationTime = new Date().toISOString();
+  if (!data.creatorSettings.some((row) => isObject(row) && row.id === 'primary')) {
+    data.creatorSettings.push({
+      id: 'primary',
+      channelName: '',
+      channelHandle: '',
+      channelUrl: '',
+      weeklyUploadTarget: 1,
+      currentArcFocus: '',
+      accountabilityMode: 'direct',
+      createdAt: migrationTime,
+      updatedAt: migrationTime,
+    });
+  }
   if (!data.treasurySettings.some((row) => isObject(row) && row.id === 'primary')) {
     data.treasurySettings.push({
       id: 'primary',
@@ -210,10 +278,12 @@ function migrateData(
         aiLinkMode: 'offline',
         aiDataSharingAcknowledged: false,
         aiRelationshipMemoryEnabled: false,
+        aiTreasurySharingEnabled: false,
         aiVoiceOutputEnabled: false,
         aiVoiceAutoPlay: false,
         aiVoiceDisclosureAcknowledged: false,
         aiUsageWarningUsd: 5,
+        aiSoulprintNotes: {},
         ...row,
         enabledCompanionIds: ['snow', ...withMira.filter((id) => id !== 'snow')],
       };
@@ -254,6 +324,9 @@ function validateData(data: Record<string, unknown[]>) {
   if (typeof settings.aiRelationshipMemoryEnabled !== 'boolean') {
     throw new Error('The Bond Memory setting is not valid.');
   }
+  if (typeof settings.aiTreasurySharingEnabled !== 'boolean') {
+    throw new Error('The Cassian Ledger Counsel setting is not valid.');
+  }
   if (
     typeof settings.aiVoiceOutputEnabled !== 'boolean' ||
     typeof settings.aiVoiceAutoPlay !== 'boolean' ||
@@ -263,6 +336,34 @@ function validateData(data: Record<string, unknown[]>) {
     settings.aiUsageWarningUsd > 1_000
   ) {
     throw new Error('The Voice Link setting is not valid.');
+  }
+  const aiCompanionIds = new Set([
+    'snow',
+    'rook',
+    'selah',
+    'cipher',
+    'haven',
+    'ember',
+    'mira',
+    'amara',
+    'cassian',
+    'saffron',
+  ]);
+  if (!isObject(settings.aiSoulprintNotes)) {
+    throw new Error('The Soulprint Studio setting is not valid.');
+  }
+  const soulprintFields = ['humor', 'challenge', 'care', 'casual', 'conflict', 'bonds', 'never'];
+  for (const [companionId, notes] of Object.entries(settings.aiSoulprintNotes)) {
+    if (!aiCompanionIds.has(companionId) || !isObject(notes)) {
+      throw new Error('A Soulprint Studio note contains an impossible value.');
+    }
+    if (
+      soulprintFields.some(
+        (field) => typeof notes[field] !== 'string' || String(notes[field]).length > 600,
+      )
+    ) {
+      throw new Error('A Soulprint Studio note contains an impossible value.');
+    }
   }
   for (const key of [
     'level',
@@ -282,18 +383,6 @@ function validateData(data: Record<string, unknown[]>) {
     }
   }
 
-  const aiCompanionIds = new Set([
-    'snow',
-    'rook',
-    'selah',
-    'cipher',
-    'haven',
-    'ember',
-    'mira',
-    'amara',
-    'cassian',
-    'saffron',
-  ]);
   const aiAudiences = new Set(['party', ...aiCompanionIds]);
   for (const row of data.aiConversations) {
     if (
@@ -393,14 +482,10 @@ function validateData(data: Record<string, unknown[]>) {
     'intimate',
   ]);
   const aiVoiceCadences = new Set(['natural', 'clipped', 'flowing', 'measured', 'rapid-fire']);
-  const aiVoiceTextures = new Set([
-    'clean',
-    'smooth',
-    'airy',
-    'textured',
-    'grounded',
-    'bright',
-  ]);
+  const aiVoiceTextures = new Set(['clean', 'smooth', 'airy', 'textured', 'grounded', 'bright']);
+  const aiVoiceRegisters = new Set(['low', 'low-mid', 'mid', 'high-mid', 'high']);
+  const aiVoiceResonances = new Set(['chest', 'balanced', 'forward', 'head']);
+  const aiVoicePerformanceTakes = new Set(['grounded', 'balanced', 'dynamic']);
   for (const row of data.aiVoiceProfiles) {
     if (
       !isObject(row) ||
@@ -410,6 +495,9 @@ function validateData(data: Record<string, unknown[]>) {
       !aiVoiceDeliveries.has(String(row.delivery)) ||
       !aiVoiceCadences.has(String(row.cadence)) ||
       !aiVoiceTextures.has(String(row.texture)) ||
+      !aiVoiceRegisters.has(String(row.register)) ||
+      !aiVoiceResonances.has(String(row.resonance)) ||
+      !aiVoicePerformanceTakes.has(String(row.performanceTake)) ||
       !Number.isFinite(row.pace) ||
       Number(row.pace) < 0.75 ||
       Number(row.pace) > 1.65 ||
@@ -428,6 +516,15 @@ function validateData(data: Record<string, unknown[]>) {
       !Number.isInteger(row.pauseDiscipline) ||
       Number(row.pauseDiscipline) < 1 ||
       Number(row.pauseDiscipline) > 5 ||
+      !Number.isInteger(row.intonation) ||
+      Number(row.intonation) < 1 ||
+      Number(row.intonation) > 5 ||
+      !Number.isInteger(row.articulation) ||
+      Number(row.articulation) < 1 ||
+      Number(row.articulation) > 5 ||
+      !Number.isInteger(row.emotionalRange) ||
+      Number(row.emotionalRange) < 1 ||
+      Number(row.emotionalRange) > 5 ||
       typeof row.updatedAt !== 'string' ||
       !Number.isFinite(Date.parse(row.updatedAt))
     ) {
@@ -435,7 +532,7 @@ function validateData(data: Record<string, unknown[]>) {
     }
   }
 
-  const aiUsageKinds = new Set(['text', 'transcription', 'speech']);
+  const aiUsageKinds = new Set(['text', 'transcription', 'speech', 'realtime']);
   for (const row of data.aiUsageRecords) {
     if (
       !isObject(row) ||
@@ -455,6 +552,16 @@ function validateData(data: Record<string, unknown[]>) {
         row.audioSeconds,
         row.estimatedCostUsd,
       ].some((value) => !Number.isFinite(value) || Number(value) < 0) ||
+      (row.cachedInputTokens !== undefined &&
+        (!Number.isFinite(row.cachedInputTokens) || Number(row.cachedInputTokens) < 0)) ||
+      (row.reasoningTokens !== undefined &&
+        (!Number.isFinite(row.reasoningTokens) || Number(row.reasoningTokens) < 0)) ||
+      (row.audioInputTokens !== undefined &&
+        (!Number.isFinite(row.audioInputTokens) || Number(row.audioInputTokens) < 0)) ||
+      (row.cachedAudioInputTokens !== undefined &&
+        (!Number.isFinite(row.cachedAudioInputTokens) || Number(row.cachedAudioInputTokens) < 0)) ||
+      (row.audioOutputTokens !== undefined &&
+        (!Number.isFinite(row.audioOutputTokens) || Number(row.audioOutputTokens) < 0)) ||
       typeof row.exactUsage !== 'boolean'
     ) {
       throw new Error('An AI usage record contains an impossible value.');
@@ -509,6 +616,156 @@ function validateData(data: Record<string, unknown[]>) {
   }
   const validDate = (value: unknown) =>
     typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value);
+  const operationStatuses = new Set(['awaiting-confirmation', 'preparing', 'ready', 'partial']);
+  const operationKinds = new Set([
+    'assemble-day',
+    'prepare-training',
+    'prepare-kitchen',
+    'prepare-sanctuary',
+  ]);
+  const operationTrainingLocations = new Set(['home', 'gym', 'conditioning', 'recovery']);
+  const operationSanctuaryModes = new Set(['study', 'stronghold']);
+  const operationSanctuaryConcerns = new Set([
+    'sexual-integrity',
+    'shame',
+    'anger',
+    'sadness',
+    'loneliness',
+    'stress',
+    'numbness',
+    'focus',
+    'doubt',
+    'forgiveness',
+    'identity',
+    'gratitude',
+  ]);
+  const operationStates = new Set(['ready', 'active', 'completed', 'changed']);
+  const validOptionalText = (value: unknown, maximum: number) =>
+    value === undefined || (typeof value === 'string' && value.length <= maximum);
+  const validCompanions = (value: unknown) =>
+    Array.isArray(value) &&
+    value.length > 0 &&
+    value.length <= 10 &&
+    value.every((id) => aiCompanionIds.has(String(id)));
+  const validPreparedBase = (value: Record<string, unknown>) =>
+    typeof value.sessionId === 'string' &&
+    value.sessionId.trim().length > 0 &&
+    value.sessionId.length <= 200 &&
+    typeof value.label === 'string' &&
+    value.label.trim().length > 0 &&
+    value.label.length <= 200 &&
+    typeof value.detail === 'string' &&
+    value.detail.length <= 500 &&
+    validCompanions(value.companionIds) &&
+    (value.state === undefined || operationStates.has(String(value.state)));
+  for (const row of data.dailyOperations) {
+    if (
+      !isObject(row) ||
+      !validDate(row.date) ||
+      row.id !== row.date ||
+      !operationStatuses.has(String(row.status)) ||
+      !aiCompanionIds.has(String(row.sourceCompanionId)) ||
+      !Number.isInteger(row.pendingMissionCount) ||
+      Number(row.pendingMissionCount) < 0 ||
+      !Number.isInteger(row.completedMissionCount) ||
+      Number(row.completedMissionCount) < 0 ||
+      !Array.isArray(row.preparationNotes) ||
+      row.preparationNotes.length > 12 ||
+      row.preparationNotes.some((note) => typeof note !== 'string' || note.length > 500) ||
+      typeof row.createdAt !== 'string' ||
+      !Number.isFinite(Date.parse(row.createdAt)) ||
+      typeof row.updatedAt !== 'string' ||
+      !Number.isFinite(Date.parse(row.updatedAt)) ||
+      !validOptionalText(row.conversationId, 200) ||
+      (row.preparedAt !== undefined &&
+        (typeof row.preparedAt !== 'string' || !Number.isFinite(Date.parse(row.preparedAt))))
+    ) {
+      throw new Error('A Party Operations record contains an impossible value.');
+    }
+    if (row.pendingProposal !== undefined) {
+      const proposal = row.pendingProposal;
+      if (!isObject(proposal)) {
+        throw new Error('A Party Operations proposal contains an impossible value.');
+      }
+      const kind = String(proposal.kind);
+      const includeTraining = proposal.includeTraining === true;
+      const includeKitchen = proposal.includeKitchen === true;
+      const includeSanctuary = proposal.includeSanctuary === true;
+      const ownershipAllowed =
+        (kind === 'assemble-day' && proposal.companionId === 'snow') ||
+        (kind === 'prepare-training' &&
+          ['snow', 'rook', 'ember', 'mira'].includes(String(proposal.companionId))) ||
+        (kind === 'prepare-kitchen' && proposal.companionId === 'saffron') ||
+        (kind === 'prepare-sanctuary' && proposal.companionId === 'selah');
+      if (
+        !operationKinds.has(kind) ||
+        !aiCompanionIds.has(String(proposal.companionId)) ||
+        !ownershipAllowed ||
+        typeof proposal.includeTraining !== 'boolean' ||
+        typeof proposal.includeKitchen !== 'boolean' ||
+        typeof proposal.includeSanctuary !== 'boolean' ||
+        (proposal.trainingLocation !== undefined &&
+          !operationTrainingLocations.has(String(proposal.trainingLocation))) ||
+        (includeTraining && !operationTrainingLocations.has(String(proposal.trainingLocation))) ||
+        (kind === 'assemble-day' && !includeTraining && !includeKitchen && !includeSanctuary) ||
+        (kind === 'prepare-training' && !includeTraining) ||
+        (kind === 'prepare-kitchen' && !includeKitchen) ||
+        (kind === 'prepare-sanctuary' && !includeSanctuary) ||
+        !validOptionalText(proposal.foodConstraints, 400) ||
+        (proposal.sanctuaryMode !== undefined &&
+          !operationSanctuaryModes.has(String(proposal.sanctuaryMode))) ||
+        (proposal.primaryConcern !== undefined &&
+          !operationSanctuaryConcerns.has(String(proposal.primaryConcern))) ||
+        (proposal.secondaryConcern !== undefined &&
+          !operationSanctuaryConcerns.has(String(proposal.secondaryConcern))) ||
+        (includeSanctuary &&
+          (!operationSanctuaryModes.has(String(proposal.sanctuaryMode)) ||
+            !operationSanctuaryConcerns.has(String(proposal.primaryConcern)))) ||
+        typeof proposal.summary !== 'string' ||
+        !proposal.summary.trim() ||
+        proposal.summary.length > 320 ||
+        typeof proposal.confirmation !== 'string' ||
+        !proposal.confirmation.trim() ||
+        proposal.confirmation.length > 240
+      ) {
+        throw new Error('A Party Operations proposal contains an impossible value.');
+      }
+    }
+    if (row.training !== undefined) {
+      const prepared = row.training;
+      if (
+        !isObject(prepared) ||
+        !validPreparedBase(prepared) ||
+        !operationTrainingLocations.has(String(prepared.location))
+      ) {
+        throw new Error('A prepared Training operation contains an impossible value.');
+      }
+    }
+    if (row.kitchen !== undefined) {
+      const prepared = row.kitchen;
+      if (
+        !isObject(prepared) ||
+        !validPreparedBase(prepared) ||
+        typeof prepared.recipeId !== 'string' ||
+        !prepared.recipeId.trim() ||
+        prepared.recipeId.length > 200 ||
+        typeof prepared.customRecipe !== 'boolean' ||
+        !validOptionalText(prepared.constraints, 400)
+      ) {
+        throw new Error('A prepared Kitchen operation contains an impossible value.');
+      }
+    }
+    if (row.sanctuary !== undefined) {
+      const prepared = row.sanctuary;
+      if (
+        !isObject(prepared) ||
+        !validPreparedBase(prepared) ||
+        !operationSanctuaryModes.has(String(prepared.mode))
+      ) {
+        throw new Error('A prepared Sanctuary operation contains an impossible value.');
+      }
+    }
+  }
   const validCents = (value: unknown, allowZero = false) =>
     Number.isInteger(value) &&
     Number(value) >= (allowZero ? 0 : 1) &&
@@ -705,11 +962,18 @@ function validateData(data: Record<string, unknown[]>) {
   }
 
   for (const row of data.kitchenSessions) {
+    const hasBuiltInRecipe = isObject(row) && KITCHEN_RECIPE_IDS.has(String(row.recipeId));
+    const hasCustomRecipe =
+      isObject(row) &&
+      isValidCustomKitchenRecipe(row.customRecipeSnapshot) &&
+      (row.customRecipeSnapshot as Record<string, unknown>).id === row.recipeId;
     if (
       !isObject(row) ||
       !validDate(row.date) ||
       row.id !== row.date ||
-      !KITCHEN_RECIPE_IDS.has(String(row.recipeId)) ||
+      (!hasBuiltInRecipe && !hasCustomRecipe) ||
+      (row.customRecipeSnapshot !== undefined &&
+        !isValidCustomKitchenRecipe(row.customRecipeSnapshot)) ||
       !['assigned', 'completed', 'declined'].includes(String(row.status)) ||
       typeof row.rerollUsed !== 'boolean' ||
       typeof row.rewardApplied !== 'boolean' ||
@@ -806,6 +1070,121 @@ function validateData(data: Record<string, unknown[]>) {
         (typeof row.nextAction !== 'string' || row.nextAction.length > 500))
     ) {
       throw new Error('A Scripture Sanctuary record contains an impossible value.');
+    }
+  }
+
+  const creatorSettings = requiredSingleton<Record<string, unknown>>(data, 'creatorSettings');
+  if (
+    typeof creatorSettings.channelName !== 'string' ||
+    creatorSettings.channelName.length > 160 ||
+    typeof creatorSettings.channelHandle !== 'string' ||
+    creatorSettings.channelHandle.length > 100 ||
+    typeof creatorSettings.channelUrl !== 'string' ||
+    creatorSettings.channelUrl.length > 500 ||
+    !Number.isInteger(creatorSettings.weeklyUploadTarget) ||
+    Number(creatorSettings.weeklyUploadTarget) < 0 ||
+    Number(creatorSettings.weeklyUploadTarget) > 21 ||
+    typeof creatorSettings.currentArcFocus !== 'string' ||
+    creatorSettings.currentArcFocus.length > 500 ||
+    !['supportive', 'direct', 'relentless'].includes(String(creatorSettings.accountabilityMode)) ||
+    typeof creatorSettings.createdAt !== 'string' ||
+    typeof creatorSettings.updatedAt !== 'string'
+  ) {
+    throw new Error('The Creator Forge settings contain an impossible value.');
+  }
+
+  for (const row of data.creatorSnapshots) {
+    if (
+      !isObject(row) ||
+      typeof row.capturedAt !== 'string' ||
+      !['manual', 'studio-csv', 'youtube-api'].includes(String(row.source)) ||
+      !Number.isInteger(row.periodDays) ||
+      Number(row.periodDays) < 1 ||
+      Number(row.periodDays) > 3650 ||
+      [
+        row.subscribers,
+        row.views,
+        row.watchHours,
+        row.impressions,
+        row.averageViewDurationSeconds,
+        row.uploads,
+      ].some((value) => value !== undefined && (!Number.isFinite(value) || Number(value) < 0)) ||
+      (row.clickThroughRate !== undefined &&
+        (!Number.isFinite(row.clickThroughRate) ||
+          Number(row.clickThroughRate) < 0 ||
+          Number(row.clickThroughRate) > 100)) ||
+      (row.note !== undefined && (typeof row.note !== 'string' || row.note.length > 1000))
+    ) {
+      throw new Error('A Creator Forge channel snapshot contains an impossible value.');
+    }
+  }
+
+  const creatorStatuses = new Set([
+    'idea',
+    'script',
+    'record',
+    'edit',
+    'thumbnail',
+    'scheduled',
+    'published',
+    'paused',
+  ]);
+  const creatorPlatforms = new Set(['youtube', 'youtube-shorts', 'arc', 'other']);
+  const creatorContentTypes = new Set([
+    'long-form',
+    'short-form',
+    'livestream',
+    'community-post',
+    'arc-project',
+    'other',
+  ]);
+  for (const row of data.creatorProjects) {
+    if (
+      !isObject(row) ||
+      typeof row.title !== 'string' ||
+      !row.title.trim() ||
+      row.title.length > 180 ||
+      !creatorPlatforms.has(String(row.platform)) ||
+      !creatorContentTypes.has(String(row.contentType)) ||
+      !creatorStatuses.has(String(row.status)) ||
+      [row.pillar, row.hook, row.audiencePromise, row.nextAction, row.notes].some(
+        (value) => typeof value !== 'string' || value.length > 4000,
+      ) ||
+      typeof row.createdAt !== 'string' ||
+      typeof row.updatedAt !== 'string' ||
+      (row.publishedAt !== undefined && typeof row.publishedAt !== 'string')
+    ) {
+      throw new Error('A Creator Forge project contains an impossible value.');
+    }
+  }
+
+  for (const row of data.creatorVideoInsights) {
+    if (
+      !isObject(row) ||
+      typeof row.id !== 'string' ||
+      row.id.length > 160 ||
+      typeof row.videoId !== 'string' ||
+      !row.videoId.trim() ||
+      row.videoId.length > 100 ||
+      typeof row.title !== 'string' ||
+      !row.title.trim() ||
+      row.title.length > 200 ||
+      !Number.isInteger(row.periodDays) ||
+      Number(row.periodDays) < 1 ||
+      Number(row.periodDays) > 3650 ||
+      [
+        row.views,
+        row.watchHours,
+        row.averageViewDurationSeconds,
+        row.averageViewPercentage,
+        row.likes,
+        row.comments,
+      ].some((value) => value !== undefined && (!Number.isFinite(value) || Number(value) < 0)) ||
+      (row.averageViewPercentage !== undefined && Number(row.averageViewPercentage) > 100) ||
+      typeof row.capturedAt !== 'string' ||
+      (row.publishedAt !== undefined && typeof row.publishedAt !== 'string')
+    ) {
+      throw new Error('A Creator Forge video insight contains an impossible value.');
     }
   }
 }

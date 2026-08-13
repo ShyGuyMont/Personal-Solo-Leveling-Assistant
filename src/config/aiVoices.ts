@@ -4,6 +4,10 @@ import type {
   AiVoiceDelivery,
   AiVoiceName,
   AiVoiceProfile,
+  AiVoiceRegister,
+  AiVoiceResonance,
+  AiVoiceScene,
+  AiVoiceTake,
   AiVoiceTexture,
   CompanionId,
 } from '@/types/game';
@@ -112,6 +116,39 @@ export const AI_TEXTURE_OPTIONS: Array<{
   { id: 'bright', label: 'Bright', character: 'crisp and energized' },
 ];
 
+export const AI_REGISTER_OPTIONS: Array<{
+  id: AiVoiceRegister;
+  label: string;
+  character: string;
+}> = [
+  { id: 'low', label: 'Low', character: 'deep center of gravity' },
+  { id: 'low-mid', label: 'Low-mid', character: 'rich without heaviness' },
+  { id: 'mid', label: 'Mid', character: 'natural everyday center' },
+  { id: 'high-mid', label: 'High-mid', character: 'lively and present' },
+  { id: 'high', label: 'High', character: 'light, sharp, and vivid' },
+];
+
+export const AI_RESONANCE_OPTIONS: Array<{
+  id: AiVoiceResonance;
+  label: string;
+  character: string;
+}> = [
+  { id: 'chest', label: 'Chest', character: 'solid and weighty' },
+  { id: 'balanced', label: 'Balanced', character: 'even and natural' },
+  { id: 'forward', label: 'Forward', character: 'close and immediate' },
+  { id: 'head', label: 'Head', character: 'light and floating' },
+];
+
+export const AI_PERFORMANCE_TAKE_OPTIONS: Array<{
+  id: AiVoiceTake;
+  label: string;
+  character: string;
+}> = [
+  { id: 'grounded', label: 'Grounded', character: 'subtle and restrained' },
+  { id: 'balanced', label: 'Balanced', character: 'natural emotional movement' },
+  { id: 'dynamic', label: 'Dynamic', character: 'bold contrast and momentum' },
+];
+
 const CREATED_AT = '2026-08-11T00:00:00.000Z';
 
 export const CANON_VOICE_PROFILES: Record<CompanionId, CanonVoiceProfile> = {
@@ -122,15 +159,21 @@ export const CANON_VOICE_PROFILES: Record<CompanionId, CanonVoiceProfile> = {
     delivery: 'conversational',
     cadence: 'flowing',
     texture: 'smooth',
+    register: 'low-mid',
+    resonance: 'balanced',
+    performanceTake: 'balanced',
     pace: 1.1,
     warmth: 5,
     energy: 3,
     expressiveness: 4,
     naturalism: 5,
     pauseDiscipline: 4,
+    intonation: 4,
+    articulation: 4,
+    emotionalRange: 4,
     updatedAt: CREATED_AT,
     direction:
-      'A real late-night call with the Hunter\'s ride-or-die older sister: relaxed, wise, lightly teasing, and naturally quick. Her authority is effortless; never sleepy, breathy, corporate, or audiobook-like.',
+      "A real late-night call with the Hunter's ride-or-die older sister: relaxed, wise, lightly teasing, and naturally quick. Her authority is effortless; never sleepy, breathy, corporate, or audiobook-like.",
     audition:
       "Okay, first of all, breathe. You don't have to solve the whole week tonight. Tell me the next true thing, and we'll handle it together.",
   },
@@ -141,12 +184,18 @@ export const CANON_VOICE_PROFILES: Record<CompanionId, CanonVoiceProfile> = {
     delivery: 'commanding',
     cadence: 'clipped',
     texture: 'grounded',
+    register: 'low',
+    resonance: 'chest',
+    performanceTake: 'grounded',
     pace: 1.18,
     warmth: 3,
     energy: 5,
     expressiveness: 4,
     naturalism: 5,
     pauseDiscipline: 5,
+    intonation: 3,
+    articulation: 5,
+    emotionalRange: 3,
     updatedAt: CREATED_AT,
     direction:
       'An athletic sparring partner speaking in the room, not a stadium announcer: resonant, competitive, quick, and controlled, with an audible grin and zero drill-sergeant caricature.',
@@ -160,12 +209,18 @@ export const CANON_VOICE_PROFILES: Record<CompanionId, CanonVoiceProfile> = {
     delivery: 'soothing',
     cadence: 'flowing',
     texture: 'clean',
+    register: 'mid',
+    resonance: 'balanced',
+    performanceTake: 'grounded',
     pace: 0.98,
     warmth: 5,
     energy: 1,
     expressiveness: 3,
     naturalism: 5,
     pauseDiscipline: 3,
+    intonation: 3,
+    articulation: 4,
+    emotionalRange: 4,
     updatedAt: CREATED_AT,
     direction:
       'Spiritually grounded and gently alive: clear, warm, plainspoken conviction without preaching, stage-whispering, or a solemn church-narrator cadence.',
@@ -179,12 +234,18 @@ export const CANON_VOICE_PROFILES: Record<CompanionId, CanonVoiceProfile> = {
     delivery: 'dry',
     cadence: 'clipped',
     texture: 'clean',
+    register: 'mid',
+    resonance: 'forward',
+    performanceTake: 'grounded',
     pace: 1.22,
     warmth: 2,
     energy: 3,
     expressiveness: 2,
     naturalism: 5,
     pauseDiscipline: 5,
+    intonation: 2,
+    articulation: 5,
+    emotionalRange: 2,
     updatedAt: CREATED_AT,
     direction:
       'Quick, crisp, tech-smart, and quietly amused, like a brilliant friend with a restrained smirk. Precise without becoming monotone, synthetic, or over-enunciated.',
@@ -193,22 +254,28 @@ export const CANON_VOICE_PROFILES: Record<CompanionId, CanonVoiceProfile> = {
   },
   haven: {
     id: 'haven',
-    voice: 'onyx',
-    accent: 'natural',
-    delivery: 'dry',
-    cadence: 'measured',
-    texture: 'grounded',
-    pace: 0.94,
+    voice: 'fable',
+    accent: 'caribbean',
+    delivery: 'playful',
+    cadence: 'rapid-fire',
+    texture: 'bright',
+    register: 'high-mid',
+    resonance: 'forward',
+    performanceTake: 'dynamic',
+    pace: 1.2,
     warmth: 4,
-    energy: 1,
-    expressiveness: 2,
+    energy: 5,
+    expressiveness: 5,
     naturalism: 5,
-    pauseDiscipline: 3,
+    pauseDiscipline: 4,
+    intonation: 5,
+    articulation: 4,
+    emotionalRange: 5,
     updatedAt: CREATED_AT,
     direction:
-      'A low protective presence with understated deadpan humor: unhurried but never dragged, parental, sedated, or self-important.',
+      'A magnetic creator friend live in the greenroom: quick, playful, socially intelligent, camera-ready, and genuinely excited by a strong idea. Use a light natural Caribbean lilt without caricature. Never sound like an ad read, influencer parody, announcer, or forced hype machine.',
     audition:
-      'You are allowed to recover before the damage becomes impressive. Protect tonight, then we build the return properly.',
+      'Okay, that hook has a pulse. Give me the audience promise, the first ten seconds, and the one tiny production move you can finish before fear starts calling itself research.',
   },
   ember: {
     id: 'ember',
@@ -217,12 +284,18 @@ export const CANON_VOICE_PROFILES: Record<CompanionId, CanonVoiceProfile> = {
     delivery: 'intense',
     cadence: 'rapid-fire',
     texture: 'bright',
+    register: 'low-mid',
+    resonance: 'chest',
+    performanceTake: 'dynamic',
     pace: 1.28,
     warmth: 2,
     energy: 5,
     expressiveness: 5,
     naturalism: 5,
     pauseDiscipline: 5,
+    intonation: 4,
+    articulation: 4,
+    emotionalRange: 5,
     updatedAt: CREATED_AT,
     direction:
       'Fast, hard-edged, tough-skinned, and fiercely loyal. The heat attacks the obstacle, never the Hunter; she sounds like a real protective friend, not a screaming anime villain.',
@@ -236,12 +309,18 @@ export const CANON_VOICE_PROFILES: Record<CompanionId, CanonVoiceProfile> = {
     delivery: 'soothing',
     cadence: 'flowing',
     texture: 'airy',
+    register: 'mid',
+    resonance: 'head',
+    performanceTake: 'grounded',
     pace: 0.96,
     warmth: 4,
     energy: 2,
     expressiveness: 3,
     naturalism: 5,
     pauseDiscipline: 3,
+    intonation: 3,
+    articulation: 4,
+    emotionalRange: 3,
     updatedAt: CREATED_AT,
     direction:
       'Calm, embodied, breath-aware, and quietly exacting. She leaves usable space for movement cues without sounding sedated, mystical, breathy, or like an ASMR recording.',
@@ -255,12 +334,18 @@ export const CANON_VOICE_PROFILES: Record<CompanionId, CanonVoiceProfile> = {
     delivery: 'intimate',
     cadence: 'natural',
     texture: 'textured',
+    register: 'mid',
+    resonance: 'balanced',
+    performanceTake: 'dynamic',
     pace: 1.08,
     warmth: 5,
     energy: 4,
     expressiveness: 5,
     naturalism: 5,
     pauseDiscipline: 4,
+    intonation: 5,
+    articulation: 3,
+    emotionalRange: 5,
     updatedAt: CREATED_AT,
     direction:
       'Emotionally alive, bold, and deeply conversational. Warmth, laughter, softness, and firmness shift naturally instead of landing as a polished performance.',
@@ -274,12 +359,18 @@ export const CANON_VOICE_PROFILES: Record<CompanionId, CanonVoiceProfile> = {
     delivery: 'dry',
     cadence: 'measured',
     texture: 'clean',
+    register: 'low-mid',
+    resonance: 'chest',
+    performanceTake: 'grounded',
     pace: 1.02,
     warmth: 2,
     energy: 2,
     expressiveness: 3,
     naturalism: 4,
     pauseDiscipline: 4,
+    intonation: 2,
+    articulation: 5,
+    emotionalRange: 2,
     updatedAt: CREATED_AT,
     direction:
       'Polished, controlled, and dryly funny, as if the numbers have already testified. His precision stays human and conversational, never stiff or automated.',
@@ -293,12 +384,18 @@ export const CANON_VOICE_PROFILES: Record<CompanionId, CanonVoiceProfile> = {
     delivery: 'playful',
     cadence: 'rapid-fire',
     texture: 'bright',
+    register: 'high-mid',
+    resonance: 'forward',
+    performanceTake: 'dynamic',
     pace: 1.32,
     warmth: 4,
     energy: 5,
     expressiveness: 5,
     naturalism: 5,
     pauseDiscipline: 5,
+    intonation: 5,
+    articulation: 4,
+    emotionalRange: 5,
     updatedAt: CREATED_AT,
     direction:
       'Pressure in a bottle: rapid, vibrant, high-pressure, theatrical, and affectionate. She ricochets through a culinary emergency like a real expressive friend, never a generic commercial narrator.',
@@ -316,12 +413,18 @@ export function cloneCanonVoiceProfile(companionId: CompanionId): AiVoiceProfile
     delivery: profile.delivery,
     cadence: profile.cadence,
     texture: profile.texture,
+    register: profile.register,
+    resonance: profile.resonance,
+    performanceTake: profile.performanceTake,
     pace: profile.pace,
     warmth: profile.warmth,
     energy: profile.energy,
     expressiveness: profile.expressiveness,
     naturalism: profile.naturalism,
     pauseDiscipline: profile.pauseDiscipline,
+    intonation: profile.intonation,
+    articulation: profile.articulation,
+    emotionalRange: profile.emotionalRange,
     updatedAt: profile.updatedAt,
   };
 }
@@ -343,6 +446,9 @@ export function normalizeAiVoiceProfile(
   const deliveries = AI_DELIVERY_OPTIONS.map((option) => option.id);
   const cadences = AI_CADENCE_OPTIONS.map((option) => option.id);
   const textures = AI_TEXTURE_OPTIONS.map((option) => option.id);
+  const registers = AI_REGISTER_OPTIONS.map((option) => option.id);
+  const resonances = AI_RESONANCE_OPTIONS.map((option) => option.id);
+  const performanceTakes = AI_PERFORMANCE_TAKE_OPTIONS.map((option) => option.id);
   return {
     ...canon,
     ...value,
@@ -353,15 +459,62 @@ export function normalizeAiVoiceProfile(
       value?.delivery && deliveries.includes(value.delivery) ? value.delivery : canon.delivery,
     cadence: value?.cadence && cadences.includes(value.cadence) ? value.cadence : canon.cadence,
     texture: value?.texture && textures.includes(value.texture) ? value.texture : canon.texture,
+    register:
+      value?.register && registers.includes(value.register) ? value.register : canon.register,
+    resonance:
+      value?.resonance && resonances.includes(value.resonance) ? value.resonance : canon.resonance,
+    performanceTake:
+      value?.performanceTake && performanceTakes.includes(value.performanceTake)
+        ? value.performanceTake
+        : canon.performanceTake,
     pace: bounded(value?.pace, canon.pace, 0.75, 1.65, 2),
     warmth: bounded(value?.warmth, canon.warmth, 1, 5),
     energy: bounded(value?.energy, canon.energy, 1, 5),
     expressiveness: bounded(value?.expressiveness, canon.expressiveness, 1, 5),
     naturalism: bounded(value?.naturalism, canon.naturalism, 1, 5),
     pauseDiscipline: bounded(value?.pauseDiscipline, canon.pauseDiscipline, 1, 5),
+    intonation: bounded(value?.intonation, canon.intonation, 1, 5),
+    articulation: bounded(value?.articulation, canon.articulation, 1, 5),
+    emotionalRange: bounded(value?.emotionalRange, canon.emotionalRange, 1, 5),
     updatedAt:
       typeof value?.updatedAt === 'string' && Number.isFinite(Date.parse(value.updatedAt))
         ? value.updatedAt
         : canon.updatedAt,
   };
+}
+
+export function inferAiVoiceScene(text: string): AiVoiceScene {
+  const normalized = text.toLowerCase();
+  if (/\b(congrat|proud|won|victory|level up|rank up|did it|crushed|celebrat)/.test(normalized)) {
+    return 'celebration';
+  }
+  if (
+    /\b(breathe|sorry|hurt|afraid|anxious|sad|lonely|grief|overwhelm|discourag|rest|recover)/.test(
+      normalized,
+    )
+  ) {
+    return 'support';
+  }
+  if (
+    /\b(no excuse|accountab|commit|promised|deadline|slack|avoid|stop stalling|do it now|move)/.test(
+      normalized,
+    )
+  ) {
+    return 'accountability';
+  }
+  if (
+    /\b(step|first|next|instructions?|recipe|form|hold|repeat|minutes?|reps?|how to)/.test(
+      normalized,
+    )
+  ) {
+    return 'instruction';
+  }
+  if (
+    /\b(plan|strategy|options?|tradeoff|priority|progress|forecast|estimate|path|goal)/.test(
+      normalized,
+    )
+  ) {
+    return 'strategy';
+  }
+  return 'neutral';
 }

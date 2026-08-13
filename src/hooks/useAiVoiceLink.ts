@@ -17,15 +17,17 @@ import {
   requestAiTranscription,
   type AiHeadquartersReply,
 } from '@/services/aiHeadquarters';
-import type { AiConversationMessage, AiVoiceProfile, CompanionId, Settings } from '@/types/game';
-import {
-  AppAudioPlayer,
-  decodeAudioBlob,
-  playSpeakerTest,
-  primeAudioOutput,
-} from '@/utils/audio';
+import type {
+  AiConversationMessage,
+  AiVoiceProfile,
+  AiVoiceTake,
+  CompanionId,
+  Settings,
+} from '@/types/game';
+import { AppAudioPlayer, decodeAudioBlob, playSpeakerTest, primeAudioOutput } from '@/utils/audio';
 
 type NoticeHandler = (message: string) => void;
+const APP_AI_SESSION_ID = crypto.randomUUID();
 
 function chooseRecorderType() {
   if (typeof MediaRecorder === 'undefined') return '';
@@ -45,10 +47,11 @@ function fileExtension(mimeType: string) {
 export function useAiVoiceLink(input: {
   settings?: Settings;
   refresh: () => Promise<void>;
-  onTranscript: (text: string) => void;
+  onTranscript: (text: string) => void | Promise<void>;
   onNotice: NoticeHandler;
+  autoSubmitTranscript?: boolean;
 }) {
-  const sessionIdRef = useRef(crypto.randomUUID());
+  const sessionIdRef = useRef(APP_AI_SESSION_ID);
   const [profiles, setProfiles] = useState<Record<CompanionId, AiVoiceProfile>>();
   const [usage, setUsage] = useState<AiUsageSummary>();
   const [recording, setRecording] = useState(false);
@@ -76,6 +79,12 @@ export function useAiVoiceLink(input: {
   useEffect(() => {
     void getAiVoiceProfiles().then(setProfiles);
     void refreshUsage();
+  }, [refreshUsage]);
+
+  useEffect(() => {
+    const refresh = () => void refreshUsage();
+    window.addEventListener('system:ai-usage-changed', refresh);
+    return () => window.removeEventListener('system:ai-usage-changed', refresh);
   }, [refreshUsage]);
 
   const stopPlayback = useCallback(() => {
@@ -173,7 +182,9 @@ export function useAiVoiceLink(input: {
         sessionId: sessionIdRef.current,
         model: reply.model,
         inputTokens: reply.usage.inputTokens,
+        cachedInputTokens: reply.usage.cachedInputTokens,
         outputTokens: reply.usage.outputTokens,
+        reasoningTokens: reply.usage.reasoningTokens,
         totalTokens: reply.usage.totalTokens,
         characters: 0,
         audioSeconds: 0,
@@ -181,6 +192,7 @@ export function useAiVoiceLink(input: {
           reply.model,
           reply.usage.inputTokens,
           reply.usage.outputTokens,
+          reply.usage.cachedInputTokens,
         ),
         exactUsage: true,
       });
@@ -324,26 +336,35 @@ export function useAiVoiceLink(input: {
   }, [input]);
 
   const previewProfile = useCallback(
-    async (profile: AiVoiceProfile) => {
-      const canon = CANON_VOICE_PROFILES[profile.id];
+    async (profile: AiVoiceProfile, takeOverride?: AiVoiceTake) => {
+      const auditionProfile = takeOverride
+        ? { ...profile, performanceTake: takeOverride }
+        : profile;
+      const canon = CANON_VOICE_PROFILES[auditionProfile.id];
       const cacheKey = [
         'preview',
-        profile.id,
-        profile.voice,
-        profile.accent,
-        profile.delivery,
-        profile.cadence,
-        profile.texture,
-        profile.pace,
-        profile.warmth,
-        profile.energy,
-        profile.expressiveness,
-        profile.naturalism,
-        profile.pauseDiscipline,
+        auditionProfile.id,
+        auditionProfile.voice,
+        auditionProfile.accent,
+        auditionProfile.delivery,
+        auditionProfile.cadence,
+        auditionProfile.texture,
+        auditionProfile.register,
+        auditionProfile.resonance,
+        auditionProfile.performanceTake,
+        auditionProfile.pace,
+        auditionProfile.warmth,
+        auditionProfile.energy,
+        auditionProfile.expressiveness,
+        auditionProfile.naturalism,
+        auditionProfile.pauseDiscipline,
+        auditionProfile.intonation,
+        auditionProfile.articulation,
+        auditionProfile.emotionalRange,
       ].join(':');
       await playMessages(
-        [{ id: cacheKey, companionId: profile.id, message: canon.audition }],
-        profile,
+        [{ id: cacheKey, companionId: auditionProfile.id, message: canon.audition }],
+        auditionProfile,
       );
     },
     [playMessages],
@@ -395,7 +416,7 @@ export function useAiVoiceLink(input: {
             fileName: `hunter-voice.${fileExtension(blob.type)}`,
             audioSeconds: seconds,
           });
-          input.onTranscript(result.text);
+          await input.onTranscript(result.text);
           await recordAiUsage({
             kind: 'transcription',
             sessionId: sessionIdRef.current,
@@ -411,7 +432,9 @@ export function useAiVoiceLink(input: {
           });
           await refreshUsage();
           input.onNotice(
-            'Voice captured. Review the transcript, edit anything you want, then send.',
+            input.autoSubmitTranscript
+              ? 'Voice captured. Quick Link is routing your transmission.'
+              : 'Voice captured. Review the transcript, edit anything you want, then send.',
           );
         } catch (error) {
           input.onNotice(error instanceof Error ? error.message : 'Transcription failed.');

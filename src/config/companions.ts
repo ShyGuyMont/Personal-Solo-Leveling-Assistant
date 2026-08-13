@@ -179,17 +179,17 @@ export const COMPANIONS: CompanionDefinition[] = [
     id: 'cipher',
     name: 'Cipher',
     title: 'The Strategist',
-    shortRole: 'Discipline · Focus · YouTube · ARC',
+    shortRole: 'Discipline · Focus · Systems · ARC',
     description:
-      'Cipher tracks execution: discipline, focus, creative output, YouTube, and the expanding ARC universe.',
+      'Cipher engineers execution: discipline, focus, production systems, ARC architecture, and the sequence that turns ambitious plans into reliable output.',
     appearance:
       'A lean East Asian tactician in a navy high-collar tech jacket, surrounded by violet and cyan planning glyphs.',
     personality:
       'Precise, dryly funny, demanding, and openly delighted whenever a plan becomes something real.',
     accent: '#9b7bff',
     image: 'companions/cipher.webp',
-    categories: ['discipline', 'creator'],
-    stats: ['discipline', 'willpower', 'focus', 'creativity'],
+    categories: ['discipline'],
+    stats: ['discipline', 'willpower', 'focus'],
     messages: {
       mission: [
         'Plan converted into output. That is the part most people never reach.',
@@ -213,45 +213,51 @@ export const COMPANIONS: CompanionDefinition[] = [
   },
   {
     id: 'haven',
-    name: 'Haven',
-    title: 'The Guardian',
-    shortRole: 'Character · Recovery · Comebacks',
+    name: 'Vesper',
+    title: 'The Spotlight',
+    shortRole: 'YouTube · Audience · Performance · Publishing',
     description:
-      'Haven protects the whole journey: character, recovery, balance, and beginning again after hard days.',
+      'Vesper commands the creator journey: YouTube strategy, hooks, audience connection, camera confidence, production momentum, and the final nerve required to publish.',
     appearance:
-      'A calm Latino field guardian with silver-streaked hair, a deep teal coat, and a soft shield of green-blue light.',
+      'A charismatic Afro-Latina woman with warm brown skin, amber-gold eyes, an energetic high curly ponytail with a lime accent lock, a graphite broadcast jacket, and an electric-chartreuse creator halo.',
     personality:
-      'Patient, observant, quietly humorous, and more interested in lasting progress than punishment.',
-    accent: '#55cbb7',
-    image: 'companions/haven.webp',
-    categories: [],
-    stats: ['character'],
+      'Magnetic, socially intelligent, quick-witted, camera-ready, and honest about weak hooks or unfinished uploads. She creates excitement without chasing empty hype and refuses to let fear disguise itself as preparation.',
+    accent: '#d7ff3f',
+    image: 'companions/vesper.png',
+    categories: ['creator'],
+    stats: ['creativity'],
     messages: {
+      'daily-briefing': [
+        'Greenroom is live. What are we making, who is it for, and what gets it one step closer to the spotlight today?',
+        'Camera check. The audience cannot connect with an idea you keep hiding in drafts. Give me one real creator move.',
+        'Your channel does not need a perfect version of you today. It needs a clear promise and enough courage to ship something real.',
+      ],
       mission: [
-        'Strength that makes room for others is worth keeping.',
-        'That choice added something good to the world. Do not minimize it.',
-        'Character grows when the decision costs something. Well done.',
+        'There it is—an idea became visible. That is how an audience learns to find you.',
+        'Creator signal confirmed. Save what worked, sharpen what did not, and keep the camera warm.',
+        'You moved the story out of your head and into the world. That deserves more than a tiny little shrug.',
       ],
       'stat-level': [
-        '{stat} reached level {level}. The person behind the progress is growing too.',
-        'Level {level} {stat}. This is the kind of strength people can feel around you.',
-        'Your {stat} advanced to level {level}. Quiet growth is still real growth.',
+        '{stat} reached level {level}. Your creative instincts are getting harder to ignore—good. Give them somewhere to perform.',
+        'Level {level} {stat}. The ideas are stronger; now make the packaging brave enough to match.',
+        'Your {stat} advanced to level {level}. Cipher will optimize the sequence. I want the part people remember.',
       ],
       'rank-up': [
-        'A higher class is good. Reaching it without abandoning yourself is better.',
-        'Classification advanced. I am proud of the way you kept your humanity with you.',
+        'New class, bigger spotlight. Do not shrink your voice just because the room got larger.',
+        'Classification advanced. Smile for one second—then let us make the next release look like you belong here.',
       ],
       'rare-event': [
-        'Rare objective complete. You made extra room for tomorrow.',
-        'The opportunity appeared, and you met it without losing your balance.',
-      ],
-      'mission-pass': [
-        'The pass is secured. Use it for wisdom, not avoidance.',
-        'Recovery is part of progression. Keep this for a day that truly needs it.',
+        'Unexpected opening, real output. That is creator instinct under pressure.',
+        'Rare signal cleared. You saw the moment, trusted the idea, and gave it somewhere to land.',
       ],
       comeback: [
-        'You came back. That is enough to begin rebuilding momentum.',
-        'No lecture. No shame. Just the next honest step—and you took it.',
+        'Oh, we are back? Good. No apology video. Open the board, choose the smallest production move, and make the signal real.',
+        'The channel did not reject you. You went quiet. Different problem—and one upload can start solving it.',
+        'No dramatic rebrand required. One honest idea, one clear audience promise, one return to the spotlight.',
+      ],
+      achievement: [
+        'Spotlight earned. Let yourself enjoy the response before you turn it into another performance review.',
+        'That badge is proof your creator story is moving. Now make the next chapter impossible to confuse with hiding.',
       ],
     },
   },
