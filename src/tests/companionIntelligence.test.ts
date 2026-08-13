@@ -33,11 +33,23 @@ interface CompanionIntelligenceModule {
     audience: string,
     enabledIds?: string[],
     commandMode?: 'none' | 'propose',
+    workload?: string,
   ) => string;
   selectIntelligenceRoute: (
-    payload: { audience: string; message: string },
+    payload: {
+      audience: string;
+      message: string;
+      commandMode?: 'none' | 'propose';
+      history?: Array<{ role: 'hunter' | 'companion'; companionId?: string; message: string }>;
+    },
     env?: Record<string, string>,
-  ) => { route: string; model: string; reasoningEffort: string };
+  ) => {
+    route: string;
+    model: string;
+    reasoningEffort: string;
+    workload: string;
+    maxOutputTokens: number;
+  };
   buildYouTubeAnalyticsWindow: (
     now?: Date,
     periodDays?: number,
@@ -141,24 +153,39 @@ describe('Companion Soulprint intelligence', () => {
   });
 
   it('requires one visible confirmation for a complete Reawakening campaign', () => {
-    const instructions = intelligence.buildSystemInstructions('haven', ['haven'], 'propose');
-    expect(instructions).toContain('2 to 4 weeks');
-    expect(instructions).toContain('Never return both content and campaign proposals');
-    expect(instructions).toContain(
-      'only a preview until the Hunter confirms the entire sequence once',
+    const instructions = intelligence.buildSystemInstructions(
+      'haven',
+      ['haven'],
+      'propose',
+      'campaign-forge',
     );
+    expect(instructions).toContain('1 to 12 weeks');
+    expect(instructions).toContain('2 to 12 distinct operations');
+    expect(instructions).toContain('preview until the Hunter confirms the entire sequence once');
   });
 
   it('routes casual direct talk economically and deeper counsel to Terra', () => {
     expect(
       intelligence.selectIntelligenceRoute({ audience: 'snow', message: 'How are you today?' }),
-    ).toEqual({ route: 'quick', model: 'gpt-5.6-luna', reasoningEffort: 'low' });
+    ).toEqual({
+      route: 'quick',
+      model: 'gpt-5.6-luna',
+      reasoningEffort: 'low',
+      workload: 'conversation',
+      maxOutputTokens: 1_600,
+    });
     expect(
       intelligence.selectIntelligenceRoute({
         audience: 'snow',
         message: 'How long until I reach World Class at my current pace?',
       }),
-    ).toEqual({ route: 'counsel', model: 'gpt-5.6-terra', reasoningEffort: 'medium' });
+    ).toEqual({
+      route: 'counsel',
+      model: 'gpt-5.6-terra',
+      reasoningEffort: 'medium',
+      workload: 'conversation',
+      maxOutputTokens: 3_200,
+    });
     expect(
       intelligence.selectIntelligenceRoute({ audience: 'party', message: 'What do you think?' }),
     ).toMatchObject({ route: 'counsel', model: 'gpt-5.6-terra' });
@@ -173,11 +200,79 @@ describe('Companion Soulprint intelligence', () => {
         audience: 'snow',
         message: 'Give me sovereign counsel and a comprehensive 90 day strategy.',
       }),
-    ).toEqual({ route: 'sovereign', model: 'gpt-5.6-sol', reasoningEffort: 'high' });
+    ).toEqual({
+      route: 'sovereign',
+      model: 'gpt-5.6-sol',
+      reasoningEffort: 'high',
+      workload: 'conversation',
+      maxOutputTokens: 6_000,
+    });
+  });
+
+  it('keeps a short Vesper follow-up inside the active Reawakening workroom', () => {
+    expect(
+      intelligence.selectIntelligenceRoute({
+        audience: 'haven',
+        message: "There's a new fighting game called Marvel Tokon. I am rusty, but it is fun.",
+        commandMode: 'propose',
+        history: [
+          {
+            role: 'companion',
+            companionId: 'haven',
+            message:
+              'What lane should this four-week Reawakening campaign use: Tekken, horror, Marvel Rivals, or another lane?',
+          },
+        ],
+      }),
+    ).toMatchObject({
+      route: 'sovereign',
+      model: 'gpt-5.6-sol',
+      reasoningEffort: 'high',
+      workload: 'campaign-forge',
+      maxOutputTokens: 8_000,
+    });
+  });
+
+  it('gives Quill, Saffron, Cassian, and Party Council distinct workroom budgets', () => {
+    expect(
+      intelligence.selectIntelligenceRoute({
+        audience: 'quill',
+        message: 'Create a character dossier and help me repair this lore.',
+        commandMode: 'propose',
+      }),
+    ).toMatchObject({ workload: 'arc-forge', maxOutputTokens: 6_000 });
+    expect(
+      intelligence.selectIntelligenceRoute({
+        audience: 'saffron',
+        message: 'Create me a new recipe with salmon and rice.',
+        commandMode: 'propose',
+      }),
+    ).toMatchObject({ workload: 'recipe-forge', maxOutputTokens: 5_000 });
+    expect(
+      intelligence.selectIntelligenceRoute({
+        audience: 'saffron',
+        message: "Walk me through today's recipe one step at a time.",
+        commandMode: 'propose',
+      }),
+    ).toMatchObject({ workload: 'kitchen-coach', maxOutputTokens: 3_200 });
+    expect(
+      intelligence.selectIntelligenceRoute({
+        audience: 'cassian',
+        message: 'Help me understand this budget.',
+      }),
+    ).toMatchObject({ workload: 'ledger-review', maxOutputTokens: 5_000 });
+    expect(
+      intelligence.selectIntelligenceRoute({ audience: 'party', message: 'What do you think?' }),
+    ).toMatchObject({ workload: 'party-council', maxOutputTokens: 4_800 });
   });
 
   it('requires a visible confirmation for commands and Private Grimoire recipes', () => {
-    const instructions = intelligence.buildSystemInstructions('saffron', ['saffron'], 'propose');
+    const instructions = intelligence.buildSystemInstructions(
+      'saffron',
+      ['saffron'],
+      'propose',
+      'system-command',
+    );
     expect(instructions).toContain('only actions you may prepare');
     expect(instructions).toContain('Hunter must confirm');
     expect(instructions).toContain('Private Grimoire');
@@ -636,6 +731,250 @@ describe('Companion Soulprint intelligence', () => {
       route: 'quick',
       reasoningEffort: 'low',
       usage: { cachedInputTokens: 60, reasoningTokens: 4 },
+    });
+  });
+
+  it('automatically rebuilds an output-limited response and counts both attempts', async () => {
+    const openAiBodies: Array<Record<string, unknown>> = [];
+    let attempt = 0;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_url: string, init: RequestInit) => {
+        openAiBodies.push(JSON.parse(String(init.body)) as Record<string, unknown>);
+        attempt += 1;
+        if (attempt === 1) {
+          return new Response(
+            JSON.stringify({
+              status: 'incomplete',
+              incomplete_details: { reason: 'max_output_tokens' },
+              output: [],
+              usage: {
+                input_tokens: 90,
+                input_tokens_details: { cached_tokens: 25 },
+                output_tokens: 1_600,
+                output_tokens_details: { reasoning_tokens: 1_200 },
+                total_tokens: 1_690,
+              },
+            }),
+            { status: 200, headers: { 'content-type': 'application/json' } },
+          );
+        }
+        return new Response(
+          JSON.stringify({
+            status: 'completed',
+            output: [
+              {
+                type: 'message',
+                content: [
+                  {
+                    type: 'output_text',
+                    text: JSON.stringify({
+                      title: 'Recovered transmission',
+                      replies: [
+                        { companionId: 'snow', message: 'There you are. I finished the thought.' },
+                      ],
+                      memoryCandidates: [],
+                    }),
+                  },
+                ],
+              },
+            ],
+            usage: {
+              input_tokens: 95,
+              input_tokens_details: { cached_tokens: 30 },
+              output_tokens: 40,
+              output_tokens_details: { reasoning_tokens: 10 },
+              total_tokens: 135,
+            },
+          }),
+          { status: 200, headers: { 'content-type': 'application/json' } },
+        );
+      }),
+    );
+
+    const response = await intelligence.default.fetch(
+      new Request('https://system.test/api/ai/chat', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', origin: 'https://system.test' },
+        body: JSON.stringify({
+          audience: 'snow',
+          message: 'Finish that thought for me.',
+          history: [],
+          context: {
+            party: { enabledCompanionIds: ['snow'] },
+            bondMemory: { enabled: false, approved: [] },
+          },
+        }),
+      }),
+      { OPENAI_API_KEY: 'test-key', OPENAI_TEXT_MODEL: 'test-model' },
+    );
+
+    expect(response.status).toBe(200);
+    expect(attempt).toBe(2);
+    expect(openAiBodies[0]).toMatchObject({ max_output_tokens: 1_600 });
+    expect(openAiBodies[1]).toMatchObject({ max_output_tokens: 3_600 });
+    const retryInput = openAiBodies[1].input as Array<{ role: string; content: string }>;
+    expect(retryInput[0].content).toContain('RECOVERY ATTEMPT');
+    const firstFormat = openAiBodies[0].text as {
+      format: { schema: { required: string[] } };
+    };
+    expect(firstFormat.format.schema.required).toEqual(['title', 'replies', 'memoryCandidates']);
+    expect(await response.json()).toMatchObject({
+      workload: 'conversation',
+      title: 'Recovered transmission',
+      usage: {
+        inputTokens: 185,
+        cachedInputTokens: 55,
+        outputTokens: 1_640,
+        reasoningTokens: 1_210,
+        totalTokens: 1_825,
+      },
+    });
+  });
+
+  it('sends a campaign follow-up through the focused Reawakening schema', async () => {
+    let openAiBody: Record<string, unknown> | undefined;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_url: string, init: RequestInit) => {
+        openAiBody = JSON.parse(String(init.body)) as Record<string, unknown>;
+        return new Response(
+          JSON.stringify({
+            status: 'completed',
+            output: [
+              {
+                type: 'message',
+                content: [
+                  {
+                    type: 'output_text',
+                    text: JSON.stringify({
+                      title: 'Marvel Tokon Reawakening',
+                      replies: [
+                        {
+                          companionId: 'haven',
+                          message:
+                            'That is enough direction. I can build the return around learning in public.',
+                        },
+                      ],
+                      memoryCandidates: [],
+                      campaign: {
+                        name: '',
+                        strategy: '',
+                        weeks: 0,
+                        operations: [],
+                        confirmation: '',
+                      },
+                    }),
+                  },
+                ],
+              },
+            ],
+            usage: { input_tokens: 100, output_tokens: 50, total_tokens: 150 },
+          }),
+          { status: 200, headers: { 'content-type': 'application/json' } },
+        );
+      }),
+    );
+
+    const response = await intelligence.default.fetch(
+      new Request('https://system.test/api/ai/chat', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', origin: 'https://system.test' },
+        body: JSON.stringify({
+          audience: 'haven',
+          message: "There's a new Marvel Tokon game. I am bad at it, but it is fun.",
+          history: [
+            {
+              role: 'companion',
+              companionId: 'haven',
+              message: 'What game should this four-week Reawakening campaign be built around?',
+            },
+          ],
+          context: {
+            party: { enabledCompanionIds: ['haven'] },
+            bondMemory: { enabled: false, approved: [] },
+          },
+          commandMode: 'propose',
+        }),
+      }),
+      { OPENAI_API_KEY: 'test-key' },
+    );
+
+    expect(response.status).toBe(200);
+    expect(openAiBody).toMatchObject({
+      model: 'gpt-5.6-sol',
+      max_output_tokens: 8_000,
+      reasoning: { effort: 'high' },
+    });
+    const format = openAiBody?.text as {
+      format: {
+        name: string;
+        schema: {
+          required: string[];
+          properties: {
+            campaign: {
+              properties: { weeks: { maximum: number }; operations: { maxItems: number } };
+            };
+          };
+        };
+      };
+    };
+    expect(format.format.name).toBe('headquarters_campaign_forge');
+    expect(format.format.schema.required).toEqual([
+      'title',
+      'replies',
+      'memoryCandidates',
+      'campaign',
+    ]);
+    expect(format.format.schema.properties.campaign.properties.weeks.maximum).toBe(12);
+    expect(format.format.schema.properties.campaign.properties.operations.maxItems).toBe(12);
+    expect(await response.json()).toMatchObject({
+      route: 'sovereign',
+      workload: 'campaign-forge',
+    });
+  });
+
+  it('surfaces a structured refusal clearly without wasting a retry', async () => {
+    const mockedFetch = vi.fn(
+      async () =>
+        new Response(
+          JSON.stringify({
+            status: 'completed',
+            output: [
+              {
+                type: 'message',
+                content: [{ type: 'refusal', refusal: 'I cannot help with that request.' }],
+              },
+            ],
+            usage: { input_tokens: 50, output_tokens: 8, total_tokens: 58 },
+          }),
+          { status: 200, headers: { 'content-type': 'application/json' } },
+        ),
+    );
+    vi.stubGlobal('fetch', mockedFetch);
+
+    const response = await intelligence.default.fetch(
+      new Request('https://system.test/api/ai/chat', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', origin: 'https://system.test' },
+        body: JSON.stringify({
+          audience: 'snow',
+          message: 'Respond to this request.',
+          history: [],
+          context: {
+            party: { enabledCompanionIds: ['snow'] },
+            bondMemory: { enabled: false, approved: [] },
+          },
+        }),
+      }),
+      { OPENAI_API_KEY: 'test-key', OPENAI_TEXT_MODEL: 'test-model' },
+    );
+
+    expect(response.status).toBe(422);
+    expect(mockedFetch).toHaveBeenCalledTimes(1);
+    expect(await response.json()).toEqual({
+      code: 'response-refused',
+      message: 'I cannot help with that request.',
     });
   });
 

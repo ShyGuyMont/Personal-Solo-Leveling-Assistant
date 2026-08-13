@@ -11,7 +11,7 @@ export const YOUTUBE_READONLY_SCOPES = [
 
 const YOUTUBE_OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
 
-export const COMPANION_INTELLIGENCE_VERSION = 'arc-archives-1';
+export const COMPANION_INTELLIGENCE_VERSION = 'adaptive-workrooms-1';
 
 const COUNSEL_SIGNALS =
   /\b(?:world\s+class|class|rank|level|xp|progress|progression|forecast|how\s+long|timeline|pace|plan|strategy|strategize|analy[sz]e|compare|trade-?off|why|should\s+i|what\s+should|recommend|decision|prioriti[sz]e|streak|challenge|trial|discipline|balanced\s+stats?|youtube|channel|content|video|stream|hook|thumbnail|audience|creator|a\.?r\.?c\.?|arc|canon|dossier|lore|plot|character|worldbuild(?:ing)?|arts?\s+codex)\b/i;
@@ -22,9 +22,94 @@ const COMMAND_SIGNALS =
 const SOVEREIGN_SIGNALS =
   /\b(?:sovereign\s+counsel|deep\s+(?:analysis|dive)|comprehensive\s+(?:strategy|plan)|full\s+(?:30|60|90)[-\s]day\s+plan|optimi[sz]e\s+(?:everything|my\s+whole|the\s+entire)|multi[-\s]domain\s+strategy)\b/i;
 
+const CAMPAIGN_WORK_SIGNALS =
+  /\b(?:reawakening|comeback|campaign|launch\s+plan|content\s+series|release\s+sequence|multi[-\s]release|publishing\s+arc|four[-\s]week|creator\s+return)\b/i;
+
+const CONTENT_WORK_SIGNALS =
+  /\b(?:video|short|livestream|stream|post|upload|content\s+idea|hook|thumbnail|creator\s+forge|production\s+board)\b/i;
+
+const RECIPE_WORK_SIGNALS =
+  /\b(?:new\s+recipe|create\s+(?:me\s+)?a\s+recipe|make\s+(?:me\s+)?a\s+recipe|add\s+(?:it|this|that|a\s+recipe)|save\s+(?:it|this|that|a\s+recipe)|private\s+grimoire|ingredients?|servings?|meal\s+idea)\b/i;
+
+const KITCHEN_COACH_SIGNALS =
+  /\b(?:walk\s+me\s+through|cook\s+with|today'?s\s+(?:recipe|meal|kitchen\s+order)|recipe\s+of\s+the\s+day|current\s+(?:recipe|step)|next\s+step)\b/i;
+
+const SYSTEM_PLAN_SIGNALS =
+  /\b(?:get\s+(?:my\s+)?tasks|assemble\s+(?:my\s+)?day|prepare\s+(?:my\s+)?day|today'?s\s+assignments|wake\s+(?:the\s+)?party|whole\s+system|across\s+(?:the\s+)?system)\b/i;
+
+const ARC_WORK_SIGNALS =
+  /\b(?:a\.?r\.?c\.?|canon|dossier|lore|plot|character\s+arc|worldbuild(?:ing)?|realm\s+modulation|nature\s+energy|arts?\s+codex)\b/i;
+
+function conversationWindow(payload, limit = 6) {
+  const history = Array.isArray(payload.history) ? payload.history.slice(-limit) : [];
+  return [...history.map((item) => String(item?.message ?? '')), String(payload.message ?? '')]
+    .filter(Boolean)
+    .join('\n');
+}
+
+function lastCompanionMessage(payload) {
+  if (!Array.isArray(payload.history)) return '';
+  for (let index = payload.history.length - 1; index >= 0; index -= 1) {
+    if (payload.history[index]?.role === 'companion') {
+      return String(payload.history[index].message ?? '');
+    }
+  }
+  return '';
+}
+
+export function selectIntelligenceWorkload(payload) {
+  const current = String(payload.message ?? '');
+  const recent = conversationWindow(payload);
+  const previousCompanion = lastCompanionMessage(payload);
+  const proposing = payload.commandMode === 'propose';
+
+  if (payload.audience === 'haven' || payload.audience === 'party') {
+    const campaignFollowUp =
+      CAMPAIGN_WORK_SIGNALS.test(previousCompanion) &&
+      (proposing || CAMPAIGN_WORK_SIGNALS.test(recent));
+    if (CAMPAIGN_WORK_SIGNALS.test(current) || campaignFollowUp) return 'campaign-forge';
+    if (CONTENT_WORK_SIGNALS.test(current) && proposing) return 'content-forge';
+  }
+  if (
+    (payload.audience === 'saffron' || payload.audience === 'party') &&
+    proposing &&
+    (RECIPE_WORK_SIGNALS.test(current) || RECIPE_WORK_SIGNALS.test(previousCompanion))
+  ) {
+    return 'recipe-forge';
+  }
+  if (payload.audience === 'saffron' && KITCHEN_COACH_SIGNALS.test(recent)) {
+    return 'kitchen-coach';
+  }
+  if (payload.audience === 'quill') return 'arc-forge';
+  if (payload.audience === 'party' && ARC_WORK_SIGNALS.test(recent)) return 'arc-forge';
+  if (payload.audience === 'cassian') return 'ledger-review';
+  if (proposing && COMMAND_SIGNALS.test(current)) return 'system-command';
+  if (payload.audience === 'party') return 'party-council';
+  if (payload.audience === 'snow' && SYSTEM_PLAN_SIGNALS.test(recent)) return 'system-plan';
+  return 'conversation';
+}
+
+const WORKLOAD_OUTPUT_BUDGETS = {
+  conversation: 1_600,
+  'system-command': 3_200,
+  'party-council': 4_800,
+  'system-plan': 4_800,
+  'recipe-forge': 5_000,
+  'kitchen-coach': 3_200,
+  'content-forge': 4_800,
+  'campaign-forge': 8_000,
+  'arc-forge': 6_000,
+  'ledger-review': 5_000,
+};
+
 export function selectIntelligenceRoute(payload, env = {}) {
-  const sovereign = payload.message.length > 700 || SOVEREIGN_SIGNALS.test(payload.message);
+  const workload = selectIntelligenceWorkload(payload);
+  const sovereign =
+    workload === 'campaign-forge' ||
+    payload.message.length > 700 ||
+    SOVEREIGN_SIGNALS.test(payload.message);
   const counsel =
+    workload !== 'conversation' ||
     payload.audience === 'party' ||
     payload.audience === 'quill' ||
     payload.message.length > 220 ||
@@ -40,6 +125,10 @@ export function selectIntelligenceRoute(payload, env = {}) {
           ? env.OPENAI_INTELLIGENCE_MODEL || 'gpt-5.6-terra'
           : env.OPENAI_FAST_MODEL || 'gpt-5.6-luna'),
     reasoningEffort: sovereign ? 'high' : counsel ? 'medium' : 'low',
+    workload,
+    maxOutputTokens: sovereign
+      ? Math.max(WORKLOAD_OUTPUT_BUDGETS[workload] ?? 0, 6_000)
+      : Math.max(WORKLOAD_OUTPUT_BUDGETS[workload] ?? 0, counsel ? 3_200 : 1_600),
   };
 }
 
@@ -431,16 +520,62 @@ Selection guidance:
 - Order the replies like a natural exchange. One companion may briefly reference another, but nobody speaks twice and nobody exists merely to agree.`;
 }
 
-export function buildSystemInstructions(audience, enabledIds = companionIds, commandMode = 'none') {
+export function buildSystemInstructions(
+  audience,
+  enabledIds = companionIds,
+  commandMode = 'none',
+  workload = 'conversation',
+) {
   const activeIds =
     audience === 'party'
       ? enabledIds.filter((id) => companionIds.includes(id))
       : [audience].filter((id) => companionIds.includes(id));
   const chemistry = audience === 'party' ? `\n\n${partyChemistry}` : '';
-  return `${baseInstructions}\n\nCompanion soulprints:\n${formatCompanionProfiles(activeIds)}${chemistry}\n\n${buildAudienceInstruction(audience, activeIds)}\n\n${buildCommandInstruction(commandMode)}`;
+  return `${baseInstructions}\n\nCompanion soulprints:\n${formatCompanionProfiles(activeIds)}${chemistry}\n\n${buildAudienceInstruction(audience, activeIds)}\n\n${buildCommandInstruction(commandMode, workload)}`;
 }
 
-export function buildCommandInstruction(commandMode) {
+function buildFocusedWorkloadInstruction(workload, commandMode) {
+  if (workload === 'conversation' || workload === 'party-council') {
+    return `Focused workroom: ${workload === 'party-council' ? 'Party Council' : 'Companion Conversation'}. Return only title, replies, and memoryCandidates. Answer the Hunter naturally with the supplied context and recent conversation. This transmission does not prepare an app mutation; if the Hunter wants a concrete System change, explain the needed confirmation naturally.`;
+  }
+  if (workload === 'arc-forge') {
+    return `Focused workroom: A.R.C. Story Room. Return only title, replies, and memoryCandidates. Give Quill enough room for grounded canon recall, continuity analysis, dossier development, or story invention while clearly separating established canon, inference, and new ideas. Do not prepare unrelated System mutations in this response.`;
+  }
+  if (workload === 'ledger-review') {
+    return `Focused workroom: Ledger Counsel. Return only title, replies, and memoryCandidates. Cassian may build a complete financial explanation or plan from the supplied calculated totals and targets, but must never invent transactions, balances, merchant details, or account access. Do not prepare unrelated System mutations in this response.`;
+  }
+  if (workload === 'recipe-forge') {
+    return `Focused workroom: Saffron's Recipe Forge. Return only title, replies, memoryCandidates, and recipe.
+- ${commandMode === 'propose' ? 'Prepare' : 'Discuss'} one complete recipe only when the Hunter has supplied enough direction. If direction is missing, ask one natural follow-up and return an empty recipe.
+- A complete draft needs concrete quantities, ordered steps, equipment, plating guidance, storage guidance, conservative food-safety guidance, and one visible confirmation before it enters the Private Grimoire.
+- Preserve every stated food boundary. Never invent an allergy, dietary restriction, ingredient availability, medical claim, or completion.
+- Use progressContext.kitchen.savedRecipeNames to avoid duplicates. If no recipe should be proposed, return recipe strings empty, numbers 0, and arrays empty.`;
+  }
+  if (workload === 'kitchen-coach') {
+    return `Focused workroom: Saffron's Cooking Console. Return only title, replies, and memoryCandidates. Use progressContext.kitchen.todayOrder exactly, track the current step through recentConversation, answer interruptions naturally, and never invent a checked ingredient, finished step, completion, replacement meal, or new recipe.`;
+  }
+  if (workload === 'content-forge') {
+    return `Focused workroom: Creator Forge. Return only title, replies, memoryCandidates, and content.
+- ${commandMode === 'propose' ? 'Prepare' : 'Discuss'} one concrete content operation only when the Hunter's direction is sufficient. A short follow-up may answer Vesper's prior question.
+- Preserve the Hunter's idea while supplying a working title, platform, format, pillar, honest hook, audience promise, one physical nextAction, useful notes, and one visible confirmation.
+- Use supplied Studio evidence and active projects without inventing analytics, audience feedback, permissions, footage, deals, or completed work.
+- If direction is missing, ask one natural follow-up and return empty content fields.`;
+  }
+  if (workload === 'campaign-forge') {
+    return `Focused workroom: Creator Reawakening. Return only title, replies, memoryCandidates, and campaign.
+- ${commandMode === 'propose' ? 'Prepare' : 'Discuss'} one deliberate multi-release campaign when the Hunter's direction is sufficient. Treat a short answer as the continuation of Vesper's most recent campaign question.
+- Match the requested scale instead of forcing one fixed template. A campaign may span 1 to 12 weeks and contain 2 to 12 distinct operations. Keep the sequence focused enough to execute; do not inflate it merely because room is available.
+- Use the supplied 28/90/365-day history, Content Vault, current focus, and active projects as evidence when available. Treat patterns as hypotheses, not guarantees.
+- Every operation needs its own title, platform, format, pillar, honest hook, audience promise, small physical nextAction, and timing or sequence notes.
+- Never invent analytics, audience feedback, permissions, footage, deals, or completed work. If essential direction is missing, ask one natural follow-up and return an empty campaign.
+- The campaign remains a preview until the Hunter confirms the entire sequence once. If no campaign should be proposed, return campaign strings empty, weeks 0, and operations empty.`;
+  }
+  return undefined;
+}
+
+export function buildCommandInstruction(commandMode, workload = 'conversation') {
+  const focusedInstruction = buildFocusedWorkloadInstruction(workload, commandMode);
+  if (focusedInstruction) return focusedInstruction;
   if (commandMode !== 'propose') {
     return `Command Mode is disabled. Return command.actionId, command.summary, and command.confirmation as empty strings. Set command.companionId to snow. Return operation.kind, operation.trainingLocation, operation.foodConstraints, operation.sanctuaryMode, operation.primaryConcern, operation.secondaryConcern, operation.summary, and operation.confirmation as empty strings; set operation.companionId to snow and all three operation include flags to false. Return recipe.name and every other recipe string as empty, recipe numbers as 0, and recipe arrays empty. Return every content string as empty. Return campaign.name, campaign.strategy, and campaign.confirmation as empty strings, campaign.weeks as 0, and campaign.operations as an empty array.`;
   }
@@ -467,7 +602,7 @@ export function buildCommandInstruction(commandMode) {
 - A content draft must preserve the Hunter's idea while providing a working title, platform, format, content pillar, honest hook, audience promise, and one small physical nextAction. Use progressContext.specialists.creator.activeProjects to avoid accidental duplicates. Do not invent analytics, brand deals, permissions, footage, audience feedback, or completed work.
 - A content proposal is only a preview until the Hunter confirms it into Creator Forge. If no content operation should be proposed, return every content string as empty.
 - When the Hunter clearly asks Vesper to build, forge, or prepare a comeback, reawakening, launch, or multi-release campaign, Vesper may prepare one campaign instead of one content operation. Never return both content and campaign proposals.
-- A campaign spans 2 to 4 weeks and contains 2 to 8 distinct operations in a deliberate sequence. Use the supplied 28/90/365-day history, Content Vault, current focus, and active projects as evidence when available. Treat patterns as hypotheses, not guarantees. Every operation needs its own title, platform, format, pillar, honest hook, audience promise, and small physical nextAction. Put timing and sequence notes in notes.
+- A campaign may span 1 to 12 weeks and contains 2 to 12 distinct operations in a deliberate sequence. Match the Hunter's requested scope and keep it focused enough to execute. Use the supplied 28/90/365-day history, Content Vault, current focus, and active projects as evidence when available. Treat patterns as hypotheses, not guarantees. Every operation needs its own title, platform, format, pillar, honest hook, audience promise, and small physical nextAction. Put timing and sequence notes in notes.
 - If essential direction is missing, ask one natural follow-up and return an empty campaign. A campaign is only a preview until the Hunter confirms the entire sequence once. If no campaign should be proposed, return campaign strings empty, weeks 0, and operations empty.`;
 }
 
@@ -682,10 +817,10 @@ const responseSchema = {
       properties: {
         name: { type: 'string', maxLength: 180 },
         strategy: { type: 'string', maxLength: 1200 },
-        weeks: { type: 'integer', minimum: 0, maximum: 4 },
+        weeks: { type: 'integer', minimum: 0, maximum: 12 },
         operations: {
           type: 'array',
-          maxItems: 8,
+          maxItems: 12,
           items: {
             type: 'object',
             properties: {
@@ -742,6 +877,30 @@ const responseSchema = {
   ],
   additionalProperties: false,
 };
+
+const focusedResponseFields = {
+  conversation: ['title', 'replies', 'memoryCandidates'],
+  'party-council': ['title', 'replies', 'memoryCandidates'],
+  'arc-forge': ['title', 'replies', 'memoryCandidates'],
+  'ledger-review': ['title', 'replies', 'memoryCandidates'],
+  'recipe-forge': ['title', 'replies', 'memoryCandidates', 'recipe'],
+  'kitchen-coach': ['title', 'replies', 'memoryCandidates'],
+  'content-forge': ['title', 'replies', 'memoryCandidates', 'content'],
+  'campaign-forge': ['title', 'replies', 'memoryCandidates', 'campaign'],
+};
+
+function selectResponseSchema(workload) {
+  const fields = focusedResponseFields[workload];
+  if (!fields) return responseSchema;
+  return {
+    type: 'object',
+    properties: Object.fromEntries(
+      fields.map((field) => [field, responseSchema.properties[field]]),
+    ),
+    required: fields,
+    additionalProperties: false,
+  };
+}
 
 const bodyDiagnosticSchema = {
   type: 'object',
@@ -1698,6 +1857,41 @@ function extractOutputText(response) {
   return undefined;
 }
 
+function extractRefusal(response) {
+  for (const item of response?.output ?? []) {
+    if (item?.type !== 'message') continue;
+    for (const content of item.content ?? []) {
+      if (content?.type === 'refusal' && typeof content.refusal === 'string') {
+        return content.refusal.trim();
+      }
+    }
+  }
+  return undefined;
+}
+
+function accumulateOpenAiUsage(total, response) {
+  total.inputTokens += Number(response?.usage?.input_tokens ?? 0);
+  total.cachedInputTokens += Number(response?.usage?.input_tokens_details?.cached_tokens ?? 0);
+  total.outputTokens += Number(response?.usage?.output_tokens ?? 0);
+  total.reasoningTokens += Number(response?.usage?.output_tokens_details?.reasoning_tokens ?? 0);
+  total.totalTokens += Number(response?.usage?.total_tokens ?? 0);
+}
+
+function workloadLabel(workload) {
+  const labels = {
+    'campaign-forge': "Vesper's Reawakening campaign",
+    'content-forge': "Vesper's Creator Forge draft",
+    'recipe-forge': "Saffron's recipe",
+    'kitchen-coach': "Saffron's cooking guidance",
+    'arc-forge': "Quill's Story Room response",
+    'ledger-review': "Cassian's Ledger Counsel",
+    'party-council': 'the Party Council response',
+    'system-plan': "Snow's System plan",
+    'system-command': 'the prepared System command',
+  };
+  return labels[workload] ?? 'the companion response';
+}
+
 function bytesToBase64(buffer) {
   const bytes = new Uint8Array(buffer);
   let binary = '';
@@ -1956,7 +2150,7 @@ async function handleAiChat(request, env, url) {
   }
 
   const intelligence = selectIntelligenceRoute(payload, env);
-  const { model, route, reasoningEffort } = intelligence;
+  const { model, route, reasoningEffort, workload, maxOutputTokens } = intelligence;
   const enabledCompanionIds = Array.isArray(payload.context?.party?.enabledCompanionIds)
     ? payload.context.party.enabledCompanionIds.filter((id) => companionIds.includes(id))
     : companionIds;
@@ -1970,6 +2164,7 @@ async function handleAiChat(request, env, url) {
     payload.audience,
     enabledCompanionIds,
     payload.commandMode,
+    workload,
   );
   const conversationInput = JSON.stringify({
     audience: payload.audience,
@@ -1979,69 +2174,147 @@ async function handleAiChat(request, env, url) {
     commandMode: payload.commandMode,
   });
 
-  let openAiResponse;
-  try {
-    openAiResponse = await fetch('https://api.openai.com/v1/responses', {
-      method: 'POST',
-      headers: {
-        authorization: `Bearer ${env.OPENAI_API_KEY}`,
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify({
-        model,
-        store: false,
-        input: [
-          { role: 'system', content: systemInstructions },
-          { role: 'user', content: conversationInput },
-        ],
-        max_output_tokens: route === 'sovereign' ? 2_400 : route === 'counsel' ? 1_600 : 1_000,
-        reasoning: { effort: reasoningEffort },
-        text: {
-          verbosity: 'medium',
-          format: {
-            type: 'json_schema',
-            name: 'headquarters_response',
-            strict: true,
-            schema: responseSchema,
-          },
+  const responseFormat = selectResponseSchema(workload);
+  const usageTotal = {
+    inputTokens: 0,
+    cachedInputTokens: 0,
+    outputTokens: 0,
+    reasoningTokens: 0,
+    totalTokens: 0,
+  };
+  let response;
+  let result;
+  let failureReason = 'invalid-response';
+  let refusal;
+  for (let attempt = 0; attempt < 2 && !result; attempt += 1) {
+    const retrying = attempt > 0;
+    const attemptBudget = retrying
+      ? Math.min(12_000, Math.max(maxOutputTokens + 2_000, Math.ceil(maxOutputTokens * 1.5)))
+      : maxOutputTokens;
+    const attemptInstructions = retrying
+      ? `${systemInstructions}\n\nRECOVERY ATTEMPT: The previous generation was interrupted or did not finish valid structured output. Rebuild the complete response now, stay focused on ${workloadLabel(workload)}, and finish every required field. Be detailed where the work requires it, but remove repetition and decorative filler.`
+      : systemInstructions;
+    let openAiResponse;
+    try {
+      openAiResponse = await fetch('https://api.openai.com/v1/responses', {
+        method: 'POST',
+        headers: {
+          authorization: `Bearer ${env.OPENAI_API_KEY}`,
+          'content-type': 'application/json',
         },
-      }),
-    });
-  } catch {
+        body: JSON.stringify({
+          model,
+          store: false,
+          input: [
+            { role: 'system', content: attemptInstructions },
+            { role: 'user', content: conversationInput },
+          ],
+          max_output_tokens: attemptBudget,
+          reasoning: { effort: reasoningEffort },
+          text: {
+            verbosity:
+              workload === 'campaign-forge' ||
+              workload === 'arc-forge' ||
+              workload === 'ledger-review'
+                ? 'high'
+                : 'medium',
+            format: {
+              type: 'json_schema',
+              name: `headquarters_${workload.replaceAll('-', '_')}`,
+              strict: true,
+              schema: responseFormat,
+            },
+          },
+        }),
+      });
+    } catch {
+      return json(
+        {
+          code: 'openai-unreachable',
+          message: 'The intelligence link is temporarily unreachable. Your local campaign is safe.',
+        },
+        502,
+      );
+    }
+
+    if (!openAiResponse.ok) {
+      const code =
+        openAiResponse.status === 429
+          ? 'rate-limited'
+          : openAiResponse.status === 401 || openAiResponse.status === 403
+            ? 'configuration-error'
+            : 'openai-error';
+      const message =
+        openAiResponse.status === 429
+          ? 'The online link is busy or has reached its current usage limit. Try again shortly.'
+          : code === 'configuration-error'
+            ? 'The secure OpenAI connection needs attention before Headquarters can respond.'
+            : 'The intelligence link could not complete that response. Your local campaign is safe.';
+      return json({ code, message }, openAiResponse.status === 429 ? 429 : 502);
+    }
+
+    try {
+      response = await openAiResponse.json();
+      accumulateOpenAiUsage(usageTotal, response);
+      refusal = extractRefusal(response);
+      if (refusal) {
+        failureReason = 'refusal';
+        break;
+      }
+      if (response?.status === 'incomplete') {
+        failureReason = response?.incomplete_details?.reason || 'incomplete';
+        if (failureReason === 'content_filter') break;
+        continue;
+      }
+      const outputText = extractOutputText(response);
+      if (!outputText) {
+        failureReason = 'missing-output';
+        continue;
+      }
+      const candidate = JSON.parse(outputText);
+      if (
+        !isObject(candidate) ||
+        !Array.isArray(candidate.replies) ||
+        typeof candidate.title !== 'string'
+      ) {
+        failureReason = 'invalid-structure';
+        continue;
+      }
+      result = candidate;
+    } catch {
+      failureReason = 'invalid-json';
+    }
+  }
+
+  if (!result) {
+    if (failureReason === 'refusal') {
+      return json(
+        {
+          code: 'response-refused',
+          message: refusal || 'The intelligence link declined that request.',
+        },
+        422,
+      );
+    }
+    if (failureReason === 'content_filter') {
+      return json(
+        {
+          code: 'response-interrupted',
+          message: 'The intelligence link stopped that response before it finished.',
+        },
+        422,
+      );
+    }
     return json(
       {
-        code: 'openai-unreachable',
-        message: 'The intelligence link is temporarily unreachable. Your local campaign is safe.',
+        code: 'invalid-response',
+        message: `${workloadLabel(workload)} was interrupted twice. Your message and conversation are saved; ask them to continue when you are ready.`,
       },
       502,
     );
   }
 
-  if (!openAiResponse.ok) {
-    const code =
-      openAiResponse.status === 429
-        ? 'rate-limited'
-        : openAiResponse.status === 401 || openAiResponse.status === 403
-          ? 'configuration-error'
-          : 'openai-error';
-    const message =
-      openAiResponse.status === 429
-        ? 'The online link is busy or has reached its current usage limit. Try again shortly.'
-        : code === 'configuration-error'
-          ? 'The secure OpenAI connection needs attention before Headquarters can respond.'
-          : 'The intelligence link could not complete that response. Your local campaign is safe.';
-    return json({ code, message }, openAiResponse.status === 429 ? 429 : 502);
-  }
-
-  let response;
   try {
-    response = await openAiResponse.json();
-    const outputText = extractOutputText(response);
-    if (!outputText) throw new Error('Missing output text');
-    const result = JSON.parse(outputText);
-    if (!isObject(result) || !Array.isArray(result.replies) || typeof result.title !== 'string') {
-      throw new Error('Invalid structured response');
-    }
     if (payload.audience !== 'party') {
       result.replies = result.replies.slice(0, 1).map((reply) => ({
         companionId: payload.audience,
@@ -2293,7 +2566,7 @@ async function handleAiChat(request, env, url) {
         : undefined;
     const campaign = isObject(result.campaign) ? result.campaign : undefined;
     const rawCampaignOperations = Array.isArray(campaign?.operations)
-      ? campaign.operations.slice(0, 8)
+      ? campaign.operations.slice(0, 12)
       : [];
     const campaignOperations = rawCampaignOperations
       .filter(
@@ -2333,8 +2606,8 @@ async function handleAiChat(request, env, url) {
       typeof campaign.strategy === 'string' &&
       campaign.strategy.trim() &&
       Number.isInteger(campaign.weeks) &&
-      campaign.weeks >= 2 &&
-      campaign.weeks <= 4 &&
+      campaign.weeks >= 1 &&
+      campaign.weeks <= 12 &&
       campaignOperations.length >= 2 &&
       campaignOperations.length === rawCampaignOperations.length &&
       typeof campaign.confirmation === 'string' &&
@@ -2351,6 +2624,7 @@ async function handleAiChat(request, env, url) {
       model,
       route,
       reasoningEffort,
+      workload,
       title: result.title.slice(0, 80),
       replies: result.replies.slice(0, payload.audience === 'party' ? 4 : 1),
       memoryCandidates,
@@ -2359,13 +2633,7 @@ async function handleAiChat(request, env, url) {
       recipeProposal: operationProposal ? undefined : recipeProposal,
       contentProposal: operationProposal || campaignProposal ? undefined : contentProposal,
       campaignProposal: operationProposal ? undefined : campaignProposal,
-      usage: {
-        inputTokens: Number(response.usage?.input_tokens ?? 0),
-        cachedInputTokens: Number(response.usage?.input_tokens_details?.cached_tokens ?? 0),
-        outputTokens: Number(response.usage?.output_tokens ?? 0),
-        reasoningTokens: Number(response.usage?.output_tokens_details?.reasoning_tokens ?? 0),
-        totalTokens: Number(response.usage?.total_tokens ?? 0),
-      },
+      usage: usageTotal,
     });
   } catch {
     return json(

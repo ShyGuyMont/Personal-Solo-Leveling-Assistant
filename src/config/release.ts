@@ -23,6 +23,8 @@ export const RELEASE_SECTIONS: ReleaseSection[] = [
       'Archive Shield format 25 validates and preserves Character Library and Canon Vault records alongside the full campaign, while imported lore remains private on this device until the Hunter intentionally asks for online counsel.',
       'Voice Forge can now cast companions from an optional Cartesia Sonic voice library while preserving their existing OpenAI voices as an automatic fallback; provider choice, voice IDs, and local allowance tracking travel safely in Archive Shield format 26.',
       'Voice Forge now presents separate Cartesia and OpenAI workbenches: Cartesia exposes only its real voice casting and independent speed, while every tuned OpenAI Soulprint remains untouched and ready for automatic fallback.',
+      'Quick Link now opens adaptive specialist workrooms: short follow-ups stay attached to Vesper campaigns, Quill lore sessions, Saffron recipes, Cassian plans, Snow coordination, and Party Council, while focused schemas and larger response budgets prevent major work from being squeezed into casual-chat limits.',
+      'Interrupted or malformed intelligence responses rebuild themselves once with additional room, refusals remain readable, and the Usage Ledger counts both attempts instead of hiding recovery cost; Reawakening campaigns may now match a focused one-to-twelve-week scope with up to twelve sequenced operations.',
     ],
   },
   {

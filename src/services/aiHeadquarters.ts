@@ -341,6 +341,17 @@ export interface AiHeadquartersReply {
   model: string;
   route?: 'quick' | 'counsel' | 'sovereign';
   reasoningEffort?: 'low' | 'medium' | 'high';
+  workload?:
+    | 'conversation'
+    | 'system-command'
+    | 'party-council'
+    | 'system-plan'
+    | 'recipe-forge'
+    | 'kitchen-coach'
+    | 'content-forge'
+    | 'campaign-forge'
+    | 'arc-forge'
+    | 'ledger-review';
   title: string;
   replies: Array<{
     companionId: CompanionId;
