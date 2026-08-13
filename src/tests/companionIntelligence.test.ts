@@ -217,6 +217,54 @@ describe('Companion Soulprint intelligence', () => {
     });
   });
 
+  it('loads every accessible English Cartesia voice page without duplicates', async () => {
+    const requestedUrls: string[] = [];
+    const emberVoice = {
+      id: '11111111-1111-4111-8111-111111111111',
+      name: 'Ember AU',
+      description: 'Fiery Australian energy',
+      gender: 'feminine',
+      language: 'en',
+      country: 'AU',
+    };
+    const snowVoice = {
+      id: '22222222-2222-4222-8222-222222222222',
+      name: 'Snow Guide',
+      description: 'Relaxed and wise',
+      gender: 'feminine',
+      language: 'en',
+      country: 'US',
+    };
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: string | URL | Request) => {
+        const requestedUrl = String(input);
+        requestedUrls.push(requestedUrl);
+        const cursor = new URL(requestedUrl).searchParams.get('starting_after');
+        return Response.json(
+          cursor
+            ? { data: [snowVoice, emberVoice], has_more: false }
+            : { data: [emberVoice], has_more: true },
+        );
+      }),
+    );
+
+    const response = await intelligence.default.fetch(
+      new Request('https://system.test/api/ai/voices?provider=cartesia', {
+        headers: { origin: 'https://system.test' },
+      }),
+      { CARTESIA_API_KEY: 'test-key' },
+    );
+    const payload = (await response.json()) as { voices: Array<{ id: string; name: string }> };
+
+    expect(response.status).toBe(200);
+    expect(requestedUrls).toHaveLength(2);
+    expect(new URL(requestedUrls[0]).searchParams.get('language')).toBe('en');
+    expect(new URL(requestedUrls[0]).searchParams.get('limit')).toBe('100');
+    expect(new URL(requestedUrls[1]).searchParams.get('starting_after')).toBe(emberVoice.id);
+    expect(payload.voices.map((voice) => voice.name)).toEqual(['Ember AU', 'Snow Guide']);
+  });
+
   it('forges speech from the selected soulprint without exposing the API key', async () => {
     let openAiBody: Record<string, unknown> | undefined;
     vi.stubGlobal(

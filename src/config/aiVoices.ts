@@ -280,7 +280,7 @@ export const CANON_VOICE_PROFILES: Record<CompanionId, CanonVoiceProfile> = {
   ember: {
     id: 'ember',
     voice: 'nova',
-    accent: 'natural',
+    accent: 'australian',
     delivery: 'intense',
     cadence: 'rapid-fire',
     texture: 'bright',
@@ -298,7 +298,7 @@ export const CANON_VOICE_PROFILES: Record<CompanionId, CanonVoiceProfile> = {
     emotionalRange: 5,
     updatedAt: CREATED_AT,
     direction:
-      'Fast, hard-edged, tough-skinned, and fiercely loyal. The heat attacks the obstacle, never the Hunter; she sounds like a real protective friend, not a screaming anime villain.',
+      'A fiery Australian with fast, hard-edged, tough-skinned energy and fierce loyalty. Her natural Australian character should be clear without becoming exaggerated or cartoonish. The heat attacks the obstacle, never the Hunter; she sounds like a real protective friend, not a screaming anime villain.',
     audition:
       "Nope. The spiral doesn't get the whole day. Shoes on, one minute of motion, and then it can file a complaint with me.",
   },

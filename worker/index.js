@@ -2547,36 +2547,49 @@ async function handleAiVoiceCatalog(request, env, url) {
   const upstreamUrl = new URL('https://api.cartesia.ai/voices');
   upstreamUrl.searchParams.set('limit', '100');
   upstreamUrl.searchParams.set('language', 'en');
-  let response;
+  const catalog = [];
+  const seenCursors = new Set();
+  let startingAfter;
   try {
-    response = await fetch(upstreamUrl, {
-      headers: {
-        accept: 'application/json',
-        authorization: `Bearer ${env.CARTESIA_API_KEY}`,
-        'cartesia-version': CARTESIA_API_VERSION,
-      },
-    });
-  } catch {
-    return json(
-      { code: 'cartesia-unreachable', message: 'The Cartesia casting library is unreachable.' },
-      502,
-    );
-  }
-  if (!response.ok) {
-    return json(
-      {
-        code: response.status === 429 ? 'rate-limited' : 'voice-catalog-failed',
-        message:
-          response.status === 401 || response.status === 403
-            ? 'The secure Cartesia connection needs a valid API key.'
-            : 'The Cartesia casting library is temporarily unavailable.',
-      },
-      response.status === 429 ? 429 : 502,
-    );
-  }
-  try {
-    const payload = await response.json();
-    const voices = (Array.isArray(payload?.data) ? payload.data : [])
+    while (true) {
+      if (startingAfter) upstreamUrl.searchParams.set('starting_after', startingAfter);
+      const response = await fetch(upstreamUrl, {
+        headers: {
+          accept: 'application/json',
+          authorization: `Bearer ${env.CARTESIA_API_KEY}`,
+          'cartesia-version': CARTESIA_API_VERSION,
+        },
+      });
+      if (!response.ok) {
+        return json(
+          {
+            code: response.status === 429 ? 'rate-limited' : 'voice-catalog-failed',
+            message:
+              response.status === 401 || response.status === 403
+                ? 'The secure Cartesia connection needs a valid API key.'
+                : 'The Cartesia casting library is temporarily unavailable.',
+          },
+          response.status === 429 ? 429 : 502,
+        );
+      }
+      const payload = await response.json();
+      const page = Array.isArray(payload?.data) ? payload.data : [];
+      catalog.push(...page);
+      if (payload?.has_more !== true) break;
+      const lastVoice = page.at(-1);
+      const nextCursor =
+        isObject(lastVoice) && typeof lastVoice.id === 'string'
+          ? lastVoice.id
+          : typeof payload?.next_page === 'string'
+            ? payload.next_page
+            : undefined;
+      if (!nextCursor || seenCursors.has(nextCursor)) {
+        throw new Error('Cartesia returned an incomplete voice catalog.');
+      }
+      seenCursors.add(nextCursor);
+      startingAfter = nextCursor;
+    }
+    const voices = catalog
       .filter(
         (voice) =>
           isObject(voice) &&
@@ -2585,7 +2598,6 @@ async function handleAiVoiceCatalog(request, env, url) {
           typeof voice.name === 'string' &&
           voice.name.trim(),
       )
-      .slice(0, 100)
       .map((voice) => ({
         id: voice.id,
         name: voice.name.trim().slice(0, 160),
@@ -2596,11 +2608,15 @@ async function handleAiVoiceCatalog(request, env, url) {
         language: typeof voice.language === 'string' ? voice.language : 'en',
         country: typeof voice.country === 'string' ? voice.country.slice(0, 8) : undefined,
       }))
+      .filter((voice, index, all) => all.findIndex((item) => item.id === voice.id) === index)
       .sort((left, right) => left.name.localeCompare(right.name));
     return json({ ok: true, provider: 'cartesia', voices });
   } catch {
     return json(
-      { code: 'invalid-response', message: 'The Cartesia library returned no usable voices.' },
+      {
+        code: 'cartesia-unreachable',
+        message: 'The complete Cartesia casting library could not be loaded. Try again shortly.',
+      },
       502,
     );
   }

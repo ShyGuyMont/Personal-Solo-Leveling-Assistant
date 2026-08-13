@@ -34,7 +34,7 @@ describe('Voice Link local profiles and usage', () => {
     });
     expect(profiles.snow.performanceTake).not.toBe(profiles.saffron.performanceTake);
     expect(CANON_VOICE_PROFILES.snow.direction).toMatch(/older sister/i);
-    expect(CANON_VOICE_PROFILES.ember.direction).toMatch(/obstacle/i);
+    expect(CANON_VOICE_PROFILES.ember.direction).toMatch(/Australian.*obstacle/i);
     expect(CANON_VOICE_PROFILES.saffron.direction).toMatch(/high-pressure/i);
     expect(CANON_VOICE_PROFILES.quill.direction).toMatch(/lore connection/i);
   });

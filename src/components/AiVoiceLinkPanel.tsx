@@ -552,8 +552,10 @@ export function AiVoiceLinkPanel({
                       <small>
                         {cartesiaCatalogError ||
                           (draft.cartesiaVoiceName
-                            ? `${draft.cartesiaVoiceName} is cast for ${companion.name}.`
-                            : `${companion.name} will keep using their saved OpenAI voice until cast.`)}
+                            ? `${draft.cartesiaVoiceName} is cast for ${companion.name}. · ${cartesiaVoices.length} English voices available.`
+                            : cartesiaVoices.length
+                              ? `${cartesiaVoices.length} English voices ready. ${companion.name} keeps their OpenAI voice until cast.`
+                              : `${companion.name} will keep using their saved OpenAI voice until cast.`)}
                       </small>
                     </label>
                     <label className="ai-cartesia-speed">
