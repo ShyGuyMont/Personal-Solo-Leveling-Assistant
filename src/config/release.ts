@@ -1,4 +1,4 @@
-export const APP_VERSION = '9.6.0';
+export const APP_VERSION = '10.0.0';
 export const DATABASE_SCHEMA_VERSION = 28;
 export const SAVE_FORMAT_VERSION = 28;
 
@@ -9,6 +9,19 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 10.0.0 · Sovereign Evolution',
+    detail:
+      'The System crosses into its next generation: the Ascension Core becomes a living progress instrument, the full interface gains a more dimensional and disciplined visual language, and every layer feels more responsive without crowding the Hunter’s screen.',
+    points: [
+      'The Ascension Core is rebuilt around dual live energy rings for daily synchronization and level progress, a rotating dimensional aperture, a suspended Class artifact, orbital telemetry, state-reactive illumination, and a projected energy pedestal.',
+      'Touching or focusing the Core now awakens a compact Core Intelligence analysis with exact daily charge, level energy, cleared Class gates, streak data, and one context-aware route to the next meaningful action.',
+      'Core Intelligence distinguishes active directives, full daily synchronization, advancement readiness, a quiet unassigned day, and stabilized World Class status without inventing rewards or changing progression rules.',
+      'The Headquarters chamber, navigation glass, active realm controls, panels, section dividers, cards, buttons, and input focus states now share one stronger Sovereign dimensional hierarchy across every color protocol.',
+      'Desktop depth remains responsive to pointer movement while the mobile Core receives its own balanced orbital layout, larger touch target, safe expansion panel, and fixed navigation treatment.',
+      'Clean Interface, subtle intensity, reduced-motion preferences, keyboard focus, screen-reader state, offline progression, local saves, and every existing confirmation wall remain fully respected.',
+    ],
+  },
   {
     title: 'Version 9.6.0 · Living Initiative',
     detail:

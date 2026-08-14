@@ -3,10 +3,14 @@ import {
   CalendarDays,
   ChevronRight,
   Flame,
+  Gauge,
+  Orbit,
+  ScanLine,
   Settings as SettingsIcon,
   Shield,
   Sparkles,
   TrendingUp,
+  Zap,
 } from 'lucide-react';
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { ChallengeCard } from '@/components/ChallengeCard';
@@ -23,6 +27,7 @@ import { getChallengeTemplate } from '@/config/challenges';
 import { getCompanion, getCompanionImage } from '@/config/companions';
 import { APP_VERSION } from '@/config/release';
 import { getDashboardHistory } from '@/db/repositories';
+import { buildAscensionCoreProjection } from '@/game/ascensionCore';
 import { calculateRankQualification } from '@/game/rank';
 import { Link } from '@/router';
 import { daySeed, formatLongDate, getCurrentHour } from '@/utils/date';
@@ -35,6 +40,7 @@ export function DashboardPage() {
     useGameStore();
   const [lastReview, setLastReview] = useState<DailyReview>();
   const [recentStats, setRecentStats] = useState<StatTransaction[]>([]);
+  const [coreAwakened, setCoreAwakened] = useState(false);
 
   useEffect(() => {
     void getDashboardHistory().then(({ lastReview: review, recentStats: transactions }) => {
@@ -97,6 +103,19 @@ export function DashboardPage() {
 
   if (!profile || !progression || !settings) return null;
   const snow = getCompanion('snow');
+  const clearedClassGates = qualification?.items.filter((item) => item.met).length ?? 0;
+  const totalClassGates = qualification?.items.length ?? 0;
+  const coreProjection = buildAscensionCoreProjection({
+    dailyCompleted: completeCount,
+    dailyTotal: todayRecords.length,
+    currentLevelXp: progression.currentLevelXp,
+    xpToNextLevel: progression.xpToNextLevel,
+    currentStreak: progression.currentDayStreak,
+    nextClass: qualification?.targetRank,
+    qualifiedForNextClass: Boolean(qualification?.qualified),
+    clearedClassGates,
+    totalClassGates,
+  });
 
   return (
     <div className="page dashboard-page">
@@ -113,7 +132,7 @@ export function DashboardPage() {
         </div>
         <div className="hero-panel__version" aria-hidden="true">
           <span>V{APP_VERSION}</span>
-          <b>SYSTEM TRANSCENDENCE</b>
+          <b>SOVEREIGN EVOLUTION</b>
         </div>
         <div className="hero-panel__top headquarters-stage__header">
           <div>
@@ -147,15 +166,36 @@ export function DashboardPage() {
             </div>
           </div>
 
-          <div
-            className="headquarters-stage__core"
-            style={{ '--core-charge': `${Math.round(percentage * 360)}deg` } as CSSProperties}
+          <button
+            type="button"
+            className={`headquarters-stage__core ascension-core ascension-core--${coreProjection.state} ${coreAwakened ? 'is-awakened' : ''}`}
+            style={
+              {
+                '--core-charge': `${coreProjection.dailyCharge * 3.6}deg`,
+                '--level-charge': `${coreProjection.levelCharge * 3.6}deg`,
+              } as CSSProperties
+            }
+            aria-expanded={coreAwakened}
+            aria-controls="ascension-core-analysis"
+            aria-label={`${coreAwakened ? 'Close' : 'Open'} Ascension Core analysis. ${coreProjection.headline}.`}
+            onClick={() => setCoreAwakened((active) => !active)}
           >
+            <div className="ascension-core__halo" aria-hidden="true">
+              <span />
+              <span />
+              <span />
+            </div>
             <div className="ascension-core__field" aria-hidden="true">
               <i />
               <i />
               <i />
               <i />
+            </div>
+            <div className="ascension-core__aperture" aria-hidden="true">
+              <span />
+              <span />
+              <span />
+              <span />
             </div>
             <div className="headquarters-stage__orbit" aria-hidden="true">
               <i />
@@ -167,12 +207,30 @@ export function DashboardPage() {
               <span />
               <span />
             </div>
+            <div className="ascension-core__satellites" aria-hidden="true">
+              <span className="ascension-core__satellite ascension-core__satellite--level">
+                <b>{progression.level}</b>
+                <small>LEVEL</small>
+              </span>
+              <span className="ascension-core__satellite ascension-core__satellite--sync">
+                <b>{coreProjection.dailyCharge}%</b>
+                <small>SYNC</small>
+              </span>
+              <span className="ascension-core__satellite ascension-core__satellite--streak">
+                <b>{progression.currentDayStreak}</b>
+                <small>STREAK</small>
+              </span>
+              <span className="ascension-core__satellite ascension-core__satellite--gates">
+                <b>{coreProjection.gateDisplay}</b>
+                <small>GATES</small>
+              </span>
+            </div>
             <div className="ascension-core__emblem">
               <ClassEmblem rank={progression.rank} />
             </div>
             <div className="ascension-core__readout">
               <span>ASCENSION CORE</span>
-              <em>{Math.round(percentage * 100)}% DAILY CHARGE</em>
+              <em>{coreProjection.dailyCharge}% DAILY CHARGE</em>
               <small>
                 {qualification?.qualified
                   ? 'ADVANCEMENT SIGNAL DETECTED'
@@ -181,7 +239,10 @@ export function DashboardPage() {
                     : 'FINAL CLASSIFICATION ACHIEVED'}
               </small>
             </div>
-          </div>
+            <span className="ascension-core__activation" aria-hidden="true">
+              <ScanLine size={13} /> {coreAwakened ? 'CORE LINK OPEN' : 'TOUCH TO AWAKEN'}
+            </span>
+          </button>
 
           <div
             className="headquarters-stage__companion"
@@ -207,6 +268,48 @@ export function DashboardPage() {
             </div>
           </div>
         </div>
+
+        {coreAwakened && (
+          <section
+            id="ascension-core-analysis"
+            className="ascension-core-analysis"
+            aria-label="Ascension Core analysis"
+          >
+            <div className="ascension-core-analysis__signal" aria-hidden="true">
+              <Orbit size={22} />
+            </div>
+            <div className="ascension-core-analysis__copy">
+              <p className="eyebrow">CORE INTELLIGENCE · LIVE PROJECTION</p>
+              <h2>{coreProjection.headline}</h2>
+              <p>{coreProjection.detail}</p>
+            </div>
+            <div className="ascension-core-analysis__metrics">
+              <span>
+                <Zap size={15} />
+                <small>DAILY SYNC</small>
+                <strong>{coreProjection.dailyCharge}%</strong>
+              </span>
+              <span>
+                <Gauge size={15} />
+                <small>LEVEL ENERGY</small>
+                <strong>{coreProjection.levelCharge}%</strong>
+              </span>
+              <span>
+                <Shield size={15} />
+                <small>CLASS GATES</small>
+                <strong>{coreProjection.gateDisplay}</strong>
+              </span>
+              <span>
+                <Flame size={15} />
+                <small>DAY STREAK</small>
+                <strong>{progression.currentDayStreak}</strong>
+              </span>
+            </div>
+            <Link to={coreProjection.href} className="button button--primary">
+              {coreProjection.actionLabel} <ArrowRight size={16} />
+            </Link>
+          </section>
+        )}
 
         <div className="hero-metrics">
           <div>

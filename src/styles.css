@@ -2304,6 +2304,790 @@ html[data-motion='reduced'] .calendar-hero__portrait i {
   }
 }
 
+/* Version 10.0.0 · Sovereign Evolution */
+.hero-panel.headquarters-stage {
+  border-radius: 28px;
+  background:
+    radial-gradient(
+      circle at var(--depth-light-x, 50%) var(--depth-light-y, 42%),
+      color-mix(in srgb, var(--system-state-accent) 13%, transparent),
+      transparent 31%
+    ),
+    radial-gradient(
+      circle at 50% 48%,
+      color-mix(in srgb, var(--realm-secondary) 8%, transparent),
+      transparent 47%
+    ),
+    linear-gradient(145deg, color-mix(in srgb, var(--panel) 94%, transparent), var(--panel-strong));
+  border-color: color-mix(in srgb, var(--system-state-accent) 31%, var(--border));
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--system-state-accent) 24%, transparent) inset,
+    0 32px 90px rgb(0 0 0 / 32%),
+    0 0 80px color-mix(in srgb, var(--system-state-accent) 7%, transparent),
+    inset 0 0 100px color-mix(in srgb, var(--system-state-accent) 4%, transparent);
+}
+
+.hero-panel.headquarters-stage::after {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  background:
+    linear-gradient(
+        112deg,
+        transparent 0 21%,
+        color-mix(in srgb, var(--system-state-accent) 7%, transparent) 21.15% 21.3%,
+        transparent 21.45% 68%,
+        color-mix(in srgb, var(--realm-secondary) 6%, transparent) 68.15% 68.3%,
+        transparent 68.45%
+      )
+      center / 100% 100%,
+    linear-gradient(90deg, var(--system-state-accent), transparent 26%) top left / 48% 1px no-repeat,
+    linear-gradient(270deg, var(--realm-secondary), transparent 26%) bottom right / 48% 1px
+      no-repeat;
+  border-radius: inherit;
+  opacity: 0.62;
+  pointer-events: none;
+  content: '';
+}
+
+.headquarters-stage__chamber {
+  grid-template-columns: minmax(0, 1.03fr) minmax(290px, 0.9fr) minmax(240px, 0.82fr);
+  gap: clamp(20px, 2.8vw, 38px);
+}
+
+button.headquarters-stage__core {
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  appearance: none;
+  color: inherit;
+  font: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  isolation: isolate;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    filter 240ms ease,
+    scale 240ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    translate 160ms cubic-bezier(0.2, 0.78, 0.2, 1);
+}
+
+button.headquarters-stage__core:hover,
+button.headquarters-stage__core:focus-visible,
+button.headquarters-stage__core.is-awakened {
+  filter: saturate(1.18) brightness(1.08);
+  scale: 1.025;
+}
+
+button.headquarters-stage__core:focus-visible::before {
+  outline: 2px solid color-mix(in srgb, var(--system-state-accent) 72%, white);
+  outline-offset: 9px;
+}
+
+.ascension-core__halo {
+  position: absolute;
+  z-index: -1;
+  top: 50%;
+  left: 50%;
+  width: 340px;
+  height: 340px;
+  pointer-events: none;
+  translate: -50% -54%;
+  transform-style: preserve-3d;
+}
+
+.ascension-core__halo::before,
+.ascension-core__halo::after,
+.ascension-core__halo span {
+  position: absolute;
+  border-radius: 50%;
+  content: '';
+}
+
+.ascension-core__halo::before {
+  inset: 4%;
+  background: conic-gradient(
+    from -90deg,
+    color-mix(in srgb, var(--system-state-accent) 84%, white) 0deg var(--core-charge),
+    color-mix(in srgb, var(--system-state-accent) 8%, transparent) var(--core-charge) 360deg
+  );
+  padding: 2px;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  filter: drop-shadow(0 0 12px color-mix(in srgb, var(--system-state-accent) 48%, transparent));
+  animation: sovereignHaloBreath 4s ease-in-out infinite;
+}
+
+.ascension-core__halo::after {
+  inset: 13%;
+  background: conic-gradient(
+    from 90deg,
+    color-mix(in srgb, var(--realm-secondary) 70%, white) 0deg var(--level-charge),
+    color-mix(in srgb, var(--realm-secondary) 6%, transparent) var(--level-charge) 360deg
+  );
+  padding: 1px;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: sovereignHaloCounterspin 28s linear infinite;
+}
+
+.ascension-core__halo span {
+  border: 1px solid color-mix(in srgb, var(--system-state-accent) 20%, transparent);
+}
+
+.ascension-core__halo span:nth-child(1) {
+  inset: 0;
+  border-style: dashed;
+  animation: sovereignHaloSpin 34s linear infinite;
+}
+
+.ascension-core__halo span:nth-child(2) {
+  inset: 22%;
+  border-color: color-mix(in srgb, var(--realm-secondary) 26%, transparent);
+  transform: rotateX(68deg) rotateZ(18deg);
+  animation: sovereignHaloTilt 15s linear infinite reverse;
+}
+
+.ascension-core__halo span:nth-child(3) {
+  inset: 31%;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--system-state-accent) 18%, transparent),
+    transparent 66%
+  );
+  border-color: color-mix(in srgb, white 16%, transparent);
+  box-shadow:
+    0 0 56px color-mix(in srgb, var(--system-state-accent) 24%, transparent),
+    inset 0 0 34px color-mix(in srgb, var(--system-state-accent) 12%, transparent);
+}
+
+.ascension-core__aperture {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 50%;
+  width: 236px;
+  height: 236px;
+  pointer-events: none;
+  translate: -50% -58%;
+  animation: sovereignApertureDrift 13s linear infinite;
+}
+
+.ascension-core__aperture span {
+  position: absolute;
+  inset: 13%;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--system-state-accent) 10%, transparent),
+    transparent 42%,
+    color-mix(in srgb, var(--realm-secondary) 8%, transparent)
+  );
+  border: 1px solid color-mix(in srgb, var(--system-state-accent) 22%, transparent);
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+}
+
+.ascension-core__aperture span:nth-child(2) {
+  inset: 24%;
+  border-color: color-mix(in srgb, var(--realm-secondary) 31%, transparent);
+  rotate: 22.5deg;
+}
+
+.ascension-core__aperture span:nth-child(3) {
+  inset: 34%;
+  border-style: dashed;
+  rotate: 45deg;
+}
+
+.ascension-core__aperture span:nth-child(4) {
+  inset: 45%;
+  background: var(--system-state-accent);
+  border: 0;
+  box-shadow: 0 0 34px 12px color-mix(in srgb, var(--system-state-accent) 38%, transparent);
+  opacity: 0.58;
+}
+
+.ascension-core__satellites {
+  position: absolute;
+  z-index: 7;
+  top: 50%;
+  left: 50%;
+  width: 320px;
+  height: 272px;
+  pointer-events: none;
+  translate: -50% -56%;
+}
+
+.ascension-core__satellite {
+  position: absolute;
+  display: grid;
+  min-width: 54px;
+  min-height: 42px;
+  place-content: center;
+  padding: 6px 8px;
+  color: var(--system-state-accent);
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--system-state-accent) 12%, var(--panel-strong)),
+    color-mix(in srgb, var(--panel) 92%, transparent)
+  );
+  border: 1px solid color-mix(in srgb, var(--system-state-accent) 32%, var(--border));
+  border-radius: 8px 14px 8px 14px;
+  box-shadow:
+    0 12px 26px rgb(0 0 0 / 27%),
+    inset 0 1px color-mix(in srgb, white 10%, transparent);
+  font-family: 'SystemDisplay', sans-serif;
+  line-height: 1;
+  backdrop-filter: blur(10px);
+  transition:
+    opacity 220ms ease,
+    transform 260ms ease;
+}
+
+.ascension-core__satellite b {
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+
+.ascension-core__satellite small {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.42rem;
+  letter-spacing: 0.12em;
+}
+
+.ascension-core__satellite--level {
+  top: 19%;
+  left: -2%;
+}
+
+.ascension-core__satellite--sync {
+  top: 19%;
+  right: -2%;
+}
+
+.ascension-core__satellite--streak {
+  bottom: 8%;
+  left: 1%;
+}
+
+.ascension-core__satellite--gates {
+  right: 1%;
+  bottom: 8%;
+}
+
+.ascension-core:not(.is-awakened) .ascension-core__satellite {
+  opacity: 0.68;
+  transform: scale(0.92) translateZ(-10px);
+}
+
+.ascension-core.is-awakened .ascension-core__satellite {
+  opacity: 1;
+  transform: scale(1) translateZ(30px);
+}
+
+.ascension-core__emblem {
+  filter: drop-shadow(0 20px 28px color-mix(in srgb, var(--system-state-accent) 20%, transparent));
+}
+
+.ascension-core.is-awakened .ascension-core__emblem {
+  animation-duration: 3.8s;
+}
+
+.ascension-core.is-awakened .ascension-core__field {
+  box-shadow:
+    0 0 100px color-mix(in srgb, var(--system-state-accent) 44%, transparent),
+    inset 0 0 70px color-mix(in srgb, var(--system-state-accent) 25%, transparent);
+}
+
+.ascension-core--advancement-ready .ascension-core__halo::before,
+.ascension-core--world-class .ascension-core__halo::before {
+  filter: drop-shadow(0 0 20px color-mix(in srgb, var(--system-state-accent) 72%, transparent));
+}
+
+.ascension-core__activation {
+  position: relative !important;
+  z-index: 8 !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 25px;
+  margin-top: 10px !important;
+  padding: 5px 9px;
+  color: color-mix(in srgb, var(--system-state-accent) 78%, white) !important;
+  background: color-mix(in srgb, var(--system-state-accent) 6%, var(--panel-strong));
+  border: 1px solid color-mix(in srgb, var(--system-state-accent) 24%, transparent);
+  border-radius: 999px;
+  box-shadow: 0 0 20px color-mix(in srgb, var(--system-state-accent) 8%, transparent);
+  font-size: 0.42rem !important;
+  line-height: 1;
+  transform: translateZ(52px);
+}
+
+.ascension-core.is-awakened .ascension-core__activation {
+  background: color-mix(in srgb, var(--system-state-accent) 14%, var(--panel-strong));
+  border-color: color-mix(in srgb, var(--system-state-accent) 52%, transparent);
+}
+
+.ascension-core-analysis {
+  position: relative;
+  z-index: 6;
+  display: grid;
+  grid-template-columns: auto minmax(220px, 1fr) minmax(360px, 0.9fr) auto;
+  align-items: center;
+  gap: clamp(14px, 2vw, 24px);
+  margin: -4px 0 20px;
+  padding: clamp(15px, 2vw, 21px);
+  overflow: hidden;
+  background: linear-gradient(
+    105deg,
+    color-mix(in srgb, var(--system-state-accent) 11%, var(--panel-strong)),
+    color-mix(in srgb, var(--panel) 94%, transparent) 48%,
+    color-mix(in srgb, var(--realm-secondary) 7%, var(--panel-strong))
+  );
+  border: 1px solid color-mix(in srgb, var(--system-state-accent) 36%, var(--border));
+  border-radius: 18px 8px 18px 8px;
+  box-shadow:
+    0 18px 46px rgb(0 0 0 / 25%),
+    inset 0 1px color-mix(in srgb, white 11%, transparent);
+  animation: sovereignAnalysisOpen 420ms cubic-bezier(0.16, 0.8, 0.2, 1) both;
+}
+
+.ascension-core-analysis::before {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, var(--system-state-accent), transparent 34%) top / 100% 1px no-repeat,
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 48px,
+      color-mix(in srgb, var(--system-state-accent) 4%, transparent) 49px 50px
+    );
+  pointer-events: none;
+  content: '';
+}
+
+.ascension-core-analysis__signal {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  color: var(--system-state-accent);
+  background: color-mix(in srgb, var(--system-state-accent) 9%, var(--panel-strong));
+  border: 1px solid color-mix(in srgb, var(--system-state-accent) 35%, transparent);
+  border-radius: 50%;
+  box-shadow: 0 0 28px color-mix(in srgb, var(--system-state-accent) 15%, transparent);
+}
+
+.ascension-core-analysis__signal svg {
+  animation: sovereignHaloSpin 12s linear infinite;
+}
+
+.ascension-core-analysis__copy,
+.ascension-core-analysis__metrics,
+.ascension-core-analysis > .button {
+  position: relative;
+  z-index: 1;
+}
+
+.ascension-core-analysis__copy h2,
+.ascension-core-analysis__copy p {
+  margin: 0;
+}
+
+.ascension-core-analysis__copy h2 {
+  margin-top: 5px;
+  font-size: clamp(1rem, 2vw, 1.34rem);
+}
+
+.ascension-core-analysis__copy > p:last-child {
+  max-width: 60ch;
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.ascension-core-analysis__metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--system-state-accent) 17%, var(--border));
+  border-radius: 12px;
+}
+
+.ascension-core-analysis__metrics span {
+  display: grid;
+  min-width: 0;
+  justify-items: center;
+  gap: 4px;
+  padding: 10px 8px;
+  border-right: 1px solid color-mix(in srgb, var(--system-state-accent) 13%, var(--border));
+}
+
+.ascension-core-analysis__metrics span:last-child {
+  border-right: 0;
+}
+
+.ascension-core-analysis__metrics svg,
+.ascension-core-analysis__metrics strong {
+  color: var(--system-state-accent);
+}
+
+.ascension-core-analysis__metrics small {
+  overflow: hidden;
+  max-width: 100%;
+  color: var(--muted);
+  font:
+    700 0.42rem/1 'SystemDisplay',
+    sans-serif;
+  letter-spacing: 0.09em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ascension-core-analysis__metrics strong {
+  font:
+    750 0.74rem/1 'SystemDisplay',
+    sans-serif;
+}
+
+.ascension-core-analysis > .button {
+  white-space: nowrap;
+}
+
+/* The evolved shell carries the same dimensional hierarchy beyond the Core. */
+html[data-interface='system'] .panel,
+html[data-interface='system'] .settings-section {
+  border-color: color-mix(in srgb, var(--realm-accent) 22%, var(--border));
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--realm-accent) 14%, transparent) inset,
+    0 18px 54px rgb(0 0 0 / 23%),
+    0 0 48px color-mix(in srgb, var(--realm-accent) 3%, transparent),
+    inset 0 0 70px color-mix(in srgb, var(--realm-accent) 2.5%, transparent);
+}
+
+html[data-interface='system'] .section-header {
+  padding-bottom: 12px;
+  border-bottom: 1px solid color-mix(in srgb, var(--realm-accent) 12%, var(--border));
+}
+
+html[data-interface='system'] .section-header::before {
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: min(150px, 28%);
+  height: 1px;
+  background: linear-gradient(90deg, var(--realm-accent), transparent);
+  box-shadow: 0 0 12px var(--realm-glow);
+  content: '';
+}
+
+html[data-interface='system'] :is(.mission-card, .challenge-card, .transaction-row) {
+  transition:
+    translate 190ms ease,
+    border-color 190ms ease,
+    box-shadow 220ms ease,
+    background 220ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-interface='system'] :is(.mission-card, .challenge-card, .transaction-row):hover {
+    translate: 0 -3px;
+    border-color: color-mix(in srgb, var(--realm-accent) 38%, var(--border));
+    box-shadow:
+      0 16px 34px rgb(0 0 0 / 23%),
+      0 0 24px color-mix(in srgb, var(--realm-accent) 6%, transparent);
+  }
+}
+
+.app-header {
+  border-color: color-mix(in srgb, var(--realm-accent) 25%, var(--border));
+  box-shadow:
+    0 18px 58px rgb(0 0 0 / 34%),
+    0 0 42px color-mix(in srgb, var(--realm-accent) 5%, transparent),
+    inset 0 -1px color-mix(in srgb, var(--realm-accent) 21%, transparent);
+}
+
+.app-header::after {
+  position: absolute;
+  right: 14%;
+  bottom: -1px;
+  left: 14%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--realm-accent), transparent);
+  box-shadow: 0 0 14px var(--realm-glow);
+  opacity: 0.62;
+  pointer-events: none;
+  content: '';
+}
+
+.brand .system-mark {
+  animation: sovereignBrandFloat 5.2s ease-in-out infinite;
+}
+
+.brand__tag {
+  letter-spacing: 0.12em;
+}
+
+.header-ai-link,
+.header-status-link {
+  box-shadow:
+    0 8px 20px rgb(0 0 0 / 18%),
+    inset 0 1px color-mix(in srgb, white 9%, transparent);
+}
+
+.bottom-nav {
+  padding: 7px;
+  border-color: color-mix(in srgb, var(--realm-accent) 29%, var(--border));
+  border-radius: 22px;
+  box-shadow:
+    0 26px 80px rgb(0 0 0 / 54%),
+    0 0 46px color-mix(in srgb, var(--realm-accent) 6%, transparent),
+    inset 0 1px color-mix(in srgb, white 10%, transparent);
+}
+
+.bottom-nav__item {
+  border-radius: 15px;
+}
+
+.bottom-nav__item.is-active {
+  background:
+    radial-gradient(
+      circle at 50% 0%,
+      color-mix(in srgb, var(--realm-accent) 21%, transparent),
+      transparent 67%
+    ),
+    color-mix(in srgb, var(--realm-accent) 5%, transparent);
+  border-color: color-mix(in srgb, var(--realm-accent) 27%, transparent);
+  box-shadow:
+    0 10px 24px color-mix(in srgb, var(--realm-accent) 9%, transparent),
+    inset 0 0 28px color-mix(in srgb, var(--realm-accent) 7%, transparent);
+}
+
+html[data-interface='system'] :is(input, select, textarea):focus {
+  border-color: color-mix(in srgb, var(--realm-accent) 62%, var(--border));
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--realm-accent) 10%, transparent),
+    0 0 24px color-mix(in srgb, var(--realm-accent) 8%, transparent);
+  outline: none;
+}
+
+@keyframes sovereignHaloBreath {
+  0%,
+  100% {
+    opacity: 0.76;
+    scale: 0.985;
+  }
+  50% {
+    opacity: 1;
+    scale: 1.025;
+  }
+}
+
+@keyframes sovereignHaloSpin {
+  to {
+    rotate: 360deg;
+  }
+}
+
+@keyframes sovereignHaloCounterspin {
+  to {
+    rotate: -360deg;
+  }
+}
+
+@keyframes sovereignHaloTilt {
+  to {
+    transform: rotateX(68deg) rotateZ(378deg);
+  }
+}
+
+@keyframes sovereignApertureDrift {
+  to {
+    rotate: 360deg;
+  }
+}
+
+@keyframes sovereignAnalysisOpen {
+  from {
+    opacity: 0;
+    transform: perspective(800px) translateY(-14px) rotateX(-5deg) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: perspective(800px) translateY(0) rotateX(0) scale(1);
+  }
+}
+
+@keyframes sovereignBrandFloat {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -2px;
+  }
+}
+
+html[data-interface='clean'] :is(.ascension-core__halo, .ascension-core__aperture) {
+  display: none;
+}
+
+html[data-motion='reduced']
+  :is(
+    .ascension-core__halo::before,
+    .ascension-core__halo::after,
+    .ascension-core__halo span,
+    .ascension-core__aperture,
+    .ascension-core-analysis,
+    .ascension-core-analysis__signal svg,
+    .brand .system-mark
+  ) {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ascension-core__halo::before,
+  .ascension-core__halo::after,
+  .ascension-core__halo span,
+  .ascension-core__aperture,
+  .ascension-core-analysis,
+  .ascension-core-analysis__signal svg,
+  .brand .system-mark {
+    animation: none;
+  }
+}
+
+@media (max-width: 1050px) {
+  .headquarters-stage__chamber {
+    grid-template-columns: minmax(0, 1fr) minmax(270px, 0.88fr);
+  }
+
+  .headquarters-stage__companion {
+    grid-column: 1 / -1;
+  }
+
+  .ascension-core-analysis {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .ascension-core-analysis__metrics {
+    grid-column: 2 / -1;
+    grid-row: 2;
+  }
+}
+
+@media (max-width: 720px) {
+  .hero-panel.headquarters-stage {
+    border-radius: 22px;
+  }
+
+  .headquarters-stage__chamber {
+    grid-template-columns: 1fr;
+  }
+
+  button.headquarters-stage__core {
+    width: min(100%, 360px);
+    min-height: 372px;
+    justify-self: center;
+    margin: 4px auto 10px;
+  }
+
+  .ascension-core__halo {
+    width: 294px;
+    height: 294px;
+  }
+
+  .ascension-core__aperture {
+    width: 204px;
+    height: 204px;
+  }
+
+  .ascension-core__satellites {
+    width: 292px;
+    height: 246px;
+  }
+
+  .ascension-core__satellite {
+    min-width: 48px;
+    min-height: 38px;
+    padding: 5px 7px;
+  }
+
+  .ascension-core__satellite--level,
+  .ascension-core__satellite--sync {
+    top: 15%;
+  }
+
+  .ascension-core-analysis {
+    grid-template-columns: auto 1fr;
+    margin-top: 2px;
+    padding: 15px;
+    border-radius: 14px 7px 14px 7px;
+  }
+
+  .ascension-core-analysis__copy {
+    min-width: 0;
+  }
+
+  .ascension-core-analysis__metrics {
+    grid-column: 1 / -1;
+    grid-row: auto;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ascension-core-analysis__metrics span:nth-child(2) {
+    border-right: 0;
+  }
+
+  .ascension-core-analysis__metrics span:nth-child(-n + 2) {
+    border-bottom: 1px solid color-mix(in srgb, var(--system-state-accent) 13%, var(--border));
+  }
+
+  .ascension-core-analysis > .button {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .app-header::after {
+    right: 6%;
+    left: 6%;
+  }
+
+  .bottom-nav {
+    border-radius: 22px 22px 0 0;
+  }
+}
+
+@media (max-width: 390px) {
+  .ascension-core__halo {
+    width: 274px;
+    height: 274px;
+  }
+
+  .ascension-core__satellites {
+    width: 272px;
+  }
+
+  .ascension-core__satellite b {
+    font-size: 0.68rem;
+  }
+}
+
 .weekly-strategy-brief {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
