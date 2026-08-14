@@ -2660,6 +2660,645 @@ html[data-motion='reduced'] .ascension-core__particle-orbit--three {
   }
 }
 
+/* Version 10.1.0 · Living Spectrum */
+.theme-choice-grid__new {
+  display: inline-flex;
+  align-items: center;
+  min-height: 16px;
+  margin-left: 4px;
+  padding: 2px 5px;
+  color: color-mix(in srgb, var(--mint) 76%, var(--white));
+  background: color-mix(in srgb, var(--mint) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--mint) 34%, transparent);
+  border-radius: 999px;
+  font-size: 0.43rem;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: 0.1em;
+  vertical-align: 2px;
+}
+
+.theme-swatch--verdant-nexus {
+  background:
+    radial-gradient(circle at 31% 28%, rgba(212, 238, 98, 0.76), transparent 7%),
+    linear-gradient(145deg, #020b07 0 48%, #36db83 48% 69%, #d4ee62 69%);
+  box-shadow: inset 0 0 17px rgba(85, 242, 155, 0.2);
+}
+
+.theme-swatch--solar-warden {
+  background:
+    radial-gradient(circle at 32% 28%, #fff7d6 0 5%, transparent 8%),
+    linear-gradient(145deg, #100b02 0 47%, #ffc857 47% 70%, #ff7d45 70%);
+  box-shadow: inset 0 0 17px rgba(255, 190, 66, 0.22);
+}
+
+.theme-swatch--neon-revenant {
+  background:
+    linear-gradient(36deg, transparent 0 45%, rgba(72, 231, 255, 0.62) 46% 48%, transparent 49%),
+    linear-gradient(145deg, #090313 0 46%, #ff4fd8 46% 69%, #48e7ff 69%);
+  box-shadow: inset 0 0 18px rgba(255, 79, 216, 0.23);
+}
+
+.theme-swatch--phantom-steel {
+  background:
+    linear-gradient(42deg, transparent 0 44%, rgba(255, 255, 255, 0.5) 45% 46%, transparent 47%),
+    linear-gradient(145deg, #080a0c 0 49%, #dce8ee 49% 69%, #63849b 69%);
+  box-shadow: inset 0 0 17px rgba(191, 218, 232, 0.17);
+}
+
+html[data-theme='verdant-nexus'] {
+  color-scheme: dark;
+  --bg: #020906;
+  --bg-elevated: #07130d;
+  --panel: #0b1912;
+  --panel-2: #102219;
+  --border: #214534;
+  --border-soft: rgba(85, 242, 155, 0.19);
+  --mint: #55f29b;
+  --mint-bright: #88ffb9;
+  --mint-dark: #20ad68;
+  --purple: #d4ee62;
+  --purple-bright: #e8fa91;
+  --white: #effcf4;
+  --muted: #93ae9e;
+  --muted-2: #61796a;
+  --warning: #e1ce5e;
+  --danger: #f16f78;
+  --success: #55f29b;
+  --protocol-haze: rgba(57, 222, 126, 0.2);
+  --protocol-secondary-haze: rgba(212, 238, 98, 0.09);
+  --protocol-grid: rgba(85, 242, 155, 0.054);
+  --protocol-depth: rgba(4, 19, 11, 0.88);
+  --shadow: 0 22px 70px rgba(0, 5, 2, 0.55);
+}
+
+html[data-theme='solar-warden'] {
+  color-scheme: dark;
+  --bg: #0b0701;
+  --bg-elevated: #151005;
+  --panel: #1c1508;
+  --panel-2: #261d0c;
+  --border: #4d3b18;
+  --border-soft: rgba(255, 200, 87, 0.2);
+  --mint: #ffc857;
+  --mint-bright: #ffe18b;
+  --mint-dark: #c88718;
+  --purple: #ff7d45;
+  --purple-bright: #ffa16f;
+  --white: #fff8e9;
+  --muted: #b6a88c;
+  --muted-2: #7f7158;
+  --warning: #ffc857;
+  --danger: #ff6f61;
+  --success: #8fd59d;
+  --protocol-haze: rgba(255, 190, 66, 0.21);
+  --protocol-secondary-haze: rgba(255, 116, 53, 0.1);
+  --protocol-grid: rgba(255, 200, 87, 0.055);
+  --protocol-depth: rgba(22, 14, 3, 0.9);
+  --shadow: 0 22px 70px rgba(6, 3, 0, 0.58);
+}
+
+html[data-theme='neon-revenant'] {
+  color-scheme: dark;
+  --bg: #06020d;
+  --bg-elevated: #0e0718;
+  --panel: #160c22;
+  --panel-2: #1d112c;
+  --border: #44285a;
+  --border-soft: rgba(255, 79, 216, 0.2);
+  --mint: #ff4fd8;
+  --mint-bright: #ff83e5;
+  --mint-dark: #bd279d;
+  --purple: #48e7ff;
+  --purple-bright: #8af2ff;
+  --white: #fff3fd;
+  --muted: #ad95b4;
+  --muted-2: #74617c;
+  --warning: #ffc25b;
+  --danger: #ff607d;
+  --success: #55eac2;
+  --protocol-haze: rgba(255, 79, 216, 0.2);
+  --protocol-secondary-haze: rgba(72, 231, 255, 0.1);
+  --protocol-grid: rgba(255, 79, 216, 0.052);
+  --protocol-depth: rgba(15, 6, 25, 0.9);
+  --shadow: 0 22px 70px rgba(3, 0, 7, 0.58);
+}
+
+html[data-theme='phantom-steel'] {
+  color-scheme: dark;
+  --bg: #06080a;
+  --bg-elevated: #0d1115;
+  --panel: #14191e;
+  --panel-2: #1b2228;
+  --border: #35434d;
+  --border-soft: rgba(202, 221, 232, 0.18);
+  --mint: #dce8ee;
+  --mint-bright: #ffffff;
+  --mint-dark: #849ba9;
+  --purple: #7197b0;
+  --purple-bright: #9bbbd0;
+  --white: #f4f7f9;
+  --muted: #98a5ae;
+  --muted-2: #66747e;
+  --warning: #d7b875;
+  --danger: #dc7881;
+  --success: #82c8b4;
+  --protocol-haze: rgba(174, 204, 220, 0.13);
+  --protocol-secondary-haze: rgba(78, 126, 158, 0.1);
+  --protocol-grid: rgba(202, 221, 232, 0.046);
+  --protocol-depth: rgba(10, 14, 17, 0.91);
+  --shadow: 0 22px 70px rgba(0, 0, 0, 0.58);
+}
+
+html:is(
+  [data-theme='verdant-nexus'],
+  [data-theme='solar-warden'],
+  [data-theme='neon-revenant'],
+  [data-theme='phantom-steel']
+),
+html:is(
+    [data-theme='verdant-nexus'],
+    [data-theme='solar-warden'],
+    [data-theme='neon-revenant'],
+    [data-theme='phantom-steel']
+  )
+  body {
+  background: var(--bg);
+}
+
+html:is(
+    [data-theme='verdant-nexus'],
+    [data-theme='solar-warden'],
+    [data-theme='neon-revenant'],
+    [data-theme='phantom-steel']
+  )
+  .app-shell {
+  --depth-surface: var(--protocol-depth);
+  background:
+    radial-gradient(circle at 50% -12%, var(--protocol-haze), transparent 38rem),
+    radial-gradient(circle at 86% 8%, var(--protocol-secondary-haze), transparent 30rem),
+    linear-gradient(150deg, color-mix(in srgb, var(--mint) 5%, transparent), transparent 41%),
+    var(--bg);
+}
+
+html:is(
+    [data-theme='verdant-nexus'],
+    [data-theme='solar-warden'],
+    [data-theme='neon-revenant'],
+    [data-theme='phantom-steel']
+  )
+  .ambient-grid {
+  background-image:
+    linear-gradient(var(--protocol-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--protocol-grid) 1px, transparent 1px);
+}
+
+html:is(
+    [data-theme='verdant-nexus'],
+    [data-theme='solar-warden'],
+    [data-theme='neon-revenant'],
+    [data-theme='phantom-steel']
+  )
+  :is(
+    .app-header,
+    .bottom-nav,
+    .system-hud,
+    .companion-presence__anchor,
+    .companion-presence__transmission
+  ) {
+  background-color: color-mix(in srgb, var(--bg-elevated) 92%, transparent);
+  border-color: color-mix(in srgb, var(--realm-accent) 21%, var(--border));
+}
+
+html:is(
+    [data-theme='verdant-nexus'],
+    [data-theme='solar-warden'],
+    [data-theme='neon-revenant'],
+    [data-theme='phantom-steel']
+  )[data-interface='system']
+  .panel,
+html:is(
+    [data-theme='verdant-nexus'],
+    [data-theme='solar-warden'],
+    [data-theme='neon-revenant'],
+    [data-theme='phantom-steel']
+  )
+  :is(.hero-panel.headquarters-stage, .settings-section) {
+  background-color: color-mix(in srgb, var(--panel) 91%, transparent);
+  border-color: color-mix(in srgb, var(--realm-accent) 24%, var(--border-soft));
+}
+
+html:is(
+    [data-theme='verdant-nexus'],
+    [data-theme='solar-warden'],
+    [data-theme='neon-revenant'],
+    [data-theme='phantom-steel']
+  )
+  :is(.appearance-choice-grid button.is-active, .theme-choice-grid button.is-active) {
+  background: color-mix(in srgb, var(--mint) 8%, transparent);
+  border-color: color-mix(in srgb, var(--mint) 52%, transparent);
+  box-shadow:
+    inset 0 0 25px color-mix(in srgb, var(--mint) 5%, transparent),
+    0 0 24px color-mix(in srgb, var(--mint) 5%, transparent);
+}
+
+html:is(
+    [data-theme='verdant-nexus'],
+    [data-theme='solar-warden'],
+    [data-theme='neon-revenant'],
+    [data-theme='phantom-steel']
+  )
+  .app-shell[data-realm='system'] {
+  --realm-accent: var(--mint);
+  --realm-secondary: var(--purple);
+}
+
+html:is(
+    [data-theme='verdant-nexus'],
+    [data-theme='solar-warden'],
+    [data-theme='neon-revenant'],
+    [data-theme='phantom-steel']
+  )
+  .app-shell[data-realm='training'] {
+  --realm-accent: color-mix(in srgb, var(--mint) 68%, #ff6845);
+  --realm-secondary: color-mix(in srgb, var(--purple) 72%, #f2bd57);
+}
+
+html:is(
+    [data-theme='verdant-nexus'],
+    [data-theme='solar-warden'],
+    [data-theme='neon-revenant'],
+    [data-theme='phantom-steel']
+  )
+  .app-shell[data-realm='sanctuary'] {
+  --realm-accent: var(--purple);
+  --realm-secondary: color-mix(in srgb, var(--mint) 72%, white);
+}
+
+html:is(
+    [data-theme='verdant-nexus'],
+    [data-theme='solar-warden'],
+    [data-theme='neon-revenant'],
+    [data-theme='phantom-steel']
+  )
+  .app-shell[data-realm='kitchen'] {
+  --realm-accent: color-mix(in srgb, var(--mint) 58%, #ff8a3d);
+  --realm-secondary: var(--purple);
+}
+
+html:is(
+    [data-theme='verdant-nexus'],
+    [data-theme='solar-warden'],
+    [data-theme='neon-revenant'],
+    [data-theme='phantom-steel']
+  )
+  .app-shell[data-realm='treasury'] {
+  --realm-accent: color-mix(in srgb, var(--purple) 64%, #f4c95d);
+  --realm-secondary: var(--mint);
+}
+
+html:is(
+    [data-theme='verdant-nexus'],
+    [data-theme='solar-warden'],
+    [data-theme='neon-revenant'],
+    [data-theme='phantom-steel']
+  )
+  .app-shell:is(
+    [data-realm='party'],
+    [data-realm='campaign'],
+    [data-realm='archive'],
+    [data-realm='progression']
+  ) {
+  --realm-accent: var(--purple);
+  --realm-secondary: var(--mint);
+}
+
+/* The Core now carries an organic membrane and visible neural currents. */
+.ascension-core__bio-aura,
+.ascension-core__neural-web {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  pointer-events: none;
+  translate: -50% -58%;
+  transform-style: preserve-3d;
+  transition:
+    opacity 420ms ease,
+    filter 420ms ease;
+}
+
+.ascension-core__bio-aura {
+  z-index: 1;
+  width: 286px;
+  height: 286px;
+  opacity: var(--core-life-opacity, 0.38);
+  filter: drop-shadow(0 0 18px color-mix(in srgb, var(--system-state-accent) 16%, transparent));
+  animation: livingCoreOrganismBreath var(--core-thought-cycle, 8.6s) ease-in-out infinite;
+}
+
+.ascension-core__bio-aura span {
+  position: absolute;
+  border: 1px solid color-mix(in srgb, var(--system-state-accent) 22%, transparent);
+  box-shadow:
+    inset 0 0 29px color-mix(in srgb, var(--system-state-accent) 5%, transparent),
+    0 0 22px color-mix(in srgb, var(--realm-secondary) 5%, transparent);
+  animation: livingCoreMembraneMorph 9.4s ease-in-out infinite alternate;
+}
+
+.ascension-core__bio-aura span:nth-child(1) {
+  inset: 3%;
+  border-radius: 46% 54% 61% 39% / 42% 38% 62% 58%;
+}
+
+.ascension-core__bio-aura span:nth-child(2) {
+  inset: 13%;
+  border-color: color-mix(in srgb, var(--realm-secondary) 25%, transparent);
+  border-radius: 59% 41% 46% 54% / 53% 62% 38% 47%;
+  animation-duration: 7.8s;
+  animation-direction: alternate-reverse;
+}
+
+.ascension-core__bio-aura span:nth-child(3) {
+  inset: 23%;
+  background: radial-gradient(
+    circle at 38% 34%,
+    color-mix(in srgb, var(--system-state-accent) 9%, transparent),
+    transparent 58%
+  );
+  border-style: dashed;
+  border-radius: 41% 59% 52% 48% / 61% 45% 55% 39%;
+  animation-duration: 6.6s;
+}
+
+.ascension-core__neural-web {
+  z-index: 3;
+  width: 224px;
+  height: 224px;
+  opacity: var(--core-neural-opacity, 0.34);
+  filter: drop-shadow(0 0 9px color-mix(in srgb, var(--system-state-accent) 30%, transparent));
+  animation: livingCoreThoughtSurge var(--core-thought-cycle, 8.6s) ease-in-out infinite;
+}
+
+.ascension-core__neural-web span {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 98px;
+  height: 1px;
+  overflow: visible;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--system-state-accent) 29%, transparent) 22%,
+    color-mix(in srgb, var(--realm-secondary) 37%, transparent) 76%,
+    transparent
+  );
+  transform-origin: 0 50%;
+}
+
+.ascension-core__neural-web span:nth-child(1) {
+  rotate: 4deg;
+}
+
+.ascension-core__neural-web span:nth-child(2) {
+  rotate: 64deg;
+}
+
+.ascension-core__neural-web span:nth-child(3) {
+  rotate: 124deg;
+}
+
+.ascension-core__neural-web span:nth-child(4) {
+  rotate: 184deg;
+}
+
+.ascension-core__neural-web span:nth-child(5) {
+  rotate: 244deg;
+}
+
+.ascension-core__neural-web span:nth-child(6) {
+  rotate: 304deg;
+}
+
+.ascension-core__neural-web i {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 4px;
+  height: 4px;
+  background: color-mix(in srgb, white 78%, var(--system-state-accent));
+  border-radius: 50%;
+  box-shadow:
+    0 0 8px 2px color-mix(in srgb, var(--system-state-accent) 72%, transparent),
+    0 0 17px color-mix(in srgb, var(--realm-secondary) 34%, transparent);
+  translate: 0 -50%;
+  animation: livingCoreNeuralCurrent var(--core-neural-speed, 3.8s) ease-in-out infinite;
+}
+
+.ascension-core__neural-web span:nth-child(2) i,
+.ascension-core__neural-web span:nth-child(5) i {
+  animation-delay: -0.9s;
+}
+
+.ascension-core__neural-web span:nth-child(3) i,
+.ascension-core__neural-web span:nth-child(6) i {
+  animation-delay: -1.8s;
+}
+
+.ascension-core--vitality-dormant {
+  --core-life-opacity: 0.31;
+  --core-neural-opacity: 0.25;
+  --core-neural-speed: 4.7s;
+  --core-thought-cycle: 10.8s;
+}
+
+.ascension-core--vitality-stirring {
+  --core-life-opacity: 0.48;
+  --core-neural-opacity: 0.42;
+  --core-neural-speed: 3.55s;
+  --core-thought-cycle: 8.2s;
+}
+
+.ascension-core--vitality-surging {
+  --core-life-opacity: 0.68;
+  --core-neural-opacity: 0.61;
+  --core-neural-speed: 2.55s;
+  --core-thought-cycle: 6.5s;
+}
+
+.ascension-core--vitality-synchronized {
+  --core-life-opacity: 0.84;
+  --core-neural-opacity: 0.78;
+  --core-neural-speed: 1.85s;
+  --core-thought-cycle: 5.1s;
+}
+
+.ascension-core.is-awakened {
+  --core-life-opacity: 0.94;
+  --core-neural-opacity: 0.92;
+  --core-neural-speed: 1.35s;
+  --core-thought-cycle: 3.7s;
+}
+
+.ascension-core.is-awakened .ascension-core__bio-aura,
+.ascension-core.is-awakened .ascension-core__neural-web {
+  filter: saturate(1.35) brightness(1.22)
+    drop-shadow(0 0 15px color-mix(in srgb, var(--system-state-accent) 34%, transparent));
+}
+
+@keyframes livingCoreMembraneMorph {
+  0% {
+    border-radius: 46% 54% 61% 39% / 42% 38% 62% 58%;
+    transform: rotate(-5deg) scale(0.97);
+  }
+  34% {
+    border-radius: 59% 41% 43% 57% / 53% 64% 36% 47%;
+    transform: rotate(3deg) scale(1.025);
+  }
+  67% {
+    border-radius: 41% 59% 54% 46% / 61% 43% 57% 39%;
+    transform: rotate(-2deg) scale(0.99);
+  }
+  100% {
+    border-radius: 53% 47% 38% 62% / 47% 57% 43% 53%;
+    transform: rotate(6deg) scale(1.035);
+  }
+}
+
+@keyframes livingCoreOrganismBreath {
+  0%,
+  100% {
+    scale: 0.97;
+  }
+  44% {
+    scale: 1.025;
+  }
+  51% {
+    scale: 0.992;
+  }
+  59% {
+    scale: 1.04;
+  }
+}
+
+@keyframes livingCoreNeuralCurrent {
+  0%,
+  10% {
+    opacity: 0;
+    transform: translateX(4px) scale(0.55);
+  }
+  28% {
+    opacity: 1;
+  }
+  72% {
+    opacity: 0.72;
+  }
+  90%,
+  100% {
+    opacity: 0;
+    transform: translateX(92px) scale(1.35);
+  }
+}
+
+@keyframes livingCoreThoughtSurge {
+  0%,
+  29%,
+  100% {
+    filter: brightness(0.88);
+  }
+  34% {
+    filter: brightness(1.58);
+  }
+  38% {
+    filter: brightness(1.02);
+  }
+  43% {
+    filter: brightness(1.86);
+  }
+  53% {
+    filter: brightness(0.96);
+  }
+  76% {
+    filter: brightness(1.34);
+  }
+}
+
+html[data-interface='clean'] :is(.ascension-core__bio-aura, .ascension-core__neural-web) {
+  display: none;
+}
+
+html[data-intensity='subtle'] .ascension-core__neural-web,
+html[data-intensity='subtle'] .ascension-core__bio-aura span:nth-child(3) {
+  display: none;
+}
+
+html[data-motion='reduced'] .ascension-core__bio-aura,
+html[data-motion='reduced'] .ascension-core__bio-aura span,
+html[data-motion='reduced'] .ascension-core__neural-web {
+  animation: none;
+}
+
+html[data-motion='reduced'] .ascension-core__neural-web i {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ascension-core__bio-aura,
+  .ascension-core__bio-aura span,
+  .ascension-core__neural-web {
+    animation: none;
+  }
+
+  .ascension-core__neural-web i {
+    display: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .ascension-core__bio-aura {
+    width: 244px;
+    height: 244px;
+  }
+
+  .ascension-core__neural-web {
+    width: 194px;
+    height: 194px;
+  }
+
+  .ascension-core__neural-web span {
+    width: 84px;
+  }
+
+  @keyframes livingCoreNeuralCurrent {
+    0%,
+    10% {
+      opacity: 0;
+      transform: translateX(4px) scale(0.55);
+    }
+    28% {
+      opacity: 1;
+    }
+    72% {
+      opacity: 0.72;
+    }
+    90%,
+    100% {
+      opacity: 0;
+      transform: translateX(78px) scale(1.28);
+    }
+  }
+}
+
+@media (max-width: 520px) {
+  .theme-choice-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .theme-choice-grid button {
+    min-height: 70px;
+  }
+}
+
 /* Version 10.0.0 · Sovereign Evolution */
 .hero-panel.headquarters-stage {
   border-radius: 28px;

@@ -135,7 +135,7 @@ export function DashboardPage() {
         </div>
         <div className="hero-panel__version" aria-hidden="true">
           <span>V{APP_VERSION}</span>
-          <b>SOVEREIGN EVOLUTION</b>
+          <b>LIVING SPECTRUM</b>
         </div>
         <div className="hero-panel__top headquarters-stage__header">
           <div>
@@ -171,7 +171,7 @@ export function DashboardPage() {
 
           <button
             type="button"
-            className={`headquarters-stage__core ascension-core ascension-core--${coreProjection.state} ${coreAwakened ? 'is-awakened' : ''}`}
+            className={`headquarters-stage__core ascension-core ascension-core--${coreProjection.state} ascension-core--vitality-${coreVitality.phase} ${coreAwakened ? 'is-awakened' : ''}`}
             style={
               {
                 '--core-charge': `${coreProjection.dailyCharge * 3.6}deg`,
@@ -225,6 +225,18 @@ export function DashboardPage() {
                     } as CSSProperties
                   }
                 />
+              ))}
+            </div>
+            <div className="ascension-core__bio-aura" aria-hidden="true">
+              <span />
+              <span />
+              <span />
+            </div>
+            <div className="ascension-core__neural-web" aria-hidden="true">
+              {Array.from({ length: 6 }, (_, currentIndex) => (
+                <span key={currentIndex}>
+                  <i />
+                </span>
               ))}
             </div>
             <div className="ascension-core__field" aria-hidden="true">

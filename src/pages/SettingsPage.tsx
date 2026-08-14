@@ -323,6 +323,58 @@ export function SettingsPage() {
                     <small>Snow · glacier · sovereign navy</small>
                   </span>
                 </button>
+                <button
+                  type="button"
+                  className={draft.colorTheme === 'verdant-nexus' ? 'is-active' : ''}
+                  onClick={() => patchSetting('colorTheme', 'verdant-nexus')}
+                >
+                  <span className="theme-swatch theme-swatch--verdant-nexus" />
+                  <span>
+                    <strong>
+                      Verdant Nexus <i className="theme-choice-grid__new">NEW</i>
+                    </strong>
+                    <small>Void black · living jade · ion lime</small>
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  className={draft.colorTheme === 'solar-warden' ? 'is-active' : ''}
+                  onClick={() => patchSetting('colorTheme', 'solar-warden')}
+                >
+                  <span className="theme-swatch theme-swatch--solar-warden" />
+                  <span>
+                    <strong>
+                      Solar Warden <i className="theme-choice-grid__new">NEW</i>
+                    </strong>
+                    <small>Obsidian · solar gold · white flame</small>
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  className={draft.colorTheme === 'neon-revenant' ? 'is-active' : ''}
+                  onClick={() => patchSetting('colorTheme', 'neon-revenant')}
+                >
+                  <span className="theme-swatch theme-swatch--neon-revenant" />
+                  <span>
+                    <strong>
+                      Neon Revenant <i className="theme-choice-grid__new">NEW</i>
+                    </strong>
+                    <small>Ink violet · shock pink · ion cyan</small>
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  className={draft.colorTheme === 'phantom-steel' ? 'is-active' : ''}
+                  onClick={() => patchSetting('colorTheme', 'phantom-steel')}
+                >
+                  <span className="theme-swatch theme-swatch--phantom-steel" />
+                  <span>
+                    <strong>
+                      Phantom Steel <i className="theme-choice-grid__new">NEW</i>
+                    </strong>
+                    <small>Graphite · silver · spectral blue</small>
+                  </span>
+                </button>
               </div>
             </div>
             {(

@@ -74,6 +74,7 @@ describe('Sovereign Ascension Core', () => {
     expect(buildAscensionCoreVitality(0)).toEqual({
       particlesPerOrbit: 5,
       sparkParticles: 10,
+      phase: 'dormant',
     });
   });
 
@@ -81,21 +82,31 @@ describe('Sovereign Ascension Core', () => {
     expect(buildAscensionCoreVitality(100)).toEqual({
       particlesPerOrbit: 10,
       sparkParticles: 20,
+      phase: 'synchronized',
     });
+  });
+
+  it('changes its living rhythm at safe synchronization thresholds', () => {
+    expect(buildAscensionCoreVitality(25).phase).toBe('stirring');
+    expect(buildAscensionCoreVitality(65).phase).toBe('surging');
+    expect(buildAscensionCoreVitality(99).phase).toBe('surging');
   });
 
   it('clamps malformed vitality without creating runaway particle fields', () => {
     expect(buildAscensionCoreVitality(-50)).toEqual({
       particlesPerOrbit: 5,
       sparkParticles: 10,
+      phase: 'dormant',
     });
     expect(buildAscensionCoreVitality(900)).toEqual({
       particlesPerOrbit: 10,
       sparkParticles: 20,
+      phase: 'synchronized',
     });
     expect(buildAscensionCoreVitality(Number.NaN)).toEqual({
       particlesPerOrbit: 5,
       sparkParticles: 10,
+      phase: 'dormant',
     });
   });
 });

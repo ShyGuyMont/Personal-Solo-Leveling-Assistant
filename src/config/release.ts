@@ -1,4 +1,4 @@
-export const APP_VERSION = '10.0.1';
+export const APP_VERSION = '10.1.0';
 export const DATABASE_SCHEMA_VERSION = 28;
 export const SAVE_FORMAT_VERSION = 28;
 
@@ -9,6 +9,19 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 10.1.0 · Living Spectrum',
+    detail:
+      'The Ascension Core develops a deeper living rhythm while the System opens four entirely new atmospheric identities, expanding personalization without disturbing the Hunter’s saved campaign or established visual settings.',
+    points: [
+      'The Core gains organic aura membranes, six neural energy paths, traveling thought currents, irregular intelligence surges, and four synchronization phases that change its visible rhythm as daily charge grows.',
+      'Dormant no longer means dead: the Core breathes quietly at low charge, begins stirring after early momentum, surges beyond the day’s midpoint, and reaches a sustained living resonance at full synchronization.',
+      'Verdant Nexus introduces void black, living jade, and ion-lime motes; Solar Warden surrounds obsidian surfaces with solar gold, white flame, and rising embers.',
+      'Neon Revenant combines ink violet, shock pink, and ion-cyan crystals, while Phantom Steel creates a restrained graphite, silver, and spectral-blue command environment.',
+      'All nine color protocols now retain distinct atmosphere profiles while sharing the complete System and Clean interfaces, realm navigation, companion presence, mobile layout, intensity controls, and reduced-motion protections.',
+      'Color changes remain presentation-only: progression, missions, XP, companions, AI behavior, local saves, and every protected confirmation flow are unchanged.',
+    ],
+  },
   {
     title: 'Version 10.0.1 · Living Core',
     detail:

@@ -27,6 +27,7 @@ export interface AscensionCoreProjection {
 export interface AscensionCoreVitality {
   particlesPerOrbit: number;
   sparkParticles: number;
+  phase: 'dormant' | 'stirring' | 'surging' | 'synchronized';
 }
 
 function percent(value: number, target: number) {
@@ -42,6 +43,14 @@ export function buildAscensionCoreVitality(dailyCharge: number): AscensionCoreVi
   return {
     particlesPerOrbit: 5 + Math.round(normalizedCharge / 20),
     sparkParticles: 10 + Math.round(normalizedCharge / 10),
+    phase:
+      normalizedCharge >= 100
+        ? 'synchronized'
+        : normalizedCharge >= 65
+          ? 'surging'
+          : normalizedCharge >= 25
+            ? 'stirring'
+            : 'dormant',
   };
 }
 
