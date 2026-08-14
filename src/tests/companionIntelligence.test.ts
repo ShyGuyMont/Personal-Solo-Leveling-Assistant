@@ -536,6 +536,8 @@ describe('Companion Soulprint intelligence', () => {
     expect(instructions).toContain('XP-backed Companion Order');
     expect(instructions).toContain('no-duplicate-reward rule');
     expect(instructions).toContain('15–29 minutes minor');
+    expect(instructions).toContain("localLabel and local date/time fields are authoritative");
+    expect(instructions).toContain('raw ISO timestamps are exact storage instants, not local clock labels');
     expect(
       intelligence.selectIntelligenceRoute({
         audience: 'saffron',

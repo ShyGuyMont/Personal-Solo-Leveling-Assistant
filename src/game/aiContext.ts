@@ -6,7 +6,7 @@ import { buildQuickLinkActionCatalog } from '@/game/aiQuickLink';
 import { getCustomKitchenRecipes } from '@/game/kitchenGrimoire';
 import { getDailyOperations } from '@/game/dailyOperations';
 import { getBodyDiagnosticData } from '@/game/bodyDiagnostic';
-import { buildCalendarBriefing, expandCalendarEvents, localDateKeyForDate } from '@/game/calendar';
+import { buildCalendarBriefing, expandCalendarEvents } from '@/game/calendar';
 import { buildArcKnowledgeContext } from '@/game/arcArchives';
 import { resolveKitchenSessionRecipe } from '@/game/kitchen';
 import { accountXpForLevel, totalXpAtLevel } from '@/game/xp';
@@ -25,7 +25,7 @@ import type {
   Settings,
   StatProgress,
 } from '@/types/game';
-import { addDays } from '@/utils/date';
+import { addDays, getZonedParts, toDateKey } from '@/utils/date';
 import { AGENT_MISSION_DAILY_XP_CAP } from '@/game/agentMissions';
 
 export interface AiContextSource {
@@ -47,6 +47,41 @@ export interface AiContextSource {
 function roundedAverage(total: number, divisor: number) {
   if (!divisor) return 0;
   return Number((total / divisor).toFixed(1));
+}
+
+function calendarLocalContext(startAt: string, endAt: string, timeZone: string, allDay = false) {
+  const start = new Date(startAt);
+  const end = new Date(endAt);
+  const startParts = getZonedParts(start, timeZone);
+  const endParts = getZonedParts(end, timeZone);
+  const localDate = toDateKey(startParts.year, startParts.month, startParts.day);
+  const localEndDate = toDateKey(endParts.year, endParts.month, endParts.day);
+  const timeFormatter = new Intl.DateTimeFormat('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZone,
+  });
+  const dateFormatter = new Intl.DateTimeFormat('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+    timeZone,
+  });
+  const localStartTime = allDay ? 'all day' : timeFormatter.format(start);
+  const localEndTime = allDay ? 'all day' : timeFormatter.format(end);
+  const sameLocalDate = localDate === localEndDate;
+  return {
+    localDate,
+    localStartTime,
+    localEndDate,
+    localEndTime,
+    localLabel: allDay
+      ? `${dateFormatter.format(start)} · all day`
+      : sameLocalDate
+        ? `${dateFormatter.format(start)} · ${localStartTime}–${localEndTime}`
+        : `${dateFormatter.format(start)} · ${localStartTime} to ${dateFormatter.format(end)} · ${localEndTime}`,
+  };
 }
 
 function remaining(current: number, target: number) {
@@ -575,6 +610,11 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
       sharedWithScheduleKeeper: shouldShareCalendar(source),
       timeZone: source.settings.timeZone,
       now: calendarNow.toISOString(),
+      localNow: calendarLocalContext(
+        calendarNow.toISOString(),
+        calendarNow.toISOString(),
+        source.settings.timeZone,
+      ).localLabel,
       privacy: shouldShareCalendar(source)
         ? 'Only the next 30 days of locally stored schedule records are shared in this Kairo, Snow, or Party request. Calendar records remain on-device outside this explicit online conversation.'
         : 'Calendar records were not shared with this companion.',
@@ -586,6 +626,12 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
         category: event.category,
         startAt: event.startAt,
         endAt: event.endAt,
+        ...calendarLocalContext(
+          event.startAt,
+          event.endAt,
+          source.settings.timeZone,
+          event.allDay,
+        ),
         allDay: event.allDay,
         recurrence: event.recurring,
         location: event.location.slice(0, 240),
@@ -601,7 +647,12 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
         firstTitle: conflict.first.title,
         secondEventId: conflict.second.eventId,
         secondTitle: conflict.second.title,
-        date: localDateKeyForDate(new Date(conflict.first.startAt)),
+        date: calendarLocalContext(
+          conflict.first.startAt,
+          conflict.first.endAt,
+          source.settings.timeZone,
+          conflict.first.allDay,
+        ).localDate,
       })),
       nextEvent: calendarBriefing.next
         ? {
@@ -609,10 +660,19 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
             title: calendarBriefing.next.title,
             startAt: calendarBriefing.next.startAt,
             endAt: calendarBriefing.next.endAt,
+            ...calendarLocalContext(
+              calendarBriefing.next.startAt,
+              calendarBriefing.next.endAt,
+              source.settings.timeZone,
+              calendarBriefing.next.allDay,
+            ),
             allDay: calendarBriefing.next.allDay,
           }
         : undefined,
-      focusWindows: calendarBriefing.focusWindows.slice(0, 4),
+      focusWindows: calendarBriefing.focusWindows.slice(0, 4).map((window) => ({
+        ...window,
+        ...calendarLocalContext(window.startAt, window.endAt, source.settings.timeZone),
+      })),
     },
     specialists: {
       sanctuary: {

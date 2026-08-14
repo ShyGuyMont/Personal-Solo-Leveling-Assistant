@@ -34,6 +34,7 @@ describe('Awakened Intelligence progress context', () => {
 
   it('supplies Class gates, a World Class forecast, and only relevant Director Notes', async () => {
     const settings = createDefaultSettings();
+    settings.timeZone = 'America/New_York';
     settings.aiSoulprintNotes = {
       snow: {
         humor: 'Use dry sisterly teasing.',
@@ -154,6 +155,67 @@ describe('Awakened Intelligence progress context', () => {
     });
     expect(scheduled.calendar.sharedWithScheduleKeeper).toBe(true);
     expect(scheduled.calendar.upcoming[0]?.title).toBe('Budget call');
+    expect(scheduled.calendar.upcoming[0]).toMatchObject({
+      startAt: '2026-08-15T22:00:00.000Z',
+      localDate: '2026-08-15',
+      localStartTime: '6:00 PM',
+      localEndTime: '7:00 PM',
+      localLabel: 'Saturday, August 15, 2026 · 6:00 PM–7:00 PM',
+    });
+  });
+
+  it('keeps a confirmed New York morning visible as 9 AM instead of raw 13:00 UTC', async () => {
+    const now = '2026-08-14T20:00:00.000Z';
+    await db.calendarEvents.put({
+      id: 'calendar:kairo-timezone-regression',
+      title: 'Mira neck reset',
+      description: 'Ten controlled minutes with Mira.',
+      category: 'training',
+      startAt: '2026-08-15T13:00:00.000Z',
+      endAt: '2026-08-15T13:10:00.000Z',
+      allDay: false,
+      recurrence: 'none',
+      recurrenceInterval: 1,
+      location: 'Home',
+      source: 'kairo',
+      linkedCompanionId: 'mira',
+      linkedRealm: 'training',
+      status: 'scheduled',
+      createdAt: now,
+      updatedAt: now,
+    });
+    const settings = createDefaultSettings();
+    settings.timeZone = 'America/New_York';
+    const context = await buildAiProgressContext({
+      audience: 'kairo',
+      query: 'Kairo, what time is my Mira reset tomorrow?',
+      profile: {
+        id: 'primary',
+        displayName: 'Jordan Hunter',
+        systemTitle: 'The Awakened',
+        startingFocus: 'balanced',
+        createdAt: now,
+        equippedTitleId: 'newly-awakened',
+        cosmeticFrame: 'focus-balanced',
+        backgroundSigil: 'origin',
+      },
+      settings,
+      progression: createDefaultProgression(),
+      missions: [],
+      todayRecords: [],
+      stats: ALL_STATS.map(createInitialStat),
+      challenges: [],
+      systemDate: '2026-08-14',
+      enabledCompanionIds: settings.enabledCompanionIds,
+    });
+
+    expect(context.calendar.upcoming[0]).toMatchObject({
+      startAt: '2026-08-15T13:00:00.000Z',
+      localDate: '2026-08-15',
+      localStartTime: '9:00 AM',
+      localEndTime: '9:10 AM',
+      localLabel: 'Saturday, August 15, 2026 · 9:00 AM–9:10 AM',
+    });
   });
 
   it('delivers all twelve saved Director Notes to a full-party room without cross-room leakage', async () => {

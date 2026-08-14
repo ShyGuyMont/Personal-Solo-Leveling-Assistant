@@ -173,6 +173,7 @@ export interface AiProgressContext {
     sharedWithScheduleKeeper: boolean;
     timeZone: string;
     now: string;
+    localNow: string;
     privacy: string;
     today: LocalDateKey;
     upcoming: Array<{
@@ -182,6 +183,11 @@ export interface AiProgressContext {
       category: string;
       startAt: string;
       endAt: string;
+      localDate: LocalDateKey;
+      localStartTime: string;
+      localEndDate: LocalDateKey;
+      localEndTime: string;
+      localLabel: string;
       allDay: boolean;
       recurrence: boolean;
       location: string;
@@ -204,9 +210,23 @@ export interface AiProgressContext {
       title: string;
       startAt: string;
       endAt: string;
+      localDate: LocalDateKey;
+      localStartTime: string;
+      localEndDate: LocalDateKey;
+      localEndTime: string;
+      localLabel: string;
       allDay: boolean;
     };
-    focusWindows: Array<{ startAt: string; endAt: string; minutes: number }>;
+    focusWindows: Array<{
+      startAt: string;
+      endAt: string;
+      minutes: number;
+      localDate: LocalDateKey;
+      localStartTime: string;
+      localEndDate: LocalDateKey;
+      localEndTime: string;
+      localLabel: string;
+    }>;
   };
   specialists: {
     sanctuary: {

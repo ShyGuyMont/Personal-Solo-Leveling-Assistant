@@ -1,4 +1,4 @@
-export const APP_VERSION = '10.4.2';
+export const APP_VERSION = '10.4.3';
 export const DATABASE_SCHEMA_VERSION = 29;
 export const SAVE_FORMAT_VERSION = 29;
 
@@ -9,6 +9,17 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 10.4.3 · Chrono Lock',
+    detail:
+      'Calendar intelligence now speaks from the Hunter\'s real local schedule instead of mistaking an internal UTC storage timestamp for the displayed appointment time.',
+    points: [
+      'Every shared calendar record now carries an explicit local date, start time, end time, and complete human-readable label in the saved System timezone.',
+      'Kairo, Snow, and Calendar Council are forbidden from reading the clock digits inside raw ISO timestamps as local time; those values remain exact storage instants only.',
+      'Existing calendar records are not migrated or rewritten because their saved times were already correct—this patch fixes the council\'s interpretation and speech layer.',
+      'A regression case now proves that 1:00 PM UTC storage for a New York appointment is reported as 9:00 AM local during daylight time, including the correct ten-minute duration.',
+    ],
+  },
   {
     title: 'Version 10.4.2 · Evidence Lens',
     detail:
