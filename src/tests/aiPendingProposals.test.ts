@@ -155,6 +155,32 @@ describe('persistent AI action previews', () => {
         }),
         'calendar',
       ],
+      [
+        reply({
+          creatorUpdateProposal: {
+            projectId: 'project-tokon',
+            projectTitle: 'Marvel Tokon Reawakening',
+            status: 'record',
+            nextAction: 'Film session one.',
+            notesAppend: 'Reawakening council approved the recording direction.',
+            confirmation: 'Move this exact project to recording?',
+          },
+        }),
+        'creator-update',
+      ],
+      [
+        reply({
+          arcNoteProposal: {
+            title: 'Akoura Incident Consequences',
+            kind: 'plot',
+            text: 'A proposed canon note grounded in the current Story Room discussion.',
+            tags: ['Akoura Incident', 'consequences'],
+            characterNames: ['Yoshanai'],
+            confirmation: 'Save this preview to the Canon Vault?',
+          },
+        }),
+        'arc-note',
+      ],
     ];
 
     expect(

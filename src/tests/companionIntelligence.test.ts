@@ -41,6 +41,7 @@ interface CompanionIntelligenceModule {
       message: string;
       commandMode?: 'none' | 'propose';
       history?: Array<{ role: 'hunter' | 'companion'; companionId?: string; message: string }>;
+      context?: Record<string, unknown>;
     },
     env?: Record<string, string>,
   ) => {
@@ -59,7 +60,11 @@ interface CompanionIntelligenceModule {
     periodDays: number;
   };
   default: {
-    fetch: (request: Request, env: Record<string, unknown>) => Promise<Response>;
+    fetch: (
+      request: Request,
+      env: Record<string, unknown>,
+      executionContext?: { waitUntil: (promise: Promise<unknown>) => void },
+    ) => Promise<Response>;
   };
 }
 
@@ -150,6 +155,8 @@ describe('Companion Soulprint intelligence', () => {
     expect(intelligence.baseInstructions).toContain('classification roadmap');
     expect(intelligence.baseInstructions).toContain('Selah may recommend Bible passages');
     expect(intelligence.baseInstructions).toContain('Cassian may analyze only');
+    expect(intelligence.baseInstructions).toContain('one coordinated system');
+    expect(intelligence.baseInstructions).toContain('handoff');
   });
 
   it('requires one visible confirmation for a complete Reawakening campaign', () => {
@@ -252,6 +259,28 @@ describe('Companion Soulprint intelligence', () => {
       route: 'counsel',
       workload: 'content-forge',
       maxOutputTokens: 4_800,
+    });
+  });
+
+  it('routes an exact Creator Forge project update even when its title has no content keyword', () => {
+    expect(
+      intelligence.selectIntelligenceRoute({
+        audience: 'haven',
+        message:
+          'Move Marvel Tokon Reawakening to record and set the next step to film session one.',
+        commandMode: 'propose',
+        context: {
+          specialists: {
+            creator: {
+              targeting: { requestedProjectTitles: ['Marvel Tokon Reawakening'] },
+            },
+          },
+        },
+      }),
+    ).toMatchObject({
+      route: 'counsel',
+      workload: 'creator-update',
+      maxOutputTokens: 4_200,
     });
   });
 
@@ -908,7 +937,12 @@ describe('Companion Soulprint intelligence', () => {
     const firstFormat = openAiBodies[0].text as {
       format: { schema: { required: string[] } };
     };
-    expect(firstFormat.format.schema.required).toEqual(['title', 'replies', 'memoryCandidates']);
+    expect(firstFormat.format.schema.required).toEqual([
+      'title',
+      'replies',
+      'memoryCandidates',
+      'handoff',
+    ]);
     expect(await response.json()).toMatchObject({
       workload: 'conversation',
       title: 'Recovered transmission',
@@ -920,6 +954,155 @@ describe('Companion Soulprint intelligence', () => {
         totalTokens: 1_825,
       },
     });
+  });
+
+  it('finishes an owner-bound transmission after the visible app is suspended', async () => {
+    type TransmissionRow = {
+      request_id: string;
+      user_id: string;
+      status: string;
+      response_status: number | null;
+      result_json: string | null;
+      expires_at: string;
+    };
+    const rows = new Map<string, TransmissionRow>();
+    const db = {
+      prepare: (sql: string) => {
+        let values: unknown[] = [];
+        const statement = {
+          bind: (...bound: unknown[]) => {
+            values = bound;
+            return statement;
+          },
+          first: async () => {
+            const [requestId, userId] = values.map(String);
+            const row = rows.get(`${userId}:${requestId}`);
+            return row ? { ...row } : null;
+          },
+          run: async () => {
+            if (sql.includes('DELETE FROM ai_transmissions')) return { success: true };
+            if (sql.includes('INSERT INTO ai_transmissions')) {
+              const [requestId, userId, , , expiresAt] = values.map(String);
+              rows.set(`${userId}:${requestId}`, {
+                request_id: requestId,
+                user_id: userId,
+                status: 'pending',
+                response_status: null,
+                result_json: null,
+                expires_at: expiresAt,
+              });
+              return { success: true };
+            }
+            if (sql.includes('UPDATE ai_transmissions')) {
+              const [status, responseStatus, resultJson, , requestId, userId] = values;
+              const key = `${String(userId)}:${String(requestId)}`;
+              const row = rows.get(key);
+              if (row) {
+                rows.set(key, {
+                  ...row,
+                  status: String(status),
+                  response_status: Number(responseStatus),
+                  result_json: String(resultJson),
+                });
+              }
+              return { success: true };
+            }
+            throw new Error(`Unexpected D1 statement: ${sql}`);
+          },
+        };
+        return statement;
+      },
+    };
+
+    let finishOpenAi!: (response: Response) => void;
+    const openAiPending = new Promise<Response>((resolve) => {
+      finishOpenAi = resolve;
+    });
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => openAiPending),
+    );
+    const backgroundWork: Promise<unknown>[] = [];
+    const requestId = 'transmission_1234567890abcdef';
+    const headers = {
+      'content-type': 'application/json',
+      origin: 'https://system.test',
+      'oai-authenticated-user-id': 'hunter-one',
+      'x-system-transmission-id': requestId,
+    };
+    const env = { DB: db, OPENAI_API_KEY: 'test-key' };
+    const started = await intelligence.default.fetch(
+      new Request('https://system.test/api/ai/transmissions', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          audience: 'snow',
+          message: 'How is the team doing?',
+          history: [],
+          context: {
+            party: { enabledCompanionIds: ['snow'] },
+            bondMemory: { enabled: false, approved: [] },
+          },
+          commandMode: 'none',
+        }),
+      }),
+      env,
+      { waitUntil: (promise) => backgroundWork.push(promise) },
+    );
+    expect(started.status).toBe(202);
+    expect(await started.json()).toMatchObject({ requestId, status: 'pending' });
+    expect(backgroundWork).toHaveLength(1);
+
+    finishOpenAi(
+      new Response(
+        JSON.stringify({
+          status: 'completed',
+          output: [
+            {
+              type: 'message',
+              content: [
+                {
+                  type: 'output_text',
+                  text: JSON.stringify({
+                    title: 'Team pulse',
+                    replies: [{ companionId: 'snow', message: 'Everyone is linked and ready.' }],
+                    memoryCandidates: [],
+                    handoff: { companionId: 'snow', summary: '', prompt: '' },
+                  }),
+                },
+              ],
+            },
+          ],
+          usage: { input_tokens: 20, output_tokens: 10, total_tokens: 30 },
+        }),
+        { status: 200, headers: { 'content-type': 'application/json' } },
+      ),
+    );
+    await Promise.all(backgroundWork);
+
+    const resumed = await intelligence.default.fetch(
+      new Request(`https://system.test/api/ai/transmissions/${requestId}`, {
+        headers: {
+          origin: 'https://system.test',
+          'oai-authenticated-user-id': 'hunter-one',
+        },
+      }),
+      env,
+    );
+    expect(resumed.status).toBe(200);
+    expect(await resumed.json()).toMatchObject({ title: 'Team pulse' });
+
+    const stranger = await intelligence.default.fetch(
+      new Request(`https://system.test/api/ai/transmissions/${requestId}`, {
+        headers: {
+          origin: 'https://system.test',
+          'oai-authenticated-user-id': 'hunter-two',
+        },
+      }),
+      env,
+    );
+    expect(stranger.status).toBe(404);
+    expect([...rows.values()][0]).not.toHaveProperty('request_body');
   });
 
   it('sends a campaign follow-up through the focused Reawakening schema', async () => {
@@ -1014,6 +1197,7 @@ describe('Companion Soulprint intelligence', () => {
       'title',
       'replies',
       'memoryCandidates',
+      'handoff',
       'campaign',
     ]);
     expect(format.format.schema.properties.campaign.properties.weeks.maximum).toBe(12);

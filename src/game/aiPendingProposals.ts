@@ -42,6 +42,18 @@ export type AiPendingProposal =
       ownerId: 'kairo' | 'snow';
       createdAt: string;
       payload: NonNullable<AiHeadquartersReply['calendarProposal']>;
+    }
+  | {
+      kind: 'creator-update';
+      ownerId: 'haven';
+      createdAt: string;
+      payload: NonNullable<AiHeadquartersReply['creatorUpdateProposal']>;
+    }
+  | {
+      kind: 'arc-note';
+      ownerId: 'quill';
+      createdAt: string;
+      payload: NonNullable<AiHeadquartersReply['arcNoteProposal']>;
     };
 
 const PENDING_PREFIX = 'ai-pending-proposal:';
@@ -92,6 +104,22 @@ export function extractAiPendingProposal(
       payload: result.calendarProposal,
     };
   }
+  if (result.creatorUpdateProposal) {
+    return {
+      kind: 'creator-update',
+      ownerId: 'haven',
+      createdAt,
+      payload: result.creatorUpdateProposal,
+    };
+  }
+  if (result.arcNoteProposal) {
+    return {
+      kind: 'arc-note',
+      ownerId: 'quill',
+      createdAt,
+      payload: result.arcNoteProposal,
+    };
+  }
   return undefined;
 }
 
@@ -99,9 +127,16 @@ function isPendingProposal(value: unknown): value is AiPendingProposal {
   if (!value || typeof value !== 'object') return false;
   const candidate = value as Partial<AiPendingProposal>;
   return (
-    ['command', 'operation', 'recipe', 'content', 'campaign', 'calendar'].includes(
-      String(candidate.kind),
-    ) &&
+    [
+      'command',
+      'operation',
+      'recipe',
+      'content',
+      'campaign',
+      'calendar',
+      'creator-update',
+      'arc-note',
+    ].includes(String(candidate.kind)) &&
     typeof candidate.ownerId === 'string' &&
     typeof candidate.createdAt === 'string' &&
     Boolean(candidate.payload && typeof candidate.payload === 'object')

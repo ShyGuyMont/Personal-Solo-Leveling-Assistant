@@ -1,5 +1,6 @@
 import {
   ArrowUpRight,
+  BookOpenCheck,
   CalendarCheck2,
   Check,
   Headphones,
@@ -40,7 +41,12 @@ import {
   type AiPendingProposal,
 } from '@/game/aiPendingProposals';
 import { applyCalendarProposal } from '@/game/calendar';
-import { saveCreatorCampaign, saveCreatorProject } from '@/game/creatorForge';
+import {
+  applyCreatorProjectUpdate,
+  saveCreatorCampaign,
+  saveCreatorProject,
+} from '@/game/creatorForge';
+import { saveArcCanonSource } from '@/game/arcArchives';
 import {
   addDailyOperationNote,
   cancelStagedCompanionOperation,
@@ -117,6 +123,12 @@ export function CompanionQuickLink() {
   const [pendingCalendar, setPendingCalendar] =
     useState<NonNullable<AiHeadquartersReply['calendarProposal']>>();
   const [pendingCalendarOwner, setPendingCalendarOwner] = useState<'kairo' | 'snow'>('kairo');
+  const [pendingHandoff, setPendingHandoff] =
+    useState<NonNullable<AiHeadquartersReply['handoffProposal']>>();
+  const [pendingCreatorUpdate, setPendingCreatorUpdate] =
+    useState<NonNullable<AiHeadquartersReply['creatorUpdateProposal']>>();
+  const [pendingArcNote, setPendingArcNote] =
+    useState<NonNullable<AiHeadquartersReply['arcNoteProposal']>>();
   const [executingAction, setExecutingAction] = useState(false);
   const [continuityTurns, setContinuityTurns] = useState(0);
   const [activeCompanionId, setActiveCompanionId] = useState<CompanionId>('snow');
@@ -187,6 +199,8 @@ export function CompanionQuickLink() {
       setPendingCalendar(proposal.payload);
       setPendingCalendarOwner(proposal.ownerId);
     }
+    if (proposal.kind === 'creator-update') setPendingCreatorUpdate(proposal.payload);
+    if (proposal.kind === 'arc-note') setPendingArcNote(proposal.payload);
     setNotice('Your unfinished confirmation is still waiting below. Nothing changed without you.');
   }, []);
 
@@ -210,6 +224,9 @@ export function CompanionQuickLink() {
       setPendingContent(undefined);
       setPendingCampaign(undefined);
       setPendingCalendar(undefined);
+      setPendingHandoff(undefined);
+      setPendingCreatorUpdate(undefined);
+      setPendingArcNote(undefined);
       setDraft(typeof detail.initialDraft === 'string' ? detail.initialDraft.slice(0, 4_000) : '');
       setContinuityTurns(0);
       setLinkMode('command');
@@ -303,6 +320,9 @@ export function CompanionQuickLink() {
       setPendingContent(undefined);
       setPendingCampaign(undefined);
       setPendingCalendar(undefined);
+      setPendingHandoff(undefined);
+      setPendingCreatorUpdate(undefined);
+      setPendingArcNote(undefined);
       setSending(true);
       setNotice(
         addressed.audience === 'party'
@@ -434,19 +454,32 @@ export function CompanionQuickLink() {
           setPendingCalendarOwner(owner);
           setActiveCompanionId(owner);
         }
+        if (result.handoffProposal) setPendingHandoff(result.handoffProposal);
+        if (result.creatorUpdateProposal) {
+          setPendingCreatorUpdate(result.creatorUpdateProposal);
+          setActiveCompanionId('haven');
+        }
+        if (result.arcNoteProposal) {
+          setPendingArcNote(result.arcNoteProposal);
+          setActiveCompanionId('quill');
+        }
         setNotice(
           proposedAction ||
             result.operationProposal ||
             result.recipeProposal ||
             result.contentProposal ||
             result.campaignProposal ||
-            result.calendarProposal
+            result.calendarProposal ||
+            result.creatorUpdateProposal ||
+            result.arcNoteProposal
             ? 'Command prepared. Nothing changes until you confirm it below.'
-            : result.route === 'sovereign'
-              ? `${result.model} · Sovereign counsel route`
-              : result.route === 'counsel'
-                ? `${result.model} · deeper counsel route`
-                : `${result.model} · quick response route`,
+            : result.handoffProposal
+              ? `${getCompanion(result.handoffProposal.companionId).name} is ready to take the specialist relay.`
+              : result.route === 'sovereign'
+                ? `${result.model} · Sovereign counsel route`
+                : result.route === 'counsel'
+                  ? `${result.model} · deeper counsel route`
+                  : `${result.model} · quick response route`,
         );
         window.dispatchEvent(
           new CustomEvent('system:ai-conversations-changed', {
@@ -881,6 +914,75 @@ export function CompanionQuickLink() {
     }
   }
 
+  async function applyPendingCreatorUpdate() {
+    if (!pendingCreatorUpdate || executingAction || executionLockRef.current) return;
+    executionLockRef.current = true;
+    setExecutingAction(true);
+    let saved = false;
+    try {
+      const project = await applyCreatorProjectUpdate({
+        projectId: pendingCreatorUpdate.projectId,
+        status: pendingCreatorUpdate.status || undefined,
+        nextAction: pendingCreatorUpdate.nextAction || undefined,
+        notesAppend: pendingCreatorUpdate.notesAppend || undefined,
+      });
+      saved = true;
+      setPendingCreatorUpdate(undefined);
+      if (conversationRef.current) await clearPendingAiProposal(conversationRef.current.id);
+      await appendLocalAcknowledgement(
+        'haven',
+        `“${project.title}” is actually updated on the Creator Forge now. ${project.status !== 'idea' ? `Stage: ${project.status}. ` : ''}Next move: ${project.nextAction || 'define the next physical production step'}.`,
+      );
+      setNotice('Creator operation confirmed · board record updated.');
+    } catch (error) {
+      setNotice(
+        saved
+          ? 'Creator operation updated locally. Only Vesper’s acknowledgement failed to save.'
+          : error instanceof Error
+            ? error.message
+            : 'That Creator Forge update could not be applied.',
+      );
+    } finally {
+      executionLockRef.current = false;
+      setExecutingAction(false);
+    }
+  }
+
+  async function savePendingArcNote() {
+    if (!pendingArcNote || executingAction || executionLockRef.current) return;
+    executionLockRef.current = true;
+    setExecutingAction(true);
+    let saved = false;
+    try {
+      const note = await saveArcCanonSource({
+        title: pendingArcNote.title,
+        kind: pendingArcNote.kind,
+        text: pendingArcNote.text,
+        tags: pendingArcNote.tags,
+        characterNames: pendingArcNote.characterNames,
+      });
+      saved = true;
+      setPendingArcNote(undefined);
+      if (conversationRef.current) await clearPendingAiProposal(conversationRef.current.id);
+      await appendLocalAcknowledgement(
+        'quill',
+        `“${note.title}” is in the Canon Vault now—real source, locally filed, and ready for future Story Room retrieval. That one is canon because you confirmed it, not because I got excited.`,
+      );
+      setNotice('Canon note confirmed · Quill’s Vault synchronized.');
+    } catch (error) {
+      setNotice(
+        saved
+          ? 'Canon note saved locally. Only Quill’s acknowledgement failed to save.'
+          : error instanceof Error
+            ? error.message
+            : 'That Canon Vault note could not be saved.',
+      );
+    } finally {
+      executionLockRef.current = false;
+      setExecutingAction(false);
+    }
+  }
+
   async function savePendingCampaign() {
     if (!pendingCampaign || executingAction || executionLockRef.current) return;
     executionLockRef.current = true;
@@ -1060,6 +1162,9 @@ export function CompanionQuickLink() {
     setPendingContent(undefined);
     setPendingCampaign(undefined);
     setPendingCalendar(undefined);
+    setPendingHandoff(undefined);
+    setPendingCreatorUpdate(undefined);
+    setPendingArcNote(undefined);
     setLinkMode(next);
     setNotice(
       next === 'live'
@@ -1388,6 +1493,49 @@ export function CompanionQuickLink() {
                 </div>
               )}
 
+              {linkMode === 'command' && pendingHandoff && (
+                <section className="quick-link__command quick-link__handoff" aria-live="polite">
+                  <header>
+                    <span>
+                      <ArrowUpRight size={15} /> PARTY RELAY
+                    </span>
+                    <small>ONE-TAP SPECIALIST HANDOFF</small>
+                  </header>
+                  <strong>{getCompanion(pendingHandoff.companionId).name} owns this lane</strong>
+                  <p>{pendingHandoff.summary}</p>
+                  <dl>
+                    <div>
+                      <dt>RELAY BRIEF</dt>
+                      <dd>{pendingHandoff.prompt}</dd>
+                    </div>
+                  </dl>
+                  <div className="quick-link__command-actions">
+                    <button
+                      type="button"
+                      className="button button--primary"
+                      disabled={sending}
+                      onClick={() => {
+                        const relay = pendingHandoff;
+                        setPendingHandoff(undefined);
+                        void submitRef.current(
+                          `${getCompanion(relay.companionId).name}, ${relay.prompt}`,
+                        );
+                      }}
+                    >
+                      <ArrowUpRight size={15} /> Relay to{' '}
+                      {getCompanion(pendingHandoff.companionId).name}
+                    </button>
+                    <button
+                      type="button"
+                      className="button button--ghost"
+                      onClick={() => setPendingHandoff(undefined)}
+                    >
+                      Stay here
+                    </button>
+                  </div>
+                </section>
+              )}
+
               {linkMode === 'command' && pendingAction && (
                 <section className="quick-link__command" aria-live="polite">
                   <header>
@@ -1635,6 +1783,131 @@ export function CompanionQuickLink() {
                         void dismissPendingPreview(
                           () => setPendingContent(undefined),
                           'Content draft dismissed. Creator Forge was not changed.',
+                        );
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </section>
+              )}
+
+              {linkMode === 'command' && pendingCreatorUpdate && (
+                <section
+                  className="quick-link__command quick-link__content-command"
+                  aria-live="polite"
+                >
+                  <header>
+                    <span>
+                      <Radio size={15} /> VESPER'S BOARD CONTROL
+                    </span>
+                    <small>EXACT PROJECT · PREVIEW</small>
+                  </header>
+                  <strong>{pendingCreatorUpdate.projectTitle}</strong>
+                  <p>{pendingCreatorUpdate.confirmation}</p>
+                  <div className="quick-link__recipe-meta">
+                    {pendingCreatorUpdate.status && (
+                      <span>stage → {pendingCreatorUpdate.status}</span>
+                    )}
+                    {pendingCreatorUpdate.nextAction && <span>next action updated</span>}
+                    {pendingCreatorUpdate.notesAppend && <span>board note added</span>}
+                  </div>
+                  <dl>
+                    {pendingCreatorUpdate.nextAction && (
+                      <div>
+                        <dt>NEXT ACTION</dt>
+                        <dd>{pendingCreatorUpdate.nextAction}</dd>
+                      </div>
+                    )}
+                    {pendingCreatorUpdate.notesAppend && (
+                      <div>
+                        <dt>APPENDED NOTE</dt>
+                        <dd>{pendingCreatorUpdate.notesAppend}</dd>
+                      </div>
+                    )}
+                  </dl>
+                  <div className="quick-link__command-actions">
+                    <button
+                      type="button"
+                      className="button button--primary"
+                      disabled={executingAction}
+                      onClick={() => void applyPendingCreatorUpdate()}
+                    >
+                      {executingAction ? (
+                        <LoaderCircle className="is-spinning" size={15} />
+                      ) : (
+                        <Check size={15} />
+                      )}
+                      Update Creator Forge
+                    </button>
+                    <button
+                      type="button"
+                      className="button button--ghost"
+                      disabled={executingAction}
+                      onClick={() => {
+                        void dismissPendingPreview(
+                          () => setPendingCreatorUpdate(undefined),
+                          'Board update dismissed. Creator Forge was not changed.',
+                        );
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </section>
+              )}
+
+              {linkMode === 'command' && pendingArcNote && (
+                <section className="quick-link__command" aria-live="polite">
+                  <header>
+                    <span>
+                      <BookOpenCheck size={15} /> QUILL'S CANON VAULT
+                    </span>
+                    <small>NEW SOURCE · PREVIEW</small>
+                  </header>
+                  <strong>{pendingArcNote.title}</strong>
+                  <p>{pendingArcNote.confirmation}</p>
+                  <div className="quick-link__recipe-meta">
+                    <span>{pendingArcNote.kind.replace('-', ' ')}</span>
+                    <span>{pendingArcNote.characterNames.length} linked characters</span>
+                    <span>{pendingArcNote.tags.length} tags</span>
+                  </div>
+                  <details>
+                    <summary>Review the canon text</summary>
+                    <p>{pendingArcNote.text}</p>
+                    {pendingArcNote.characterNames.length > 0 && (
+                      <p>
+                        <strong>Characters:</strong> {pendingArcNote.characterNames.join(', ')}
+                      </p>
+                    )}
+                    {pendingArcNote.tags.length > 0 && (
+                      <p>
+                        <strong>Tags:</strong> {pendingArcNote.tags.join(', ')}
+                      </p>
+                    )}
+                  </details>
+                  <div className="quick-link__command-actions">
+                    <button
+                      type="button"
+                      className="button button--primary"
+                      disabled={executingAction}
+                      onClick={() => void savePendingArcNote()}
+                    >
+                      {executingAction ? (
+                        <LoaderCircle className="is-spinning" size={15} />
+                      ) : (
+                        <Check size={15} />
+                      )}
+                      File in Canon Vault
+                    </button>
+                    <button
+                      type="button"
+                      className="button button--ghost"
+                      disabled={executingAction}
+                      onClick={() => {
+                        void dismissPendingPreview(
+                          () => setPendingArcNote(undefined),
+                          'Canon note dismissed. Quill filed nothing.',
                         );
                       }}
                     >

@@ -93,7 +93,10 @@ export function selectCreatorProjectsForContext(
   const currentMatches = exactCreatorProjectMatches(active, query);
   let carriedMatches: CreatorProject[] = [];
   if (!currentMatches.length) {
-    const hunterMessages = history.filter((message) => message.role === 'hunter').slice(-8).reverse();
+    const hunterMessages = history
+      .filter((message) => message.role === 'hunter')
+      .slice(-8)
+      .reverse();
     for (const message of hunterMessages) {
       carriedMatches = exactCreatorProjectMatches(active, message.message);
       if (carriedMatches.length) break;
@@ -101,10 +104,10 @@ export function selectCreatorProjectsForContext(
   }
   const targeted = currentMatches.length ? currentMatches : carriedMatches;
   const targetedIds = new Set(targeted.map((project) => project.id));
-  const selected = [
-    ...targeted,
-    ...active.filter((project) => !targetedIds.has(project.id)),
-  ].slice(0, 12);
+  const selected = [...targeted, ...active.filter((project) => !targetedIds.has(project.id))].slice(
+    0,
+    12,
+  );
 
   return {
     selected,
@@ -128,10 +131,23 @@ export function selectCreatorProjectsForContext(
 const ARC_KNOWLEDGE_SIGNALS =
   /\b(?:a\.?r\.?c\.?|arc|art(?:s)?\s+codex|canon|character|continuity|dossier|faction|lore|plot|story|style|worldbuild(?:ing)?)\b/i;
 
+const CREATOR_KNOWLEDGE_SIGNALS =
+  /\b(?:youtube|channel|creator|content|video|short|stream|upload|hook|thumbnail|audience|forge|reawakening|campaign)\b/i;
+
+const CALENDAR_CONTEXT_SIGNALS =
+  /\b(?:calendar|schedule|agenda|appointment|meeting|event|availability|available|time\s+block|deadline|remind|recurr|every\s+(?:day|week|month))\b/i;
+
+function recentConversationSignal(source: AiContextSource) {
+  return [
+    ...(source.history ?? []).slice(-6).map((message) => message.message),
+    source.query ?? '',
+  ].join('\n');
+}
+
 function shouldShareArcKnowledge(source: AiContextSource) {
   if (source.audience === 'quill') return true;
   if (source.audience !== 'snow' && source.audience !== 'party') return false;
-  return ARC_KNOWLEDGE_SIGNALS.test(source.query ?? '');
+  return ARC_KNOWLEDGE_SIGNALS.test(recentConversationSignal(source));
 }
 
 function emptyArcKnowledgeContext() {
@@ -157,11 +173,24 @@ function emptyArcKnowledgeContext() {
 }
 
 function shouldShareCalendar(source: AiContextSource) {
-  return source.audience === 'kairo' || source.audience === 'snow' || source.audience === 'party';
+  if (source.audience === 'kairo' || source.audience === 'snow' || source.audience === 'party') {
+    return true;
+  }
+  return (
+    source.enabledCompanionIds.includes('kairo') &&
+    CALENDAR_CONTEXT_SIGNALS.test(recentConversationSignal(source))
+  );
+}
+
+function shouldShareCreatorKnowledge(source: AiContextSource) {
+  if (source.audience === 'haven') return true;
+  if (source.audience !== 'snow' && source.audience !== 'party') return false;
+  return CREATOR_KNOWLEDGE_SIGNALS.test(recentConversationSignal(source));
 }
 
 export async function buildAiProgressContext(source: AiContextSource): Promise<AiProgressContext> {
   const recentStart = addDays(source.systemDate, -29);
+  const creatorSharingAllowed = shouldShareCreatorKnowledge(source);
   const treasurySharingAllowed =
     source.settings.aiTreasurySharingEnabled === true &&
     (source.audience === 'cassian' ||
@@ -210,10 +239,16 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
     treasurySharingAllowed ? db.treasuryBills.toArray() : Promise.resolve([]),
     treasurySharingAllowed ? db.treasuryDebts.toArray() : Promise.resolve([]),
     treasurySharingAllowed ? db.treasurySavingsGoals.toArray() : Promise.resolve([]),
-    db.creatorSettings.get('primary'),
-    db.creatorSnapshots.orderBy('capturedAt').reverse().limit(30).toArray(),
-    db.creatorProjects.orderBy('updatedAt').reverse().toArray(),
-    db.creatorVideoInsights.orderBy('views').reverse().limit(10).toArray(),
+    creatorSharingAllowed ? db.creatorSettings.get('primary') : Promise.resolve(undefined),
+    creatorSharingAllowed
+      ? db.creatorSnapshots.orderBy('capturedAt').reverse().limit(30).toArray()
+      : Promise.resolve([]),
+    creatorSharingAllowed
+      ? db.creatorProjects.orderBy('updatedAt').reverse().toArray()
+      : Promise.resolve([]),
+    creatorSharingAllowed
+      ? db.creatorVideoInsights.orderBy('views').reverse().limit(10).toArray()
+      : Promise.resolve([]),
     getDailyOperations(source.systemDate),
     getBodyDiagnosticData(source.systemDate),
     shouldShareArcKnowledge(source)
@@ -668,17 +703,17 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
           comments: video.comments,
         })),
         activeProjects: creatorProjectContext.selected.map((project) => ({
-            id: project.id,
-            title: project.title.slice(0, 180),
-            platform: project.platform,
-            contentType: project.contentType,
-            status: project.status,
-            pillar: project.pillar.slice(0, 200),
-            hook: project.hook.slice(0, 500),
-            audiencePromise: project.audiencePromise.slice(0, 500),
-            nextAction: project.nextAction.slice(0, 500),
-            updatedAt: project.updatedAt,
-          })),
+          id: project.id,
+          title: project.title.slice(0, 180),
+          platform: project.platform,
+          contentType: project.contentType,
+          status: project.status,
+          pillar: project.pillar.slice(0, 200),
+          hook: project.hook.slice(0, 500),
+          audiencePromise: project.audiencePromise.slice(0, 500),
+          nextAction: project.nextAction.slice(0, 500),
+          updatedAt: project.updatedAt,
+        })),
         recentlyPublished: creatorProjects
           .filter((project) => project.status === 'published')
           .slice(0, 8)

@@ -41,6 +41,21 @@ Headquarters channel uses the private Sites sign-in and a server-side OpenAI con
 only the message, limited recent chat context, and a compact progress signal when the user presses
 Send. There is no analytics, advertising, or tracking.
 
+## Version 8.2.0 · Sovereign Command Network
+
+The twelve companions now function as one coordinated network instead of isolated chat channels.
+When the active companion cannot responsibly own a request, a transparent Party Relay preserves the
+Hunter's intent and opens the correct enabled specialist without pretending that work happened in
+the background. Snow coordinates the network, while each companion keeps honest authority over
+their own records and every mutation still requires a visible local confirmation.
+
+Vesper can prepare exact updates to existing Creator Forge operations, and Quill can turn an
+explicit Story Room conclusion into a Canon Vault preview. Both remain drafts until confirmed and
+successfully saved on-device. Specialist context is now routed more selectively for clearer answers
+and less unnecessary data exposure. Private resumable transmissions also allow an online response
+to finish server-side while the phone temporarily suspends the visible app, then return when The
+System becomes active again; the temporary result is owner-bound and expires automatically.
+
 ## Version 8.1.1 · Verified Workrooms
 
 Quill now retrieves the exact Character Library dossier or Canon Vault source named by the Hunter,

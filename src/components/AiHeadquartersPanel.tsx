@@ -1,4 +1,5 @@
 import {
+  ArrowUpRight,
   BookmarkCheck,
   BrainCircuit,
   Check,
@@ -49,7 +50,12 @@ import {
 } from '@/game/aiPendingProposals';
 import { buildQuickLinkActionCatalog, commandSuccessAcknowledgement } from '@/game/aiQuickLink';
 import { applyCalendarProposal } from '@/game/calendar';
-import { saveCreatorCampaign, saveCreatorProject } from '@/game/creatorForge';
+import {
+  applyCreatorProjectUpdate,
+  saveCreatorCampaign,
+  saveCreatorProject,
+} from '@/game/creatorForge';
+import { saveArcCanonSource } from '@/game/arcArchives';
 import {
   addDailyOperationNote,
   cancelStagedCompanionOperation,
@@ -97,6 +103,10 @@ export function AiHeadquartersPanel() {
   const [memoryOpen, setMemoryOpen] = useState(false);
   const [deviceOnline, setDeviceOnline] = useState(navigator.onLine);
   const [pendingProposal, setPendingProposal] = useState<AiPendingProposal>();
+  const [pendingHandoff, setPendingHandoff] =
+    useState<
+      NonNullable<Awaited<ReturnType<typeof requestAiHeadquartersReply>>['handoffProposal']>
+    >();
   const [executingProposal, setExecutingProposal] = useState(false);
   const messageListRef = useRef<HTMLDivElement>(null);
   const voiceLink = useAiVoiceLink({
@@ -192,6 +202,7 @@ export function AiHeadquartersPanel() {
 
   useEffect(() => {
     let active = true;
+    setPendingHandoff(undefined);
     if (!activeId) {
       setPendingProposal(undefined);
       return () => {
@@ -304,6 +315,7 @@ export function AiHeadquartersPanel() {
     await updateConversation(conversation);
     setDraft('');
     setNotice('');
+    setPendingHandoff(undefined);
   }
 
   async function selectAudience(audience: AiConversationAudience) {
@@ -348,6 +360,7 @@ export function AiHeadquartersPanel() {
     }
     setSending(true);
     setNotice('');
+    setPendingHandoff(undefined);
     setDraft('');
     const hunterMessage = createHunterMessage(message);
     const pendingConversation: AiConversation = {
@@ -409,6 +422,11 @@ export function AiHeadquartersPanel() {
         await savePendingAiProposal(completedConversation.id, proposal);
         setPendingProposal(proposal);
         setNotice('Action preview prepared. Nothing changes until you confirm it below.');
+      } else if (result.handoffProposal) {
+        setPendingHandoff(result.handoffProposal);
+        setNotice(
+          `${getCompanion(result.handoffProposal.companionId).name} is ready to receive the specialist brief.`,
+        );
       }
       if (currentSettings.aiVoiceOutputEnabled && currentSettings.aiVoiceAutoPlay) {
         void voiceLink.playMessages(replyMessages);
@@ -541,6 +559,17 @@ export function AiHeadquartersPanel() {
       } else if (pendingProposal.kind === 'campaign') {
         const projects = await saveCreatorCampaign(pendingProposal.payload.operations);
         acknowledgement = `${pendingProposal.payload.name} is now on Creator Forge: ${projects.length} real operations in one sequence. Start with ${projects[0]?.nextAction || 'the first physical move'}.`;
+      } else if (pendingProposal.kind === 'creator-update') {
+        const project = await applyCreatorProjectUpdate({
+          projectId: pendingProposal.payload.projectId,
+          status: pendingProposal.payload.status || undefined,
+          nextAction: pendingProposal.payload.nextAction || undefined,
+          notesAppend: pendingProposal.payload.notesAppend || undefined,
+        });
+        acknowledgement = `“${project.title}” is actually updated on Creator Forge now. Stage: ${project.status}. Next move: ${project.nextAction || 'define the next physical production step'}.`;
+      } else if (pendingProposal.kind === 'arc-note') {
+        const source = await saveArcCanonSource(pendingProposal.payload);
+        acknowledgement = `“${source.title}” is now a real Canon Vault source. Quill can retrieve it in future Story Room sessions because the Hunter confirmed the local filing.`;
       } else {
         const event = await applyCalendarProposal(pendingProposal.payload, pendingProposal.ownerId);
         const linked = event.linkedCompanionId ? getCompanion(event.linkedCompanionId) : undefined;
@@ -622,6 +651,28 @@ export function AiHeadquartersPanel() {
         eyebrow: 'REAWAKENING CAMPAIGN',
         title: proposal.payload.name,
         summary: `${proposal.payload.weeks} weeks · ${proposal.payload.operations.length} operations · ${proposal.payload.strategy}`,
+        confirmation: proposal.payload.confirmation,
+      };
+    }
+    if (proposal.kind === 'creator-update') {
+      return {
+        eyebrow: 'CREATOR BOARD CONTROL',
+        title: proposal.payload.projectTitle,
+        summary: [
+          proposal.payload.status && `Stage → ${proposal.payload.status}`,
+          proposal.payload.nextAction && `Next: ${proposal.payload.nextAction}`,
+          proposal.payload.notesAppend && 'Append one board note',
+        ]
+          .filter(Boolean)
+          .join(' · '),
+        confirmation: proposal.payload.confirmation,
+      };
+    }
+    if (proposal.kind === 'arc-note') {
+      return {
+        eyebrow: 'CANON VAULT FILING',
+        title: proposal.payload.title,
+        summary: `${proposal.payload.kind.replace('-', ' ')} · ${proposal.payload.characterNames.length} linked characters · ${proposal.payload.tags.length} tags`,
         confirmation: proposal.payload.confirmation,
       };
     }
@@ -1058,6 +1109,54 @@ export function AiHeadquartersPanel() {
                 </div>
               )}
             </div>
+
+            {pendingHandoff && (
+              <section className="ai-proposal-card" aria-live="polite">
+                <header>
+                  <span>
+                    <ArrowUpRight size={16} /> PARTY RELAY
+                  </span>
+                  <small>ONE-TAP SPECIALIST HANDOFF</small>
+                </header>
+                <div className="ai-proposal-card__identity">
+                  <img
+                    src={getCompanionImage(getCompanion(pendingHandoff.companionId).image)}
+                    alt=""
+                  />
+                  <div>
+                    <strong>{getCompanion(pendingHandoff.companionId).name}</strong>
+                    <small>Receives the exact brief · no hidden action</small>
+                  </div>
+                </div>
+                <p>{pendingHandoff.summary}</p>
+                <blockquote>{pendingHandoff.prompt}</blockquote>
+                <div>
+                  <button
+                    className="button button--primary"
+                    type="button"
+                    onClick={() => {
+                      const relay = pendingHandoff;
+                      void startConversation(relay.companionId).then(() => {
+                        setDraft(relay.prompt);
+                        setPendingHandoff(undefined);
+                        setNotice(
+                          `${getCompanion(relay.companionId).name}'s direct link has the full brief.`,
+                        );
+                      });
+                    }}
+                  >
+                    <ArrowUpRight size={16} /> Open specialist brief
+                  </button>
+                  <button
+                    className="button button--ghost"
+                    type="button"
+                    onClick={() => setPendingHandoff(undefined)}
+                  >
+                    Stay here
+                  </button>
+                </div>
+              </section>
+            )}
 
             {pendingProposal &&
               (() => {

@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { db } from '@/db/database';
 import { createDefaultProgression, createDefaultSettings } from '@/db/seed';
 import { buildAiProgressContext } from '@/game/aiContext';
+import { saveCreatorProject } from '@/game/creatorForge';
 import { ALL_STATS, createInitialStat } from '@/game/stats';
 
 describe('Awakened Intelligence progress context', () => {
@@ -209,5 +210,65 @@ describe('Awakened Intelligence progress context', () => {
     expect(serialized).not.toContain('Secret restaurant name');
     expect(serialized).not.toContain('Private transaction note');
     expect(serialized).not.toContain('Private milestone note');
+  });
+
+  it('keeps a creator workroom grounded through short follow-ups without leaking it elsewhere', async () => {
+    await saveCreatorProject({
+      title: 'Marvel Tokon Reawakening',
+      platform: 'youtube',
+      contentType: 'long-form',
+      status: 'record',
+      pillar: 'Honest beginner progress',
+      hook: 'A real first week in a new fighting game.',
+      audiencePromise: 'Specific improvement without fake expertise.',
+      nextAction: 'Film session one.',
+      notes: 'Private board note.',
+    });
+    const settings = createDefaultSettings();
+    const shared = {
+      audience: 'snow' as const,
+      profile: {
+        id: 'primary' as const,
+        displayName: 'Jordan Hunter',
+        systemTitle: 'The Awakened',
+        startingFocus: 'balanced' as const,
+        createdAt: '2026-08-12T12:00:00.000Z',
+        equippedTitleId: 'newly-awakened',
+        cosmeticFrame: 'focus-balanced',
+        backgroundSigil: 'origin',
+      },
+      settings,
+      progression: createDefaultProgression(),
+      missions: [],
+      todayRecords: [],
+      stats: ALL_STATS.map(createInitialStat),
+      challenges: [],
+      systemDate: '2026-08-12' as const,
+      enabledCompanionIds: settings.enabledCompanionIds,
+    };
+    const followUp = await buildAiProgressContext({
+      ...shared,
+      query: 'What should I do next?',
+      history: [
+        {
+          id: 'creator-turn',
+          role: 'hunter',
+          message: 'Help me plan the next YouTube video.',
+          createdAt: '2026-08-12T12:00:00.000Z',
+        },
+      ],
+    });
+    expect(followUp.specialists.creator.activeProjects[0]).toMatchObject({
+      title: 'Marvel Tokon Reawakening',
+      nextAction: 'Film session one.',
+    });
+
+    const unrelated = await buildAiProgressContext({
+      ...shared,
+      query: 'How is everyone doing today?',
+      history: [],
+    });
+    expect(unrelated.specialists.creator.activeProjects).toEqual([]);
+    expect(JSON.stringify(unrelated)).not.toContain('Private board note');
   });
 });

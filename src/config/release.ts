@@ -1,4 +1,4 @@
-export const APP_VERSION = '8.1.1';
+export const APP_VERSION = '8.2.0';
 export const DATABASE_SCHEMA_VERSION = 27;
 export const SAVE_FORMAT_VERSION = 27;
 
@@ -9,6 +9,20 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 8.2.0 · Sovereign Command Network',
+    detail:
+      'All twelve companions now operate as one coordinated command network: each specialist keeps honest domain authority, transparent relays preserve the Hunter’s intent, and deeper creative work can become a verified local action instead of ending as advice.',
+    points: [
+      'Every companion can recognize when another enabled specialist owns the requested work and prepare a one-tap Party Relay with the Hunter’s actual intent intact; Snow remains the coordinator without impersonating another companion’s records or authority.',
+      'Vesper can now prepare an exact existing Creator Forge operation update—status, next action, and a dated note—as one persistent preview, then apply it only after the Hunter confirms and the local board save succeeds.',
+      'Quill can turn an explicit Story Room conclusion into a grounded Canon Vault preview with source type, tags, and character links; brainstorming remains conversation until the Hunter intentionally asks to preserve it and confirms the record.',
+      'Creator, A.R.C., Calendar, Kitchen, Ledger, Training, Sanctuary, and System context is routed only to the companions and questions that need it, reducing irrelevant data exposure and making specialist answers more precise.',
+      'Calendar intelligence now follows realm-related scheduling requests from any companion channel, allowing a specialist to coordinate with Kairo without silently moving, creating, or completing anything.',
+      'Online transmissions receive a private resumable link: switching to another phone app may pause the screen, but the secure response can finish server-side and return when The System becomes active again.',
+      'Resumable results are owner-bound, temporary, automatically expire, and never store the full Hunter request in the transmission table; direct offline realms and all existing confirmation walls remain unchanged.',
+    ],
+  },
   {
     title: 'Version 8.1.1 · Verified Workrooms',
     detail:

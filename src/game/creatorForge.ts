@@ -227,6 +227,29 @@ export async function updateCreatorProjectStatus(id: string, status: CreatorProj
   return saveCreatorProject({ ...project, status });
 }
 
+export async function applyCreatorProjectUpdate(input: {
+  projectId: string;
+  status?: CreatorProject['status'];
+  nextAction?: string;
+  notesAppend?: string;
+}) {
+  const project = await db.creatorProjects.get(input.projectId);
+  if (!project) throw new Error('That Creator Forge operation no longer exists.');
+  const note = cleanText(input.notesAppend, 1_500);
+  const notes = note
+    ? [project.notes.trim(), `[Vesper update Â· ${new Date().toLocaleDateString()}] ${note}`]
+        .filter(Boolean)
+        .join('\n\n')
+        .slice(0, 4_000)
+    : project.notes;
+  return saveCreatorProject({
+    ...project,
+    status: input.status ?? project.status,
+    nextAction: cleanText(input.nextAction, 1_000) || project.nextAction,
+    notes,
+  });
+}
+
 export async function saveCreatorCampaign(
   projects: Array<
     Pick<

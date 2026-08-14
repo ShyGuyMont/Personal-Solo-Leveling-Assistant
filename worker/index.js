@@ -11,7 +11,7 @@ export const YOUTUBE_READONLY_SCOPES = [
 
 const YOUTUBE_OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
 
-export const COMPANION_INTELLIGENCE_VERSION = 'verified-workrooms-3';
+export const COMPANION_INTELLIGENCE_VERSION = 'sovereign-command-network-4';
 
 const COUNSEL_SIGNALS =
   /\b(?:world\s+class|class|rank|level|xp|progress|progression|forecast|how\s+long|timeline|pace|plan|strategy|strategize|analy[sz]e|compare|trade-?off|why|should\s+i|what\s+should|recommend|decision|prioriti[sz]e|streak|challenge|trial|discipline|balanced\s+stats?|youtube|channel|content|video|stream|hook|thumbnail|audience|creator|a\.?r\.?c\.?|arc|canon|dossier|lore|plot|character|worldbuild(?:ing)?|arts?\s+codex)\b/i;
@@ -27,6 +27,9 @@ const CAMPAIGN_WORK_SIGNALS =
 
 const CONTENT_WORK_SIGNALS =
   /\b(?:video|short|livestream|stream|post|upload|content\s+idea|hook|thumbnail|creator\s+forge|production\s+board)\b/i;
+
+const CREATOR_UPDATE_SIGNALS =
+  /\b(?:move|mark|set|update|change|advance|pause|publish|schedule|next\s+(?:action|step)|production\s+stage|status)\b/i;
 
 const RECIPE_WORK_SIGNALS =
   /\b(?:new\s+recipe|create\s+(?:me\s+)?a\s+recipe|make\s+(?:me\s+)?a\s+recipe|add\s+(?:it|this|that|a\s+recipe)|save\s+(?:it|this|that|a\s+recipe)|private\s+grimoire|ingredients?|servings?|meal\s+idea)\b/i;
@@ -74,9 +77,21 @@ export function selectIntelligenceWorkload(payload) {
   }
 
   if (payload.audience === 'haven' || payload.audience === 'party') {
+    const hasKnownCreatorTarget =
+      Array.isArray(payload.context?.specialists?.creator?.targeting?.requestedProjectTitles) &&
+      payload.context.specialists.creator.targeting.requestedProjectTitles.length > 0;
     const campaignFollowUp =
       CAMPAIGN_WORK_SIGNALS.test(previousCompanion) &&
       (proposing || CAMPAIGN_WORK_SIGNALS.test(recent));
+    if (
+      proposing &&
+      CREATOR_UPDATE_SIGNALS.test(current) &&
+      (hasKnownCreatorTarget ||
+        CONTENT_WORK_SIGNALS.test(recent) ||
+        CONTENT_WORK_SIGNALS.test(previousCompanion))
+    ) {
+      return 'creator-update';
+    }
     if (CAMPAIGN_WORK_SIGNALS.test(current) || campaignFollowUp) return 'campaign-forge';
     const contentFollowUp = CONTENT_WORK_SIGNALS.test(previousCompanion) && proposing;
     if ((CONTENT_WORK_SIGNALS.test(current) && proposing) || contentFollowUp) {
@@ -119,6 +134,7 @@ const WORKLOAD_OUTPUT_BUDGETS = {
   'recipe-forge': 5_000,
   'kitchen-coach': 3_200,
   'content-forge': 4_800,
+  'creator-update': 4_200,
   'campaign-forge': 8_000,
   'arc-forge': 6_000,
   'ledger-review': 5_000,
@@ -539,15 +555,16 @@ Rules:
 - The app's progression rules are authoritative. Never claim that XP, a mission, or the save has already changed. In Command Mode you may prepare one explicitly allowed on-device action, but the Hunter must confirm it in the app before anything changes.
 - Never use saved, added, scheduled, confirmed, completed, synchronized, or other past-tense mutation language merely because the Hunter typed “I confirm.” Until the client returns a locally generated success acknowledgement after a verified write, describe the action only as a preview waiting for confirmation.
 - Specialist context may appear in progressContext.specialists. Use only the domain relevant to the addressed companion or the party's actual question; do not dump unrelated records into the reply.
+- The party is one coordinated system, not twelve isolated bots. When the addressed companion cannot own the Hunter's requested specialist work, return one transparent handoff to the correct enabled companion instead of ending at "go ask them." The handoff prompt must preserve the Hunter's actual intent and necessary details, but it never claims a second conversation happened or changes app data. Do not hand off ordinary questions the current companion can answer well. Snow is the coordinator: she may frame why a specialist should take the next turn, but she never impersonates that specialist's record authority.
 - Selah may recommend Bible passages, explain themes, compare interpretations at a general level, and connect a situation to Scripture with warmth and practical discernment. Never invent a verse or present a paraphrase as an exact quotation. When exact wording matters and no translation text is supplied, give the reference, label any paraphrase, and note that wording varies by translation. Do not weaponize Scripture, declare God's private intent, replace a pastor or clinician, or turn uncertainty into spiritual failure. progressContext.specialists.sanctuary deliberately excludes the Hunter's written reflection and prayer.
 - Cassian may analyze only progressContext.specialists.treasury. If sharingEnabled is false, say that aggregate-only Ledger Counsel can be enabled in AI Headquarters; do not fish for or infer amounts. If enabled, distinguish facts from estimates, show the arithmetic behind important recommendations, preserve emergency and minimum-payment constraints, and frame guidance as general education rather than professional financial advice. Itemized labels, notes, merchants, and account credentials are never available.
 - Rook, Ember, and Mira may use progressContext.specialists.training to coach from real recent sessions and the locally approved summary of Body Diagnostics without inventing loads, injuries, measurements, or completions. When this week's diagnostic is due, they may call for the evidence directly and firmly, but never shame appearance or claim they can see an image that is not in the active request. Mira prioritizes controlled range, breath, and pain-free movement; Rook prioritizes executable next steps; Ember challenges avoidance without attacking the Hunter. Body Diagnostic photos are never included in conversation context.
 - Cipher may use progressContext.specialists.campaigns to identify the next incomplete milestone, expose decorative planning, and construct concrete sequences without inventing completion. Snow may synthesize across the supplied specialist snapshots when the Hunter asks a cross-System question.
-- Quill may use only progressContext.specialists.arc for established A.R.C. facts. He must cite the supplied source label in natural language, label every inference or new idea, and say which dossier or canon source is missing when retrieval does not support the answer. He may brainstorm boldly after the grounded answer, but a proposal is never canon until the Hunter approves and files it. Snow may join A.R.C. conversations as an enthusiastic fan and emotional-story reader, but must obey the same source boundary.
+- Quill may use only progressContext.specialists.arc for established A.R.C. facts. He must cite the supplied source label in natural language, label every inference or new idea, and say which dossier or canon source is missing when retrieval does not support the answer. He may brainstorm boldly after the grounded answer. When the Hunter explicitly asks Quill to file a new lore note, he may prepare one Canon Vault preview; it is never canon until the Hunter confirms the verified local save. Snow may join A.R.C. conversations as an enthusiastic fan and emotional-story reader, but must obey the same source boundary.
 - The A.R.C. Story Room is Quill's focused conversation workroom, not a folder, vault, library, or storage location. Character dossiers live in the Character Library and canon sources live in the Canon Vault. Never say a record is absent from, uploaded to, or stored in the Story Room.
 - For A.R.C. work, progressContext.specialists.arc.targeting is authoritative. When requestedCharacterNames or requestedCanonSourceTitles is non-empty, review those exact retrieved records first and never substitute a related character merely because another dossier mentions the target. The library indexes prove which records exist; if an indexed record was not retrieved, describe that as a retrieval miss rather than a missing upload.
 - For Creator Forge work, progressContext.specialists.creator.targeting is authoritative. When requestedProjectTitles is non-empty, treat those exact active projects as the primary board records. The project index proves which operations exist; never call an indexed operation absent, create a duplicate merely because it fell outside the recent-project window, or claim a board change before confirmation.
-- Vesper may use progressContext.specialists.creator to evaluate the real channel baseline, active production stages, hooks, audience promises, upload target, and recent releases. She must distinguish supplied metrics from hypotheses, never guarantee performance or invent analytics, and should end creator strategy with a specific next production move. Cipher may join creator discussions as the systems counterpart but should not replace Vesper's audience and performance expertise.
+- Vesper may use progressContext.specialists.creator to evaluate the real channel baseline, active production stages, hooks, audience promises, upload target, and recent releases. She must distinguish supplied metrics from hypotheses, never guarantee performance or invent analytics, and should end creator strategy with a specific next production move. When the Hunter explicitly names an existing project and asks to move its stage, replace its next action, or append a board note, Vesper may prepare one exact-project update preview. Cipher may join creator discussions as the systems counterpart but should not replace Vesper's audience and performance expertise.
 - Saffron may use progressContext.kitchen to walk the Hunter through the exact current order one step at a time, answer cooking interruptions, and adapt with safe substitutions. A generated recipe is a draft until the Hunter confirms it into the Private Grimoire.
 - Kairo may use only progressContext.calendar for schedule facts. The supplied timeZone, now, today, upcoming records, conflict list, nextEvent, and focusWindows are authoritative. He must state exact dates and times when answering scheduling questions, name missing time details instead of guessing, and never claim access to a phone calendar, external calendar, alarm, push notification, or background process. Snow may consult the same calendar context and report Kairo's schedule truth in her own voice, but she may not contradict or invent it. A calendar mutation is only a preview until the Hunter confirms it in the app.
 - Never shame, insult, manipulate, threaten abandonment, or treat struggle as a moral defect.
@@ -588,13 +605,13 @@ export function buildSystemInstructions(
 
 function buildFocusedWorkloadInstruction(workload, commandMode) {
   if (workload === 'conversation' || workload === 'party-council') {
-    return `Focused workroom: ${workload === 'party-council' ? 'Party Council' : 'Companion Conversation'}. Return only title, replies, and memoryCandidates. Answer the Hunter naturally with the supplied context and recent conversation. This transmission does not prepare an app mutation; if the Hunter wants a concrete System change, explain the needed confirmation naturally.`;
+    return `Focused workroom: ${workload === 'party-council' ? 'Party Council' : 'Companion Conversation'}. Return only title, replies, memoryCandidates, and handoff. Answer the Hunter naturally with the supplied context and recent conversation. This transmission does not prepare an app mutation. When a different enabled companion clearly owns the requested next step, prepare one concise handoff instead of leaving the Hunter at a verbal referral; otherwise return an empty handoff.`;
   }
   if (workload === 'calendar-counsel') {
-    return `Focused workroom: Calendar Counsel. Return only title, replies, and memoryCandidates. Use progressContext.calendar as the entire source of schedule truth. Lead with exact dates and local times, name conflicts and realistic open windows, distinguish scheduled facts from suggestions, and never imply that a question changed the calendar.`;
+    return `Focused workroom: Calendar Counsel. Return only title, replies, memoryCandidates, and handoff. Use progressContext.calendar as the entire source of schedule truth. Lead with exact dates and local times, name conflicts and realistic open windows, distinguish scheduled facts from suggestions, and never imply that a question changed the calendar.`;
   }
   if (workload === 'calendar-command') {
-    return `Focused workroom: Calendar Command. Return only title, replies, memoryCandidates, and calendar.
+    return `Focused workroom: Calendar Command. Return only title, replies, memoryCandidates, handoff, and calendar.
 - Prepare exactly one create, update, or cancel preview only when the Hunter clearly requested that change and every required detail is known. A preview never becomes real until the Hunter confirms it in the app.
 - Use progressContext.calendar.timeZone, now, today, and upcoming. Convert resolved dates and times into ISO-8601 startAt and endAt values. Repeat the human-readable date, local time, and duration in the reply and confirmation.
 - A create needs a title, start, end, category, recurrence, and recurrenceInterval. Never guess AM versus PM, date, duration, location, recurrence, or which similarly named event the Hunter means. Ask one concise follow-up and return an empty calendar object when a material detail is missing.
@@ -607,30 +624,40 @@ function buildFocusedWorkloadInstruction(workload, commandMode) {
 - If no complete mutation should be proposed, set action, eventId, title, description, category, startAt, endAt, recurrence, recurrenceEndsOn, location, linkedCompanionId, linkedRealm, and confirmation to empty strings; set allDay false and recurrenceInterval 0.`;
   }
   if (workload === 'arc-forge') {
-    return `Focused workroom: A.R.C. Story Room. Return only title, replies, and memoryCandidates. Give Quill enough room for grounded canon recall, continuity analysis, dossier development, or story invention while clearly separating established canon, inference, and new ideas. If progressContext.specialists.arc.targeting names an exact dossier or source, begin with that record and cite its source label; do not replace it with adjacent lore. Story Room names this conversation mode only—storage is the Character Library and Canon Vault. Do not prepare unrelated System mutations in this response.`;
+    return `Focused workroom: A.R.C. Story Room. Return only title, replies, memoryCandidates, handoff, and arcNote.
+- Give Quill enough room for grounded canon recall, continuity analysis, dossier development, or story invention while clearly separating established canon, inference, and new ideas. If progressContext.specialists.arc.targeting names an exact dossier or source, begin with that record and cite its source label; do not replace it with adjacent lore.
+- When the Hunter explicitly asks Quill to save, file, record, or add a newly established lore note, prepare one complete Canon Vault preview with a clear title, one valid source kind, self-contained text, relevant tags, named characters, and a confirmation question. Do not overwrite a character dossier or existing source, and do not file speculative brainstorming unless the Hunter clearly chose it as canon.
+- If the Hunter is still discussing, reviewing, or brainstorming, return empty arcNote fields. Story Room names this conversation mode only—storage is the Character Library and Canon Vault. Do not prepare unrelated System mutations in this response.`;
   }
   if (workload === 'ledger-review') {
-    return `Focused workroom: Ledger Counsel. Return only title, replies, and memoryCandidates. Cassian may build a complete financial explanation or plan from the supplied calculated totals and targets, but must never invent transactions, balances, merchant details, or account access. Do not prepare unrelated System mutations in this response.`;
+    return `Focused workroom: Ledger Counsel. Return only title, replies, memoryCandidates, and handoff. Cassian may build a complete financial explanation or plan from the supplied calculated totals and targets, but must never invent transactions, balances, merchant details, or account access. Do not prepare unrelated System mutations in this response.`;
   }
   if (workload === 'recipe-forge') {
-    return `Focused workroom: Saffron's Recipe Forge. Return only title, replies, memoryCandidates, and recipe.
+    return `Focused workroom: Saffron's Recipe Forge. Return only title, replies, memoryCandidates, handoff, and recipe.
 - ${commandMode === 'propose' ? 'Prepare' : 'Discuss'} one complete recipe only when the Hunter has supplied enough direction. If direction is missing, ask one natural follow-up and return an empty recipe.
 - A complete draft needs concrete quantities, ordered steps, equipment, plating guidance, storage guidance, conservative food-safety guidance, and one visible confirmation before it enters the Private Grimoire.
 - Preserve every stated food boundary. Never invent an allergy, dietary restriction, ingredient availability, medical claim, or completion.
 - Use progressContext.kitchen.savedRecipeNames to avoid duplicates. If no recipe should be proposed, return recipe strings empty, numbers 0, and arrays empty.`;
   }
   if (workload === 'kitchen-coach') {
-    return `Focused workroom: Saffron's Cooking Console. Return only title, replies, and memoryCandidates. Use progressContext.kitchen.todayOrder exactly, track the current step through recentConversation, answer interruptions naturally, and never invent a checked ingredient, finished step, completion, replacement meal, or new recipe.`;
+    return `Focused workroom: Saffron's Cooking Console. Return only title, replies, memoryCandidates, and handoff. Use progressContext.kitchen.todayOrder exactly, track the current step through recentConversation, answer interruptions naturally, and never invent a checked ingredient, finished step, completion, replacement meal, or new recipe.`;
   }
   if (workload === 'content-forge') {
-    return `Focused workroom: Creator Forge. Return only title, replies, memoryCandidates, and content.
+    return `Focused workroom: Creator Forge. Return only title, replies, memoryCandidates, handoff, and content.
 - ${commandMode === 'propose' ? 'Prepare' : 'Discuss'} one concrete content operation only when the Hunter's direction is sufficient. A short follow-up may answer Vesper's prior question.
 - Preserve the Hunter's idea while supplying a working title, platform, format, pillar, honest hook, audience promise, one physical nextAction, useful notes, and one visible confirmation.
 - Use supplied Studio evidence and active projects without inventing analytics, audience feedback, permissions, footage, deals, or completed work.
 - If direction is missing, ask one natural follow-up and return empty content fields.`;
   }
+  if (workload === 'creator-update') {
+    return `Focused workroom: Creator Forge Board Update. Return only title, replies, memoryCandidates, handoff, and creatorUpdate.
+- Update exactly one existing project only when the Hunter clearly asks Vesper to change its production stage, next action, or append a board note. Copy projectId and projectTitle from the exact matched record in progressContext.specialists.creator; never invent or loosely guess an ID.
+- Preserve every field the Hunter did not ask to change. Use an empty status, nextAction, or notesAppend for each untouched field. At least one of those three fields must change.
+- Never mark a project published, scheduled, or otherwise advanced merely because Vesper recommended the step. The complete update remains a preview until the Hunter confirms it in the app.
+- If the exact project is ambiguous or absent, ask one concise follow-up and return empty creatorUpdate fields.`;
+  }
   if (workload === 'campaign-forge') {
-    return `Focused workroom: Creator Reawakening. Return only title, replies, memoryCandidates, and campaign.
+    return `Focused workroom: Creator Reawakening. Return only title, replies, memoryCandidates, handoff, and campaign.
 - ${commandMode === 'propose' ? 'Prepare' : 'Discuss'} one deliberate multi-release campaign when the Hunter's direction is sufficient. Treat a short answer as the continuation of Vesper's most recent campaign question.
 - Match the requested scale instead of forcing one fixed template. A campaign may span 1 to 12 weeks and contain 2 to 12 distinct operations. Keep the sequence focused enough to execute; do not inflate it merely because room is available.
 - Use the supplied 28/90/365-day history, Content Vault, current focus, and active projects as evidence when available. Treat patterns as hypotheses, not guarantees.
@@ -645,9 +672,11 @@ export function buildCommandInstruction(commandMode, workload = 'conversation') 
   const focusedInstruction = buildFocusedWorkloadInstruction(workload, commandMode);
   if (focusedInstruction) return focusedInstruction;
   if (commandMode !== 'propose') {
-    return `Command Mode is disabled. Return command.actionId, command.summary, and command.confirmation as empty strings. Set command.companionId to snow. Return operation.kind, operation.trainingLocation, operation.foodConstraints, operation.sanctuaryMode, operation.primaryConcern, operation.secondaryConcern, operation.summary, and operation.confirmation as empty strings; set operation.companionId to snow and all three operation include flags to false. Return recipe.name and every other recipe string as empty, recipe numbers as 0, and recipe arrays empty. Return every content string as empty. Return campaign.name, campaign.strategy, and campaign.confirmation as empty strings, campaign.weeks as 0, and campaign.operations as an empty array. Return calendar strings, calendar.linkedCompanionId, and calendar.linkedRealm empty, calendar.allDay false, and calendar.recurrenceInterval 0.`;
+    return `Command Mode is disabled. Return handoff strings empty. Return creatorUpdate and arcNote strings empty and their arrays empty. Return command.actionId, command.summary, and command.confirmation as empty strings. Set command.companionId to snow. Return operation.kind, operation.trainingLocation, operation.foodConstraints, operation.sanctuaryMode, operation.primaryConcern, operation.secondaryConcern, operation.summary, and operation.confirmation as empty strings; set operation.companionId to snow and all three operation include flags to false. Return recipe.name and every other recipe string as empty, recipe numbers as 0, and recipe arrays empty. Return every content string as empty. Return campaign.name, campaign.strategy, and campaign.confirmation as empty strings, campaign.weeks as 0, and campaign.operations as an empty array. Return calendar strings, calendar.linkedCompanionId, and calendar.linkedRealm empty, calendar.allDay false, and calendar.recurrenceInterval 0.`;
   }
   return `Command Mode is active. The only actions you may prepare are listed in progressContext.commands.allowedActions.
+- If another enabled specialist clearly owns the requested work, use handoff instead of pretending the addressed companion can perform it. Set all handoff strings empty when no relay is needed. A handoff is read-only and never replaces the confirmation required by the specialist's eventual proposal.
+- Outside the focused Creator Board Update and A.R.C. Story Room workrooms, return creatorUpdate and arcNote strings empty and their arrays empty.
 - Propose an action only when the Hunter clearly asks to perform that exact change now. Questions, hypotheticals, planning, reports, and vague wishes are not action requests.
 - Copy one actionId exactly from the allowed list. Never invent, combine, infer, or alter an action ID. If no listed action exactly matches the request, leave the command strings empty and explain the limitation naturally in the reply.
 - Distinguish complete, skipped, failed, reopened, and restored precisely. Do not turn "I might skip" into a command. Do not choose failure merely because completion is unavailable.
@@ -710,6 +739,73 @@ const responseSchema = {
         required: ['fact', 'category'],
         additionalProperties: false,
       },
+    },
+    handoff: {
+      type: 'object',
+      properties: {
+        companionId: { type: 'string', enum: ['', ...companionIds] },
+        summary: { type: 'string', maxLength: 240 },
+        prompt: { type: 'string', maxLength: 800 },
+      },
+      required: ['companionId', 'summary', 'prompt'],
+      additionalProperties: false,
+    },
+    creatorUpdate: {
+      type: 'object',
+      properties: {
+        projectId: { type: 'string', maxLength: 200 },
+        projectTitle: { type: 'string', maxLength: 180 },
+        status: {
+          type: 'string',
+          enum: [
+            '',
+            'idea',
+            'script',
+            'record',
+            'edit',
+            'thumbnail',
+            'scheduled',
+            'published',
+            'paused',
+          ],
+        },
+        nextAction: { type: 'string', maxLength: 1_000 },
+        notesAppend: { type: 'string', maxLength: 1_500 },
+        confirmation: { type: 'string', maxLength: 320 },
+      },
+      required: [
+        'projectId',
+        'projectTitle',
+        'status',
+        'nextAction',
+        'notesAppend',
+        'confirmation',
+      ],
+      additionalProperties: false,
+    },
+    arcNote: {
+      type: 'object',
+      properties: {
+        title: { type: 'string', maxLength: 240 },
+        kind: {
+          type: 'string',
+          enum: ['', 'world-lore', 'faction', 'location', 'timeline', 'plot', 'reference'],
+        },
+        text: { type: 'string', maxLength: 12_000 },
+        tags: {
+          type: 'array',
+          maxItems: 12,
+          items: { type: 'string', minLength: 1, maxLength: 120 },
+        },
+        characterNames: {
+          type: 'array',
+          maxItems: 20,
+          items: { type: 'string', minLength: 1, maxLength: 160 },
+        },
+        confirmation: { type: 'string', maxLength: 320 },
+      },
+      required: ['title', 'kind', 'text', 'tags', 'characterNames', 'confirmation'],
+      additionalProperties: false,
     },
     command: {
       type: 'object',
@@ -983,6 +1079,9 @@ const responseSchema = {
     'title',
     'replies',
     'memoryCandidates',
+    'handoff',
+    'creatorUpdate',
+    'arcNote',
     'command',
     'operation',
     'recipe',
@@ -994,16 +1093,17 @@ const responseSchema = {
 };
 
 const focusedResponseFields = {
-  conversation: ['title', 'replies', 'memoryCandidates'],
-  'party-council': ['title', 'replies', 'memoryCandidates'],
-  'arc-forge': ['title', 'replies', 'memoryCandidates'],
-  'ledger-review': ['title', 'replies', 'memoryCandidates'],
-  'recipe-forge': ['title', 'replies', 'memoryCandidates', 'recipe'],
-  'kitchen-coach': ['title', 'replies', 'memoryCandidates'],
-  'content-forge': ['title', 'replies', 'memoryCandidates', 'content'],
-  'campaign-forge': ['title', 'replies', 'memoryCandidates', 'campaign'],
-  'calendar-counsel': ['title', 'replies', 'memoryCandidates'],
-  'calendar-command': ['title', 'replies', 'memoryCandidates', 'calendar'],
+  conversation: ['title', 'replies', 'memoryCandidates', 'handoff'],
+  'party-council': ['title', 'replies', 'memoryCandidates', 'handoff'],
+  'arc-forge': ['title', 'replies', 'memoryCandidates', 'handoff', 'arcNote'],
+  'ledger-review': ['title', 'replies', 'memoryCandidates', 'handoff'],
+  'recipe-forge': ['title', 'replies', 'memoryCandidates', 'handoff', 'recipe'],
+  'kitchen-coach': ['title', 'replies', 'memoryCandidates', 'handoff'],
+  'content-forge': ['title', 'replies', 'memoryCandidates', 'handoff', 'content'],
+  'creator-update': ['title', 'replies', 'memoryCandidates', 'handoff', 'creatorUpdate'],
+  'campaign-forge': ['title', 'replies', 'memoryCandidates', 'handoff', 'campaign'],
+  'calendar-counsel': ['title', 'replies', 'memoryCandidates', 'handoff'],
+  'calendar-command': ['title', 'replies', 'memoryCandidates', 'handoff', 'calendar'],
 };
 
 function selectResponseSchema(workload) {
@@ -2512,6 +2612,119 @@ async function handleAiChat(request, env, url) {
             category: candidate.category,
           }))
       : [];
+    const handoff = isObject(result.handoff) ? result.handoff : undefined;
+    const handoffCompanionId = String(handoff?.companionId ?? '').trim();
+    const handoffProposal =
+      handoff &&
+      companionIds.includes(handoffCompanionId) &&
+      enabledCompanionIds.includes(handoffCompanionId) &&
+      handoffCompanionId !== payload.audience &&
+      typeof handoff.summary === 'string' &&
+      handoff.summary.trim() &&
+      typeof handoff.prompt === 'string' &&
+      handoff.prompt.trim()
+        ? {
+            companionId: handoffCompanionId,
+            summary: handoff.summary.trim().slice(0, 240),
+            prompt: handoff.prompt.trim().slice(0, 800),
+          }
+        : undefined;
+    const creatorUpdate = isObject(result.creatorUpdate) ? result.creatorUpdate : undefined;
+    const knownCreatorProjects = Array.isArray(payload.context?.specialists?.creator?.projectIndex)
+      ? payload.context.specialists.creator.projectIndex.filter(
+          (project) =>
+            isObject(project) &&
+            typeof project.id === 'string' &&
+            typeof project.title === 'string',
+        )
+      : [];
+    const knownCreatorProject = knownCreatorProjects.find(
+      (project) => project.id === creatorUpdate?.projectId,
+    );
+    const creatorStatuses = new Set([
+      'idea',
+      'script',
+      'record',
+      'edit',
+      'thumbnail',
+      'scheduled',
+      'published',
+      'paused',
+    ]);
+    const creatorUpdateStatus = creatorStatuses.has(creatorUpdate?.status)
+      ? creatorUpdate.status
+      : '';
+    const creatorUpdateNextAction = String(creatorUpdate?.nextAction ?? '').trim();
+    const creatorUpdateNotes = String(creatorUpdate?.notesAppend ?? '').trim();
+    const creatorUpdateProposal =
+      payload.commandMode === 'propose' &&
+      workload === 'creator-update' &&
+      (payload.audience === 'haven' ||
+        (payload.audience === 'party' && enabledCompanionIds.includes('haven'))) &&
+      knownCreatorProject &&
+      knownCreatorProject.title === creatorUpdate?.projectTitle &&
+      (creatorUpdateStatus || creatorUpdateNextAction || creatorUpdateNotes) &&
+      typeof creatorUpdate.confirmation === 'string' &&
+      creatorUpdate.confirmation.trim()
+        ? {
+            projectId: knownCreatorProject.id,
+            projectTitle: knownCreatorProject.title.slice(0, 180),
+            status: creatorUpdateStatus,
+            nextAction: creatorUpdateNextAction.slice(0, 1_000),
+            notesAppend: creatorUpdateNotes.slice(0, 1_500),
+            confirmation: creatorUpdate.confirmation.trim().slice(0, 320),
+          }
+        : undefined;
+    const arcNote = isObject(result.arcNote) ? result.arcNote : undefined;
+    const arcNoteKinds = new Set([
+      'world-lore',
+      'faction',
+      'location',
+      'timeline',
+      'plot',
+      'reference',
+    ]);
+    const existingArcSourceTitles = new Set(
+      (Array.isArray(payload.context?.specialists?.arc?.library?.canonSourceIndex)
+        ? payload.context.specialists.arc.library.canonSourceIndex
+        : []
+      )
+        .filter((source) => isObject(source) && typeof source.title === 'string')
+        .map((source) => source.title.trim().toLowerCase()),
+    );
+    const arcNoteTitle = String(arcNote?.title ?? '').trim();
+    const arcNoteProposal =
+      payload.commandMode === 'propose' &&
+      workload === 'arc-forge' &&
+      (payload.audience === 'quill' ||
+        (payload.audience === 'party' && enabledCompanionIds.includes('quill'))) &&
+      arcNoteTitle &&
+      !existingArcSourceTitles.has(arcNoteTitle.toLowerCase()) &&
+      arcNoteKinds.has(arcNote?.kind) &&
+      typeof arcNote.text === 'string' &&
+      arcNote.text.trim() &&
+      typeof arcNote.confirmation === 'string' &&
+      arcNote.confirmation.trim()
+        ? {
+            title: arcNoteTitle.slice(0, 240),
+            kind: arcNote.kind,
+            text: arcNote.text.trim().slice(0, 12_000),
+            tags: Array.isArray(arcNote.tags)
+              ? [...new Set(arcNote.tags.map((tag) => String(tag).trim()).filter(Boolean))].slice(
+                  0,
+                  12,
+                )
+              : [],
+            characterNames: Array.isArray(arcNote.characterNames)
+              ? [
+                  ...new Set(
+                    arcNote.characterNames.map((name) => String(name).trim()).filter(Boolean),
+                  ),
+                ].slice(0, 20)
+              : [],
+            confirmation: arcNote.confirmation.trim().slice(0, 320),
+          }
+        : undefined;
     const allowedActions = Array.isArray(payload.context?.commands?.allowedActions)
       ? payload.context.commands.allowedActions.filter(
           (action) => isObject(action) && typeof action.actionId === 'string',
@@ -2877,13 +3090,44 @@ async function handleAiChat(request, env, url) {
       title: result.title.slice(0, 80),
       replies: result.replies.slice(0, payload.audience === 'party' ? 4 : 1),
       memoryCandidates,
-      commandProposal: operationProposal || calendarProposal ? undefined : commandProposal,
-      operationProposal: calendarProposal ? undefined : operationProposal,
-      recipeProposal: operationProposal || calendarProposal ? undefined : recipeProposal,
+      commandProposal:
+        operationProposal || calendarProposal || creatorUpdateProposal || arcNoteProposal
+          ? undefined
+          : commandProposal,
+      operationProposal:
+        calendarProposal || creatorUpdateProposal || arcNoteProposal
+          ? undefined
+          : operationProposal,
+      recipeProposal:
+        operationProposal || calendarProposal || creatorUpdateProposal || arcNoteProposal
+          ? undefined
+          : recipeProposal,
       contentProposal:
-        operationProposal || campaignProposal || calendarProposal ? undefined : contentProposal,
-      campaignProposal: operationProposal || calendarProposal ? undefined : campaignProposal,
+        operationProposal ||
+        campaignProposal ||
+        calendarProposal ||
+        creatorUpdateProposal ||
+        arcNoteProposal
+          ? undefined
+          : contentProposal,
+      campaignProposal:
+        operationProposal || calendarProposal || creatorUpdateProposal || arcNoteProposal
+          ? undefined
+          : campaignProposal,
       calendarProposal,
+      creatorUpdateProposal,
+      arcNoteProposal,
+      handoffProposal:
+        commandProposal ||
+        operationProposal ||
+        recipeProposal ||
+        contentProposal ||
+        campaignProposal ||
+        calendarProposal ||
+        creatorUpdateProposal ||
+        arcNoteProposal
+          ? undefined
+          : handoffProposal,
       usage: usageTotal,
     });
   } catch {
@@ -2895,6 +3139,161 @@ async function handleAiChat(request, env, url) {
       502,
     );
   }
+}
+
+const AI_TRANSMISSION_TTL_MS = 15 * 60 * 1000;
+
+async function aiTransmissionForUser(requestId, userId, env) {
+  return env.DB.prepare(
+    `SELECT request_id, status, response_status, result_json, expires_at
+     FROM ai_transmissions
+     WHERE request_id = ? AND user_id = ?`,
+  )
+    .bind(requestId, userId)
+    .first();
+}
+
+function completedTransmissionResponse(record) {
+  return new Response(record.result_json || '{}', {
+    status: Number(record.response_status) || 502,
+    headers: {
+      ...jsonHeaders,
+      'x-system-transmission-status': record.status,
+    },
+  });
+}
+
+async function processAiTransmission(requestId, userId, body, headers, env, url) {
+  let response;
+  try {
+    const chatUrl = new URL('/api/ai/chat', url.origin);
+    response = await handleAiChat(
+      new Request(chatUrl, {
+        method: 'POST',
+        headers,
+        body,
+      }),
+      env,
+      chatUrl,
+    );
+  } catch {
+    response = json(
+      {
+        code: 'transmission-interrupted',
+        message: 'The companion transmission was interrupted. Your local conversation is safe.',
+      },
+      502,
+    );
+  }
+  const resultJson = await response.text();
+  const now = new Date().toISOString();
+  await env.DB.prepare(
+    `UPDATE ai_transmissions
+     SET status = ?, response_status = ?, result_json = ?, updated_at = ?
+     WHERE request_id = ? AND user_id = ?`,
+  )
+    .bind(response.ok ? 'completed' : 'failed', response.status, resultJson, now, requestId, userId)
+    .run();
+}
+
+async function handleAiTransmissionStart(request, env, url, executionContext) {
+  if (!isSameOriginRequest(request, url)) {
+    return json(
+      { code: 'origin-denied', message: 'That transmission origin was not accepted.' },
+      403,
+    );
+  }
+  const userId = authenticatedUserId(request);
+  if (!userId) {
+    return json({ code: 'authentication-required', message: 'Sign in to The System first.' }, 401);
+  }
+  if (!env.DB) {
+    return json(
+      {
+        code: 'resumable-link-unavailable',
+        message: 'Resumable transmissions are not configured.',
+      },
+      503,
+    );
+  }
+  const requestId = String(request.headers.get('x-system-transmission-id') ?? '').trim();
+  if (!/^[a-zA-Z0-9_-]{20,100}$/.test(requestId)) {
+    return json(
+      { code: 'invalid-transmission-id', message: 'That transmission ID is not valid.' },
+      400,
+    );
+  }
+  const body = await request.text();
+  if (!body || new TextEncoder().encode(body).byteLength > 96 * 1024) {
+    return json({ code: 'message-too-large', message: 'That transmission is too large.' }, 413);
+  }
+  const now = new Date();
+  await env.DB.prepare('DELETE FROM ai_transmissions WHERE expires_at < ?')
+    .bind(now.toISOString())
+    .run();
+  const existing = await aiTransmissionForUser(requestId, userId, env);
+  if (existing) {
+    return existing.status === 'pending'
+      ? json({ requestId, status: 'pending' }, 202)
+      : completedTransmissionResponse(existing);
+  }
+  const expiresAt = new Date(now.getTime() + AI_TRANSMISSION_TTL_MS).toISOString();
+  await env.DB.prepare(
+    `INSERT INTO ai_transmissions
+      (request_id, user_id, status, response_status, result_json, created_at, updated_at, expires_at)
+     VALUES (?, ?, 'pending', NULL, NULL, ?, ?, ?)`,
+  )
+    .bind(requestId, userId, now.toISOString(), now.toISOString(), expiresAt)
+    .run();
+  const forwardedHeaders = new Headers(request.headers);
+  forwardedHeaders.set('content-type', 'application/json');
+  const operation = processAiTransmission(requestId, userId, body, forwardedHeaders, env, url);
+  if (executionContext?.waitUntil) executionContext.waitUntil(operation);
+  else await operation;
+  const completed = await aiTransmissionForUser(requestId, userId, env);
+  return completed && completed.status !== 'pending'
+    ? completedTransmissionResponse(completed)
+    : json({ requestId, status: 'pending' }, 202);
+}
+
+async function handleAiTransmissionStatus(request, env, url, requestId) {
+  if (!isSameOriginRequest(request, url)) {
+    return json(
+      { code: 'origin-denied', message: 'That transmission origin was not accepted.' },
+      403,
+    );
+  }
+  const userId = authenticatedUserId(request);
+  if (!userId) {
+    return json({ code: 'authentication-required', message: 'Sign in to The System first.' }, 401);
+  }
+  if (!env.DB) {
+    return json(
+      {
+        code: 'resumable-link-unavailable',
+        message: 'Resumable transmissions are not configured.',
+      },
+      503,
+    );
+  }
+  const record = await aiTransmissionForUser(requestId, userId, env);
+  if (!record) {
+    return json(
+      { code: 'transmission-expired', message: 'That transmission expired. Please send it again.' },
+      404,
+    );
+  }
+  if (Date.parse(record.expires_at) <= Date.now()) {
+    await env.DB.prepare('DELETE FROM ai_transmissions WHERE request_id = ? AND user_id = ?')
+      .bind(requestId, userId)
+      .run();
+    return json(
+      { code: 'transmission-expired', message: 'That transmission expired. Please send it again.' },
+      404,
+    );
+  }
+  if (record.status === 'pending') return json({ requestId, status: 'pending' }, 202);
+  return completedTransmissionResponse(record);
 }
 
 async function handleAiTranscription(request, env, url) {
@@ -3363,7 +3762,7 @@ async function handleAiRealtimeSession(request, env, url) {
 }
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, executionContext) {
     const url = new URL(request.url);
 
     if (url.pathname === '/api/health') {
@@ -3434,6 +3833,29 @@ export default {
         );
       }
       return handleAiChat(request, env, url);
+    }
+
+    if (url.pathname === '/api/ai/transmissions') {
+      if (request.method !== 'POST') {
+        return json(
+          { code: 'method-not-allowed', message: 'Use a secure POST transmission.' },
+          405,
+        );
+      }
+      return handleAiTransmissionStart(request, env, url, executionContext);
+    }
+
+    const transmissionMatch = url.pathname.match(
+      /^\/api\/ai\/transmissions\/([a-zA-Z0-9_-]{20,100})$/,
+    );
+    if (transmissionMatch) {
+      if (request.method !== 'GET') {
+        return json(
+          { code: 'method-not-allowed', message: 'Use a secure GET transmission check.' },
+          405,
+        );
+      }
+      return handleAiTransmissionStatus(request, env, url, transmissionMatch[1]);
     }
 
     if (url.pathname === '/api/ai/body-diagnostic') {

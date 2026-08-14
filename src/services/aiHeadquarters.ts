@@ -244,11 +244,7 @@ export interface AiProgressContext {
       retrievalQuery: string;
       targeting: {
         mode:
-          | 'exact-character'
-          | 'exact-source'
-          | 'conversation-carryover'
-          | 'relevance'
-          | 'browse';
+          'exact-character' | 'exact-source' | 'conversation-carryover' | 'relevance' | 'browse';
         requestedCharacterNames: string[];
         requestedCanonSourceTitles: string[];
         usedConversationCarryover: boolean;
@@ -406,6 +402,7 @@ export interface AiHeadquartersReply {
     | 'recipe-forge'
     | 'kitchen-coach'
     | 'content-forge'
+    | 'creator-update'
     | 'campaign-forge'
     | 'arc-forge'
     | 'ledger-review'
@@ -489,6 +486,36 @@ export interface AiHeadquartersReply {
     linkedCompanionId: CompanionId | '';
     linkedRealm:
       '' | 'missions' | 'training' | 'kitchen' | 'sanctuary' | 'creator' | 'arc' | 'treasury';
+    confirmation: string;
+  };
+  handoffProposal?: {
+    companionId: CompanionId;
+    summary: string;
+    prompt: string;
+  };
+  creatorUpdateProposal?: {
+    projectId: string;
+    projectTitle: string;
+    status:
+      | ''
+      | 'idea'
+      | 'script'
+      | 'record'
+      | 'edit'
+      | 'thumbnail'
+      | 'scheduled'
+      | 'published'
+      | 'paused';
+    nextAction: string;
+    notesAppend: string;
+    confirmation: string;
+  };
+  arcNoteProposal?: {
+    title: string;
+    kind: 'world-lore' | 'faction' | 'location' | 'timeline' | 'plot' | 'reference';
+    text: string;
+    tags: string[];
+    characterNames: string[];
     confirmation: string;
   };
   usage?: {
@@ -628,27 +655,64 @@ export async function requestAiHeadquartersReply(input: {
   context: AiProgressContext;
   commandMode?: 'none' | 'propose';
 }): Promise<AiHeadquartersReply> {
+  const requestBody = JSON.stringify({
+    audience: input.audience,
+    message: input.message,
+    history: input.history.slice(-16).map((item) => ({
+      role: item.role,
+      companionId: item.companionId,
+      message: item.message.slice(0, 4_000),
+    })),
+    context: input.context,
+    commandMode: input.commandMode ?? 'none',
+  });
   let response: Response;
   try {
-    response = await fetch('/api/ai/chat', {
+    const transmissionId =
+      typeof globalThis.crypto?.randomUUID === 'function'
+        ? globalThis.crypto.randomUUID()
+        : `system-${Date.now()}-${Math.random().toString(36).slice(2, 14)}`;
+    response = await fetch('/api/ai/transmissions', {
       method: 'POST',
       headers: {
         accept: 'application/json',
         'content-type': 'application/json',
+        'x-system-transmission-id': transmissionId,
       },
-      body: JSON.stringify({
-        audience: input.audience,
-        message: input.message,
-        history: input.history.slice(-16).map((item) => ({
-          role: item.role,
-          companionId: item.companionId,
-          message: item.message.slice(0, 4_000),
-        })),
-        context: input.context,
-        commandMode: input.commandMode ?? 'none',
-      }),
+      body: requestBody,
     });
-  } catch {
+    if (response.status === 503) {
+      const unavailable = await readJson(response.clone());
+      if (unavailable?.code === 'resumable-link-unavailable') {
+        response = await fetch('/api/ai/chat', {
+          method: 'POST',
+          headers: { accept: 'application/json', 'content-type': 'application/json' },
+          body: requestBody,
+        });
+      }
+    }
+    let checks = 0;
+    while (response.status === 202 && checks < 240) {
+      await new Promise((resolve) => globalThis.setTimeout(resolve, 1_500));
+      try {
+        response = await fetch(`/api/ai/transmissions/${encodeURIComponent(transmissionId)}`, {
+          headers: { accept: 'application/json' },
+          cache: 'no-store',
+        });
+      } catch {
+        checks += 1;
+        continue;
+      }
+      checks += 1;
+    }
+    if (response.status === 202) {
+      throw new AiLinkError(
+        'That transmission is still working in the background. Return to this conversation shortly.',
+        'transmission-pending',
+      );
+    }
+  } catch (error) {
+    if (error instanceof AiLinkError) throw error;
     throw new AiLinkError(
       'The online link could not be reached. Your message is still saved on this device.',
       'network',
@@ -717,6 +781,18 @@ export async function requestAiHeadquartersReply(input: {
     calendarProposal:
       payload.calendarProposal && typeof payload.calendarProposal === 'object'
         ? (payload.calendarProposal as AiHeadquartersReply['calendarProposal'])
+        : undefined,
+    handoffProposal:
+      payload.handoffProposal && typeof payload.handoffProposal === 'object'
+        ? (payload.handoffProposal as AiHeadquartersReply['handoffProposal'])
+        : undefined,
+    creatorUpdateProposal:
+      payload.creatorUpdateProposal && typeof payload.creatorUpdateProposal === 'object'
+        ? (payload.creatorUpdateProposal as AiHeadquartersReply['creatorUpdateProposal'])
+        : undefined,
+    arcNoteProposal:
+      payload.arcNoteProposal && typeof payload.arcNoteProposal === 'object'
+        ? (payload.arcNoteProposal as AiHeadquartersReply['arcNoteProposal'])
         : undefined,
   };
 }
