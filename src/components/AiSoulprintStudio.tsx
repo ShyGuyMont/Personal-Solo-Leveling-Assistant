@@ -173,6 +173,12 @@ export function AiSoulprintStudio({
             performance and chemistry; their established identity, factual grounding, and safety
             boundaries always remain intact.
           </p>
+          <p>
+            <strong>Soulprints shape who they are.</strong> The shared Living Intelligence layer
+            separately handles common-sense context, natural specialist relays, and proactive
+            suggestions across the whole party—so you do not need to repeat those instructions in
+            every companion profile.
+          </p>
           <div className="ai-soulprint-studio__roster" aria-label="Choose a companion to direct">
             {COMPANIONS.map((item) => (
               <button

@@ -27,6 +27,8 @@ describe('Awakened Intelligence progress context', () => {
       db.creatorSnapshots.clear(),
       db.creatorProjects.clear(),
       db.creatorVideoInsights.clear(),
+      db.calendarEvents.clear(),
+      db.agentMissions.clear(),
     ]);
   });
 
@@ -94,6 +96,64 @@ describe('Awakened Intelligence progress context', () => {
         never: 'Never sound corporate.',
       }),
     ]);
+  });
+
+  it('loads Snow calendar records only when the conversation actually needs the schedule', async () => {
+    const now = '2026-08-14T12:00:00.000Z';
+    await db.calendarEvents.put({
+      id: 'calendar:snow-context',
+      title: 'Budget call',
+      description: 'Review the payment timeline with Cassian.',
+      category: 'personal',
+      startAt: '2026-08-15T22:00:00.000Z',
+      endAt: '2026-08-15T23:00:00.000Z',
+      allDay: false,
+      recurrence: 'none',
+      recurrenceInterval: 1,
+      location: 'Home',
+      source: 'kairo',
+      linkedCompanionId: 'cassian',
+      linkedRealm: 'treasury',
+      status: 'scheduled',
+      createdAt: now,
+      updatedAt: now,
+    });
+    const settings = createDefaultSettings();
+    const shared = {
+      audience: 'snow' as const,
+      profile: {
+        id: 'primary' as const,
+        displayName: 'Jordan Hunter',
+        systemTitle: 'The Awakened',
+        startingFocus: 'balanced' as const,
+        createdAt: now,
+        equippedTitleId: 'newly-awakened',
+        cosmeticFrame: 'focus-balanced',
+        backgroundSigil: 'origin',
+      },
+      settings,
+      progression: createDefaultProgression(),
+      missions: [],
+      todayRecords: [],
+      stats: ALL_STATS.map(createInitialStat),
+      challenges: [],
+      systemDate: '2026-08-14' as const,
+      enabledCompanionIds: settings.enabledCompanionIds,
+    };
+
+    const casual = await buildAiProgressContext({
+      ...shared,
+      query: 'I need to plan with Cass about a frustrating payment problem.',
+    });
+    expect(casual.calendar.sharedWithScheduleKeeper).toBe(false);
+    expect(casual.calendar.upcoming).toEqual([]);
+
+    const scheduled = await buildAiProgressContext({
+      ...shared,
+      query: 'Snow, what is on my schedule tomorrow?',
+    });
+    expect(scheduled.calendar.sharedWithScheduleKeeper).toBe(true);
+    expect(scheduled.calendar.upcoming[0]?.title).toBe('Budget call');
   });
 
   it('delivers all twelve saved Director Notes to a full-party room without cross-room leakage', async () => {

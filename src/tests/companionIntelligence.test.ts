@@ -33,6 +33,7 @@ interface CompanionIntelligenceModule {
     enabledIds?: string[],
     room?: Record<string, unknown>,
   ) => string;
+  buildCommandInstruction: (commandMode: 'none' | 'propose', workload?: string) => string;
   buildSystemInstructions: (
     audience: string,
     enabledIds?: string[],
@@ -488,6 +489,70 @@ describe('Companion Soulprint intelligence', () => {
     expect(instructions).toContain('Snow must ask the single final consent question');
   });
 
+  it('keeps specialist identity without trapping casual or off-domain conversation', () => {
+    expect(
+      intelligence.selectIntelligenceRoute({
+        audience: 'kairo',
+        message: 'Saffron gave me a recipe idea. What do you think?',
+      }),
+    ).toMatchObject({ workload: 'conversation' });
+    expect(
+      intelligence.selectIntelligenceRoute({
+        audience: 'cassian',
+        message: 'How has your day been?',
+      }),
+    ).toMatchObject({ workload: 'conversation' });
+    expect(
+      intelligence.selectIntelligenceRoute({
+        audience: 'quill',
+        message: 'Rook is acting smug again.',
+      }),
+    ).toMatchObject({ workload: 'conversation' });
+    expect(
+      intelligence.selectIntelligenceRoute({
+        audience: 'kairo',
+        message: 'Am I free tomorrow evening?',
+      }),
+    ).toMatchObject({ workload: 'calendar-counsel' });
+  });
+
+  it('gives every companion the same natural scheduling and mission command fluency', () => {
+    for (const audience of intelligence.companionIds) {
+      expect(
+        intelligence.selectIntelligenceRoute({
+          audience,
+          message: 'Put a focused work session on my calendar tomorrow at 7 PM for one hour.',
+          commandMode: 'propose',
+        }),
+      ).toMatchObject({ workload: 'calendar-command' });
+      expect(
+        intelligence.selectIntelligenceRoute({
+          audience,
+          message: 'Assign me a new discipline mission.',
+          commandMode: 'propose',
+        }),
+      ).toMatchObject({ workload: 'system-command' });
+    }
+  });
+
+  it('makes natural speech, silent timezone context, and proactive team relays explicit', () => {
+    expect(intelligence.baseInstructions).toContain('not a status console');
+    expect(intelligence.baseInstructions).toContain('timezone as silent operating context');
+    expect(intelligence.baseInstructions).toContain('without saying "New York time,"');
+    expect(intelligence.baseInstructions).toContain(
+      'observations, shorthand, or follow-up answers',
+    );
+    expect(intelligence.baseInstructions).toContain('Use initiative without taking control away');
+    expect(intelligence.baseInstructions).toContain('Kairo handoff with Mira in participantIds');
+    expect(intelligence.baseInstructions).toContain('Do not wait for the Hunter to say');
+
+    const conversation = intelligence.buildCommandInstruction('propose', 'conversation');
+    expect(conversation).toContain('offer that next step in character');
+    expect(conversation).toContain('handoff.participantIds');
+    const calendar = intelligence.buildCommandInstruction('propose', 'calendar-counsel');
+    expect(calendar).toContain('Apply the supplied timezone silently');
+  });
+
   it('understands natural Companion Order verbs before calendar vocabulary', () => {
     for (const message of [
       'Assign me a one-time mobility mission.',
@@ -764,6 +829,9 @@ describe('Companion Soulprint intelligence', () => {
     expect(String(session.instructions)).toContain('Speak in English');
     expect(String(session.instructions)).toContain('Ignore background conversations');
     expect(String(session.instructions)).toContain('Command Link can prepare a confirmation');
+    expect(String(session.instructions)).toContain('not a voice interface reading a report');
+    expect(String(session.instructions)).toContain('timezone as silent local context');
+    expect(String(session.instructions)).toContain('naturally suggest the right specialist');
     expect(JSON.stringify(session)).not.toContain('test-key');
   });
 
@@ -1026,6 +1094,87 @@ describe('Companion Soulprint intelligence', () => {
         },
       ],
       usage: { cachedInputTokens: 60, reasoningTokens: 4 },
+    });
+  });
+
+  it('returns a coordinated training relay that can bring Kairo and Mira into one room', async () => {
+    let openAiBody: Record<string, unknown> | undefined;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_url: string, init: RequestInit) => {
+        openAiBody = JSON.parse(String(init.body)) as Record<string, unknown>;
+        return new Response(
+          JSON.stringify({
+            output: [
+              {
+                type: 'message',
+                content: [
+                  {
+                    type: 'output_text',
+                    text: JSON.stringify({
+                      title: 'Neck mobility check',
+                      replies: [
+                        {
+                          companionId: 'rook',
+                          message:
+                            'Yeah, do not bulldoze through that. Want me to bring Mira and Kairo in so she can own the mobility work and he can find a clean slot?',
+                          voiceSummary:
+                            'Do not bulldoze through it. I can bring Mira and Kairo in for a mobility check and a clean time slot.',
+                        },
+                      ],
+                      memoryCandidates: [],
+                      handoff: {
+                        companionId: 'kairo',
+                        participantIds: ['mira'],
+                        summary: 'Find protected time for a cautious Mira-led neck mobility check.',
+                        prompt:
+                          'The Hunter reported neck pain. Ask how it feels now, keep the work pain-free, let Mira own the mobility recommendation, and only prepare a calendar preview after timing is clear.',
+                      },
+                    }),
+                  },
+                ],
+              },
+            ],
+            usage: { input_tokens: 100, output_tokens: 60, total_tokens: 160 },
+          }),
+          { status: 200, headers: { 'content-type': 'application/json' } },
+        );
+      }),
+    );
+
+    const response = await intelligence.default.fetch(
+      new Request('https://system.test/api/ai/chat', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', origin: 'https://system.test' },
+        body: JSON.stringify({
+          audience: 'rook',
+          message: 'My neck has been hurting and feels tight.',
+          history: [],
+          context: {
+            party: { enabledCompanionIds: ['rook', 'mira', 'kairo', 'snow'] },
+            bondMemory: { enabled: false, approved: [] },
+          },
+          commandMode: 'propose',
+        }),
+      }),
+      { OPENAI_API_KEY: 'test-key', OPENAI_TEXT_MODEL: 'test-model' },
+    );
+
+    expect(response.status).toBe(200);
+    const responseFormat = openAiBody?.text as {
+      format: {
+        schema: {
+          properties: { handoff: { required: string[] } };
+        };
+      };
+    };
+    expect(responseFormat.format.schema.properties.handoff.required).toContain('participantIds');
+    expect(await response.json()).toMatchObject({
+      handoffProposal: {
+        companionId: 'kairo',
+        participantIds: ['mira'],
+        summary: 'Find protected time for a cautious Mira-led neck mobility check.',
+      },
     });
   });
 

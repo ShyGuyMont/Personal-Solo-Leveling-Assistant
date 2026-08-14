@@ -1,4 +1,4 @@
-export const APP_VERSION = '9.5.0';
+export const APP_VERSION = '9.6.0';
 export const DATABASE_SCHEMA_VERSION = 28;
 export const SAVE_FORMAT_VERSION = 28;
 
@@ -9,6 +9,20 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 9.6.0 · Living Initiative',
+    detail:
+      'The twelve companions now speak with more natural shared judgment: they silently understand local context, recognize ordinary intent across specialist lanes, and can offer the right coordinated next step without waiting for command syntax.',
+    points: [
+      'Soulprint Studio remains the personality director—humor, care, challenge, conflict, and party chemistry—while Living Intelligence now governs shared common sense, initiative, and operational coordination for all twelve companions.',
+      'Kairo treats the saved timezone as silent context and uses familiar local dates and times without repeatedly announcing New York or Eastern time unless travel, daylight-saving ambiguity, or another timezone makes the label useful.',
+      'Direct conversations no longer trap Kairo, Cassian, or Quill inside their specialist workrooms when the Hunter is simply talking or asking about another domain; they answer normally and relay only when a specialist or protected record truly needs to take over.',
+      'Companions can notice a concrete next step from an observation, shorthand, or follow-up answer, offer it in their own voice, and carry the full brief into one visible Party Relay instead of requiring the Hunter to translate a natural request into System vocabulary.',
+      'Party Relays can now bring a small coordinated team into the same conversation. A training concern can invite Kairo and Mira together while preserving the original companion, then add Snow automatically if Calendar Council is accepted.',
+      'Training conversations treat soreness, tightness, mobility limits, and ordinary pain reports as self-reported context: the crew responds first, may offer a cautious Mira session, and escalates serious warning signs toward appropriate professional care rather than extra intensity.',
+      'Initiative remains consent-based. Suggestions and relays never schedule, save, assign, complete, or award anything; the existing visible confirmation walls remain authoritative for every app change.',
+    ],
+  },
   {
     title: 'Version 9.5.0 · Earned Commitments',
     detail:

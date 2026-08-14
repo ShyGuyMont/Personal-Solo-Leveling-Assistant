@@ -337,4 +337,49 @@ describe('AI Headquarters local history', () => {
       commandMode: 'propose',
     });
   });
+
+  it('compacts an oversized private context packet without rejecting the Hunter message', async () => {
+    let requestBody: Record<string, unknown> | undefined;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_url: string, init: RequestInit) => {
+        requestBody = JSON.parse(String(init.body)) as Record<string, unknown>;
+        return new Response(
+          JSON.stringify({
+            model: 'gpt-5.6-terra',
+            route: 'counsel',
+            reasoningEffort: 'medium',
+            title: 'Snow',
+            replies: [{ companionId: 'snow', message: 'Cassian can help us map it cleanly.' }],
+            memoryCandidates: [],
+          }),
+          { status: 200, headers: { 'content-type': 'application/json' } },
+        );
+      }),
+    );
+    const oversizedContext = {
+      calendar: {
+        upcoming: Array.from({ length: 100 }, (_, index) => ({
+          eventId: `event-${index}`,
+          title: `Event ${index}`,
+          description: 'x'.repeat(1_000),
+        })),
+      },
+    } as unknown as AiProgressContext;
+    const message = 'I have some payments to clear by September 9th. I need to plan with Cassian.';
+
+    await requestAiHeadquartersReply({
+      audience: 'snow',
+      message,
+      history: [],
+      context: oversizedContext,
+      transmissionId: 'transmission_oversized_context_test',
+    });
+
+    expect(requestBody?.message).toBe(message);
+    expect(JSON.stringify(requestBody?.context).length).toBeLessThanOrEqual(44_000);
+    expect(
+      (requestBody?.context as { calendar: { upcoming: unknown[] } }).calendar.upcoming.length,
+    ).toBeLessThan(100);
+  });
 });

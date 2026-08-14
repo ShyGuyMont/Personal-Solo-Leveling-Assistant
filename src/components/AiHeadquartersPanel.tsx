@@ -1607,7 +1607,15 @@ export function AiHeadquartersPanel() {
                   />
                   <div>
                     <strong>{getCompanion(pendingHandoff.companionId).name}</strong>
-                    <small>Receives the exact brief · no hidden action</small>
+                    <small>
+                      Receives the exact brief
+                      {(pendingHandoff.participantIds?.length ?? 0) > 0
+                        ? ` with ${(pendingHandoff.participantIds ?? [])
+                            .map((companionId) => getCompanion(companionId).name)
+                            .join(', ')}`
+                        : ''}{' '}
+                      · no hidden action
+                    </small>
                   </div>
                 </div>
                 <p>{pendingHandoff.summary}</p>
@@ -1618,9 +1626,12 @@ export function AiHeadquartersPanel() {
                     type="button"
                     onClick={() => {
                       const relay = pendingHandoff;
+                      const relayCompanionIds = [
+                        ...new Set([relay.companionId, ...(relay.participantIds ?? [])]),
+                      ];
                       const joined = addAiConversationParticipants(
                         currentConversation,
-                        [relay.companionId],
+                        relayCompanionIds,
                         undefined,
                         enabledCompanions.map((companion) => companion.id),
                       );
@@ -1631,7 +1642,7 @@ export function AiHeadquartersPanel() {
                         leadCompanionId: relay.companionId,
                         partyEvent: {
                           kind: 'handoff',
-                          companionIds: [relay.companionId],
+                          companionIds: relayCompanionIds,
                           initiatedBy:
                             currentConversation.audience === 'party'
                               ? 'hunter'
@@ -1641,7 +1652,10 @@ export function AiHeadquartersPanel() {
                       });
                     }}
                   >
-                    <ArrowUpRight size={16} /> Bring specialist into chat
+                    <ArrowUpRight size={16} /> Bring{' '}
+                    {(pendingHandoff.participantIds?.length ?? 0) > 0
+                      ? 'team into chat'
+                      : 'specialist into chat'}
                   </button>
                   <button
                     className="button button--ghost"

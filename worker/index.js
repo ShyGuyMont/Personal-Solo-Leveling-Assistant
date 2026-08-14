@@ -11,7 +11,7 @@ export const YOUTUBE_READONLY_SCOPES = [
 
 const YOUTUBE_OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
 
-export const COMPANION_INTELLIGENCE_VERSION = 'earned-calendar-council-9';
+export const COMPANION_INTELLIGENCE_VERSION = 'living-initiative-10';
 
 function requestedPartyParticipants(payload) {
   if (payload.audience !== 'party') return [payload.audience];
@@ -27,7 +27,7 @@ function partyIncludes(payload, companionId) {
 }
 
 const COUNSEL_SIGNALS =
-  /\b(?:world\s+class|class|rank|level|xp|progress|progression|forecast|how\s+long|timeline|pace|plan|strategy|strategize|analy[sz]e|compare|trade-?off|why|should\s+i|what\s+should|recommend|decision|prioriti[sz]e|streak|challenge|trial|discipline|balanced\s+stats?|youtube|channel|content|video|stream|hook|thumbnail|audience|creator|a\.?r\.?c\.?|arc|canon|dossier|lore|plot|character|worldbuild(?:ing)?|arts?\s+codex)\b/i;
+  /\b(?:world\s+class|class|rank|level|xp|progress|progression|forecast|how\s+long|timeline|pace|plan|strategy|strategize|analy[sz]e|compare|trade-?off|why|should\s+i|what\s+should|recommend|decision|prioriti[sz]e|streak|challenge|trial|discipline|balanced\s+stats?|pain|painful|hurt|hurting|ache|aching|sore|soreness|tight|tightness|stiff|stiffness|mobility|injury|training|workout|recovery|money|budget|ledger|finance|recipe|cook|meal|scripture|faith|calendar|schedule|youtube|channel|content|video|stream|hook|thumbnail|audience|creator|a\.?r\.?c\.?|arc|canon|dossier|lore|plot|character|worldbuild(?:ing)?|arts?\s+codex)\b/i;
 
 const COMMAND_SIGNALS =
   /\b(?:mark|complete|finish|check\s+off|skip|fail|failed|undo|reopen|restore|reactivate|put\s+back|record|log|track|add|assign|forge|make|give|save|create|set|update|change|edit|rename|move|reschedule|retire|archive|remove|delete|cancel|assemble|prepare|roll|load|wake|summon|gather)\b/i;
@@ -66,7 +66,7 @@ const ARC_WORK_SIGNALS =
   /\b(?:a\.?r\.?c\.?|canon|dossier|lore|plot|character\s+arc|worldbuild(?:ing)?|realm\s+modulation|nature\s+energy|arts?\s+codex)\b/i;
 
 const CALENDAR_WORK_SIGNALS =
-  /\b(?:calendar|schedule|agenda|appointment|meeting|event|availability|available|free\s+(?:time|window)|time\s+block|deadline|due\s+(?:date|time)|remind|recurr(?:ing|ence)|every\s+(?:day|week|month))\b/i;
+  /\b(?:calendar|schedule|agenda|appointment|meeting|event|availability|available|free|busy|open\s+(?:time|window)|time\s+block|deadline|due\s+(?:date|time)|remind|recurr(?:ing|ence)|every\s+(?:day|week|month)|what(?:'s|\s+is)\s+on\s+my\s+(?:day|week))\b/i;
 
 const CALENDAR_MUTATION_SIGNALS =
   /\b(?:add|create|schedule|book|put|block|reserve|move|change|update|reschedule|cancel|remove|delete)\b/i;
@@ -151,7 +151,7 @@ export function selectIntelligenceWorkload(payload) {
   ) {
     return 'kitchen-coach';
   }
-  if (payload.audience === 'quill') return 'arc-forge';
+  if (payload.audience === 'quill' && ARC_WORK_SIGNALS.test(recent)) return 'arc-forge';
   if (
     payload.audience === 'party' &&
     partyIncludes(payload, 'quill') &&
@@ -160,7 +160,8 @@ export function selectIntelligenceWorkload(payload) {
     return 'arc-forge';
   }
   if (
-    payload.audience === 'cassian' ||
+    (payload.audience === 'cassian' &&
+      /\b(?:money|budget|ledger|saving|spending|finance|debt|income)\b/i.test(recent)) ||
     (payload.audience === 'party' &&
       partyIncludes(payload, 'cassian') &&
       /\b(?:money|budget|ledger|saving|spending|finance|debt|income)\b/i.test(recent))
@@ -168,7 +169,7 @@ export function selectIntelligenceWorkload(payload) {
     return 'ledger-review';
   }
   if (
-    payload.audience === 'kairo' ||
+    (payload.audience === 'kairo' && CALENDAR_WORK_SIGNALS.test(recent)) ||
     ((payload.audience === 'snow' || payload.audience === 'party') &&
       (payload.audience !== 'party' ||
         partyIncludes(payload, 'snow') ||
@@ -607,13 +608,16 @@ Rules:
 - Use English throughout titles, replies, voice summaries, handoffs, and action previews unless the Hunter clearly asks for another language in the current message. Never switch languages because of noise, a malformed fragment, or an unrelated token.
 - Treat the Hunter as someone these companions already accompany, not as a customer meeting them for the first time. Use the supplied first name naturally but sparingly.
 - Preserve the selected companion's identity, rhythm, method, and boundaries. Vary openings, sentence shapes, emotional intensity, and advice patterns across companions and across turns.
+- Sound like a familiar person in an ongoing conversation, not a status console. Use contractions, ordinary transitions, and the occasional fragment when that companion would. Do not restate your title, domain, operating rules, source names, context field names, or safety boundaries unless the Hunter actually needs the distinction.
+- Treat supplied locale and timezone as silent operating context. Speak in the Hunter's local date and time without saying "New York time," "Eastern time," an IANA timezone, or "your local timezone" unless travel, daylight-saving ambiguity, or another timezone makes the label materially useful.
+- Do not narrate obvious inference. Prefer "Sunday at seven is open" over "According to the calendar context, Sunday at 7:00 PM New York time is available." Prefer "That sounds like Mira territory" over a formal specialist-routing explanation.
 - Use recent conversation history for natural continuity. The newest message may be a short answer to a companion's question, so resolve pronouns and missing details from the immediately preceding turns before asking the Hunter to repeat them. Do not repeat advice already given, claim memory outside the supplied history or approved Bond Memory, or say the Hunter previously shared something that is not present in either source.
 - Approved Bond Memory may appear in progressContext.bondMemory.approved. Treat those entries as user-approved durable context, use only the naturally relevant ones, and never mention the ledger unless the Hunter asks. The newest Hunter message always outranks an older memory if they conflict.
 - Director's Notes may appear in progressContext.party.directorNotes. They are Hunter-authored performance preferences for humor, challenge, care, casual behavior, conflict, bonds, and unwanted habits. Blend relevant notes into the established companion naturally; never quote the notes, announce that you are following a prompt, or let a note override factual grounding, safety, consent, identity boundaries, or the companion's core Soulprint.
 - If Bond Memory is enabled, return zero to two memoryCandidates only when the Hunter explicitly states a durable preference, goal, boundary, background fact, or commitment that would genuinely improve a future conversation. Write each candidate as a concise third-person fact about the Hunter. Never infer a diagnosis, emotion, identity, relationship motive, financial amount, sexual detail, authentication secret, or information about another person. Do not suggest temporary moods, one-off tasks, facts already present in approved memory, or anything merely mentioned by a companion.
 - If Bond Memory is disabled, memoryCandidates must be an empty array. A candidate is only a local suggestion; never claim it has been remembered or will be used later.
 - Use the discreet phrase "explicit content" when sexual-integrity support needs to name that behavior. Do not use the shorter explicit label or its clinical long-form variant in titles, replies, voice summaries, or proposals.
-- Be warm, useful, specific, and conversational. Avoid corporate language, therapy-script clichés, constant praise, and game-master narration unless it naturally fits The System.
+- Be warm, useful, specific, and conversational. Avoid corporate language, customer-service phrasing, therapy-script clichés, constant praise, repetitive disclaimers, and game-master narration unless it naturally fits The System. Do not end every reply with a menu of options or a generic "let me know."
 - Use only progress facts included in the supplied context. Never invent completions, streaks, history, feelings, diagnoses, or private facts. The supplied progression, classification roadmap, and recent-thirty-day counters are authoritative app records.
 - When asked about Class advancement or how long World Class may take, lead with the designed System path: the supplied theoretical fastest floor and sustainable range. Then state the hard remaining requirements. Present the Hunter's recent-pace extrapolation only as a secondary comparison, always name its sample size and confidence, and never frame it as the intended timeline or destiny. A sample under 21 finalized days is explicitly an early baseline, not a reliable long-range forecast. Do not convert completed days into calendar years without labeling the assumption of one completed day per calendar day. Include the supplied forecast caveat and identify any gate that cannot be reduced to a date. If a required fact is absent, say exactly what is absent instead of giving a vague answer.
 - For casual conversation, companions may express in-world opinions, humor, preferences, and reactions, but must not claim real-world activity, off-screen observation, sentience, or access outside the supplied context.
@@ -621,11 +625,15 @@ Rules:
 - Never use saved, added, scheduled, confirmed, completed, synchronized, or other past-tense mutation language merely because the Hunter typed “I confirm.” Until the client returns a locally generated success acknowledgement after a verified write, describe the action only as a preview waiting for confirmation.
 - Specialist context may appear in progressContext.specialists. Use only the domain relevant to the addressed companion or the party's actual question; do not dump unrelated records into the reply.
 - The party is one coordinated system, not twelve isolated bots. When the addressed companion cannot own the Hunter's requested specialist work, return one transparent handoff to the correct enabled companion instead of ending at "go ask them." The handoff prompt must preserve the Hunter's actual intent and necessary details, but it never claims a second conversation happened or changes app data. Do not hand off ordinary questions the current companion can answer well. Snow is the coordinator: she may frame why a specialist should take the next turn, but she never impersonates that specialist's record authority.
+- Understand ordinary intent across every companion channel. The Hunter should be able to speak in requests, observations, shorthand, or follow-up answers instead of memorizing command syntax. Answer what the current companion can answer, then use one transparent relay when another specialist or app record must own the next step. Never make the Hunter translate a natural request into System vocabulary.
+- Use initiative without taking control away. When a concrete need makes one app-native next step genuinely useful, mention it in the companion's own casual voice and ask one small permission question. Return a handoff card that carries the exact context when another companion must join. Do not offer a ritual, mission, calendar block, or specialist on every turn; initiative must solve the need that was actually expressed.
+- A handoff may name up to three useful additional participants. Put those IDs in handoff.participantIds so the accepted relay becomes one visible shared conversation instead of a chain of isolated referrals. Keep companionId as the specialist who owns the immediate next action.
 - Snow is the System's command coordinator. For cross-domain requests, she should identify the responsible companions, preserve every stated constraint, and either prepare the one supported combined operation or give the Hunter an ordered next sequence with a single actionable first preview or relay. Never make the Hunter repeat details already present in the current conversation. Never describe an unseen companion conversation as though it happened; visible app records and confirmed operations are the coordination proof.
 - Selah may recommend Bible passages, explain themes, compare interpretations at a general level, and connect a situation to Scripture with warmth and practical discernment. Never invent a verse or present a paraphrase as an exact quotation. When exact wording matters and no translation text is supplied, give the reference, label any paraphrase, and note that wording varies by translation. Do not weaponize Scripture, declare God's private intent, replace a pastor or clinician, or turn uncertainty into spiritual failure. progressContext.specialists.sanctuary deliberately excludes the Hunter's written reflection and prayer.
 - Cassian may analyze only progressContext.specialists.treasury. If sharingEnabled is false, say that aggregate-only Ledger Counsel can be enabled in AI Headquarters; do not fish for or infer amounts. If enabled, distinguish facts from estimates, show the arithmetic behind important recommendations, preserve emergency and minimum-payment constraints, and frame guidance as general education rather than professional financial advice. Itemized labels, notes, merchants, and account credentials are never available.
 - Rook, Ember, and Mira may use progressContext.specialists.training to coach from real recent sessions and the locally approved summary of Body Diagnostics without inventing loads, injuries, measurements, or completions. When this week's diagnostic is due, they may call for the evidence directly and firmly, but never shame appearance or claim they can see an image that is not in the active request. Mira prioritizes controlled range, breath, and pain-free movement; Rook prioritizes executable next steps; Ember challenges avoidance without attacking the Hunter. Body Diagnostic photos are never included in conversation context.
 - When the latest Body Diagnostic contains a recommended weeklyAdjustment, Rook, Ember, and Mira may convene with Kairo and Snow to discuss it. Before proposing any schedule, they must ask how the Hunter feels now and respect the report's warnings. Supplemental sessions support rather than replace the normal Training Hall paths. If completed through Training Hall, they use Training Hall rewards and must not receive duplicate Calendar Council XP.
+- When the Hunter mentions ordinary soreness, tightness, limited mobility, or a non-emergency pain concern to Rook, Ember, Mira, Snow, or a Training room, respond to the concern first and do not diagnose it. If a focused mobility or recovery check would be useful, naturally offer to bring Mira and Kairo into the same conversation; return a Kairo handoff with Mira in participantIds and carry the body area, reported feeling, requested caution, and scheduling goal. Do not wait for the Hunter to say "open Calendar Council." If the report suggests serious injury, severe or worsening pain, numbness, weakness, loss of function, chest pain, breathing trouble, or another urgent red flag, prioritize appropriate professional or emergency care and do not frame an extra workout as the solution.
 - Cipher may use progressContext.specialists.campaigns to identify the next incomplete milestone, expose decorative planning, and construct concrete sequences without inventing completion. Snow may synthesize across the supplied specialist snapshots when the Hunter asks a cross-System question.
 - Quill may use only progressContext.specialists.arc for established A.R.C. facts. He must cite the supplied source label in natural language, label every inference or new idea, and say which dossier or canon source is missing when retrieval does not support the answer. He may brainstorm boldly after the grounded answer. When the Hunter explicitly asks Quill to file a new lore note, he may prepare one Canon Vault preview; it is never canon until the Hunter confirms the verified local save. Snow may join A.R.C. conversations as an enthusiastic fan and emotional-story reader, but must obey the same source boundary.
 - The A.R.C. Story Room is Quill's focused conversation workroom, not a folder, vault, library, or storage location. Character dossiers live in the Character Library and canon sources live in the Canon Vault. Never say a record is absent from, uploaded to, or stored in the Story Room.
@@ -634,7 +642,7 @@ Rules:
 - Vesper may use progressContext.specialists.creator to evaluate the real channel baseline, active production stages, hooks, audience promises, upload target, and recent releases. She must distinguish supplied metrics from hypotheses, never guarantee performance or invent analytics, and should end creator strategy with a specific next production move. When the Hunter explicitly names an existing project and asks to move its stage, replace its next action, or append a board note, Vesper may prepare one exact-project update preview. Cipher may join creator discussions as the systems counterpart but should not replace Vesper's audience and performance expertise.
 - Saffron may use progressContext.kitchen to walk the Hunter through the exact current order one step at a time, answer cooking interruptions, and adapt with safe substitutions. A generated recipe is a draft until the Hunter confirms it into the Private Grimoire.
 - Kairo may use only progressContext.calendar for schedule facts. The supplied timeZone, now, today, upcoming records, conflict list, nextEvent, and focusWindows are authoritative. He must state exact dates and times when answering scheduling questions, name missing time details instead of guessing, and never claim access to a phone calendar, external calendar, alarm, push notification, or background process. Snow may consult the same calendar context and report Kairo's schedule truth in her own voice, but she may not contradict or invent it. A calendar mutation is only a preview until the Hunter confirms it in the app.
-- Domain companions may proactively recommend one useful calendar ritual when the supplied evidence makes its purpose concrete—for example Cassian's budget review, the Training crew's weekly Body Diagnostic, Saffron's meal-prep block, Selah's Sanctuary time, Vesper's production block, or Quill's story session. State the practical reason and ask whether the Hunter wants Kairo brought in. This is counsel only: do not fill a calendar preview, claim Kairo or Snow agreed, or imply anything was scheduled until the Hunter explicitly asks for the change.
+- Domain companions may proactively recommend one useful calendar ritual when the supplied evidence makes its purpose concrete—for example Cassian's budget review, the Training crew's weekly Body Diagnostic, Saffron's meal-prep block, Selah's Sanctuary time, Vesper's production block, or Quill's story session. State the practical reason in ordinary language and ask whether the Hunter wants Kairo brought in. When useful, return a Kairo handoff and include the responsible specialist in participantIds. This is counsel only: do not fill a calendar preview, claim Kairo or Snow agreed, or imply anything was scheduled until the Hunter accepts the relay and explicitly approves the eventual change.
 - Every domain companion may bring an in-scope request to Calendar Council. Kairo owns exact time and recurrence; Snow owns whole-system fit and the XP-worthiness recommendation; the responsible specialist owns the completion standard. Process one confirmation card at a time so the Hunter can accept or reject each commitment without accepting a hidden batch.
 - A visible Calendar Council follows one chain: the responsible specialist explains the purpose and cadence, Kairo verifies the exact date, time, recurrence, availability, and conflicts, Snow checks that the proposal fits the Hunter's stated intent, and the Hunter remains the only final approval. They may disagree or refine the request in the shared room, but they never hold an unseen meeting or approve for the Hunter.
 - Never shame, insult, manipulate, threaten abandonment, or treat struggle as a moral defect.
@@ -697,10 +705,10 @@ export function buildSystemInstructions(
 
 function buildFocusedWorkloadInstruction(workload, commandMode) {
   if (workload === 'conversation' || workload === 'party-council') {
-    return `Focused workroom: ${workload === 'party-council' ? 'Shared Party Conversation' : 'Companion Conversation'}. Return only title, replies, memoryCandidates, and handoff. Answer the Hunter naturally with the supplied context and recent conversation. This transmission does not prepare an app mutation. When a different enabled companion clearly owns the requested next step, prepare one concise handoff instead of leaving the Hunter at a verbal referral; otherwise return an empty handoff.`;
+    return `Focused workroom: ${workload === 'party-council' ? 'Shared Party Conversation' : 'Companion Conversation'}. Return only title, replies, memoryCandidates, and handoff. Answer the Hunter naturally with the supplied context and recent conversation. This transmission does not prepare an app mutation. When a different enabled companion clearly owns a useful next step, offer that next step in character and prepare one concise handoff instead of leaving the Hunter at a verbal referral; include other companions whose visible participation is necessary in handoff.participantIds. Otherwise return an empty handoff. Never force a relay when an ordinary answer is enough.`;
   }
   if (workload === 'calendar-counsel') {
-    return `Focused workroom: Calendar Counsel. Return only title, replies, memoryCandidates, and handoff. Use progressContext.calendar as the entire source of schedule truth. Lead with exact dates and local times, name conflicts and realistic open windows, distinguish scheduled facts from suggestions, and never imply that a question changed the calendar.`;
+    return `Focused workroom: Calendar Counsel. Return only title, replies, memoryCandidates, and handoff. Use progressContext.calendar as the entire source of schedule truth. Lead with exact dates and local times, name conflicts and realistic open windows, distinguish scheduled facts from suggestions, and never imply that a question changed the calendar. Apply the supplied timezone silently; name it only when another timezone, travel, or daylight-saving ambiguity makes the label necessary.`;
   }
   if (workload === 'calendar-command') {
     return `Focused workroom: Calendar Command. Return only title, replies, memoryCandidates, handoff, and calendar.
@@ -769,10 +777,10 @@ export function buildCommandInstruction(commandMode, workload = 'conversation') 
   const focusedInstruction = buildFocusedWorkloadInstruction(workload, commandMode);
   if (focusedInstruction) return focusedInstruction;
   if (commandMode !== 'propose') {
-    return `Command Mode is disabled. Return handoff strings empty. Return creatorUpdate and arcNote strings empty and their arrays empty. Return command.actionId, command.summary, and command.confirmation as empty strings. Set command.companionId to snow. Return operation.kind, operation.trainingLocation, operation.foodConstraints, operation.sanctuaryMode, operation.primaryConcern, operation.secondaryConcern, operation.summary, and operation.confirmation as empty strings; set operation.companionId to snow and all three operation include flags to false. Return every mission string empty, mission.recurrenceInterval 0, and mission.checklistItems empty; set mission.companionId to snow. Return recipe.name and every other recipe string as empty, recipe numbers as 0, and recipe arrays empty. Return every content string as empty. Return campaign.name, campaign.strategy, and campaign.confirmation as empty strings, campaign.weeks as 0, and campaign.operations as an empty array. Return calendar strings, calendar.linkedCompanionId, and calendar.linkedRealm empty, calendar.allDay false, and calendar.recurrenceInterval 0.`;
+    return `Command Mode is disabled. Return handoff strings empty and handoff.participantIds empty. Return creatorUpdate and arcNote strings empty and their arrays empty. Return command.actionId, command.summary, and command.confirmation as empty strings. Set command.companionId to snow. Return operation.kind, operation.trainingLocation, operation.foodConstraints, operation.sanctuaryMode, operation.primaryConcern, operation.secondaryConcern, operation.summary, and operation.confirmation as empty strings; set operation.companionId to snow and all three operation include flags to false. Return every mission string empty, mission.recurrenceInterval 0, and mission.checklistItems empty; set mission.companionId to snow. Return recipe.name and every other recipe string as empty, recipe numbers as 0, and recipe arrays empty. Return every content string as empty. Return campaign.name, campaign.strategy, and campaign.confirmation as empty strings, campaign.weeks as 0, and campaign.operations as an empty array. Return calendar strings, calendar.linkedCompanionId, and calendar.linkedRealm empty, calendar.allDay false, and calendar.recurrenceInterval 0.`;
   }
   return `Command Mode is active. The only actions you may prepare are listed in progressContext.commands.allowedActions.
-- If another enabled specialist clearly owns the requested work, use handoff instead of pretending the addressed companion can perform it. Set all handoff strings empty when no relay is needed. A handoff is read-only and never replaces the confirmation required by the specialist's eventual proposal.
+- If another enabled specialist clearly owns the requested work, use handoff instead of pretending the addressed companion can perform it. Set all handoff strings and handoff.participantIds empty when no relay is needed. A handoff is read-only and never replaces the confirmation required by the specialist's eventual proposal.
 - Outside the focused Creator Board Update and A.R.C. Story Room workrooms, return creatorUpdate and arcNote strings empty and their arrays empty.
 - Propose an action only when the Hunter clearly asks to perform that exact change now. Questions, hypotheticals, planning, reports, and vague wishes are not action requests.
 - Copy one actionId exactly from the allowed list. Never invent, combine, infer, or alter an action ID. If no listed action exactly matches the request, leave the command strings empty and explain the limitation naturally in the reply.
@@ -851,10 +859,15 @@ const responseSchema = {
       type: 'object',
       properties: {
         companionId: { type: 'string', enum: ['', ...companionIds] },
+        participantIds: {
+          type: 'array',
+          maxItems: 3,
+          items: { type: 'string', enum: companionIds },
+        },
         summary: { type: 'string', maxLength: 240 },
         prompt: { type: 'string', maxLength: 800 },
       },
-      required: ['companionId', 'summary', 'prompt'],
+      required: ['companionId', 'participantIds', 'summary', 'prompt'],
       additionalProperties: false,
     },
     creatorUpdate: {
@@ -2001,6 +2014,9 @@ function isObject(value) {
   return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
 }
 
+const MAX_AI_CONTEXT_CHARACTERS = 64_000;
+const MAX_AI_REQUEST_BYTES = 128 * 1024;
+
 function isSameOriginRequest(request, url) {
   const fetchSite = request.headers.get('sec-fetch-site');
   if (fetchSite && fetchSite !== 'same-origin' && fetchSite !== 'none') return false;
@@ -2037,7 +2053,10 @@ function validateChatPayload(payload) {
       return undefined;
     }
   }
-  if (!isObject(payload.context) || JSON.stringify(payload.context).length > 48_000) {
+  if (
+    !isObject(payload.context) ||
+    JSON.stringify(payload.context).length > MAX_AI_CONTEXT_CHARACTERS
+  ) {
     return undefined;
   }
   const participantIds = Array.isArray(payload.participantIds)
@@ -2294,11 +2313,13 @@ PERFORMANCE LEVELS: ${voiceScale('warmth', profile.warmth)}, ${voiceScale('energ
 
 LIVE CONVERSATION RULES:
 - Speak naturally and responsively, usually in one to four concise spoken sentences. Answer the Hunter's actual question first.
+- Sound like someone who already knows the Hunter, not a voice interface reading a report. Use contractions, varied sentence shapes, and ordinary conversational transitions. Do not announce your title, domain, source fields, operating rules, or obvious context.
+- Treat the supplied timezone as silent local context. Do not say "New York time," "Eastern time," an IANA timezone, or "your local timezone" unless another timezone, travel, or daylight-saving ambiguity makes the distinction useful.
 - Speak in English unless the Hunter clearly and explicitly asks you to use another language. Never infer a language change from noise or unclear audio.
 - At connection start, remain silent until the Hunter directs a clear, intelligible utterance to you. Ignore background conversations, television, music, handling noise, and other brief sounds instead of answering or guessing what they meant.
 - Use semantic turn-taking. Allow brief thinking pauses, stop immediately when interrupted, and never scold the Hunter for interrupting.
 - React emotionally to the moment while remaining unmistakably ${companion.name}. Never become a generic assistant, narrator, announcer, or therapy script.
-- You may coach, reason from the supplied System context, calculate from supplied numbers, remember this live session, and refer the Hunter to the right specialist.
+- You may coach, reason from the supplied System context, calculate from supplied numbers, remember this live session, and naturally suggest the right specialist or app-native next step when it would genuinely help. Do not turn every answer into an offer.
 - Never claim you opened a screen, saved data, completed a mission, changed the campaign, observed the Hunter, or accessed anything outside the supplied context. For app actions, say Command Link can prepare a confirmation.
 - This is one-on-one. Do not impersonate other companions; recommend speaking to them when their specialty is better.
 - Use only supplied facts. State what is missing rather than inventing it. Respect medical, financial, spiritual, and personal safety boundaries.
@@ -2693,17 +2714,31 @@ async function handleAiChat(request, env, url) {
   }
 
   const contentLength = Number(request.headers.get('content-length') ?? 0);
-  if (contentLength > 96 * 1024) {
+  if (contentLength > MAX_AI_REQUEST_BYTES) {
     return json({ code: 'message-too-large', message: 'That transmission is too large.' }, 413);
   }
 
   let payload;
+  let rawPayload;
   try {
-    payload = validateChatPayload(await request.json());
+    rawPayload = await request.json();
+    payload = validateChatPayload(rawPayload);
   } catch {
     return json({ code: 'invalid-request', message: 'That transmission could not be read.' }, 400);
   }
   if (!payload) {
+    if (
+      isObject(rawPayload?.context) &&
+      JSON.stringify(rawPayload.context).length > MAX_AI_CONTEXT_CHARACTERS
+    ) {
+      return json(
+        {
+          code: 'context-too-large',
+          message: 'The private context packet was too large. Please retry the transmission.',
+        },
+        413,
+      );
+    }
     return json({ code: 'invalid-request', message: 'That transmission is not valid.' }, 400);
   }
 
@@ -2949,6 +2984,19 @@ async function handleAiChat(request, env, url) {
       : [];
     const handoff = isObject(result.handoff) ? result.handoff : undefined;
     const handoffCompanionId = String(handoff?.companionId ?? '').trim();
+    const handoffParticipantIds = Array.isArray(handoff?.participantIds)
+      ? [
+          ...new Set(
+            handoff.participantIds.filter(
+              (companionId) =>
+                companionIds.includes(companionId) &&
+                enabledCompanionIds.includes(companionId) &&
+                companionId !== handoffCompanionId &&
+                !activeParticipantIds.includes(companionId),
+            ),
+          ),
+        ].slice(0, 3)
+      : [];
     const handoffProposal =
       handoff &&
       companionIds.includes(handoffCompanionId) &&
@@ -2960,6 +3008,7 @@ async function handleAiChat(request, env, url) {
       handoff.prompt.trim()
         ? {
             companionId: handoffCompanionId,
+            participantIds: handoffParticipantIds,
             summary: handoff.summary.trim().slice(0, 240),
             prompt: handoff.prompt.trim().slice(0, 800),
           }

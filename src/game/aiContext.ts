@@ -137,7 +137,7 @@ const CREATOR_KNOWLEDGE_SIGNALS =
   /\b(?:youtube|channel|creator|content|video|short|stream|upload|hook|thumbnail|audience|forge|reawakening|campaign)\b/i;
 
 const CALENDAR_CONTEXT_SIGNALS =
-  /\b(?:calendar|schedule|agenda|appointment|meeting|event|availability|available|time\s+block|deadline|remind|recurr|every\s+(?:day|week|month))\b/i;
+  /\b(?:calendar|schedule|agenda|appointment|meeting|event|availability|available|free\s+(?:time|window)|busy|time\s+block|deadline|remind|recurr|today|tomorrow|tonight|this\s+(?:week|weekend|month)|next\s+(?:week|weekend|month)|what(?:'s|\s+is)\s+on\s+my\s+(?:day|calendar|schedule)|every\s+(?:day|week|month))\b/i;
 
 function recentConversationSignal(source: AiContextSource) {
   return [
@@ -175,13 +175,15 @@ function emptyArcKnowledgeContext() {
 }
 
 function shouldShareCalendar(source: AiContextSource) {
-  if (source.audience === 'kairo' || source.audience === 'snow' || source.audience === 'party') {
-    return true;
+  if (source.audience === 'kairo') return true;
+
+  const calendarRequested = CALENDAR_CONTEXT_SIGNALS.test(recentConversationSignal(source));
+  if (!source.enabledCompanionIds.includes('kairo')) return false;
+  if (source.audience === 'snow') return calendarRequested;
+  if (source.audience === 'party') {
+    return Boolean(source.participantIds?.includes('kairo') || calendarRequested);
   }
-  return (
-    source.enabledCompanionIds.includes('kairo') &&
-    CALENDAR_CONTEXT_SIGNALS.test(recentConversationSignal(source))
-  );
+  return calendarRequested;
 }
 
 function shouldShareCreatorKnowledge(source: AiContextSource) {

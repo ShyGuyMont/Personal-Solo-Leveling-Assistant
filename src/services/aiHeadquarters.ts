@@ -554,6 +554,7 @@ export interface AiHeadquartersReply {
   };
   handoffProposal?: {
     companionId: CompanionId;
+    participantIds?: CompanionId[];
     summary: string;
     prompt: string;
   };
@@ -637,6 +638,40 @@ async function readJson(response: Response) {
   const contentType = response.headers.get('content-type') ?? '';
   if (!contentType.includes('application/json')) return undefined;
   return (await response.json()) as Record<string, unknown>;
+}
+
+const AI_CONTEXT_TARGET_CHARACTERS = 44_000;
+
+function compactContextValue(
+  value: unknown,
+  limits: { arrayItems: number; stringCharacters: number },
+): unknown {
+  if (typeof value === 'string') return value.slice(0, limits.stringCharacters);
+  if (Array.isArray(value)) {
+    return value.slice(0, limits.arrayItems).map((item) => compactContextValue(item, limits));
+  }
+  if (!value || typeof value !== 'object') return value;
+  return Object.fromEntries(
+    Object.entries(value).map(([key, item]) => [key, compactContextValue(item, limits)]),
+  );
+}
+
+function prepareAiProgressContext(context: AiProgressContext): AiProgressContext {
+  if (JSON.stringify(context).length <= AI_CONTEXT_TARGET_CHARACTERS) return context;
+
+  const compactionPasses = [
+    { arrayItems: 48, stringCharacters: 800 },
+    { arrayItems: 32, stringCharacters: 600 },
+    { arrayItems: 20, stringCharacters: 420 },
+    { arrayItems: 12, stringCharacters: 300 },
+    { arrayItems: 8, stringCharacters: 220 },
+  ];
+  let prepared: unknown = context;
+  for (const limits of compactionPasses) {
+    prepared = compactContextValue(context, limits);
+    if (JSON.stringify(prepared).length <= AI_CONTEXT_TARGET_CHARACTERS) break;
+  }
+  return prepared as AiProgressContext;
 }
 
 export async function getAiLinkStatus(): Promise<AiLinkStatus> {
@@ -857,6 +892,7 @@ export async function requestAiHeadquartersReply(input: {
   commandMode?: 'none' | 'propose';
   transmissionId?: string;
 }): Promise<AiHeadquartersReply> {
+  const preparedContext = prepareAiProgressContext(input.context);
   const requestBody = JSON.stringify({
     audience: input.audience,
     participantIds: input.participantIds,
@@ -869,7 +905,7 @@ export async function requestAiHeadquartersReply(input: {
       companionId: item.companionId,
       message: item.message.slice(0, 4_000),
     })),
-    context: input.context,
+    context: preparedContext,
     commandMode: input.commandMode ?? 'none',
   });
   let response: Response;

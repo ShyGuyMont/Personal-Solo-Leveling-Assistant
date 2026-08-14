@@ -500,8 +500,11 @@ export function CompanionQuickLink() {
         parsePartyMembershipCommand(addressed.message || text) ??
         (addressed.message !== text ? parsePartyMembershipCommand(text) : undefined);
       const relay = intent === 'confirmed-handoff' ? pendingHandoff : undefined;
+      const relayCompanionIds = relay
+        ? [...new Set([relay.companionId, ...(relay.participantIds ?? [])])]
+        : [];
       const requestedIds = relay
-        ? [relay.companionId]
+        ? relayCompanionIds
         : membership?.action === 'all'
           ? settings.enabledCompanionIds
           : (membership?.companionIds ?? addressed.companionIds ?? []);
@@ -529,7 +532,7 @@ export function CompanionQuickLink() {
         const base = previousConversation ?? createAiConversation(activeCompanionId);
         conversation = addAiConversationParticipants(
           base,
-          [relay.companionId],
+          relayCompanionIds,
           undefined,
           settings.enabledCompanionIds,
         );
@@ -538,7 +541,7 @@ export function CompanionQuickLink() {
         leadCompanionId = relay.companionId;
         partyEvent = {
           kind: 'handoff',
-          companionIds: [relay.companionId],
+          companionIds: relayCompanionIds,
           initiatedBy: activeCompanionId,
           summary: relay.summary,
         };
@@ -2030,6 +2033,14 @@ export function CompanionQuickLink() {
                     <small>ONE-TAP SPECIALIST HANDOFF</small>
                   </header>
                   <strong>{getCompanion(pendingHandoff.companionId).name} owns this lane</strong>
+                  {(pendingHandoff.participantIds?.length ?? 0) > 0 && (
+                    <small>
+                      Joining too:{' '}
+                      {(pendingHandoff.participantIds ?? [])
+                        .map((companionId) => getCompanion(companionId).name)
+                        .join(', ')}
+                    </small>
+                  )}
                   <p>{pendingHandoff.summary}</p>
                   <dl>
                     <div>
@@ -2051,7 +2062,9 @@ export function CompanionQuickLink() {
                       }}
                     >
                       <ArrowUpRight size={15} /> Bring in{' '}
-                      {getCompanion(pendingHandoff.companionId).name}
+                      {(pendingHandoff.participantIds?.length ?? 0) > 0
+                        ? 'the team'
+                        : getCompanion(pendingHandoff.companionId).name}
                     </button>
                     <button
                       type="button"
