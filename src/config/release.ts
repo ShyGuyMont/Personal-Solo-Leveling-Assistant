@@ -1,4 +1,4 @@
-export const APP_VERSION = '9.0.0';
+export const APP_VERSION = '9.0.1';
 export const DATABASE_SCHEMA_VERSION = 28;
 export const SAVE_FORMAT_VERSION = 28;
 
@@ -9,6 +9,16 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 9.0.1 · Quick Link Relay Stabilization',
+    detail:
+      'Specialist handoffs now cross directly from the current companion into the receiving expert’s conversation instead of being blocked by their own pending relay state.',
+    points: [
+      'Confirmed Party Relays bypass only the handoff they explicitly approve; mission, recipe, calendar, Creator Forge, and other mutation previews remain protected until separately confirmed or dismissed.',
+      'A synchronous transmission lock prevents rapid taps, overlapping speech results, or delayed local preparation from opening duplicate intelligence requests.',
+      'Expanded routing coverage verifies every companion name, Vesper’s Haven alias, Party Council addressing, ordinary follow-up continuity, and navigation phrases that must not hijack normal conversation.',
+    ],
+  },
   {
     title: 'Version 9.0.0 · Sovereign Agent Engine',
     detail:

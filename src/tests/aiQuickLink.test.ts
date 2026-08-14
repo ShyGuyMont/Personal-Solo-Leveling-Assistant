@@ -1,9 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import {
+  acquireQuickLinkTransmission,
   buildQuickLinkActionCatalog,
+  canBeginQuickLinkTransmission,
   navigationAcknowledgement,
   parseQuickLinkAddress,
   parseQuickNavigationCommand,
+  releaseQuickLinkTransmission,
 } from '@/game/aiQuickLink';
 import type { DailyMissionRecord, MissionDefinition } from '@/types/game';
 
@@ -37,6 +40,55 @@ describe('Companion Quick Link', () => {
     expect(parseQuickLinkAddress('Rook and Mira, build me a recovery plan').audience).toBe('party');
   });
 
+  it('routes every specialist name and legacy alias without losing the relay brief', () => {
+    const specialists = [
+      ['Snow', 'snow'],
+      ['Rook', 'rook'],
+      ['Selah', 'selah'],
+      ['Cipher', 'cipher'],
+      ['Haven', 'haven'],
+      ['Vesper', 'haven'],
+      ['Ember', 'ember'],
+      ['Mira', 'mira'],
+      ['Amara', 'amara'],
+      ['Cassian', 'cassian'],
+      ['Saffron', 'saffron'],
+      ['Quill', 'quill'],
+      ['Kairo', 'kairo'],
+    ] as const;
+
+    for (const [spokenName, audience] of specialists) {
+      expect(parseQuickLinkAddress(`${spokenName}, keep this exact relay brief`, 'snow')).toEqual({
+        audience,
+        message: 'keep this exact relay brief',
+        explicitlyAddressed: true,
+      });
+    }
+  });
+
+  it('allows the confirmed specialist handoff while protecting every other pending command', () => {
+    expect(
+      canBeginQuickLinkTransmission({ hasCommand: false, hasHandoff: true }, 'confirmed-handoff'),
+    ).toBe(true);
+    expect(canBeginQuickLinkTransmission({ hasCommand: false, hasHandoff: true }, 'message')).toBe(
+      false,
+    );
+    expect(
+      canBeginQuickLinkTransmission({ hasCommand: true, hasHandoff: true }, 'confirmed-handoff'),
+    ).toBe(false);
+    expect(canBeginQuickLinkTransmission({ hasCommand: true, hasHandoff: false })).toBe(false);
+    expect(canBeginQuickLinkTransmission({ hasCommand: false, hasHandoff: false })).toBe(true);
+  });
+
+  it('rejects overlapping transmissions until the active request releases its lock', () => {
+    const lock = { current: false };
+
+    expect(acquireQuickLinkTransmission(lock)).toBe(true);
+    expect(acquireQuickLinkTransmission(lock)).toBe(false);
+    releaseQuickLinkTransmission(lock);
+    expect(acquireQuickLinkTransmission(lock)).toBe(true);
+  });
+
   it('recognizes intentional navigation without hijacking ordinary conversation', () => {
     expect(parseQuickNavigationCommand('Take me to the Training Hall')).toEqual({
       route: '/training-hall',
@@ -51,6 +103,9 @@ describe('Companion Quick Link', () => {
       label: 'Creator Forge',
     });
     expect(parseQuickNavigationCommand('Tell me about gym recovery')).toBeUndefined();
+    expect(parseQuickNavigationCommand('How is my budget looking?')).toBeUndefined();
+    expect(parseQuickNavigationCommand('I want to discuss my schedule')).toBeUndefined();
+    expect(parseQuickNavigationCommand('Could a creator forge a stronger hook?')).toBeUndefined();
     expect(navigationAcknowledgement('snow', 'Training Hall')).toContain('Training Hall');
   });
 

@@ -34,6 +34,30 @@ export interface QuickNavigationCommand {
   label: string;
 }
 
+export type QuickLinkTransmissionIntent = 'message' | 'confirmed-handoff';
+
+export interface QuickLinkTransmissionLock {
+  current: boolean;
+}
+
+export function canBeginQuickLinkTransmission(
+  pending: { hasCommand: boolean; hasHandoff: boolean },
+  intent: QuickLinkTransmissionIntent = 'message',
+) {
+  if (pending.hasCommand) return false;
+  return !pending.hasHandoff || intent === 'confirmed-handoff';
+}
+
+export function acquireQuickLinkTransmission(lock: QuickLinkTransmissionLock) {
+  if (lock.current) return false;
+  lock.current = true;
+  return true;
+}
+
+export function releaseQuickLinkTransmission(lock: QuickLinkTransmissionLock) {
+  lock.current = false;
+}
+
 export type QuickLinkActionKind =
   'complete_mission' | 'skip_mission' | 'fail_mission' | 'reopen_mission' | 'restore_mission';
 

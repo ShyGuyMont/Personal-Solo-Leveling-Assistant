@@ -65,12 +65,16 @@ import {
 import { assignSpecificKitchenOrder } from '@/game/kitchen';
 import { deleteCustomKitchenRecipe, saveCustomKitchenRecipe } from '@/game/kitchenGrimoire';
 import {
+  acquireQuickLinkTransmission,
   buildQuickLinkActionCatalog,
+  canBeginQuickLinkTransmission,
   commandSuccessAcknowledgement,
   navigationAcknowledgement,
   parseQuickLinkAddress,
   parseQuickNavigationCommand,
+  releaseQuickLinkTransmission,
   type QuickLinkAction,
+  type QuickLinkTransmissionIntent,
 } from '@/game/aiQuickLink';
 import { useAiVoiceLink } from '@/hooks/useAiVoiceLink';
 import { useAiRealtimeLink } from '@/hooks/useAiRealtimeLink';
@@ -139,7 +143,7 @@ export function CompanionQuickLink() {
     useState<NonNullable<AiHeadquartersReply['creatorUpdateProposal']>>();
   const [pendingArcNote, setPendingArcNote] =
     useState<NonNullable<AiHeadquartersReply['arcNoteProposal']>>();
-  const confirmationWaiting = Boolean(
+  const protectedConfirmationWaiting = Boolean(
     pendingAction ||
     pendingOperation ||
     pendingMission ||
@@ -147,7 +151,6 @@ export function CompanionQuickLink() {
     pendingContent ||
     pendingCampaign ||
     pendingCalendar ||
-    pendingHandoff ||
     pendingCreatorUpdate ||
     pendingArcNote,
   );
@@ -155,6 +158,7 @@ export function CompanionQuickLink() {
   const [continuityTurns, setContinuityTurns] = useState(0);
   const [activeCompanionId, setActiveCompanionId] = useState<CompanionId>('snow');
   const submitRef = useRef<(text: string) => Promise<void>>(async () => undefined);
+  const transmissionLockRef = useRef(false);
   const conversationRef = useRef<AiConversation>();
   const repliesRef = useRef<HTMLDivElement>(null);
   const liveWriteQueueRef = useRef(Promise.resolve());
@@ -300,11 +304,12 @@ export function CompanionQuickLink() {
   }, [open, replies]);
 
   const transmit = useCallback(
-    async (raw: string) => {
+    async (raw: string, intent: QuickLinkTransmissionIntent = 'message') => {
       const text = raw.trim();
       if (
         !text ||
         sending ||
+        transmissionLockRef.current ||
         !profile ||
         !settings ||
         !progression ||
@@ -312,7 +317,7 @@ export function CompanionQuickLink() {
         settings.aiLinkMode !== 'online' ||
         !settings.aiDataSharingAcknowledged
       ) {
-        if (text && !sending) {
+        if (text && !sending && !transmissionLockRef.current) {
           setNotice(
             !deviceOnline
               ? 'Quick Link needs a connection for speech and intelligence. The rest of your campaign remains available offline.'
@@ -321,7 +326,15 @@ export function CompanionQuickLink() {
         }
         return;
       }
-      if (confirmationWaiting) {
+      if (
+        !canBeginQuickLinkTransmission(
+          {
+            hasCommand: protectedConfirmationWaiting,
+            hasHandoff: Boolean(pendingHandoff),
+          },
+          intent,
+        )
+      ) {
         setNotice(
           'A prepared command is still waiting below. Confirm or cancel it before opening another transmission.',
         );
@@ -338,47 +351,48 @@ export function CompanionQuickLink() {
         setNotice(`${getCompanion(addressed.audience).name}'s link is disabled in Settings.`);
         return;
       }
-      setActiveCompanionId(addressedCompanion);
-      setDraft('');
-      setPendingAction(undefined);
-      if (pendingOperation) await cancelStagedCompanionOperation(systemDate);
-      if (conversationRef.current) {
-        await clearPendingAiProposal(conversationRef.current.id);
-      }
-      setPendingOperation(undefined);
-      setPendingMission(undefined);
-      setPendingRecipe(undefined);
-      setPendingContent(undefined);
-      setPendingCampaign(undefined);
-      setPendingCalendar(undefined);
-      setPendingHandoff(undefined);
-      setPendingCreatorUpdate(undefined);
-      setPendingArcNote(undefined);
+      if (!acquireQuickLinkTransmission(transmissionLockRef)) return;
       setSending(true);
-      setNotice(
-        addressed.audience === 'party'
-          ? 'Party channel open. The council is thinking…'
-          : `${getCompanion(addressed.audience).name} is thinking…`,
-      );
-
-      const continuing = conversationRef.current?.audience === addressed.audience;
-      const conversation = continuing
-        ? conversationRef.current!
-        : createAiConversation(addressed.audience);
-      conversationRef.current = conversation;
-      if (!continuing) setReplies([]);
-      setContinuityTurns(conversation.messages.length);
-      const hunterMessage = createHunterMessage(addressed.message || text);
-      setReplies((current) => (continuing ? [...current, hunterMessage] : [hunterMessage]));
-      const pendingConversation = {
-        ...conversation,
-        messages: [...conversation.messages, hunterMessage],
-        updatedAt: hunterMessage.createdAt,
-      };
-      await saveAiConversation(pendingConversation);
-      conversationRef.current = pendingConversation;
-
       try {
+        setActiveCompanionId(addressedCompanion);
+        setDraft('');
+        setPendingAction(undefined);
+        if (pendingOperation) await cancelStagedCompanionOperation(systemDate);
+        if (conversationRef.current) {
+          await clearPendingAiProposal(conversationRef.current.id);
+        }
+        setPendingOperation(undefined);
+        setPendingMission(undefined);
+        setPendingRecipe(undefined);
+        setPendingContent(undefined);
+        setPendingCampaign(undefined);
+        setPendingCalendar(undefined);
+        setPendingHandoff(undefined);
+        setPendingCreatorUpdate(undefined);
+        setPendingArcNote(undefined);
+        setNotice(
+          addressed.audience === 'party'
+            ? 'Party channel open. The council is thinking…'
+            : `${getCompanion(addressed.audience).name} is thinking…`,
+        );
+
+        const continuing = conversationRef.current?.audience === addressed.audience;
+        const conversation = continuing
+          ? conversationRef.current!
+          : createAiConversation(addressed.audience);
+        conversationRef.current = conversation;
+        if (!continuing) setReplies([]);
+        setContinuityTurns(conversation.messages.length);
+        const hunterMessage = createHunterMessage(addressed.message || text);
+        setReplies((current) => (continuing ? [...current, hunterMessage] : [hunterMessage]));
+        const pendingConversation = {
+          ...conversation,
+          messages: [...conversation.messages, hunterMessage],
+          updatedAt: hunterMessage.createdAt,
+        };
+        await saveAiConversation(pendingConversation);
+        conversationRef.current = pendingConversation;
+
         const navigation = parseQuickNavigationCommand(addressed.message);
         if (navigation) {
           const companionMessage = createCompanionMessage(
@@ -526,6 +540,7 @@ export function CompanionQuickLink() {
       } catch (error) {
         setNotice(error instanceof Error ? error.message : 'Quick Link could not respond.');
       } finally {
+        releaseQuickLinkTransmission(transmissionLockRef);
         setSending(false);
       }
     },
@@ -533,13 +548,14 @@ export function CompanionQuickLink() {
       challenges,
       actionCatalog,
       activeCompanionId,
-      confirmationWaiting,
       deviceOnline,
       enabledCompanions,
       missions,
       profile,
       progression,
       pendingOperation,
+      pendingHandoff,
+      protectedConfirmationWaiting,
       sending,
       settings,
       stats,
@@ -1254,6 +1270,17 @@ export function CompanionQuickLink() {
 
   function changeLinkMode(next: 'command' | 'live') {
     if (next === linkMode) return;
+    if (
+      !canBeginQuickLinkTransmission({
+        hasCommand: protectedConfirmationWaiting,
+        hasHandoff: Boolean(pendingHandoff),
+      })
+    ) {
+      setNotice(
+        'A prepared command is still waiting below. Confirm or cancel it before switching channels.',
+      );
+      return;
+    }
     if (voiceLink.recording) voiceLink.stopRecording();
     voiceLink.stopPlayback();
     realtimeLink.stop();
@@ -1292,6 +1319,7 @@ export function CompanionQuickLink() {
     const continuing = operations?.conversationId
       ? await getAiConversation(operations.conversationId)
       : await getContinuingAiConversation('snow', new Date(), 24);
+    const storedProposal = continuing ? await getPendingAiProposal(continuing.id) : undefined;
     conversationRef.current = continuing;
     setActiveCompanionId(operations?.pendingProposal?.companionId ?? 'snow');
     setReplies(continuing?.messages ?? []);
@@ -1302,6 +1330,12 @@ export function CompanionQuickLink() {
     setPendingMission(undefined);
     setPendingRecipe(undefined);
     setPendingContent(undefined);
+    setPendingCampaign(undefined);
+    setPendingCalendar(undefined);
+    setPendingHandoff(undefined);
+    setPendingCreatorUpdate(undefined);
+    setPendingArcNote(undefined);
+    restorePendingProposal(storedProposal);
     setContinuityTurns(continuing?.messages.length ?? 0);
     await listening;
   }
@@ -1621,9 +1655,9 @@ export function CompanionQuickLink() {
                       disabled={sending}
                       onClick={() => {
                         const relay = pendingHandoff;
-                        setPendingHandoff(undefined);
-                        void submitRef.current(
+                        void transmit(
                           `${getCompanion(relay.companionId).name}, ${relay.prompt}`,
+                          'confirmed-handoff',
                         );
                       }}
                     >
