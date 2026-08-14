@@ -51,6 +51,7 @@ interface CompanionIntelligenceModule {
     workload: string;
     maxOutputTokens: number;
   };
+  sanitizeCompanionLanguage: (value: string, requestMessage?: string) => string;
   buildYouTubeAnalyticsWindow: (
     now?: Date,
     periodDays?: number,
@@ -157,6 +158,20 @@ describe('Companion Soulprint intelligence', () => {
     expect(intelligence.baseInstructions).toContain('Cassian may analyze only');
     expect(intelligence.baseInstructions).toContain('one coordinated system');
     expect(intelligence.baseInstructions).toContain('handoff');
+    expect(intelligence.baseInstructions).toContain('Use English throughout');
+    expect(intelligence.baseInstructions).toContain("Snow is the System's command coordinator");
+  });
+
+  it('removes accidental foreign-script fragments without blocking requested translation', () => {
+    expect(
+      intelligence.sanitizeCompanionLanguage(
+        'Everything is ready for confirmation. તેઓ',
+        'Prepare my day.',
+      ),
+    ).toBe('Everything is ready for confirmation.');
+    expect(
+      intelligence.sanitizeCompanionLanguage('Hello. こんにちは', 'Say hello in Japanese.'),
+    ).toBe('Hello. こんにちは');
   });
 
   it('requires one visible confirmation for a complete Reawakening campaign', () => {
@@ -169,6 +184,19 @@ describe('Companion Soulprint intelligence', () => {
     expect(instructions).toContain('1 to 12 weeks');
     expect(instructions).toContain('2 to 12 distinct operations');
     expect(instructions).toContain('preview until the Hunter confirms the entire sequence once');
+  });
+
+  it('keeps mission synonyms inside the same protected confirmation contract', () => {
+    const instructions = intelligence.buildSystemInstructions(
+      'snow',
+      ['snow', 'rook'],
+      'propose',
+      'system-command',
+    );
+    expect(instructions).toContain('assign, forge, add, create, make, or give');
+    expect(instructions).toContain('archive, remove, delete, or cancel as retire');
+    expect(instructions).toContain('first-person completion report');
+    expect(instructions).toContain('instead of guessing or awarding credit');
   });
 
   it('routes casual direct talk economically and deeper counsel to Terra', () => {
@@ -363,6 +391,41 @@ describe('Companion Soulprint intelligence', () => {
         }),
       ).toMatchObject({ workload: 'calendar-command' });
     }
+  });
+
+  it('understands natural Companion Order verbs before calendar vocabulary', () => {
+    for (const message of [
+      'Assign me a one-time mobility mission.',
+      'Forge me a new creator mission.',
+      'Create me a mission to stretch tonight.',
+      'Change my stretching mission to weekly.',
+      'Retire my stretching mission.',
+      'Delete my stretching mission.',
+      'Update my stretching mission due date to Friday.',
+    ]) {
+      expect(
+        intelligence.selectIntelligenceRoute({
+          audience: 'snow',
+          message,
+          commandMode: 'propose',
+        }),
+      ).toMatchObject({ workload: 'system-command' });
+    }
+
+    expect(
+      intelligence.selectIntelligenceRoute({
+        audience: 'snow',
+        message: 'Log my 4.5 mile walk.',
+        commandMode: 'propose',
+      }),
+    ).toMatchObject({ workload: 'system-command' });
+    expect(
+      intelligence.selectIntelligenceRoute({
+        audience: 'snow',
+        message: 'I just went on a 4.5 mile walk.',
+        commandMode: 'propose',
+      }),
+    ).toMatchObject({ workload: 'system-command' });
   });
 
   it('forbids every companion from claiming a write before the verified local confirmation', () => {

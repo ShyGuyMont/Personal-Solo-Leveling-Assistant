@@ -1,4 +1,4 @@
-export const APP_VERSION = '9.0.1';
+export const APP_VERSION = '9.1.0';
 export const DATABASE_SCHEMA_VERSION = 28;
 export const SAVE_FORMAT_VERSION = 28;
 
@@ -9,6 +9,19 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 9.1.0 Â· Living Command Intelligence',
+    detail:
+      'Snow and the complete companion network understand a wider range of natural commands, preserve unfinished text transmissions across an app restart, and reject accidental language contamination before it reaches the Hunter.',
+    points: [
+      'Mission Forge now recognizes natural action language such as assign, forge, make, give, change, edit, rename, move, retire, archive, remove, delete, restore, reactivate, log, and clear first-person completion reports without weakening confirmation walls.',
+      'Mission due dates and recurrence changes resolve through Companion Orders before generic calendar vocabulary, preventing Kairo from receiving an unrelated mission edit.',
+      'Snowâ€™s coordination contract preserves cross-domain constraints, identifies the responsible companions, and uses the supported combined operation or one transparent next relay without pretending hidden conversations occurred.',
+      'Quick Link and AI Headquarters save an owner-bound local recovery pointer before each text transmission; if the app is suspended or relaunched, a finished response returns to its original private conversation with any protected preview still awaiting confirmation.',
+      'Recovered transmissions are deduplicated, expire with the temporary server result, and clear only after the written reply is safely stored on-device. Live microphone sessions remain intentionally foreground-only.',
+      'An English-output guard removes accidental foreign-script fragments from titles, replies, summaries, handoffs, and previews while preserving translations the Hunter explicitly requests.',
+    ],
+  },
   {
     title: 'Version 9.0.1 · Quick Link Relay Stabilization',
     detail:

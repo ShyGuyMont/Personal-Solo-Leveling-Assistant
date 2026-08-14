@@ -47,6 +47,11 @@ import {
   savePendingAiProposal,
   type AiPendingProposal,
 } from '@/game/aiPendingProposals';
+import {
+  clearPendingAiTransmission,
+  getPendingAiTransmission,
+  savePendingAiTransmission,
+} from '@/game/aiTransmissions';
 import { applyCalendarProposal } from '@/game/calendar';
 import {
   applyCreatorProjectUpdate,
@@ -80,8 +85,10 @@ import { useAiVoiceLink } from '@/hooks/useAiVoiceLink';
 import { useAiRealtimeLink } from '@/hooks/useAiRealtimeLink';
 import { Link } from '@/router';
 import {
+  createAiTransmissionId,
   getAiLinkStatus,
   requestAiHeadquartersReply,
+  resumeAiHeadquartersReply,
   type AiHeadquartersReply,
   type AiLinkStatus,
 } from '@/services/aiHeadquarters';
@@ -159,6 +166,7 @@ export function CompanionQuickLink() {
   const [activeCompanionId, setActiveCompanionId] = useState<CompanionId>('snow');
   const submitRef = useRef<(text: string) => Promise<void>>(async () => undefined);
   const transmissionLockRef = useRef(false);
+  const recoveryStartedRef = useRef(false);
   const conversationRef = useRef<AiConversation>();
   const repliesRef = useRef<HTMLDivElement>(null);
   const liveWriteQueueRef = useRef(Promise.resolve());
@@ -283,6 +291,115 @@ export function CompanionQuickLink() {
       window.removeEventListener('system:open-quick-link', openDirectLink);
     };
   }, [restorePendingProposal, systemDate]);
+
+  useEffect(() => {
+    if (
+      recoveryStartedRef.current ||
+      !profile ||
+      !settings ||
+      !progression ||
+      settings.aiLinkMode !== 'online' ||
+      !settings.aiDataSharingAcknowledged
+    ) {
+      return;
+    }
+    recoveryStartedRef.current = true;
+    void (async () => {
+      const pendingTransmission = await getPendingAiTransmission('quick-link');
+      if (!pendingTransmission) return;
+      const conversation = await getAiConversation(pendingTransmission.conversationId);
+      if (!conversation) {
+        await clearPendingAiTransmission('quick-link', pendingTransmission.transmissionId);
+        return;
+      }
+      const hunterIndex = conversation.messages.findIndex(
+        (message) => message.id === pendingTransmission.hunterMessageId,
+      );
+      if (
+        hunterIndex >= 0 &&
+        conversation.messages.slice(hunterIndex + 1).some((message) => message.role === 'companion')
+      ) {
+        await clearPendingAiTransmission('quick-link', pendingTransmission.transmissionId);
+        return;
+      }
+
+      setSending(true);
+      setNotice('Restoring the companion transmission that finished while The System was awayâ€¦');
+      try {
+        const result = await resumeAiHeadquartersReply(pendingTransmission.transmissionId);
+        await voiceLink.trackTextUsage(result);
+        if (settings.aiRelationshipMemoryEnabled) {
+          await saveAiMemoryCandidates(
+            result.memoryCandidates,
+            pendingTransmission.audience,
+            conversation.id,
+          );
+        }
+        const replyTime = new Date().toISOString();
+        const responseMessages = result.replies.map((reply) =>
+          createCompanionMessage(reply.companionId, reply.message, replyTime, reply.voiceSummary),
+        );
+        const completedConversation = {
+          ...conversation,
+          title: result.title,
+          messages: [...conversation.messages, ...responseMessages],
+          updatedAt: replyTime,
+        };
+        await saveAiConversation(completedConversation);
+        const pendingProposal = extractAiPendingProposal(
+          result,
+          actionCatalog,
+          pendingTransmission.audience,
+        );
+        if (pendingProposal) {
+          await savePendingAiProposal(completedConversation.id, pendingProposal);
+          restorePendingProposal(pendingProposal);
+        }
+        if (result.operationProposal) {
+          await stageCompanionOperation(
+            systemDate,
+            result.operationProposal,
+            completedConversation.id,
+          );
+        }
+        if (result.handoffProposal) setPendingHandoff(result.handoffProposal);
+        conversationRef.current = completedConversation;
+        setReplies(completedConversation.messages);
+        setContinuityTurns(completedConversation.messages.length);
+        setActiveCompanionId(
+          pendingTransmission.audience === 'party' ? 'snow' : pendingTransmission.audience,
+        );
+        setOpen(true);
+        setNotice(
+          pendingProposal
+            ? 'Recovered transmission complete. Its protected preview is waiting for your confirmation.'
+            : 'Recovered transmission complete. Snow kept the channel open for you.',
+        );
+        await clearPendingAiTransmission('quick-link', pendingTransmission.transmissionId);
+        window.dispatchEvent(
+          new CustomEvent('system:ai-conversations-changed', {
+            detail: { id: completedConversation.id },
+          }),
+        );
+      } catch (error) {
+        setNotice(
+          error instanceof Error
+            ? error.message
+            : 'The unfinished transmission is still protected and will be checked again later.',
+        );
+      } finally {
+        setSending(false);
+      }
+    })();
+  }, [
+    actionCatalog,
+    profile,
+    progression,
+    restorePendingProposal,
+    settings,
+    systemDate,
+    voiceLink,
+  ]);
 
   useEffect(() => {
     if (!open) return;
@@ -421,6 +538,15 @@ export function CompanionQuickLink() {
           return;
         }
 
+        const transmissionId = createAiTransmissionId();
+        await savePendingAiTransmission({
+          surface: 'quick-link',
+          transmissionId,
+          conversationId: pendingConversation.id,
+          hunterMessageId: hunterMessage.id,
+          audience: addressed.audience,
+          startedAt: new Date().toISOString(),
+        });
         const result = await requestAiHeadquartersReply({
           audience: addressed.audience,
           message: addressed.message || text,
@@ -440,6 +566,7 @@ export function CompanionQuickLink() {
             history: conversation.messages,
           }),
           commandMode: 'propose',
+          transmissionId,
         });
         await voiceLink.trackTextUsage(result);
         if (settings.aiRelationshipMemoryEnabled) {
@@ -536,6 +663,7 @@ export function CompanionQuickLink() {
             detail: { id: conversation.id },
           }),
         );
+        await clearPendingAiTransmission('quick-link', transmissionId);
         if (settings.aiVoiceOutputEnabled) void voiceLink.playMessages(responseMessages);
       } catch (error) {
         setNotice(error instanceof Error ? error.message : 'Quick Link could not respond.');

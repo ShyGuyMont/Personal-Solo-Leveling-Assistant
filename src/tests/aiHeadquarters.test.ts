@@ -13,12 +13,19 @@ import {
   saveAiMemoryCandidates,
   saveAiConversation,
 } from '@/game/aiHeadquarters';
-import { requestAiSpeech } from '@/services/aiHeadquarters';
+import {
+  clearPendingAiTransmission,
+  getPendingAiTransmission,
+  savePendingAiTransmission,
+} from '@/game/aiTransmissions';
+import { requestAiSpeech, resumeAiHeadquartersReply } from '@/services/aiHeadquarters';
 
 describe('AI Headquarters local history', () => {
   beforeEach(async () => {
     await db.aiConversations.clear();
     await db.aiMemories.clear();
+    await db.appMetadata.delete('ai-pending-transmission:quick-link');
+    await db.appMetadata.delete('ai-pending-transmission:headquarters');
   });
 
   afterEach(() => {
@@ -74,6 +81,57 @@ describe('AI Headquarters local history', () => {
 
     await forgetAiRelationshipMemory(candidate.id);
     expect(await getAiRelationshipMemories()).toEqual([]);
+  });
+
+  it('keeps one recoverable text transmission pointer per conversation surface', async () => {
+    await savePendingAiTransmission({
+      surface: 'quick-link',
+      transmissionId: 'transmission_1234567890abcdef',
+      conversationId: 'ai:test-conversation',
+      hunterMessageId: 'ai:test-message',
+      audience: 'snow',
+      startedAt: new Date().toISOString(),
+    });
+
+    expect(await getPendingAiTransmission('quick-link')).toMatchObject({
+      transmissionId: 'transmission_1234567890abcdef',
+      conversationId: 'ai:test-conversation',
+      audience: 'snow',
+    });
+
+    await clearPendingAiTransmission('quick-link', 'different-transmission-id');
+    expect(await getPendingAiTransmission('quick-link')).toBeDefined();
+    await clearPendingAiTransmission('quick-link', 'transmission_1234567890abcdef');
+    expect(await getPendingAiTransmission('quick-link')).toBeUndefined();
+  });
+
+  it('recovers a completed owner-bound transmission without resending the Hunter request', async () => {
+    const fetchMock = vi.fn(
+      async () =>
+        new Response(
+          JSON.stringify({
+            model: 'gpt-5.6-terra',
+            route: 'counsel',
+            reasoningEffort: 'medium',
+            title: 'Recovered counsel',
+            replies: [{ companionId: 'snow', message: 'I finished while you were away.' }],
+            memoryCandidates: [],
+          }),
+          { status: 200, headers: { 'content-type': 'application/json' } },
+        ),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(resumeAiHeadquartersReply('transmission_1234567890abcdef')).resolves.toMatchObject(
+      {
+        title: 'Recovered counsel',
+        route: 'counsel',
+      },
+    );
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/ai/transmissions/transmission_1234567890abcdef',
+      expect.objectContaining({ cache: 'no-store' }),
+    );
   });
 
   it('sends every audible Voice Forge control through the secure speech request', async () => {

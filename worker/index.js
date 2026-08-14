@@ -11,13 +11,22 @@ export const YOUTUBE_READONLY_SCOPES = [
 
 const YOUTUBE_OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
 
-export const COMPANION_INTELLIGENCE_VERSION = 'sovereign-agent-engine-5';
+export const COMPANION_INTELLIGENCE_VERSION = 'sovereign-agent-engine-6';
 
 const COUNSEL_SIGNALS =
   /\b(?:world\s+class|class|rank|level|xp|progress|progression|forecast|how\s+long|timeline|pace|plan|strategy|strategize|analy[sz]e|compare|trade-?off|why|should\s+i|what\s+should|recommend|decision|prioriti[sz]e|streak|challenge|trial|discipline|balanced\s+stats?|youtube|channel|content|video|stream|hook|thumbnail|audience|creator|a\.?r\.?c\.?|arc|canon|dossier|lore|plot|character|worldbuild(?:ing)?|arts?\s+codex)\b/i;
 
 const COMMAND_SIGNALS =
-  /\b(?:mark|complete|finish|check\s+off|skip|fail|failed|undo|reopen|restore|put\s+back|record|add|save|create|assemble|prepare|roll|load|wake|summon|gather)\b/i;
+  /\b(?:mark|complete|finish|check\s+off|skip|fail|failed|undo|reopen|restore|reactivate|put\s+back|record|log|track|add|assign|forge|make|give|save|create|set|update|change|edit|rename|move|reschedule|retire|archive|remove|delete|cancel|assemble|prepare|roll|load|wake|summon|gather)\b/i;
+
+const MISSION_WORK_SIGNALS =
+  /\b(?:companion\s+orders?|agent\s+missions?|missions?|quests?|objectives?)\b/i;
+
+const MISSION_MUTATION_SIGNALS =
+  /\b(?:assign|forge|add|create|make|give|set|update|change|edit|rename|move|reschedule|complete|finish|check\s+off|reopen|undo|restore|reactivate|retire|archive|remove|delete|cancel)\b/i;
+
+const COMPLETION_REPORT_SIGNALS =
+  /\b(?:i\s+(?:just\s+)?(?:finished|completed|did|went|walked|ran|trained|worked\s+out|stretched|prayed|read)|i(?:'ve|\s+have)\s+(?:just\s+)?(?:finished|completed|done|gone|walked|ran|trained|worked\s+out|stretched|prayed|read))\b/i;
 
 const SOVEREIGN_SIGNALS =
   /\b(?:sovereign\s+counsel|deep\s+(?:analysis|dive)|comprehensive\s+(?:strategy|plan)|full\s+(?:30|60|90)[-\s]day\s+plan|optimi[sz]e\s+(?:everything|my\s+whole|the\s+entire)|multi[-\s]domain\s+strategy)\b/i;
@@ -71,6 +80,12 @@ export function selectIntelligenceWorkload(payload) {
   const recent = conversationWindow(payload);
   const previousCompanion = lastCompanionMessage(payload);
   const proposing = payload.commandMode === 'propose';
+
+  if (proposing && MISSION_WORK_SIGNALS.test(recent) && MISSION_MUTATION_SIGNALS.test(current)) {
+    return 'system-command';
+  }
+
+  if (proposing && COMPLETION_REPORT_SIGNALS.test(current)) return 'system-command';
 
   if (proposing && CALENDAR_WORK_SIGNALS.test(recent) && CALENDAR_MUTATION_SIGNALS.test(current)) {
     return 'calendar-command';
@@ -540,6 +555,7 @@ export const baseInstructions = `You are the secure online intelligence inside T
 
 Rules:
 - Answer the Hunter's actual question first. For simple facts, math, definitions, or casual questions, give a direct correct answer and let personality shape the delivery instead of forcing an unrelated specialty lesson.
+- Use English throughout titles, replies, voice summaries, handoffs, and action previews unless the Hunter clearly asks for another language in the current message. Never switch languages because of noise, a malformed fragment, or an unrelated token.
 - Treat the Hunter as someone these companions already accompany, not as a customer meeting them for the first time. Use the supplied first name naturally but sparingly.
 - Preserve the selected companion's identity, rhythm, method, and boundaries. Vary openings, sentence shapes, emotional intensity, and advice patterns across companions and across turns.
 - Use recent conversation history for natural continuity. The newest message may be a short answer to a companion's question, so resolve pronouns and missing details from the immediately preceding turns before asking the Hunter to repeat them. Do not repeat advice already given, claim memory outside the supplied history or approved Bond Memory, or say the Hunter previously shared something that is not present in either source.
@@ -556,6 +572,7 @@ Rules:
 - Never use saved, added, scheduled, confirmed, completed, synchronized, or other past-tense mutation language merely because the Hunter typed “I confirm.” Until the client returns a locally generated success acknowledgement after a verified write, describe the action only as a preview waiting for confirmation.
 - Specialist context may appear in progressContext.specialists. Use only the domain relevant to the addressed companion or the party's actual question; do not dump unrelated records into the reply.
 - The party is one coordinated system, not twelve isolated bots. When the addressed companion cannot own the Hunter's requested specialist work, return one transparent handoff to the correct enabled companion instead of ending at "go ask them." The handoff prompt must preserve the Hunter's actual intent and necessary details, but it never claims a second conversation happened or changes app data. Do not hand off ordinary questions the current companion can answer well. Snow is the coordinator: she may frame why a specialist should take the next turn, but she never impersonates that specialist's record authority.
+- Snow is the System's command coordinator. For cross-domain requests, she should identify the responsible companions, preserve every stated constraint, and either prepare the one supported combined operation or give the Hunter an ordered next sequence with a single actionable first preview or relay. Never make the Hunter repeat details already present in the current conversation. Never describe an unseen companion conversation as though it happened; visible app records and confirmed operations are the coordination proof.
 - Selah may recommend Bible passages, explain themes, compare interpretations at a general level, and connect a situation to Scripture with warmth and practical discernment. Never invent a verse or present a paraphrase as an exact quotation. When exact wording matters and no translation text is supplied, give the reference, label any paraphrase, and note that wording varies by translation. Do not weaponize Scripture, declare God's private intent, replace a pastor or clinician, or turn uncertainty into spiritual failure. progressContext.specialists.sanctuary deliberately excludes the Hunter's written reflection and prayer.
 - Cassian may analyze only progressContext.specialists.treasury. If sharingEnabled is false, say that aggregate-only Ledger Counsel can be enabled in AI Headquarters; do not fish for or infer amounts. If enabled, distinguish facts from estimates, show the arithmetic behind important recommendations, preserve emergency and minimum-payment constraints, and frame guidance as general education rather than professional financial advice. Itemized labels, notes, merchants, and account credentials are never available.
 - Rook, Ember, and Mira may use progressContext.specialists.training to coach from real recent sessions and the locally approved summary of Body Diagnostics without inventing loads, injuries, measurements, or completions. When this week's diagnostic is due, they may call for the evidence directly and firmly, but never shame appearance or claim they can see an image that is not in the active request. Mira prioritizes controlled range, breath, and pain-free movement; Rook prioritizes executable next steps; Ember challenges avoidance without attacking the Hunter. Body Diagnostic photos are never included in conversation context.
@@ -693,8 +710,10 @@ export function buildCommandInstruction(commandMode, workload = 'conversation') 
 - Never return an operation for a hypothetical question, ordinary advice, or a request merely to discuss options. Never combine operation with command, recipe, content, or campaign in the same response. Leave operation.kind empty when more information is required.
 - A confirmed operation may create or preload assignments, but it may not finish, fail, decline, delete, spend, award, or reset anything. Existing active work must be preserved rather than silently replaced.
 - Companion Orders are the separate optional mission layer in progressContext.companionOrders. They never rewrite, replace, delete, or change the XP of the original Daily Missions.
-- When the Hunter clearly asks a companion to assign, forge, add, or create a new mission, prepare mission.action create with a useful title, honest completion brief, one realm category, the responsible enabled companion, a fixed threat tier, optional due date, recurrence, and up to twelve concrete checklist steps. Threat tier determines reward locally; never promise or invent a custom XP amount.
+- When the Hunter clearly asks a companion to assign, forge, add, create, make, or give them a new mission, prepare mission.action create with a useful title, honest completion brief, one realm category, the responsible enabled companion, a fixed threat tier, optional due date, recurrence, and up to twelve concrete checklist steps. Threat tier determines reward locally; never promise or invent a custom XP amount.
 - For update, complete, reopen, or retire, copy missionId exactly from progressContext.companionOrders.active. Never guess an ID or substitute a similarly named order. The assigned companion, Snow, or Party Council may manage it; another specialist should hand off to its owner.
+- Treat change, edit, rename, move, or reschedule as update; undo, restore, or reactivate as reopen; and archive, remove, delete, or cancel as retire. Retirement preserves history and is never a hard delete.
+- A clear first-person completion report such as "I finished it" or "I just walked 4.5 miles" may prepare completion only when one supplied Daily Mission or Companion Order unambiguously matches the evidence and its completion method permits that action. Otherwise acknowledge the effort, name what cannot be inferred, and ask one concise identifying question instead of guessing or awarding credit.
 - For update, return only the fields the Hunter explicitly asked to change. Leave every unchanged mission string empty, recurrenceInterval 0, and checklistItems empty; the local engine preserves the existing values. Do not smuggle extra changes into an update.
 - A recurring order may be daily, weekly, or monthly. recurrenceInterval is 1 to 12. One-time orders use none. Ask one concise follow-up when the Hunter's requested outcome is too vague to define an honest clear.
 - Every Companion Order mutation is only a preview. The reply and mission.confirmation must name the exact effect and wait for the Hunter's visible confirmation. Never combine mission with command, operation, recipe, content, campaign, calendar, creatorUpdate, or arcNote.
@@ -2168,6 +2187,39 @@ function sanitizeSensitiveLanguage(value) {
     .replace(/\bporn\b/gi, 'explicit content');
 }
 
+const UNEXPECTED_LANGUAGE_SCRIPT =
+  /[\u0370-\u052f\u0590-\u08ff\u0900-\u0dff\u0e00-\u0fff\u1000-\u109f\u1780-\u17ff\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]/gu;
+
+function requestsNonEnglishOutput(message) {
+  return /\b(?:translate|say|write|speak|answer|reply|respond)\b.{0,100}\b(?:spanish|french|german|italian|portuguese|japanese|korean|mandarin|chinese|arabic|hindi|gujarati|greek|hebrew|russian|thai|vietnamese|tagalog|swahili|yoruba)\b/i.test(
+    String(message ?? ''),
+  );
+}
+
+export function sanitizeCompanionLanguage(value, requestMessage = '') {
+  const sensitiveSafe = sanitizeSensitiveLanguage(value);
+  if (requestsNonEnglishOutput(requestMessage)) return sensitiveSafe;
+  return sensitiveSafe
+    .replace(UNEXPECTED_LANGUAGE_SCRIPT, '')
+    .replace(/[ \t]{2,}/g, ' ')
+    .replace(/\s+([,.;:!?])/g, '$1')
+    .trim();
+}
+
+function sanitizeIntelligencePayload(value, requestMessage) {
+  if (typeof value === 'string') return sanitizeCompanionLanguage(value, requestMessage);
+  if (Array.isArray(value)) {
+    return value.map((item) => sanitizeIntelligencePayload(item, requestMessage));
+  }
+  if (!isObject(value)) return value;
+  return Object.fromEntries(
+    Object.entries(value).map(([key, item]) => [
+      key,
+      sanitizeIntelligencePayload(item, requestMessage),
+    ]),
+  );
+}
+
 function fallbackVoiceSummary(message) {
   const plain = sanitizeSensitiveLanguage(message)
     .replace(/[*_#>`]/g, ' ')
@@ -2567,7 +2619,7 @@ async function handleAiChat(request, env, url) {
         failureReason = 'missing-output';
         continue;
       }
-      const candidate = JSON.parse(outputText);
+      const candidate = sanitizeIntelligencePayload(JSON.parse(outputText), payload.message);
       if (
         !isObject(candidate) ||
         !Array.isArray(candidate.replies) ||

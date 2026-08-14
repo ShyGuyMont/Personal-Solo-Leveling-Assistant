@@ -1,7 +1,7 @@
 {
   "name": "the-system",
   "private": true,
-  "version": "9.0.1",
+  "version": "9.1.0",
   "packageManager": "pnpm@10.12.4",
   "type": "module",
   "scripts": {

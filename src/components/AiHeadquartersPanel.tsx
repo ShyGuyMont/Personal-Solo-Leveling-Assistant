@@ -55,6 +55,11 @@ import {
   savePendingAiProposal,
   type AiPendingProposal,
 } from '@/game/aiPendingProposals';
+import {
+  clearPendingAiTransmission,
+  getPendingAiTransmission,
+  savePendingAiTransmission,
+} from '@/game/aiTransmissions';
 import { buildQuickLinkActionCatalog, commandSuccessAcknowledgement } from '@/game/aiQuickLink';
 import { applyCalendarProposal } from '@/game/calendar';
 import {
@@ -73,8 +78,10 @@ import {
 import { assignSpecificKitchenOrder } from '@/game/kitchen';
 import { deleteCustomKitchenRecipe, saveCustomKitchenRecipe } from '@/game/kitchenGrimoire';
 import {
+  createAiTransmissionId,
   getAiLinkStatus,
   requestAiHeadquartersReply,
+  resumeAiHeadquartersReply,
   type AiLinkStatus,
 } from '@/services/aiHeadquarters';
 import { useGameStore } from '@/store/useGameStore';
@@ -121,6 +128,7 @@ export function AiHeadquartersPanel() {
     >();
   const [executingProposal, setExecutingProposal] = useState(false);
   const messageListRef = useRef<HTMLDivElement>(null);
+  const recoveryStartedRef = useRef(false);
   const voiceLink = useAiVoiceLink({
     settings,
     refresh,
@@ -229,6 +237,99 @@ export function AiHeadquartersPanel() {
       active = false;
     };
   }, [activeId]);
+
+  useEffect(() => {
+    if (
+      recoveryStartedRef.current ||
+      !profile ||
+      !settings ||
+      !progression ||
+      settings.aiLinkMode !== 'online' ||
+      !settings.aiDataSharingAcknowledged
+    ) {
+      return;
+    }
+    recoveryStartedRef.current = true;
+    void (async () => {
+      const pendingTransmission = await getPendingAiTransmission('headquarters');
+      if (!pendingTransmission) return;
+      const conversation = await db.aiConversations.get(pendingTransmission.conversationId);
+      if (!conversation) {
+        await clearPendingAiTransmission('headquarters', pendingTransmission.transmissionId);
+        return;
+      }
+      const hunterIndex = conversation.messages.findIndex(
+        (message) => message.id === pendingTransmission.hunterMessageId,
+      );
+      if (
+        hunterIndex >= 0 &&
+        conversation.messages.slice(hunterIndex + 1).some((message) => message.role === 'companion')
+      ) {
+        await clearPendingAiTransmission('headquarters', pendingTransmission.transmissionId);
+        return;
+      }
+
+      setSending(true);
+      setNotice('Restoring the Headquarters transmission that finished while you were awayâ€¦');
+      try {
+        const result = await resumeAiHeadquartersReply(pendingTransmission.transmissionId);
+        void voiceLink.trackTextUsage(result).catch(() => undefined);
+        if (settings.aiRelationshipMemoryEnabled) {
+          await saveAiMemoryCandidates(
+            result.memoryCandidates,
+            pendingTransmission.audience,
+            conversation.id,
+          );
+        }
+        const replyTime = new Date().toISOString();
+        const replyMessages = result.replies.map((reply) =>
+          createCompanionMessage(reply.companionId, reply.message, replyTime, reply.voiceSummary),
+        );
+        const completedConversation: AiConversation = {
+          ...conversation,
+          title: result.title,
+          updatedAt: replyTime,
+          messages: [...conversation.messages, ...replyMessages],
+        };
+        await saveAiConversation(completedConversation);
+        const proposal = extractAiPendingProposal(
+          result,
+          actionCatalog,
+          pendingTransmission.audience,
+        );
+        if (proposal) {
+          if (proposal.kind === 'operation') {
+            await stageCompanionOperation(systemDate, proposal.payload, completedConversation.id);
+          }
+          await savePendingAiProposal(completedConversation.id, proposal);
+          setPendingProposal(proposal);
+        }
+        if (result.handoffProposal) setPendingHandoff(result.handoffProposal);
+        const refreshed = await getRecentAiConversations();
+        setConversations(refreshed);
+        setActiveId(completedConversation.id);
+        setNotice(
+          proposal
+            ? 'Recovered transmission complete. Its protected preview is waiting for confirmation.'
+            : 'Recovered transmission complete. Headquarters kept your place.',
+        );
+        await clearPendingAiTransmission('headquarters', pendingTransmission.transmissionId);
+        window.dispatchEvent(
+          new CustomEvent('system:ai-conversations-changed', {
+            detail: { id: completedConversation.id },
+          }),
+        );
+      } catch (error) {
+        setNotice(
+          error instanceof Error
+            ? error.message
+            : 'The unfinished Headquarters transmission remains protected.',
+        );
+      } finally {
+        setSending(false);
+      }
+    })();
+  }, [actionCatalog, profile, progression, settings, systemDate, voiceLink]);
 
   if (!profile || !settings || !progression || !activeConversation) return null;
 
@@ -382,6 +483,15 @@ export function AiHeadquartersPanel() {
     await updateConversation(pendingConversation);
 
     try {
+      const transmissionId = createAiTransmissionId();
+      await savePendingAiTransmission({
+        surface: 'headquarters',
+        transmissionId,
+        conversationId: pendingConversation.id,
+        hunterMessageId: hunterMessage.id,
+        audience: currentConversation.audience,
+        startedAt: new Date().toISOString(),
+      });
       const result = await requestAiHeadquartersReply({
         audience: currentConversation.audience,
         message,
@@ -401,6 +511,7 @@ export function AiHeadquartersPanel() {
           history: currentConversation.messages,
         }),
         commandMode: 'propose',
+        transmissionId,
       });
       void voiceLink.trackTextUsage(result).catch(() => undefined);
       const memoryAdditions = currentSettings.aiRelationshipMemoryEnabled
@@ -449,6 +560,7 @@ export function AiHeadquartersPanel() {
           `${memoryAdditions.length} new Bond Memory suggestion${memoryAdditions.length === 1 ? '' : 's'} awaiting your approval.`,
         );
       }
+      await clearPendingAiTransmission('headquarters', transmissionId);
     } catch (error) {
       setNotice(error instanceof Error ? error.message : 'The online link could not respond.');
     } finally {

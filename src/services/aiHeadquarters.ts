@@ -685,77 +685,43 @@ export async function requestCartesiaVoiceCatalog(): Promise<CartesiaVoiceOption
     }));
 }
 
-export async function requestAiHeadquartersReply(input: {
-  audience: AiConversationAudience;
-  message: string;
-  history: AiConversationMessage[];
-  context: AiProgressContext;
-  commandMode?: 'none' | 'propose';
-}): Promise<AiHeadquartersReply> {
-  const requestBody = JSON.stringify({
-    audience: input.audience,
-    message: input.message,
-    history: input.history.slice(-16).map((item) => ({
-      role: item.role,
-      companionId: item.companionId,
-      message: item.message.slice(0, 4_000),
-    })),
-    context: input.context,
-    commandMode: input.commandMode ?? 'none',
-  });
-  let response: Response;
-  try {
-    const transmissionId =
-      typeof globalThis.crypto?.randomUUID === 'function'
-        ? globalThis.crypto.randomUUID()
-        : `system-${Date.now()}-${Math.random().toString(36).slice(2, 14)}`;
-    response = await fetch('/api/ai/transmissions', {
-      method: 'POST',
-      headers: {
-        accept: 'application/json',
-        'content-type': 'application/json',
-        'x-system-transmission-id': transmissionId,
-      },
-      body: requestBody,
-    });
-    if (response.status === 503) {
-      const unavailable = await readJson(response.clone());
-      if (unavailable?.code === 'resumable-link-unavailable') {
-        response = await fetch('/api/ai/chat', {
-          method: 'POST',
-          headers: { accept: 'application/json', 'content-type': 'application/json' },
-          body: requestBody,
-        });
-      }
-    }
-    let checks = 0;
-    while (response.status === 202 && checks < 240) {
+export function createAiTransmissionId() {
+  return typeof globalThis.crypto?.randomUUID === 'function'
+    ? globalThis.crypto.randomUUID()
+    : `system-${Date.now()}-${Math.random().toString(36).slice(2, 14)}`;
+}
+
+async function waitForAiTransmission(
+  transmissionId: string,
+  initialResponse?: Response,
+): Promise<Response> {
+  let response = initialResponse;
+  let checks = 0;
+  while ((!response || response.status === 202) && checks < 240) {
+    if (response) {
       await new Promise((resolve) => globalThis.setTimeout(resolve, 1_500));
-      try {
-        response = await fetch(`/api/ai/transmissions/${encodeURIComponent(transmissionId)}`, {
-          headers: { accept: 'application/json' },
-          cache: 'no-store',
-        });
-      } catch {
-        checks += 1;
-        continue;
-      }
+    }
+    try {
+      response = await fetch(`/api/ai/transmissions/${encodeURIComponent(transmissionId)}`, {
+        headers: { accept: 'application/json' },
+        cache: 'no-store',
+      });
+    } catch {
       checks += 1;
+      continue;
     }
-    if (response.status === 202) {
-      throw new AiLinkError(
-        'That transmission is still working in the background. Return to this conversation shortly.',
-        'transmission-pending',
-      );
-    }
-  } catch (error) {
-    if (error instanceof AiLinkError) throw error;
+    checks += 1;
+  }
+  if (!response || response.status === 202) {
     throw new AiLinkError(
-      'The online link could not be reached. Your message is still saved on this device.',
-      'network',
+      'That transmission is still working in the background. Return to this conversation shortly.',
+      'transmission-pending',
     );
   }
+  return response;
+}
 
+async function parseAiHeadquartersReply(response: Response): Promise<AiHeadquartersReply> {
   const payload = await readJson(response);
   if (!response.ok) {
     const code = typeof payload?.code === 'string' ? payload.code : 'request-failed';
@@ -836,6 +802,73 @@ export async function requestAiHeadquartersReply(input: {
         ? (payload.arcNoteProposal as AiHeadquartersReply['arcNoteProposal'])
         : undefined,
   };
+}
+
+export async function resumeAiHeadquartersReply(
+  transmissionId: string,
+): Promise<AiHeadquartersReply> {
+  try {
+    return await parseAiHeadquartersReply(await waitForAiTransmission(transmissionId));
+  } catch (error) {
+    if (error instanceof AiLinkError) throw error;
+    throw new AiLinkError(
+      'The online link could not be reached. The unfinished transmission remains protected.',
+      'network',
+    );
+  }
+}
+
+export async function requestAiHeadquartersReply(input: {
+  audience: AiConversationAudience;
+  message: string;
+  history: AiConversationMessage[];
+  context: AiProgressContext;
+  commandMode?: 'none' | 'propose';
+  transmissionId?: string;
+}): Promise<AiHeadquartersReply> {
+  const requestBody = JSON.stringify({
+    audience: input.audience,
+    message: input.message,
+    history: input.history.slice(-16).map((item) => ({
+      role: item.role,
+      companionId: item.companionId,
+      message: item.message.slice(0, 4_000),
+    })),
+    context: input.context,
+    commandMode: input.commandMode ?? 'none',
+  });
+  let response: Response;
+  try {
+    const transmissionId = input.transmissionId ?? createAiTransmissionId();
+    response = await fetch('/api/ai/transmissions', {
+      method: 'POST',
+      headers: {
+        accept: 'application/json',
+        'content-type': 'application/json',
+        'x-system-transmission-id': transmissionId,
+      },
+      body: requestBody,
+    });
+    if (response.status === 503) {
+      const unavailable = await readJson(response.clone());
+      if (unavailable?.code === 'resumable-link-unavailable') {
+        response = await fetch('/api/ai/chat', {
+          method: 'POST',
+          headers: { accept: 'application/json', 'content-type': 'application/json' },
+          body: requestBody,
+        });
+      }
+    }
+    if (response.status === 202) response = await waitForAiTransmission(transmissionId, response);
+  } catch (error) {
+    if (error instanceof AiLinkError) throw error;
+    throw new AiLinkError(
+      'The online link could not be reached. Your message is still saved on this device.',
+      'network',
+    );
+  }
+
+  return parseAiHeadquartersReply(response);
 }
 
 export async function requestAiTranscription(input: {
