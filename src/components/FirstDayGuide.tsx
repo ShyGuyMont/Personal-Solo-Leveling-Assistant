@@ -8,7 +8,7 @@ const STEPS = [
   {
     icon: Sparkles,
     title: 'This is your System day',
-    text: 'The dashboard shows your active directives, level, streak, and current System state.',
+    text: 'The dashboard shows your active directives, level, cleared-day streak, and current System state. A partial day records progress but does not extend that streak.',
   },
   {
     icon: ListChecks,

@@ -89,6 +89,59 @@ describe('mission transaction engine', () => {
     expect(await db.dailyReviews.where('date').equals(yesterday).count()).toBe(1);
   });
 
+  it('records a partial activity day without falsely extending the cleared-day streak', async () => {
+    const settings = await db.settings.get('primary');
+    const today = getSystemDateKey(new Date(), settings!.resetTime, settings!.timeZone);
+    const yesterday = addDays(today, -1);
+    await ensureDailyRecords(yesterday);
+    const records = await db.dailyMissions.where('date').equals(yesterday).toArray();
+    const first = records[0];
+    expect(first).toBeDefined();
+    await completeMission({ date: yesterday, missionId: first.missionId, systemDate: today });
+    for (const record of records.slice(1)) {
+      await setMissionStatus({
+        date: yesterday,
+        missionId: record.missionId,
+        status: 'failed',
+      });
+    }
+
+    const review = await finalizeDailyReview(yesterday, today);
+    expect(review.perfectDay).toBe(false);
+    expect(review.protectedPerfectDay).toBe(false);
+    expect(await db.progression.get('primary')).toMatchObject({
+      completedDays: 1,
+      currentDayStreak: 0,
+      longestDayStreak: 0,
+    });
+    expect(await db.streaks.get('day')).toMatchObject({ current: 0, longest: 0 });
+  });
+
+  it('does not bridge a cleared-day streak across a missing date', async () => {
+    const settings = await db.settings.get('primary');
+    const today = getSystemDateKey(new Date(), settings!.resetTime, settings!.timeZone);
+    const firstDate = addDays(today, -3);
+    const secondDate = addDays(today, -1);
+
+    for (const date of [firstDate, secondDate]) {
+      await ensureDailyRecords(date);
+      const records = await db.dailyMissions.where('date').equals(date).toArray();
+      for (const record of records) {
+        await completeMission({ date, missionId: record.missionId, systemDate: today });
+      }
+      await finalizeDailyReview(date, today);
+    }
+
+    expect(await db.progression.get('primary')).toMatchObject({
+      completedDays: 2,
+      perfectDays: 2,
+      currentDayStreak: 1,
+      longestDayStreak: 1,
+      currentPerfectStreak: 1,
+      longestPerfectStreak: 1,
+    });
+  });
+
   it('does not let an unresolved optional mission prevent a Perfect Day', async () => {
     const settings = await db.settings.get('primary');
     const today = getSystemDateKey(new Date(), settings!.resetTime, settings!.timeZone);

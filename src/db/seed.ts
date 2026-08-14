@@ -12,6 +12,7 @@ import { db } from '@/db/database';
 import { createChallengeProgress, chooseRotatingChallenge } from '@/game/challenges';
 import { accountXpForLevel } from '@/game/xp';
 import { ALL_STATS, createInitialStat } from '@/game/stats';
+import { reconcileClearedDayStreaks } from '@/game/streaks';
 import { getSystemDateKey, startOfMonth, startOfWeek } from '@/utils/date';
 import { sanitizeSensitiveDisplayText } from '@/utils/privacy';
 import type {
@@ -296,6 +297,7 @@ export async function ensureCoreData() {
       });
     },
   );
+  await reconcileClearedDayStreaks();
   const systemDate = getSystemDateKey(new Date(), settings.resetTime, settings.timeZone);
   await ensureRotatingChallenges(systemDate, settings.weekStartsOn);
 }

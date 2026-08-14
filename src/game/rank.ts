@@ -69,7 +69,7 @@ export function calculateRankQualification(
     },
     {
       id: 'days',
-      label: 'Completed Days',
+      label: 'Progress Days',
       current: progression.completedDays,
       target: requirement.completedDays,
       met: progression.completedDays >= requirement.completedDays,

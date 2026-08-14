@@ -183,8 +183,14 @@ function recentConversationSignal(source: AiContextSource) {
 
 function shouldShareArcKnowledge(source: AiContextSource) {
   if (source.audience === 'quill') return true;
-  if (source.audience !== 'snow' && source.audience !== 'party') return false;
-  return ARC_KNOWLEDGE_SIGNALS.test(recentConversationSignal(source));
+  if (source.audience !== 'party') return false;
+  const activeParticipants = source.participantIds?.length
+    ? source.participantIds
+    : source.enabledCompanionIds;
+  return (
+    activeParticipants.includes('quill') &&
+    ARC_KNOWLEDGE_SIGNALS.test(recentConversationSignal(source))
+  );
 }
 
 function emptyArcKnowledgeContext() {
@@ -323,8 +329,8 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
     .filter((transaction) => transaction.amount > 0)
     .reduce((sum, transaction) => sum + transaction.amount, 0);
   const observedDays = Math.max(1, finalizedReviews.length);
-  const averageXpPerCompletedDay = roundedAverage(positiveXp, observedDays);
-  const averageMissionsPerCompletedDay = roundedAverage(
+  const averageXpPerFinalizedDay = roundedAverage(positiveXp, observedDays);
+  const averageMissionsPerFinalizedDay = roundedAverage(
     completedRecentMissions.length,
     observedDays,
   );
@@ -353,19 +359,19 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
       : finalizedReviews.length < 60
         ? 'developing'
         : 'established';
-  if (averageMissionsPerCompletedDay > 0) {
+  if (averageMissionsPerFinalizedDay > 0) {
     lowerBoundCandidates.push(
       Math.ceil(
         remaining(
           source.progression.lifetimeMissionCompletions,
           worldRequirement.lifetimeCompletions,
-        ) / averageMissionsPerCompletedDay,
+        ) / averageMissionsPerFinalizedDay,
       ),
     );
   }
-  if (averageXpPerCompletedDay > 0) {
+  if (averageXpPerFinalizedDay > 0) {
     lowerBoundCandidates.push(
-      Math.ceil(remaining(source.progression.totalXp, worldLevelXp) / averageXpPerCompletedDay),
+      Math.ceil(remaining(source.progression.totalXp, worldLevelXp) / averageXpPerFinalizedDay),
     );
   }
   const currentTreasuryWeek = treasuryWeeks.find(
@@ -408,6 +414,14 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
         .slice(0, 12)
         .map((mission) => mission.name),
     },
+    dayDefinitions: {
+      progressDay:
+        'A finalized day with at least one completed core directive. It advances Class day gates but does not by itself sustain the visible streak.',
+      clearedDayStreak:
+        'Consecutive finalized days where every active core directive was completed, or every remaining directive carried a valid protected exception.',
+      perfectDay:
+        'A finalized day where every active core directive was completed without using a protected exception.',
+    },
     companionOrders: {
       dailyXpCap: AGENT_MISSION_DAILY_XP_CAP,
       active: agentMissions
@@ -437,10 +451,10 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
       currentLevelXp: source.progression.currentLevelXp,
       xpToNextLevel: source.progression.xpToNextLevel,
       lifetimeMissionCompletions: source.progression.lifetimeMissionCompletions,
-      completedDays: source.progression.completedDays,
+      progressDays: source.progression.completedDays,
       perfectDays: source.progression.perfectDays,
-      currentDayStreak: source.progression.currentDayStreak,
-      currentPerfectStreak: source.progression.currentPerfectStreak,
+      currentClearedDayStreak: source.progression.currentDayStreak,
+      currentPerfectDayStreak: source.progression.currentPerfectStreak,
       xpMultiplier: source.progression.xpMultiplier,
     },
     classification: {
@@ -462,7 +476,7 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
         class: requirement.rank,
         minimumLevel: requirement.minimumLevel,
         lifetimeCompletions: requirement.lifetimeCompletions,
-        completedDays: requirement.completedDays,
+        progressDays: requirement.completedDays,
         disciplineLevel: requirement.disciplineLevel,
         balancedStatLevel: requirement.balancedStatLevel,
         balancedStatsRequired: requirement.balancedStatsRequired,
@@ -476,7 +490,7 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
           source.progression.lifetimeMissionCompletions,
           worldRequirement.lifetimeCompletions,
         ),
-        remainingCompletedDays: remaining(
+        remainingProgressDays: remaining(
           source.progression.completedDays,
           worldRequirement.completedDays,
         ),
@@ -492,19 +506,19 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
           maximum: WORLD_CLASS_PACING.sustainableSteadyDays,
         },
         designedConsistencyRange: WORLD_CLASS_PACING.designedConsistencyRange,
-        lowerBoundCompletedDaysAtRecentPace: Math.max(...lowerBoundCandidates),
+        lowerBoundProgressDaysAtRecentPace: Math.max(...lowerBoundCandidates),
         recentPaceSampleDays: finalizedReviews.length,
         recentPaceConfidence,
         forecastCaveat:
-          'The System is designed around a sustainable 620–725 calendar-day path from a new save, with 570 days only as a near-perfect theoretical floor. The recent-pace figure is a secondary extrapolation, not the intended timeline; samples under 21 finalized days are too early for a reliable long-range forecast. Every intermediate Class trial, stat requirement, challenge requirement, and completed-day gate must still be cleared.',
+          'The System is designed around a sustainable 620–725 calendar-day path from a new save, with 570 days only as a near-perfect theoretical floor. The recent-pace figure is a secondary extrapolation, not the intended timeline; samples under 21 finalized days are too early for a reliable long-range forecast. Every intermediate Class trial, stat requirement, challenge requirement, and Progress-Day gate must still be cleared.',
       },
     },
     recentThirtyDays: {
       finalizedDays: finalizedReviews.length,
       missionsCompleted: completedRecentMissions.length,
       xpEarned: positiveXp,
-      averageXpPerCompletedDay,
-      averageMissionsPerCompletedDay,
+      averageXpPerFinalizedDay,
+      averageMissionsPerFinalizedDay,
       perfectDays: finalizedReviews.filter((review) => review.perfectDay).length,
       trainingSessions: training.filter((session) => session.status === 'completed').length,
       kitchenOrders: kitchen.filter((session) => session.status === 'completed').length,

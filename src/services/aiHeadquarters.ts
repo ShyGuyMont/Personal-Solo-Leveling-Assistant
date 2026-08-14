@@ -29,6 +29,11 @@ export interface AiProgressContext {
     availableMissions: number;
     pendingMissionNames: string[];
   };
+  dayDefinitions: {
+    progressDay: string;
+    clearedDayStreak: string;
+    perfectDay: string;
+  };
   companionOrders: {
     dailyXpCap: number;
     active: Array<{
@@ -53,10 +58,10 @@ export interface AiProgressContext {
     currentLevelXp: number;
     xpToNextLevel: number;
     lifetimeMissionCompletions: number;
-    completedDays: number;
+    progressDays: number;
     perfectDays: number;
-    currentDayStreak: number;
-    currentPerfectStreak: number;
+    currentClearedDayStreak: number;
+    currentPerfectDayStreak: number;
     xpMultiplier: number;
   };
   classification: {
@@ -75,7 +80,7 @@ export interface AiProgressContext {
       class: Rank;
       minimumLevel: number;
       lifetimeCompletions: number;
-      completedDays: number;
+      progressDays: number;
       disciplineLevel: number;
       balancedStatLevel: number;
       balancedStatsRequired: number;
@@ -86,14 +91,14 @@ export interface AiProgressContext {
       remainingLevels: number;
       remainingXpToMinimumLevel: number;
       remainingMissionCompletions: number;
-      remainingCompletedDays: number;
+      remainingProgressDays: number;
       remainingDisciplineLevels: number;
       remainingBalancedStats: number;
       remainingChallenges: number;
       designedTheoreticalFastestDays: number;
       designedSustainableRangeDays: { minimum: number; maximum: number };
       designedConsistencyRange: string;
-      lowerBoundCompletedDaysAtRecentPace: number;
+      lowerBoundProgressDaysAtRecentPace: number;
       recentPaceSampleDays: number;
       recentPaceConfidence: 'early' | 'developing' | 'established';
       forecastCaveat: string;
@@ -103,8 +108,8 @@ export interface AiProgressContext {
     finalizedDays: number;
     missionsCompleted: number;
     xpEarned: number;
-    averageXpPerCompletedDay: number;
-    averageMissionsPerCompletedDay: number;
+    averageXpPerFinalizedDay: number;
+    averageMissionsPerFinalizedDay: number;
     perfectDays: number;
     trainingSessions: number;
     kitchenOrders: number;

@@ -5,6 +5,7 @@ import { buildAiProgressContext } from '@/game/aiContext';
 import { saveCreatorProject } from '@/game/creatorForge';
 import { ALL_STATS, createInitialStat } from '@/game/stats';
 import { COMPANIONS } from '@/config/companions';
+import { saveArcCanonSource } from '@/game/arcArchives';
 
 describe('Awakened Intelligence progress context', () => {
   beforeEach(async () => {
@@ -18,6 +19,8 @@ describe('Awakened Intelligence progress context', () => {
       db.aiMemories.clear(),
       db.campaignArcs.clear(),
       db.arcMilestones.clear(),
+      db.arcCharacters.clear(),
+      db.arcCanonSources.clear(),
       db.treasuryTransactions.clear(),
       db.treasuryWeeks.clear(),
       db.treasuryBills.clear(),
@@ -82,7 +85,7 @@ describe('Awakened Intelligence progress context', () => {
     expect(context.classification.nextClass).toBe('E');
     expect(context.classification.roadmap.at(-1)?.class).toBe('WORLD CLASS');
     expect(context.classification.worldClass.remainingMissionCompletions).toBe(2_850);
-    expect(context.classification.worldClass.lowerBoundCompletedDaysAtRecentPace).toBe(480);
+    expect(context.classification.worldClass.lowerBoundProgressDaysAtRecentPace).toBe(480);
     expect(context.classification.worldClass.designedTheoreticalFastestDays).toBe(570);
     expect(context.classification.worldClass.designedSustainableRangeDays).toEqual({
       minimum: 620,
@@ -90,6 +93,11 @@ describe('Awakened Intelligence progress context', () => {
     });
     expect(context.classification.worldClass.recentPaceSampleDays).toBe(0);
     expect(context.classification.worldClass.recentPaceConfidence).toBe('early');
+    expect(context.dayDefinitions).toEqual({
+      progressDay: expect.stringContaining('at least one completed core directive'),
+      clearedDayStreak: expect.stringContaining('every active core directive'),
+      perfectDay: expect.stringContaining('without using a protected exception'),
+    });
     expect(context.party.directorNotes).toEqual([
       expect.objectContaining({
         companionId: 'snow',
@@ -275,6 +283,58 @@ describe('Awakened Intelligence progress context', () => {
       'kairo',
       'snow',
     ]);
+  });
+
+  it('keeps Snow outside Quill\'s private archive knowledge while grounding a visible spoiler room', async () => {
+    await saveArcCanonSource({
+      title: 'Akoura Incident Truth',
+      kind: 'world-lore',
+      tags: ['Akoura', 'Yoshanai'],
+      characterNames: ['Yoshanai'],
+      text: 'The Akoura Incident left Yoshanai carrying a hidden witness mark.',
+    });
+    const settings = createDefaultSettings();
+    const base = {
+      profile: {
+        id: 'primary' as const,
+        displayName: 'Jordan Hunter',
+        systemTitle: 'The Awakened',
+        startingFocus: 'balanced' as const,
+        createdAt: '2026-08-01T00:00:00.000Z',
+        equippedTitleId: 'newly-awakened',
+        cosmeticFrame: 'focus-balanced',
+        backgroundSigil: 'origin',
+      },
+      settings,
+      progression: createDefaultProgression(),
+      missions: [],
+      todayRecords: [],
+      stats: ALL_STATS.map(createInitialStat),
+      challenges: [],
+      systemDate: '2026-08-14' as const,
+      enabledCompanionIds: settings.enabledCompanionIds,
+      query: 'Review the Canon Vault source Akoura Incident Truth.',
+    };
+
+    const snow = await buildAiProgressContext({ ...base, audience: 'snow' });
+    expect(snow.specialists.arc.relevantCanonSources).toEqual([]);
+    expect(JSON.stringify(snow.specialists.arc)).not.toContain('hidden witness mark');
+
+    const snowOnlyRoom = await buildAiProgressContext({
+      ...base,
+      audience: 'party',
+      participantIds: ['snow'],
+    });
+    expect(snowOnlyRoom.specialists.arc.relevantCanonSources).toEqual([]);
+
+    const spoilerRoom = await buildAiProgressContext({
+      ...base,
+      audience: 'party',
+      participantIds: ['snow', 'quill'],
+    });
+    expect(spoilerRoom.specialists.arc.relevantCanonSources[0]).toMatchObject({
+      source: 'Canon source: Akoura Incident Truth',
+    });
   });
 
   it('gives specialists useful compact context while protecting private writing and ledger detail', async () => {

@@ -25,7 +25,7 @@ export const COSMETICS: CosmeticDefinition[] = [
     description: 'A cold steel frame for consistent discipline.',
     kind: 'frame',
     rarity: 'rare',
-    unlockCondition: 'Reach a 30-day streak',
+    unlockCondition: 'Reach a 30-day cleared-day streak',
     previewClass: 'focus-discipline',
   },
   {
@@ -61,7 +61,7 @@ export const COSMETICS: CosmeticDefinition[] = [
     description: 'A seven-point mark for an unbroken week.',
     kind: 'sigil',
     rarity: 'uncommon',
-    unlockCondition: 'Reach a 7-day streak',
+    unlockCondition: 'Reach a 7-day cleared-day streak',
     previewClass: 'sigil-seven',
   },
   {

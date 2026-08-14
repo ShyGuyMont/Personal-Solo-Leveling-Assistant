@@ -125,7 +125,8 @@ export async function claimMissionPass(date: LocalDateKey) {
     await db.inventory.put({
       id: 'mission-pass',
       name: 'Mission Pass',
-      description: 'Excuse one mission while protecting the day streak. No mission XP is awarded.',
+      description:
+        'Excuse one mission while protecting the cleared-day streak. No mission XP is awarded.',
       quantity: (pass?.quantity ?? 0) + 1,
       updatedAt: now,
     });

@@ -11,6 +11,7 @@ import { calculateChallengeCurrent, createChallengeProgress } from '@/game/chall
 import { missionAccountXp, missionStatXp } from '@/game/rewards';
 import { applyAccountXp, resolveLevelFromTotalXp } from '@/game/xp';
 import { applyStatChange, getDecayForNeglect } from '@/game/stats';
+import { deriveDailyStreakMetrics } from '@/game/streaks';
 import { refreshPeriodicReports } from '@/game/reports';
 import {
   addDays,
@@ -881,19 +882,30 @@ export async function finalizeDailyReview(date: LocalDateKey, systemDate: LocalD
         }
       }
 
-      const dayQualified = completed.length > 0;
-      const perfectStreak =
-        perfectDay || protectedPerfectDay ? nextProgression.currentPerfectStreak + 1 : 0;
-      const dayStreak = dayQualified ? nextProgression.currentDayStreak + 1 : 0;
+      const priorFinalizedReviews = await db.dailyReviews
+        .where('status')
+        .equals('finalized')
+        .toArray();
+      const streakMetrics = deriveDailyStreakMetrics([
+        ...priorFinalizedReviews,
+        {
+          date,
+          status: 'finalized',
+          perfectDay,
+          protectedPerfectDay,
+        },
+      ]);
+      const perfectStreak = streakMetrics.currentPerfectStreak;
+      const dayStreak = streakMetrics.currentDayStreak;
       nextProgression = {
         ...nextProgression,
-        completedDays: nextProgression.completedDays + (dayQualified ? 1 : 0),
+        completedDays: nextProgression.completedDays + (completed.length > 0 ? 1 : 0),
         perfectDays: nextProgression.perfectDays + (perfectDay ? 1 : 0),
         protectedPerfectDays: nextProgression.protectedPerfectDays + (protectedPerfectDay ? 1 : 0),
         currentPerfectStreak: perfectStreak,
-        longestPerfectStreak: Math.max(nextProgression.longestPerfectStreak, perfectStreak),
+        longestPerfectStreak: streakMetrics.longestPerfectStreak,
         currentDayStreak: dayStreak,
-        longestDayStreak: Math.max(nextProgression.longestDayStreak, dayStreak),
+        longestDayStreak: streakMetrics.longestDayStreak,
         xpMultiplier:
           systemState === 'stable' || systemState === 'recovery'
             ? 1

@@ -189,7 +189,7 @@ export function StatusPage() {
             <strong>{formatNumber(progression.lifetimeMissionCompletions)}</strong>
           </div>
           <div>
-            <span>Completed days</span>
+            <span>Progress Days</span>
             <strong>{formatNumber(progression.completedDays)}</strong>
           </div>
           <div>
@@ -197,7 +197,7 @@ export function StatusPage() {
             <strong>{formatNumber(progression.perfectDays)}</strong>
           </div>
           <div>
-            <span>Longest streak</span>
+            <span>Longest cleared-day streak</span>
             <strong>{formatNumber(progression.longestDayStreak)}</strong>
           </div>
           <div>

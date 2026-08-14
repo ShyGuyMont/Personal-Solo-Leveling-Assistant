@@ -263,11 +263,43 @@ describe('Companion Soulprint intelligence', () => {
 
     expect(instructions).toContain('Soulprint Studio Direction');
     expect(instructions).toContain('active performance cues, not biography');
+    expect(instructions).toContain('must visibly embody at least one relevant authored cue');
+    expect(instructions).toContain('never field is a hard performance prohibition');
     expect(instructions).toContain('System administrator title');
     expect(instructions).toContain('Hates giving Snow spoilers');
     expect(instructions).toContain('Pushes Snow');
     expect(instructions).toContain('override built-in rhythm, relationship, and Party chemistry defaults');
+    expect(instructions.indexOf('Focused workroom:')).toBeLessThan(
+      instructions.indexOf('FINAL PERFORMANCE LOCK'),
+    );
     expect(instructions).not.toContain('This absent note must not enter the room');
+  });
+
+  it('keeps Quill as the sole archive authority while Snow plays the spoiler-hungry fan', () => {
+    const instructions = intelligence.buildSystemInstructions(
+      'party',
+      ['snow', 'quill'],
+      'none',
+      'arc-forge',
+      { kind: 'spoiler-room', enabledIds: ['snow', 'quill'] },
+      [
+        {
+          companionId: 'snow',
+          bonds: 'Abuses her unofficial System-admin seniority to pressure Quill for spoilers.',
+        },
+        {
+          companionId: 'quill',
+          bonds: 'Protests before surrendering one spoiler-safe hint to Snow.',
+        },
+      ],
+    );
+
+    expect(instructions).toContain('Quill is the only canon authority');
+    expect(instructions).toContain('Snow begins with no private archive knowledge');
+    expect(instructions).toContain('never displays independent knowledge of raw dossiers');
+    expect(instructions).toContain("Quill's grounding reply first");
+    expect(instructions).toContain('unofficial System-admin seniority');
+    expect(instructions).toContain('Protests before surrendering one spoiler-safe hint');
   });
 
   it('keeps absent companions from speaking through one-on-one Soulprint notes', () => {
@@ -312,6 +344,47 @@ describe('Companion Soulprint intelligence', () => {
       expect(direction).toContain(`Unique relationship direction ${index + 1}`);
     }
     expect(direction).toContain('built-in descriptions only fill gaps');
+  });
+
+  it('keeps every companion\'s authored performance lock active inside their specialist route', () => {
+    const workloads: Record<string, string> = {
+      snow: 'system-plan',
+      rook: 'system-command',
+      selah: 'conversation',
+      cipher: 'conversation',
+      haven: 'content-forge',
+      ember: 'conversation',
+      mira: 'conversation',
+      amara: 'conversation',
+      cassian: 'ledger-review',
+      saffron: 'kitchen-coach',
+      quill: 'arc-forge',
+      kairo: 'calendar-counsel',
+    };
+    const notes = intelligence.companionIds.map((companionId) => ({
+      companionId,
+      casual: `AUTHORED-${companionId}-CASUAL`,
+      never: `AUTHORED-${companionId}-NEVER`,
+    }));
+
+    for (const companionId of intelligence.companionIds) {
+      const instructions = intelligence.buildSystemInstructions(
+        companionId,
+        [companionId],
+        'propose',
+        workloads[companionId],
+        {},
+        notes,
+      );
+      expect(instructions).toContain(`AUTHORED-${companionId}-CASUAL`);
+      expect(instructions).toContain(`AUTHORED-${companionId}-NEVER`);
+      expect(instructions.indexOf('FINAL PERFORMANCE LOCK')).toBeGreaterThan(
+        instructions.indexOf('Focused workroom:'),
+      );
+      for (const otherId of intelligence.companionIds.filter((id) => id !== companionId)) {
+        expect(instructions).not.toContain(`AUTHORED-${otherId}-CASUAL`);
+      }
+    }
   });
 
   it('makes specialist, Kairo, Snow, and Hunter roles explicit inside Calendar Council', () => {
@@ -888,7 +961,18 @@ describe('Companion Soulprint intelligence', () => {
           sdp: 'v=0\r\no=hunter 1 1 IN IP4 127.0.0.1',
           companionId: 'haven',
           profile,
-          context: { hunter: { firstName: 'Jay' }, party: { directorNotes: [] } },
+          context: {
+            hunter: { firstName: 'Jay' },
+            party: {
+              directorNotes: [
+                {
+                  companionId: 'haven',
+                  casual: 'Talk like a charismatic streamer friend, never a presenter.',
+                  never: 'Never become stiff or corporate.',
+                },
+              ],
+            },
+          },
         }),
       }),
       { OPENAI_API_KEY: 'test-key' },
@@ -924,6 +1008,12 @@ describe('Companion Soulprint intelligence', () => {
     expect(String(session.instructions)).toContain('not a voice interface reading a report');
     expect(String(session.instructions)).toContain('timezone as silent local context');
     expect(String(session.instructions)).toContain('naturally suggest the right specialist');
+    expect(String(session.instructions)).toContain('FINAL LIVE PERFORMANCE LOCK');
+    expect(String(session.instructions)).toContain('charismatic streamer friend');
+    expect(String(session.instructions)).toContain('Never become stiff or corporate');
+    expect(String(session.instructions).lastIndexOf('FINAL LIVE PERFORMANCE LOCK')).toBeGreaterThan(
+      String(session.instructions).lastIndexOf('CURRENT SYSTEM CONTEXT'),
+    );
     expect(JSON.stringify(session)).not.toContain('test-key');
   });
 
@@ -1189,6 +1279,8 @@ describe('Companion Soulprint intelligence', () => {
     expect(input[0].content).toContain('Hunter-authored Rook cadence');
     expect(input[0].content).not.toContain('This Snow direction must remain outside Rook solo chat');
     expect(input[1].content).toContain('What is 5 + 5?');
+    expect(input[1].content).not.toContain('Hunter-authored Rook cadence');
+    expect(input[1].content).not.toContain('directorNotes');
     expect(await response.clone().json()).toMatchObject({
       route: 'quick',
       reasoningEffort: 'low',

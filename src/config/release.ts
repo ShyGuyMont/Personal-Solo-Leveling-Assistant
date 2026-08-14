@@ -1,4 +1,4 @@
-export const APP_VERSION = '10.4.3';
+export const APP_VERSION = '10.5.0';
 export const DATABASE_SCHEMA_VERSION = 29;
 export const SAVE_FORMAT_VERSION = 29;
 
@@ -9,6 +9,21 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 10.5.0 · True Signal',
+    detail:
+      'The System now protects the truth of the Hunter’s progress and the authored identity of every companion: partial effort remains valuable, cleared days mean what they say, and Soulprint Studio becomes the final performance authority everywhere intelligence speaks.',
+    points: [
+      'The visible streak is now a true Cleared-Day Streak: every active core directive must be completed, or every remaining directive must carry a valid protected exception; completing only one mission no longer extends it.',
+      'Existing saves automatically rebuild cleared-day and Perfect-Day chains from dated finalized reviews, correcting legacy streak totals without deleting mission history, earned XP, Class progress, or previously unlocked rewards.',
+      'Date gaps and out-of-order finalization can no longer create a false chain because every daily finalization derives streaks from the complete review timeline instead of blindly adding one.',
+      'Progress Days now name the separate long-term Class gate: any finalized day with at least one completed core directive records real advancement, while Cleared-Day Streaks and Perfect Days keep their stricter meanings.',
+      'Soulprint Studio direction is applied as the final performance lock after factual and specialist reasoning in direct chat, Quick Link, Live Link, pivots, workrooms, Party Commons, and councils for all twelve companions.',
+      'Authored humor, challenge, care, casual behavior, conflict, bonds, and never-break-character boundaries must visibly shape the relevant moment; built-in personality and relationship defaults fill only details the Hunter left open.',
+      'Quill alone receives and speaks from retrieved A.R.C. canon. Snow enters the Spoiler Room without private archive knowledge, presses Quill as an invested fan, reacts only after canon is revealed, and labels her own theories instead of becoming a second lore database.',
+      'A full twelve-companion route matrix and progression regression suite now protects specialist ownership, Soulprint isolation, shared-room chemistry, canon boundaries, historical streak repair, protected clears, partial days, and missing-date breaks.',
+    ],
+  },
   {
     title: 'Version 10.4.3 · Chrono Lock',
     detail:

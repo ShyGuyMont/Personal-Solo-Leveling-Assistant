@@ -135,7 +135,7 @@ export function DashboardPage() {
         </div>
         <div className="hero-panel__version" aria-hidden="true">
           <span>V{APP_VERSION}</span>
-          <b>CHRONO LOCK</b>
+          <b>TRUE SIGNAL</b>
         </div>
         <div className="hero-panel__top headquarters-stage__header">
           <div>
@@ -322,7 +322,7 @@ export function DashboardPage() {
               </span>
               <span className="ascension-core__satellite ascension-core__satellite--streak">
                 <b>{progression.currentDayStreak}</b>
-                <small>STREAK</small>
+                <small>CLEAR CHAIN</small>
               </span>
               <span className="ascension-core__satellite ascension-core__satellite--gates">
                 <b>{coreProjection.gateDisplay}</b>
@@ -405,7 +405,7 @@ export function DashboardPage() {
               </span>
               <span>
                 <Flame size={15} />
-                <small>DAY STREAK</small>
+                <small>CLEARED-DAY STREAK</small>
                 <strong>{progression.currentDayStreak}</strong>
               </span>
             </div>
@@ -423,7 +423,7 @@ export function DashboardPage() {
           </div>
           <div>
             <Flame size={17} />
-            <span>Day streak</span>
+            <span>Cleared-day streak</span>
             <strong>{progression.currentDayStreak}</strong>
           </div>
           <div>

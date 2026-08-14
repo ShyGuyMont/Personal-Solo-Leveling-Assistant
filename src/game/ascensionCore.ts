@@ -96,7 +96,7 @@ export function buildAscensionCoreProjection(input: AscensionCoreInput): Ascensi
       dailyCharge,
       levelCharge,
       headline: 'Daily core fully synchronized',
-      detail: `Every available directive is answered. Your ${input.currentStreak}-day streak is feeding the long-range Class path.`,
+      detail: `Every available directive is answered. Your ${input.currentStreak}-day cleared-day streak is feeding the long-range Class path.`,
       actionLabel: 'Inspect Class path',
       href: '/status',
       gateDisplay,

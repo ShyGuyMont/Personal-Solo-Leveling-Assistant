@@ -290,7 +290,7 @@ export function AboutPage() {
                       <span>{requirement.lifetimeCompletions.toLocaleString()}</span>
                     </li>
                     <li>
-                      <b>Completed days</b>
+                      <b>Progress Days</b>
                       <span>{requirement.completedDays.toLocaleString()}</span>
                     </li>
                     <li>
@@ -315,7 +315,7 @@ export function AboutPage() {
           <p>
             <strong>Highest classification:</strong> World Class. Numerical account and stat levels
             can continue as high as Level 999. World Class requires{' '}
-            {WORLD_CLASS_REQUIREMENT.completedDays} Completed Days before its final{' '}
+            {WORLD_CLASS_REQUIREMENT.completedDays} Progress Days before its final{' '}
             {WORLD_CLASS_TRIAL.durationDays}-day Class Trial can begin, so the earliest
             first-attempt path is about {EARLIEST_WORLD_CLASS_DAYS} calendar days—roughly nineteen
             months. At sustainable 75–90% long-term mission consistency, the full ladder is designed
@@ -323,8 +323,16 @@ export function AboutPage() {
             retries can extend it. Every class still depends on all six visible requirements and its
             Class Trial. The Level {WORLD_CLASS_LEVEL} gate equals{' '}
             {WORLD_CLASS_ACCOUNT_XP.toLocaleString()} lifetime account XP, but the simulator
-            confirms that Completed Days and trials—not an oversized hidden XP wall—set the final
+            confirms that Progress Days and trials—not an oversized hidden XP wall—set the final
             pace. Once a class is earned, missed days do not demote it.
+          </p>
+          <p>
+            A <strong>Progress Day</strong> is a finalized day with at least one completed core
+            directive; it advances the long-term Class path without pretending the whole day was
+            cleared. The visible <strong>Cleared-Day Streak</strong> is stricter: every active core
+            directive must be completed, or every remaining directive must carry a valid protected
+            exception. A <strong>Perfect Day</strong> requires every core directive completed with
+            no protected exception.
           </p>
         </details>
         <details>
@@ -472,7 +480,7 @@ export function AboutPage() {
           </p>
           <p>
             Those examples assume a Stable System state. Warning temporarily awards 90% of printed
-            account mission XP and Stagnant awards 75% until completed days restore stability; stat
+            account mission XP and Stagnant awards 75% until Progress Days restore stability; stat
             mission XP remains as displayed.
           </p>
         </details>
