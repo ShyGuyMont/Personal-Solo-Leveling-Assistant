@@ -433,12 +433,11 @@ export function BodyDiagnosticPanel({
             <label className="body-diagnostic-upload">
               <Camera size={25} />
               <strong>Physique angles</strong>
-              <span>Front, side, or back · up to 3</span>
+              <span>Choose from Photo Library · front, side, or back · up to 3</span>
               <small>{counts.physique}/3 loaded</small>
               <input
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
-                capture="environment"
                 multiple
                 onChange={(event) => {
                   addImages(event.target.files, 'physique');
@@ -479,11 +478,10 @@ export function BodyDiagnosticPanel({
               ))}
               {counts.physique < 3 && (
                 <label className="body-diagnostic-previews__add">
-                  <ImagePlus size={20} /> Add angle
+                  <ImagePlus size={20} /> Add from library
                   <input
                     type="file"
                     accept="image/jpeg,image/png,image/webp"
-                    capture="environment"
                     multiple
                     onChange={(event) => {
                       addImages(event.target.files, 'physique');

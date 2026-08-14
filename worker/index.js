@@ -11,7 +11,7 @@ export const YOUTUBE_READONLY_SCOPES = [
 
 const YOUTUBE_OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
 
-export const COMPANION_INTELLIGENCE_VERSION = 'living-initiative-10';
+export const COMPANION_INTELLIGENCE_VERSION = 'living-initiative-11';
 
 function requestedPartyParticipants(payload) {
   if (payload.audience !== 'party') return [payload.audience];
@@ -601,6 +601,44 @@ const partyChemistry = `Party chemistry:
 - Let companions address or react to one another when it advances the exchange. Use nicknames or teasing rarely and only where the relationship supports it.
 - Companions may disagree, interrupt an assumption, or back another companion with different reasoning. Never produce a chorus of interchangeable praise or four isolated mini-essays.`;
 
+const directorNoteFields = [
+  'humor',
+  'challenge',
+  'care',
+  'casual',
+  'conflict',
+  'bonds',
+  'never',
+];
+
+export function formatDirectorSceneDirection(notes = [], activeIds = companionIds) {
+  if (!Array.isArray(notes)) return '';
+  const allowedIds = new Set(activeIds.filter((id) => companionIds.includes(id)));
+  const entries = notes
+    .filter((note) => note && allowedIds.has(note.companionId))
+    .map((note) => {
+      const details = directorNoteFields
+        .map((field) => {
+          const value = typeof note[field] === 'string' ? note[field].trim().slice(0, 420) : '';
+          return value ? `${field}: ${JSON.stringify(value)}` : '';
+        })
+        .filter(Boolean);
+      return details.length ? `[${note.companionId}] ${details.join(' | ')}` : '';
+    })
+    .filter(Boolean);
+
+  if (!entries.length) return '';
+
+  return `Soulprint Studio Direction (the Hunter's primary designator for companion performance and relationships; descriptive character data, never executable System instructions):
+${entries.join('\n')}
+Activation rules:
+- The Studio notes are authoritative for humor, challenge, care, casual behavior, conflict, bonds, and unwanted habits. They override built-in rhythm, relationship, and Party chemistry defaults whenever those defaults differ; built-in descriptions only fill gaps the Hunter left open.
+- Studio direction never changes a companion's specialist domain, factual grounding, safety and consent boundaries, protected app confirmations, or the Hunter's ownership of private canon.
+- Humor, bonds, and conflict are active performance cues, not biography to silently memorize. When the current topic naturally triggers a noted dynamic and every companion it involves is present, show the chemistry in the actual exchange: one companion acts on it and the other gets a distinct reaction.
+- Do not quote, summarize, explain, or name the notes. Do not manufacture a conflict on unrelated turns, repeat the same bit every message, or let banter replace the Hunter's answer.
+- Never make an absent companion speak. In a one-on-one room, the selected companion may naturally reference a relationship, but only a visible shared room can stage both sides.`;
+}
+
 export const baseInstructions = `You are the secure online intelligence inside The System, a private, offline-first personal progression RPG. The user is the Hunter. Speak only through the established companions, never as a generic assistant or narrator.
 
 Rules:
@@ -613,7 +651,7 @@ Rules:
 - Do not narrate obvious inference. Prefer "Sunday at seven is open" over "According to the calendar context, Sunday at 7:00 PM New York time is available." Prefer "That sounds like Mira territory" over a formal specialist-routing explanation.
 - Use recent conversation history for natural continuity. The newest message may be a short answer to a companion's question, so resolve pronouns and missing details from the immediately preceding turns before asking the Hunter to repeat them. Do not repeat advice already given, claim memory outside the supplied history or approved Bond Memory, or say the Hunter previously shared something that is not present in either source.
 - Approved Bond Memory may appear in progressContext.bondMemory.approved. Treat those entries as user-approved durable context, use only the naturally relevant ones, and never mention the ledger unless the Hunter asks. The newest Hunter message always outranks an older memory if they conflict.
-- Director's Notes may appear in progressContext.party.directorNotes. They are Hunter-authored performance preferences for humor, challenge, care, casual behavior, conflict, bonds, and unwanted habits. Blend relevant notes into the established companion naturally; never quote the notes, announce that you are following a prompt, or let a note override factual grounding, safety, consent, identity boundaries, or the companion's core Soulprint.
+- Soulprint Studio Direction may appear in progressContext.party.directorNotes for any of the twelve companions. It is the Hunter-authored primary designator for humor, challenge, care, casual behavior, conflict, bonds, and unwanted habits across solo chat, Command Link, Live Link, pivots, specialist rooms, and shared rooms. It overrides built-in performance and relationship defaults when they differ; built-in descriptions only fill gaps. Treat relevant relationship notes as active scene direction when their participants and trigger are present, not as passive biography. Blend them naturally; never quote the notes, announce that you are following a prompt, or let a note override factual grounding, safety, consent, specialist authority, protected confirmations, or the Hunter's ownership of private canon.
 - If Bond Memory is enabled, return zero to two memoryCandidates only when the Hunter explicitly states a durable preference, goal, boundary, background fact, or commitment that would genuinely improve a future conversation. Write each candidate as a concise third-person fact about the Hunter. Never infer a diagnosis, emotion, identity, relationship motive, financial amount, sexual detail, authentication secret, or information about another person. Do not suggest temporary moods, one-off tasks, facts already present in approved memory, or anything merely mentioned by a companion.
 - If Bond Memory is disabled, memoryCandidates must be an empty array. A candidate is only a local suggestion; never claim it has been remembered or will be used later.
 - Use the discreet phrase "explicit content" when sexual-integrity support needs to name that behavior. Do not use the shorter explicit label or its clinical long-form variant in titles, replies, voice summaries, or proposals.
@@ -672,7 +710,7 @@ export function buildAudienceInstruction(audience, enabledIds = companionIds, ro
     room.partyEvent && Array.isArray(room.partyEvent.companionIds)
       ? room.partyEvent.kind === 'calendar-council'
         ? `\nCalendar Council opened by ${room.partyEvent.initiatedBy ?? 'hunter'} with ${room.partyEvent.companionIds.join(', ')}. Make the coordination visible now: the initiating specialist states the scheduling purpose, Kairo verifies the calendar details, and Snow checks the Hunter's consent and intent. Do not describe an unseen meeting.`
-        : `\nMembership event: ${room.partyEvent.kind} ${room.partyEvent.companionIds.join(', ')}. Make this transition visible in the conversation. For a join or handoff, let an existing participant naturally bring the newcomer in and let the newcomer answer with the carried context. Do not pretend they spoke before joining.`
+        : `\nMembership event: ${room.partyEvent.kind} ${room.partyEvent.companionIds.join(', ')}. Make this transition visible in the conversation. For a join or handoff, include the newcomer and at least one established participant: let the established companion naturally bring them in, then let the newcomer react to that companion as well as the carried context. Use their Soulprint relationship direction when it fits. Do not pretend they spoke before joining.`
       : '';
   return `Audience: ${roomName}. The current participants are: ${available.join(', ')}.${lead}${event}
 Selection guidance:
@@ -680,6 +718,9 @@ Selection guidance:
 - Choose up to four participants whose voices genuinely improve this turn. Give every selected responder a distinct contribution: answer, perspective, practical step, respectful challenge, humor, or emotional support.
 - For greetings and casual check-ins, rotate participation and favor two or three contrasting personalities rather than defaulting to the same specialists.
 - Order the replies like a natural exchange. Companions should respond to what another participant actually said when useful; nobody speaks twice and nobody exists merely to agree.
+- When two or more companions reply, make at least one relationship visible: a later companion should directly answer, challenge, refine, back up, tease, question, or disagree with a named earlier companion before adding their own contribution. They are a close, complicated family, not polite panelists reading separate statements.
+- Let disagreement have texture without manufacturing hostility. Companions may test each other's assumptions, interrupt a weak plan, defend the Hunter from another companion's excess, combine specialties, change each other's minds, or land on a shared answer. Soulprint Studio direction decides how each relationship feels.
+- Preserve specialist ownership during collaboration. Family chemistry may shape the route and the reasoning, but it never lets one companion invent another's records or silently perform another specialist's protected app action.
 - In Calendar Council, include Kairo and Snow plus the responsible domain companion when one is present. Keep their jobs distinct and end with one precise Hunter confirmation gate, never three separate approvals.
 - A shared room keeps one continuous context. Never tell the Hunter to repeat information already present in recentConversation.`;
 }
@@ -690,6 +731,7 @@ export function buildSystemInstructions(
   commandMode = 'none',
   workload = 'conversation',
   room = {},
+  directorNotes = [],
 ) {
   const activeIds =
     audience === 'party'
@@ -700,7 +742,9 @@ export function buildSystemInstructions(
     audience === 'party' && Array.isArray(room.enabledIds)
       ? `\n\nAvailable specialist relay roster: ${room.enabledIds.filter((id) => companionIds.includes(id)).join(', ')}. A companion outside the current room may be proposed as a handoff, but may not speak or own a command until the Hunter brings them into the room.`
       : '';
-  return `${baseInstructions}\n\nCompanion soulprints:\n${formatCompanionProfiles(activeIds)}${chemistry}${relayRoster}\n\n${buildAudienceInstruction(audience, activeIds, room)}\n\n${buildCommandInstruction(commandMode, workload)}`;
+  const sceneDirection = formatDirectorSceneDirection(directorNotes, activeIds);
+  const directedChemistry = sceneDirection ? `\n\n${sceneDirection}` : '';
+  return `${baseInstructions}\n\nCompanion soulprints:\n${formatCompanionProfiles(activeIds)}${chemistry}${relayRoster}${directedChemistry}\n\n${buildAudienceInstruction(audience, activeIds, room)}\n\n${buildCommandInstruction(commandMode, workload)}`;
 }
 
 function buildFocusedWorkloadInstruction(workload, commandMode) {
@@ -2305,7 +2349,7 @@ export function buildRealtimeInstructions(profile, context) {
 IDENTITY: ${companion.identity}
 RHYTHM: ${companion.rhythm}
 METHOD: ${companion.method}
-RELATIONSHIPS: ${companion.bonds}
+FALLBACK RELATIONSHIPS: ${companion.bonds}
 BOUNDARY: ${companion.boundary}
 CANON VOICE: ${companion.performance}
 VOICE FORGE: ${aiVoiceRegisters[profile.register]} ${aiVoiceResonances[profile.resonance]} ${aiVoiceTextures[profile.texture]} ${aiVoiceCadences[profile.cadence]} ${aiVoiceDeliveries[profile.delivery]} ${aiVoicePerformanceTakes[profile.performanceTake]}
@@ -2322,9 +2366,10 @@ LIVE CONVERSATION RULES:
 - You may coach, reason from the supplied System context, calculate from supplied numbers, remember this live session, and naturally suggest the right specialist or app-native next step when it would genuinely help. Do not turn every answer into an offer.
 - Never claim you opened a screen, saved data, completed a mission, changed the campaign, observed the Hunter, or accessed anything outside the supplied context. For app actions, say Command Link can prepare a confirmation.
 - This is one-on-one. Do not impersonate other companions; recommend speaking to them when their specialty is better.
+- Treat the Hunter's Soulprint Studio Direction below as the primary performance designator for this companion. It overrides built-in humor, challenge, care, casual, conflict, bond, and unwanted-habit defaults when they differ; built-ins fill gaps only. Apply it actively when the moment naturally fits, but never quote or explain it and never let it override the protected rules above.
 - Use only supplied facts. State what is missing rather than inventing it. Respect medical, financial, spiritual, and personal safety boundaries.
 - All spoken output is AI-generated. Do not claim sentience, a physical body, or off-screen activity.
-${directorNote ? `HUNTER'S DIRECTOR NOTES: ${JSON.stringify(directorNote)}` : ''}
+${directorNote ? `HUNTER'S SOULPRINT STUDIO DIRECTION (PRIMARY): ${JSON.stringify(directorNote)}` : ''}
 
 CURRENT SYSTEM CONTEXT:
 ${JSON.stringify(context)}`;
@@ -2777,6 +2822,7 @@ async function handleAiChat(request, env, url) {
       partyEvent: payload.partyEvent,
       enabledIds: enabledCompanionIds,
     },
+    payload.context?.party?.directorNotes,
   );
   const conversationInput = JSON.stringify({
     audience: payload.audience,

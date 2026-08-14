@@ -159,7 +159,7 @@ export function AiSoulprintStudio({
         <span>
           <strong>Soulprint Studio</strong>
           <small>
-            Your Director's Notes · {authoredCount}/{COMPANIONS.length} companion
+            Primary personality direction · {authoredCount}/{COMPANIONS.length} companion
             {authoredCount === 1 ? '' : 's'}
           </small>
         </span>
@@ -169,15 +169,18 @@ export function AiSoulprintStudio({
       {open && (
         <div className="ai-soulprint-studio__body">
           <p>
-            Add the little details that make each companion feel real to you. These notes guide
-            performance and chemistry; their established identity, factual grounding, and safety
-            boundaries always remain intact.
+            This is the primary designator for how every companion behaves with you and with one
+            another. Your notes control humor, challenge, care, off-duty behavior, disagreement,
+            party bonds, and never-break habits across solo chat, Quick Link, Live Link, specialist
+            rooms, pivots, and shared conversations. Built-in personality only fills what you leave
+            open.
           </p>
           <p>
-            <strong>Soulprints shape who they are.</strong> The shared Living Intelligence layer
-            separately handles common-sense context, natural specialist relays, and proactive
-            suggestions across the whole party—so you do not need to repeat those instructions in
-            every companion profile.
+            <strong>Your Soulprints shape who they are.</strong> Specialist authority, factual
+            grounding, protected confirmations, canon ownership, and safety boundaries stay intact.
+            The shared Living Intelligence layer separately handles common-sense context, natural
+            relays, and proactive suggestions—so you do not need to repeat those rules in every
+            profile.
           </p>
           <div className="ai-soulprint-studio__roster" aria-label="Choose a companion to direct">
             {COMPANIONS.map((item) => (
@@ -197,7 +200,7 @@ export function AiSoulprintStudio({
             <img src={getCompanionImage(companion.image)} alt="" />
             <span>
               <strong>{companion.name}</strong>
-              <small>{companion.title} · canon Soulprint + your direction</small>
+              <small>{companion.title} · your direction + protected foundation</small>
             </span>
           </header>
           <div className="ai-soulprint-studio__fields">

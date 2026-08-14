@@ -10,6 +10,10 @@ const quickLink = readFileSync(
   resolve(process.cwd(), 'src/components/CompanionQuickLink.tsx'),
   'utf8',
 );
+const bodyDiagnostic = readFileSync(
+  resolve(process.cwd(), 'src/components/BodyDiagnosticPanel.tsx'),
+  'utf8',
+);
 
 describe('mobile keyboard viewport safety', () => {
   it('keeps touch-device editors at the WebKit-safe 16px focus size', () => {
@@ -40,5 +44,11 @@ describe('mobile keyboard viewport safety', () => {
 
   it('never lets the offline navigation fallback intercept secure API routes', () => {
     expect(viteConfig).toContain('navigateFallbackDenylist: [/^\\/api\\//]');
+  });
+
+  it('opens the normal phone photo library for every Body Diagnostic image', () => {
+    expect(bodyDiagnostic).toContain('Choose from Photo Library');
+    expect(bodyDiagnostic).toContain('Add from library');
+    expect(bodyDiagnostic).not.toContain('capture="environment"');
   });
 });

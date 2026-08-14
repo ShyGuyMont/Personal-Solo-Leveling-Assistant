@@ -135,7 +135,7 @@ export function DashboardPage() {
         </div>
         <div className="hero-panel__version" aria-hidden="true">
           <span>V{APP_VERSION}</span>
-          <b>ADAPTIVE PULSE</b>
+          <b>LIVING CHEMISTRY</b>
         </div>
         <div className="hero-panel__top headquarters-stage__header">
           <div>

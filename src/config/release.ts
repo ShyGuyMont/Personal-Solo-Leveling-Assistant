@@ -1,4 +1,4 @@
-export const APP_VERSION = '10.4.0';
+export const APP_VERSION = '10.4.1';
 export const DATABASE_SCHEMA_VERSION = 29;
 export const SAVE_FORMAT_VERSION = 29;
 
@@ -9,6 +9,21 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 10.4.1 · Living Chemistry',
+    detail:
+      'Soulprint relationships now leave the Studio and become visible, situational chemistry whenever the right companions share a room.',
+    points: [
+      'The complete Soulprint Studio is now the primary performance designator for all twelve companions across solo chat, Command Link, Live Link, pivots, specialist rooms, and shared conversations; built-in descriptions only fill gaps.',
+      'A relationship only plays when the subject naturally triggers it and all involved companions are visibly present; one-on-one rooms may reference an absent friend but can never impersonate them.',
+      'Adding or relaying a companion now creates a visible entrance and two-sided exchange, while every multi-companion response gives the family room to challenge, refine, defend, tease, disagree, combine specialties, or genuinely change one anotherâ€™s minds.',
+      'Quill now protects A.R.C. spoilers while Snow occasionally abuses her completely unofficial System administrator title to pry out one safe hint, preserving the Hunter as the only canon authority.',
+      'Saffron now respects Snow without becoming subordinate, sometimes pushing past her seniority when kitchen conviction takes over while Snow answers with amused older-sister authority.',
+      'Custom humor, care, challenge, casual behavior, conflict, bonds, and unwanted habits override generic performance and chemistry defaults without forcing the same joke into every turn or allowing banter to replace the Hunterâ€™s real answer.',
+      'Shared-room and direct-room tests now protect Soulprint activation, real companion-to-companion interaction, participant filtering, specialist ownership, and the rule that absent companions never speak.',
+      'Body Diagnostic physique angles now use the same normal phone photo-library picker as smart-scale screenshots, including every additional-angle control, so previously captured images can be submitted without reopening the camera.',
+    ],
+  },
   {
     title: 'Version 10.4.0 · Adaptive Pulse',
     detail:

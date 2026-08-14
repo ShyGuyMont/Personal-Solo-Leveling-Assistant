@@ -28,6 +28,10 @@ interface CompanionIntelligenceModule {
   ) => string;
   baseInstructions: string;
   formatCompanionProfiles: () => string;
+  formatDirectorSceneDirection: (
+    notes?: Array<Record<string, unknown>>,
+    activeIds?: string[],
+  ) => string;
   buildAudienceInstruction: (
     audience: string,
     enabledIds?: string[],
@@ -40,6 +44,7 @@ interface CompanionIntelligenceModule {
     commandMode?: 'none' | 'propose',
     workload?: string,
     room?: Record<string, unknown>,
+    directorNotes?: Array<Record<string, unknown>>,
   ) => string;
   selectIntelligenceRoute: (
     payload: {
@@ -159,7 +164,7 @@ describe('Companion Soulprint intelligence', () => {
     expect(intelligence.formatCompanionProfiles()).toContain('Relational signature:');
     expect(intelligence.baseInstructions).toContain('Approved Bond Memory');
     expect(intelligence.baseInstructions).toContain('memoryCandidates');
-    expect(intelligence.baseInstructions).toContain("Director's Notes");
+    expect(intelligence.baseInstructions).toContain('Soulprint Studio Direction');
     expect(intelligence.baseInstructions).toContain('classification roadmap');
     expect(intelligence.baseInstructions).toContain('Selah may recommend Bible passages');
     expect(intelligence.baseInstructions).toContain('Cassian may analyze only');
@@ -220,8 +225,93 @@ describe('Companion Soulprint intelligence', () => {
     expect(instructions).toContain('Party Commons');
     expect(instructions).toContain('snow, saffron');
     expect(instructions).toContain('Membership event: join saffron');
-    expect(instructions).toContain('let an existing participant naturally bring the newcomer in');
+    expect(instructions).toContain('include the newcomer and at least one established participant');
+    expect(instructions).toContain('let the newcomer react to that companion');
+    expect(instructions).toContain('make at least one relationship visible');
+    expect(instructions).toContain('close, complicated family');
+    expect(instructions).toContain('Preserve specialist ownership during collaboration');
     expect(instructions).not.toContain('cipher, haven');
+  });
+
+  it('promotes active Soulprint relationships into shared-room scene direction', () => {
+    const instructions = intelligence.buildSystemInstructions(
+      'party',
+      ['snow', 'saffron', 'quill'],
+      'none',
+      'party-council',
+      { kind: 'commons', enabledIds: ['snow', 'saffron', 'quill', 'rook'] },
+      [
+        {
+          companionId: 'snow',
+          bonds: 'Uses her System administrator title to pry spoilers out of Quill.',
+          conflict: 'Saffron sometimes ignores her seniority and tests her patience.',
+        },
+        {
+          companionId: 'quill',
+          bonds: 'Hates giving Snow spoilers and protests before surrendering a safe hint.',
+        },
+        {
+          companionId: 'saffron',
+          conflict: 'Pushes Snow by treating seniority as optional when food is involved.',
+        },
+        {
+          companionId: 'rook',
+          bonds: 'This absent note must not enter the room.',
+        },
+      ],
+    );
+
+    expect(instructions).toContain('Soulprint Studio Direction');
+    expect(instructions).toContain('active performance cues, not biography');
+    expect(instructions).toContain('System administrator title');
+    expect(instructions).toContain('Hates giving Snow spoilers');
+    expect(instructions).toContain('Pushes Snow');
+    expect(instructions).toContain('override built-in rhythm, relationship, and Party chemistry defaults');
+    expect(instructions).not.toContain('This absent note must not enter the room');
+  });
+
+  it('keeps absent companions from speaking through one-on-one Soulprint notes', () => {
+    const instructions = intelligence.buildSystemInstructions(
+      'quill',
+      ['quill'],
+      'none',
+      'conversation',
+      {},
+      [
+        {
+          companionId: 'quill',
+          bonds: 'He resists Snow when she asks for spoilers.',
+        },
+        {
+          companionId: 'snow',
+          bonds: 'This Snow-only direction is outside the room.',
+        },
+      ],
+    );
+
+    expect(instructions).toContain('He resists Snow when she asks for spoilers.');
+    expect(instructions).toContain('Never make an absent companion speak');
+    expect(instructions).not.toContain('This Snow-only direction is outside the room.');
+  });
+
+  it('honors Soulprint Studio direction for all twelve companions', () => {
+    const notes = intelligence.companionIds.map((companionId, index) => ({
+      companionId,
+      casual: `Unique Studio cadence ${index + 1}`,
+      bonds: `Unique relationship direction ${index + 1}`,
+    }));
+    const direction = intelligence.formatDirectorSceneDirection(
+      notes,
+      intelligence.companionIds,
+    );
+
+    expect(intelligence.companionIds).toHaveLength(12);
+    for (let index = 0; index < intelligence.companionIds.length; index += 1) {
+      expect(direction).toContain(`[${intelligence.companionIds[index]}]`);
+      expect(direction).toContain(`Unique Studio cadence ${index + 1}`);
+      expect(direction).toContain(`Unique relationship direction ${index + 1}`);
+    }
+    expect(direction).toContain('built-in descriptions only fill gaps');
   });
 
   it('makes specialist, Kairo, Snow, and Hunter roles explicit inside Calendar Council', () => {
@@ -1057,7 +1147,19 @@ describe('Companion Soulprint intelligence', () => {
               pendingMissionNames: ['Workout'],
             },
             momentum: [],
-            party: { enabledCompanionIds: ['rook'] },
+            party: {
+              enabledCompanionIds: ['rook'],
+              directorNotes: [
+                {
+                  companionId: 'rook',
+                  casual: 'Use the Hunter-authored Rook cadence in ordinary conversation.',
+                },
+                {
+                  companionId: 'snow',
+                  casual: 'This Snow direction must remain outside Rook solo chat.',
+                },
+              ],
+            },
             state: { recoveryActive: false },
             bondMemory: { enabled: false, approved: [] },
           },
@@ -1082,6 +1184,8 @@ describe('Companion Soulprint intelligence', () => {
     expect(input[0].content).toContain("follow only Rook's soulprint");
     expect(input[0].content).toContain('[rook] Rook — The Vanguard');
     expect(input[0].content).not.toContain('[snow] Snow — The Constant');
+    expect(input[0].content).toContain('Hunter-authored Rook cadence');
+    expect(input[0].content).not.toContain('This Snow direction must remain outside Rook solo chat');
     expect(input[1].content).toContain('What is 5 + 5?');
     expect(await response.clone().json()).toMatchObject({
       route: 'quick',
