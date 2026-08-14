@@ -50,5 +50,6 @@ describe('mobile keyboard viewport safety', () => {
     expect(bodyDiagnostic).toContain('Choose from Photo Library');
     expect(bodyDiagnostic).toContain('Add from library');
     expect(bodyDiagnostic).not.toContain('capture="environment"');
+    expect(documentShell).toContain("img-src 'self' data: blob:");
   });
 });

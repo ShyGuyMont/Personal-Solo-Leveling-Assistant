@@ -1,4 +1,4 @@
-export const APP_VERSION = '10.4.1';
+export const APP_VERSION = '10.4.2';
 export const DATABASE_SCHEMA_VERSION = 29;
 export const SAVE_FORMAT_VERSION = 29;
 
@@ -9,6 +9,17 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 10.4.2 · Evidence Lens',
+    detail:
+      'Body Diagnostic evidence selected from the phone photo library now remains visibly inspectable before the Hunter authorizes its private analysis.',
+    points: [
+      'Temporary on-device photo preview URLs are now explicitly allowed by the appâ€™s image security policy, fixing black or broken physique and scale tiles without allowing outside image hosts.',
+      'The underlying JPG, PNG, and WEBP files remain the diagnostic payload; preview URLs are never uploaded, retained in the campaign, or treated as proof of submission.',
+      'Selected counters continue to mean loaded locally, while Evidence secured remains the only successful-submission state after the private diagnostic returns and the weekly record is saved.',
+      'A regression test now protects the photo-library picker and the exact local-only preview allowance together.',
+    ],
+  },
   {
     title: 'Version 10.4.1 · Living Chemistry',
     detail:
