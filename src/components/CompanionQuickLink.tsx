@@ -78,6 +78,7 @@ import {
   buildQuickLinkActionCatalog,
   canBeginQuickLinkTransmission,
   commandSuccessAcknowledgement,
+  isCalendarCouncilRequest,
   navigationAcknowledgement,
   parseQuickLinkAddress,
   parsePartyMembershipCommand,
@@ -645,6 +646,44 @@ export function CompanionQuickLink() {
       } else {
         const continuing = previousConversation?.audience === addressed.audience;
         conversation = continuing ? previousConversation : createAiConversation(addressed.audience);
+      }
+
+      const calendarCouncilRequested =
+        isCalendarCouncilRequest(effectiveMessage) || relay?.companionId === 'kairo';
+      if (calendarCouncilRequested) {
+        const unavailableCouncilMember = (['kairo', 'snow'] as const).find(
+          (id) => !settings.enabledCompanionIds.includes(id),
+        );
+        if (unavailableCouncilMember) {
+          setNotice(
+            `${getCompanion(unavailableCouncilMember).name}'s link must be enabled before Calendar Council can prepare a change.`,
+          );
+          return;
+        }
+        const beforeCouncil = getAiConversationParticipantIds(
+          conversation,
+          settings.enabledCompanionIds,
+        );
+        const initiatingCompanion =
+          (relay && activeCompanionId !== 'kairo' ? activeCompanionId : leadCompanionId) ??
+          beforeCouncil[0] ??
+          'snow';
+        const councilIds = [...new Set([initiatingCompanion, 'kairo', 'snow'] as CompanionId[])];
+        const joining = councilIds.filter((id) => !beforeCouncil.includes(id));
+        conversation = addAiConversationParticipants(
+          conversation,
+          councilIds,
+          'commons',
+          settings.enabledCompanionIds,
+        );
+        requestAudience = 'party';
+        leadCompanionId = initiatingCompanion;
+        partyEvent = {
+          kind: 'calendar-council',
+          companionIds: joining.length ? joining : councilIds,
+          initiatedBy: initiatingCompanion,
+          summary: `${getCompanion(initiatingCompanion).name} requested Kairo's schedule review and Snow's consent check.`,
+        };
       }
 
       const activeIds = getAiConversationParticipantIds(conversation, settings.enabledCompanionIds);
@@ -2551,9 +2590,7 @@ export function CompanionQuickLink() {
                   <header>
                     <span>
                       <CalendarCheck2 size={15} />{' '}
-                      {pendingCalendarOwner === 'snow'
-                        ? "SNOW + KAIRO'S SCHEDULE LINK"
-                        : "KAIRO'S CALENDAR COMMAND"}
+                      CALENDAR COUNCIL
                     </span>
                     <small>PREVIEW · CONFIRMATION REQUIRED</small>
                   </header>
@@ -2590,6 +2627,15 @@ export function CompanionQuickLink() {
                     )}
                   </div>
                   <dl>
+                    <div>
+                      <dt>COUNCIL ROUTE</dt>
+                      <dd>
+                        {pendingCalendar.linkedCompanionId
+                          ? `${getCompanion(pendingCalendar.linkedCompanionId as CompanionId).name} → `
+                          : ''}
+                        Kairo → Snow → You
+                      </dd>
+                    </div>
                     <div>
                       <dt>TIME WINDOW</dt>
                       <dd>

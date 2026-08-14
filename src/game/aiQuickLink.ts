@@ -162,6 +162,25 @@ const ROUTES: Array<QuickNavigationCommand & { patterns: RegExp[] }> = [
 const NAVIGATION_INTENT =
   /\b(?:take|bring|send|lead|navigate)\s+me\b|\b(?:open|enter|visit|show me|pull up|go to|head to|switch to)\b/i;
 
+const CALENDAR_CHANGE_INTENT =
+  /\b(?:add|create|schedule|book|put|block|reserve|set\s+(?:up|aside)|move|change|update|reschedule|cancel|remove|delete|remind)\b/i;
+const CALENDAR_SUBJECT =
+  /\b(?:calendar|schedule|agenda|appointment|meeting|event|reminder|time\s+block|deadline|check[ -]?in|review\s+session|recurring)\b/i;
+const CALENDAR_TIME =
+  /\b(?:today|tomorrow|tonight|monday|tuesday|wednesday|thursday|friday|saturday|sunday|daily|weekly|monthly|every\s+(?:day|week|month|monday|tuesday|wednesday|thursday|friday|saturday|sunday)|(?:this|next)\s+(?:week|month|monday|tuesday|wednesday|thursday|friday|saturday|sunday)|at\s+\d{1,2}(?::\d{2})?\s*(?:a\.?m\.?|p\.?m\.?)?|on\s+(?:the\s+)?\d{1,2}(?:st|nd|rd|th)?)\b/i;
+const CALENDAR_READ_INTENT =
+  /^\s*(?:what(?:'s|\s+is|\s+does)|how(?:'s|\s+is)|when\s+is|do\s+i\s+have)\b/i;
+
+export function isCalendarCouncilRequest(message: string) {
+  const normalized = message.trim();
+  if (CALENDAR_READ_INTENT.test(normalized)) return false;
+  return (
+    Boolean(normalized) &&
+    CALENDAR_CHANGE_INTENT.test(normalized) &&
+    (CALENDAR_SUBJECT.test(normalized) || CALENDAR_TIME.test(normalized))
+  );
+}
+
 export function parseQuickLinkAddress(
   input: string,
   fallback: AiConversationAudience = 'snow',

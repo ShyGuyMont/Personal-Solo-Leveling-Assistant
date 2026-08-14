@@ -4,6 +4,7 @@ import { createDefaultProgression, createDefaultSettings } from '@/db/seed';
 import { buildAiProgressContext } from '@/game/aiContext';
 import { saveCreatorProject } from '@/game/creatorForge';
 import { ALL_STATS, createInitialStat } from '@/game/stats';
+import { COMPANIONS } from '@/config/companions';
 
 describe('Awakened Intelligence progress context', () => {
   beforeEach(async () => {
@@ -92,6 +93,65 @@ describe('Awakened Intelligence progress context', () => {
         humor: 'Use dry sisterly teasing.',
         never: 'Never sound corporate.',
       }),
+    ]);
+  });
+
+  it('delivers all twelve saved Director Notes to a full-party room without cross-room leakage', async () => {
+    const settings = createDefaultSettings();
+    settings.aiSoulprintNotes = Object.fromEntries(
+      COMPANIONS.map((companion) => [
+        companion.id,
+        {
+          humor: `${companion.name} humor direction`,
+          challenge: `${companion.name} challenge direction`,
+          care: `${companion.name} care direction`,
+          casual: `${companion.name} casual direction`,
+          conflict: `${companion.name} conflict direction`,
+          bonds: `${companion.name} bond direction`,
+          never: `${companion.name} boundary direction`,
+        },
+      ]),
+    );
+    const base = {
+      profile: {
+        id: 'primary' as const,
+        displayName: 'Jordan Hunter',
+        systemTitle: 'The Awakened',
+        startingFocus: 'balanced' as const,
+        createdAt: '2026-08-01T00:00:00.000Z',
+        equippedTitleId: 'newly-awakened',
+        cosmeticFrame: 'focus-balanced',
+        backgroundSigil: 'origin',
+      },
+      settings,
+      progression: createDefaultProgression(),
+      missions: [],
+      todayRecords: [],
+      stats: ALL_STATS.map(createInitialStat),
+      challenges: [],
+      systemDate: '2026-08-14' as const,
+      enabledCompanionIds: settings.enabledCompanionIds,
+    };
+
+    const party = await buildAiProgressContext({
+      ...base,
+      audience: 'party',
+      participantIds: settings.enabledCompanionIds,
+    });
+    expect(party.party.directorNotes).toHaveLength(12);
+    expect(party.party.directorNotes.map((note) => note.companionId)).toEqual(
+      settings.enabledCompanionIds,
+    );
+
+    const commons = await buildAiProgressContext({
+      ...base,
+      audience: 'party',
+      participantIds: ['cassian', 'kairo', 'snow'],
+    });
+    expect(commons.party.directorNotes.map((note) => note.companionId).sort()).toEqual([
+      'cassian',
+      'kairo',
+      'snow',
     ]);
   });
 

@@ -11,7 +11,7 @@ export const YOUTUBE_READONLY_SCOPES = [
 
 const YOUTUBE_OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
 
-export const COMPANION_INTELLIGENCE_VERSION = 'party-commons-engine-7';
+export const COMPANION_INTELLIGENCE_VERSION = 'calendar-council-engine-8';
 
 function requestedPartyParticipants(payload) {
   if (payload.audience !== 'party') return [payload.audience];
@@ -71,6 +71,9 @@ const CALENDAR_WORK_SIGNALS =
 const CALENDAR_MUTATION_SIGNALS =
   /\b(?:add|create|schedule|book|put|block|reserve|move|change|update|reschedule|cancel|remove|delete)\b/i;
 
+const CALENDAR_DETAIL_ANSWER_SIGNALS =
+  /\b(?:today|tomorrow|tonight|monday|tuesday|wednesday|thursday|friday|saturday|sunday|daily|weekly|monthly|every\s+(?:day|week|month)|\d{1,2}(?::\d{2})?\s*(?:a\.?m\.?|p\.?m\.?)?|\d+\s*(?:minutes?|hours?)|all\s+day)\b/i;
+
 function conversationWindow(payload, limit = 6) {
   const history = Array.isArray(payload.history) ? payload.history.slice(-limit) : [];
   return [...history.map((item) => String(item?.message ?? '')), String(payload.message ?? '')]
@@ -93,6 +96,11 @@ export function selectIntelligenceWorkload(payload) {
   const recent = conversationWindow(payload);
   const previousCompanion = lastCompanionMessage(payload);
   const proposing = payload.commandMode === 'propose';
+  const calendarFollowUp =
+    proposing &&
+    CALENDAR_MUTATION_SIGNALS.test(recent) &&
+    CALENDAR_WORK_SIGNALS.test(previousCompanion) &&
+    CALENDAR_DETAIL_ANSWER_SIGNALS.test(current);
 
   if (proposing && MISSION_WORK_SIGNALS.test(recent) && MISSION_MUTATION_SIGNALS.test(current)) {
     return 'system-command';
@@ -100,7 +108,10 @@ export function selectIntelligenceWorkload(payload) {
 
   if (proposing && COMPLETION_REPORT_SIGNALS.test(current)) return 'system-command';
 
-  if (proposing && CALENDAR_WORK_SIGNALS.test(recent) && CALENDAR_MUTATION_SIGNALS.test(current)) {
+  if (
+    (proposing && CALENDAR_WORK_SIGNALS.test(recent) && CALENDAR_MUTATION_SIGNALS.test(current)) ||
+    calendarFollowUp
+  ) {
     return 'calendar-command';
   }
 
@@ -622,6 +633,8 @@ Rules:
 - Vesper may use progressContext.specialists.creator to evaluate the real channel baseline, active production stages, hooks, audience promises, upload target, and recent releases. She must distinguish supplied metrics from hypotheses, never guarantee performance or invent analytics, and should end creator strategy with a specific next production move. When the Hunter explicitly names an existing project and asks to move its stage, replace its next action, or append a board note, Vesper may prepare one exact-project update preview. Cipher may join creator discussions as the systems counterpart but should not replace Vesper's audience and performance expertise.
 - Saffron may use progressContext.kitchen to walk the Hunter through the exact current order one step at a time, answer cooking interruptions, and adapt with safe substitutions. A generated recipe is a draft until the Hunter confirms it into the Private Grimoire.
 - Kairo may use only progressContext.calendar for schedule facts. The supplied timeZone, now, today, upcoming records, conflict list, nextEvent, and focusWindows are authoritative. He must state exact dates and times when answering scheduling questions, name missing time details instead of guessing, and never claim access to a phone calendar, external calendar, alarm, push notification, or background process. Snow may consult the same calendar context and report Kairo's schedule truth in her own voice, but she may not contradict or invent it. A calendar mutation is only a preview until the Hunter confirms it in the app.
+- Domain companions may proactively recommend one useful calendar ritual when the supplied evidence makes its purpose concrete—for example Cassian's budget review, the Training crew's weekly Body Diagnostic, Saffron's meal-prep block, Selah's Sanctuary time, Vesper's production block, or Quill's story session. State the practical reason and ask whether the Hunter wants Kairo brought in. This is counsel only: do not fill a calendar preview, claim Kairo or Snow agreed, or imply anything was scheduled until the Hunter explicitly asks for the change.
+- A visible Calendar Council follows one chain: the responsible specialist explains the purpose and cadence, Kairo verifies the exact date, time, recurrence, availability, and conflicts, Snow checks that the proposal fits the Hunter's stated intent, and the Hunter remains the only final approval. They may disagree or refine the request in the shared room, but they never hold an unseen meeting or approve for the Hunter.
 - Never shame, insult, manipulate, threaten abandonment, or treat struggle as a moral defect.
 - For medical, mental-health, legal, financial, or immediate-safety concerns, stay within general supportive guidance and recommend appropriate qualified or emergency help when the situation warrants it.
 - If the audience is one companion, return exactly one reply from that companion.
@@ -647,7 +660,9 @@ export function buildAudienceInstruction(audience, enabledIds = companionIds, ro
     : '';
   const event =
     room.partyEvent && Array.isArray(room.partyEvent.companionIds)
-      ? `\nMembership event: ${room.partyEvent.kind} ${room.partyEvent.companionIds.join(', ')}. Make this transition visible in the conversation. For a join or handoff, let an existing participant naturally bring the newcomer in and let the newcomer answer with the carried context. Do not pretend they spoke before joining.`
+      ? room.partyEvent.kind === 'calendar-council'
+        ? `\nCalendar Council opened by ${room.partyEvent.initiatedBy ?? 'hunter'} with ${room.partyEvent.companionIds.join(', ')}. Make the coordination visible now: the initiating specialist states the scheduling purpose, Kairo verifies the calendar details, and Snow checks the Hunter's consent and intent. Do not describe an unseen meeting.`
+        : `\nMembership event: ${room.partyEvent.kind} ${room.partyEvent.companionIds.join(', ')}. Make this transition visible in the conversation. For a join or handoff, let an existing participant naturally bring the newcomer in and let the newcomer answer with the carried context. Do not pretend they spoke before joining.`
       : '';
   return `Audience: ${roomName}. The current participants are: ${available.join(', ')}.${lead}${event}
 Selection guidance:
@@ -655,6 +670,7 @@ Selection guidance:
 - Choose up to four participants whose voices genuinely improve this turn. Give every selected responder a distinct contribution: answer, perspective, practical step, respectful challenge, humor, or emotional support.
 - For greetings and casual check-ins, rotate participation and favor two or three contrasting personalities rather than defaulting to the same specialists.
 - Order the replies like a natural exchange. Companions should respond to what another participant actually said when useful; nobody speaks twice and nobody exists merely to agree.
+- In Calendar Council, include Kairo and Snow plus the responsible domain companion when one is present. Keep their jobs distinct and end with one precise Hunter confirmation gate, never three separate approvals.
 - A shared room keeps one continuous context. Never tell the Hunter to repeat information already present in recentConversation.`;
 }
 
@@ -695,6 +711,7 @@ function buildFocusedWorkloadInstruction(workload, commandMode) {
 - Coordinate domain time without pretending the domain assignment exists. Cooking and meal-prep blocks link to Saffron and kitchen; training links to Rook and training unless recovery clearly calls for Mira; Scripture or prayer links to Selah and sanctuary; content links to Vesper (haven) and creator; A.R.C. work links to Quill and arc; finance work links to Cassian and treasury. General commitments have no linked specialist.
 - A linked event means Kairo reserved time and made the responsible companion visible. It never rolls a meal or workout, creates a Scripture session or content project, checks a mission, awards XP, or proves the specialist performed a separate verification.
 - When the Hunter asks a domain companion directly to schedule relevant time, that companion may hand the structured calendar preview to Kairo while replying in their own voice. Kairo remains the record owner; this is coordination, not proof of a second unseen AI conversation.
+- In a shared Calendar Council, the domain companion must briefly name what the time protects, Kairo must state the exact schedule and any conflict, and Snow must ask the single final consent question. If a material detail is missing, they should ask one grouped follow-up together and leave the calendar object empty.
 - If no complete mutation should be proposed, set action, eventId, title, description, category, startAt, endAt, recurrence, recurrenceEndsOn, location, linkedCompanionId, linkedRealm, and confirmation to empty strings; set allDay false and recurrenceInterval 0.`;
   }
   if (workload === 'arc-forge') {
@@ -1986,7 +2003,9 @@ function validateChatPayload(payload) {
     : undefined;
   const partyEvent =
     isObject(payload.partyEvent) &&
-    ['join', 'leave', 'handoff', 'assemble'].includes(payload.partyEvent.kind) &&
+    ['join', 'leave', 'handoff', 'assemble', 'calendar-council'].includes(
+      payload.partyEvent.kind,
+    ) &&
     Array.isArray(payload.partyEvent.companionIds) &&
     payload.partyEvent.companionIds.length <= 12 &&
     payload.partyEvent.companionIds.every((id) => companionIds.includes(id))
@@ -3353,10 +3372,7 @@ async function handleAiChat(request, env, url) {
     ]);
     const scheduleKeeperAllowed =
       payload.audience === 'kairo' ||
-      payload.audience === 'snow' ||
-      (payload.audience === 'party' &&
-        (activeParticipantIds.includes('kairo') || activeParticipantIds.includes('snow'))) ||
-      (companionIds.includes(payload.audience) && enabledCompanionIds.includes('kairo'));
+      (payload.audience === 'party' && activeParticipantIds.includes('kairo'));
     const knownCalendarEvents = Array.isArray(payload.context?.calendar?.upcoming)
       ? payload.context.calendar.upcoming.filter(
           (event) => isObject(event) && typeof event.eventId === 'string',

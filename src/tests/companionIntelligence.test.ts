@@ -223,6 +223,28 @@ describe('Companion Soulprint intelligence', () => {
     expect(instructions).not.toContain('cipher, haven');
   });
 
+  it('makes specialist, Kairo, Snow, and Hunter roles explicit inside Calendar Council', () => {
+    const instructions = intelligence.buildAudienceInstruction(
+      'party',
+      ['cassian', 'kairo', 'snow'],
+      {
+        kind: 'commons',
+        leadCompanionId: 'cassian',
+        partyEvent: {
+          kind: 'calendar-council',
+          companionIds: ['kairo', 'snow'],
+          initiatedBy: 'cassian',
+        },
+      },
+    );
+
+    expect(instructions).toContain('Calendar Council opened by cassian');
+    expect(instructions).toContain('initiating specialist states the scheduling purpose');
+    expect(instructions).toContain('Kairo verifies the calendar details');
+    expect(instructions).toContain("Snow checks the Hunter's consent");
+    expect(instructions).toContain('one precise Hunter confirmation gate');
+  });
+
   it('keeps every specialist command lane operational inside shared rooms', () => {
     const route = (participantIds: string[], message: string, commandMode = 'propose' as const) =>
       intelligence.selectIntelligenceRoute({
@@ -443,6 +465,24 @@ describe('Companion Soulprint intelligence', () => {
         }),
       ).toMatchObject({ workload: 'calendar-command' });
     }
+    expect(
+      intelligence.selectIntelligenceRoute({
+        audience: 'party',
+        participantIds: ['cassian', 'kairo', 'snow'],
+        message: 'Sunday at 7 PM for thirty minutes, every week.',
+        history: [
+          { role: 'hunter', message: 'Add a recurring budget review.' },
+          {
+            role: 'companion',
+            companionId: 'kairo',
+            message: 'Which day and time should I schedule this calendar event for?',
+          },
+        ],
+        commandMode: 'propose',
+      }),
+    ).toMatchObject({ workload: 'calendar-command' });
+    expect(instructions).toContain('domain companion must briefly name what the time protects');
+    expect(instructions).toContain('Snow must ask the single final consent question');
   });
 
   it('understands natural Companion Order verbs before calendar vocabulary', () => {

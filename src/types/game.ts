@@ -1050,7 +1050,12 @@ export interface SupportConversation {
 
 export type AiConversationAudience = 'party' | CompanionId;
 export type AiConversationKind = 'direct' | 'party-council' | 'commons' | 'spoiler-room';
-export type AiPartyEventKind = 'join' | 'leave' | 'handoff' | 'assemble';
+export type AiPartyEventKind =
+  | 'join'
+  | 'leave'
+  | 'handoff'
+  | 'assemble'
+  | 'calendar-council';
 
 export interface AiPartyEvent {
   kind: AiPartyEventKind;

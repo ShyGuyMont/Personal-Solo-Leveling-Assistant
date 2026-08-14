@@ -3,6 +3,7 @@ import {
   acquireQuickLinkTransmission,
   buildQuickLinkActionCatalog,
   canBeginQuickLinkTransmission,
+  isCalendarCouncilRequest,
   navigationAcknowledgement,
   parsePartyMembershipCommand,
   parseQuickLinkAddress,
@@ -128,6 +129,17 @@ describe('Companion Quick Link', () => {
     expect(parseQuickNavigationCommand('I want to discuss my schedule')).toBeUndefined();
     expect(parseQuickNavigationCommand('Could a creator forge a stronger hook?')).toBeUndefined();
     expect(navigationAcknowledgement('snow', 'Training Hall')).toContain('Training Hall');
+  });
+
+  it('opens Calendar Council only for an explicit scheduling change', () => {
+    expect(isCalendarCouncilRequest('Cassian, schedule a budget review Sunday at 7 PM')).toBe(true);
+    expect(isCalendarCouncilRequest('Add a recurring Body Diagnostic check-in every Sunday')).toBe(
+      true,
+    );
+    expect(isCalendarCouncilRequest('Cancel my appointment tomorrow')).toBe(true);
+    expect(isCalendarCouncilRequest('What does my schedule look like tomorrow?')).toBe(false);
+    expect(isCalendarCouncilRequest('I would like to cook on Sunday')).toBe(false);
+    expect(isCalendarCouncilRequest('Saffron, add this recipe to the Grimoire')).toBe(false);
   });
 
   it('builds only explicit confirmation-gated actions from today’s real mission state', () => {

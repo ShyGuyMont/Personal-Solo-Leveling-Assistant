@@ -1,4 +1,4 @@
-export const APP_VERSION = '9.3.0';
+export const APP_VERSION = '9.4.0';
 export const DATABASE_SCHEMA_VERSION = 28;
 export const SAVE_FORMAT_VERSION = 28;
 
@@ -9,6 +9,20 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 9.4.0 · Calendar Council',
+    detail:
+      'The companions can now initiate transparent schedule coordination with their specialist, Kairo, and Snow in one continuous room while the Hunter remains the only person who can approve a calendar change.',
+    points: [
+      'Explicit scheduling requests automatically open a visible Calendar Council containing the responsible specialist, Kairo, and Snow without abandoning the current conversation or losing its history.',
+      'The specialist explains what the time protects, Kairo verifies the exact date, time, recurrence, availability, and conflicts, and Snow checks the request against the Hunter’s stated intent before one final confirmation.',
+      'Cassian can recommend budget reviews, the Training crew can recommend weekly Body Diagnostics, and every other domain companion can suggest one evidence-based calendar ritual without silently creating it or spamming the schedule.',
+      'Incomplete scheduling requests remain inside Calendar Council for a single grouped follow-up, so natural replies such as “Sunday at 7 PM, every week” continue the same protected command instead of falling back to casual chat.',
+      'Kairo remains the authoritative local calendar writer; Snow and the originating specialist can refine a proposal, but only the Hunter’s verified confirmation button can create, update, or cancel the record.',
+      'Calendar previews now display the coordination chain—specialist to Kairo to Snow to Hunter—while linked realm assignments, missions, workouts, meals, Scripture sessions, and rewards remain unchanged until completed in their original systems.',
+      'Soulprint delivery is regression-checked across the complete twelve-companion roster: direct links receive only their own Director’s Notes and shared rooms receive only the notes of companions visibly present.',
+    ],
+  },
   {
     title: 'Version 9.3.0 · Party Commons',
     detail:

@@ -68,6 +68,7 @@ import {
 import {
   buildQuickLinkActionCatalog,
   commandSuccessAcknowledgement,
+  isCalendarCouncilRequest,
   parsePartyMembershipCommand,
   parseQuickLinkAddress,
 } from '@/game/aiQuickLink';
@@ -621,6 +622,37 @@ export function AiHeadquartersPanel() {
       }
     }
 
+    const calendarCouncilRequested =
+      isCalendarCouncilRequest(message) ||
+      (partyEvent?.kind === 'handoff' && partyEvent.companionIds.includes('kairo'));
+    if (calendarCouncilRequested) {
+      const enabledIds = enabledCompanions.map((companion) => companion.id);
+      const unavailableCouncilMember = (['kairo', 'snow'] as const).find(
+        (id) => !enabledIds.includes(id),
+      );
+      if (unavailableCouncilMember) {
+        setNotice(
+          `${getCompanion(unavailableCouncilMember).name}'s link must be enabled before Calendar Council can prepare a change.`,
+        );
+        return;
+      }
+      const beforeCouncil = getAiConversationParticipantIds(conversation, enabledIds);
+      const initiatingCompanion =
+        (partyEvent?.kind === 'handoff' && partyEvent.initiatedBy !== 'hunter'
+          ? partyEvent.initiatedBy
+          : leadCompanionId) ?? beforeCouncil[0] ?? 'snow';
+      const councilIds = [...new Set([initiatingCompanion, 'kairo', 'snow'] as CompanionId[])];
+      const joining = councilIds.filter((id) => !beforeCouncil.includes(id));
+      conversation = addAiConversationParticipants(conversation, councilIds, 'commons', enabledIds);
+      leadCompanionId = initiatingCompanion;
+      partyEvent = {
+        kind: 'calendar-council',
+        companionIds: joining.length ? joining : councilIds,
+        initiatedBy: initiatingCompanion,
+        summary: `${getCompanion(initiatingCompanion).name} requested Kairo's schedule review and Snow's consent check.`,
+      };
+    }
+
     if (!message || sending || !linkReady) return;
     if (
       pendingProposal &&
@@ -1035,9 +1067,9 @@ export function AiHeadquartersPanel() {
       };
     }
     return {
-      eyebrow: 'CALENDAR COMMAND',
+      eyebrow: 'CALENDAR COUNCIL',
       title: proposal.payload.title,
-      summary: `${proposal.payload.action} · ${new Intl.DateTimeFormat('en-US', {
+      summary: `${proposal.payload.linkedCompanionId ? `${getCompanion(proposal.payload.linkedCompanionId as CompanionId).name} → ` : ''}Kairo → Snow → You · ${proposal.payload.action} · ${new Intl.DateTimeFormat('en-US', {
         dateStyle: 'medium',
         timeStyle: proposal.payload.allDay ? undefined : 'short',
         timeZone: currentSettings.timeZone,
