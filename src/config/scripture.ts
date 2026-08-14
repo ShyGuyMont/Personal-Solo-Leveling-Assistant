@@ -25,7 +25,7 @@ export const SANCTUARY_CONCERNS: SanctuaryConcernDefinition[] = [
     id: 'sexual-integrity',
     label: 'Temptation & sexual integrity',
     prompt: 'I am fighting an urge or a pattern I do not want to obey.',
-    description: 'Desire, escape, pornography, boundaries, and honoring bodies without shame.',
+    description: 'Desire, escape, explicit content, boundaries, and honoring bodies without shame.',
     companionId: 'amara',
     strongholdAction:
       'Leave the private space, put the triggering device out of reach, and choose visible movement for ten minutes.',
@@ -975,7 +975,7 @@ export const SELAH_SANCTUARY_LINES = [
 export const SPECIALIST_SANCTUARY_LINES: Record<SanctuaryConcern, string[]> = {
   'sexual-integrity': [
     'Amara: The urge may be sexual, but the need underneath it may be closeness, relief, reassurance, or escape. We can honor the need without feeding the pattern.',
-    'Amara: Pornography offers the appearance of intimacy without the risk of being known. You deserve connection that can actually recognize you.',
+    'Amara: Explicit content offers the appearance of intimacy without the risk of being known. You deserve connection that can actually recognize you.',
     'Amara: We are not declaring your sexuality filthy. We are teaching desire to live with dignity, patience, truth, and mutual humanity.',
   ],
   shame: [
@@ -1037,7 +1037,7 @@ export const SPECIALIST_SANCTUARY_LINES: Record<SanctuaryConcern, string[]> = {
 
 export const LONELINESS_INTEGRITY_LINES = [
   'Amara: This may not be only a fight against sexual appetite. It may be an attempt to escape the ache of not feeling chosen, touched, known, or accompanied.',
-  'Amara: Pornography can imitate access while protecting you from the vulnerability of real connection. The relief is immediate; the loneliness often returns heavier.',
+  'Amara: Explicit content can imitate access while protecting you from the vulnerability of real connection. The relief is immediate; the loneliness often returns heavier.',
   'Amara: We will interrupt the behavior and also care for the lonely person underneath it. Both parts deserve an honest response.',
   'Amara: Your need for intimacy is human. The pattern becomes harmful when it turns people into images and leaves you more hidden than before.',
   'Amara: Tonight’s victory may include leaving the trigger and reaching toward safe connection instead of demanding that willpower do every job.',

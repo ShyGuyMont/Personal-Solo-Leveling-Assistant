@@ -1022,6 +1022,7 @@ export interface AiConversationMessage {
   role: 'hunter' | 'companion';
   companionId?: CompanionId;
   message: string;
+  voiceSummary?: string;
   createdAt: string;
 }
 

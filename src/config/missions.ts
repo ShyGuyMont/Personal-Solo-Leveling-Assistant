@@ -40,9 +40,9 @@ export const DEFAULT_MISSIONS: MissionDefinition[] = [
   },
   {
     id: 'no-porn',
-    name: 'No Porn',
+    name: 'Integrity Protocol',
     shortName: 'Integrity',
-    description: 'Complete the entire day without pornography.',
+    description: 'Complete the entire day without explicit sexual content.',
     category: 'discipline',
     method: 'day-boundary',
     accountXp: 40,

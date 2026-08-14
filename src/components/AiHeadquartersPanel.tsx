@@ -38,6 +38,7 @@ import {
   saveAiMemoryCandidates,
   saveAiConversation,
 } from '@/game/aiHeadquarters';
+import { hasAiVoiceSummary } from '@/game/aiVoice';
 import { buildAiProgressContext } from '@/game/aiContext';
 import {
   clearPendingAiProposal,
@@ -66,6 +67,7 @@ import {
 import { useGameStore } from '@/store/useGameStore';
 import { useAiVoiceLink } from '@/hooks/useAiVoiceLink';
 import { formatClassName } from '@/utils/format';
+import { sanitizeSensitiveDisplayText } from '@/utils/privacy';
 import { scrollChatViewportToBottom } from '@/utils/scroll';
 import type { AiConversation, AiConversationAudience, AiRelationshipMemory } from '@/types/game';
 
@@ -385,7 +387,7 @@ export function AiHeadquartersPanel() {
         : [];
       const replyTime = new Date().toISOString();
       const replyMessages = result.replies.map((reply) =>
-        createCompanionMessage(reply.companionId, reply.message, replyTime),
+        createCompanionMessage(reply.companionId, reply.message, replyTime, reply.voiceSummary),
       );
       const completedConversation: AiConversation = {
         ...pendingConversation,
@@ -952,7 +954,11 @@ export function AiHeadquartersPanel() {
                         onClick={() => voiceLink.playMessages(latestCompanionMessages)}
                       >
                         <Headphones size={14} />
-                        {latestCompanionMessages.length > 1 ? 'Play council' : 'Play reply'}
+                        {latestCompanionMessages.length > 1
+                          ? 'Play briefings'
+                          : hasAiVoiceSummary(latestCompanionMessages[0])
+                            ? 'Play briefing'
+                            : 'Play reply'}
                       </button>
                     )}
                   </div>
@@ -994,34 +1000,51 @@ export function AiHeadquartersPanel() {
                     )}
                     <div>
                       <span>{companion?.name ?? profile.displayName}</span>
-                      <p>{message.message}</p>
+                      <p>{sanitizeSensitiveDisplayText(message.message)}</p>
                       {companion && currentSettings.aiVoiceOutputEnabled && (
-                        <button
-                          className="ai-message__voice"
-                          type="button"
-                          onClick={() =>
-                            voiceLink.playingMessageId === message.id
-                              ? voiceLink.stopPlayback()
-                              : voiceLink.playMessages([message])
-                          }
-                          disabled={
-                            Boolean(voiceLink.voiceBusyMessageId) &&
-                            voiceLink.voiceBusyMessageId !== message.id
-                          }
-                        >
-                          {voiceLink.voiceBusyMessageId === message.id ? (
-                            <LoaderCircle className="is-spinning" size={14} />
-                          ) : voiceLink.playingMessageId === message.id ? (
-                            <Square size={12} />
-                          ) : (
-                            <Play size={13} />
-                          )}
-                          {voiceLink.voiceBusyMessageId === message.id
-                            ? 'Forging voice…'
-                            : voiceLink.playingMessageId === message.id
-                              ? 'Stop'
-                              : 'Play voice'}
-                        </button>
+                        <div className="ai-message__voice-actions">
+                          <button
+                            className="ai-message__voice"
+                            type="button"
+                            onClick={() =>
+                              voiceLink.playingMessageId === message.id
+                                ? voiceLink.stopPlayback()
+                                : voiceLink.playMessages([message])
+                            }
+                            disabled={
+                              Boolean(voiceLink.voiceBusyMessageId) &&
+                              voiceLink.voiceBusyMessageId !== message.id
+                            }
+                          >
+                            {voiceLink.voiceBusyMessageId === message.id ? (
+                              <LoaderCircle className="is-spinning" size={14} />
+                            ) : voiceLink.playingMessageId === message.id ? (
+                              <Square size={12} />
+                            ) : (
+                              <Play size={13} />
+                            )}
+                            {voiceLink.voiceBusyMessageId === message.id
+                              ? 'Forging voice…'
+                              : voiceLink.playingMessageId === message.id
+                                ? 'Stop'
+                                : hasAiVoiceSummary(message)
+                                  ? 'Play briefing'
+                                  : 'Play voice'}
+                          </button>
+                          {hasAiVoiceSummary(message) &&
+                            voiceLink.playingMessageId !== message.id && (
+                              <button
+                                className="ai-message__voice"
+                                type="button"
+                                onClick={() =>
+                                  voiceLink.playMessages([message], undefined, { fullText: true })
+                                }
+                                disabled={Boolean(voiceLink.voiceBusyMessageId)}
+                              >
+                                <Headphones size={13} /> Play full
+                              </button>
+                            )}
+                        </div>
                       )}
                     </div>
                   </article>

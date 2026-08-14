@@ -5,9 +5,11 @@ import {
   estimateSpeechCostUsd,
   estimateRealtimeCostUsd,
   estimateTextCostUsd,
+  getAiSpokenText,
   getCartesiaMonthlyUsage,
   getAiUsageSummary,
   getAiVoiceProfiles,
+  hasAiVoiceSummary,
   recordAiUsage,
   resetAiVoiceProfile,
   saveAiVoiceProfile,
@@ -105,6 +107,25 @@ describe('Voice Link local profiles and usage', () => {
     expect(inferAiVoiceScene('No excuses. Do it now.')).toBe('accountability');
     expect(inferAiVoiceScene('First, hold this stretch for thirty seconds.')).toBe('instruction');
     expect(inferAiVoiceScene('Let us compare the best path to World Class.')).toBe('strategy');
+  });
+
+  it('voices a short companion briefing for long replies while preserving full-play control', () => {
+    const message = {
+      message: `Full tactical explanation ${'with supporting detail '.repeat(30)}`,
+      voiceSummary: 'Here is the decision, the important caveat, and your next move.',
+    };
+    expect(hasAiVoiceSummary(message)).toBe(true);
+    expect(getAiSpokenText(message)).toBe(message.voiceSummary);
+    expect(getAiSpokenText(message, true)).toBe(message.message.trim());
+
+    const shortMessage = {
+      message: 'Skip the pornography trigger and take the next honest step.',
+      voiceSummary: 'Take the next honest step.',
+    };
+    expect(hasAiVoiceSummary(shortMessage)).toBe(false);
+    expect(getAiSpokenText(shortMessage)).toBe(
+      'Skip the explicit sexual content trigger and take the next honest step.',
+    );
   });
 
   it('prices mixed realtime text and audio tokens without double counting cached input', () => {

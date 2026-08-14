@@ -40,12 +40,15 @@ export function createCompanionMessage(
   companionId: CompanionId,
   message: string,
   now = new Date().toISOString(),
+  voiceSummary?: string,
 ): AiConversationMessage {
+  const normalizedVoiceSummary = voiceSummary?.trim();
   return {
     id: crypto.randomUUID(),
     role: 'companion',
     companionId,
     message: message.trim(),
+    voiceSummary: normalizedVoiceSummary || undefined,
     createdAt: now,
   };
 }

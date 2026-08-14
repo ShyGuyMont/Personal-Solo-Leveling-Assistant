@@ -5,6 +5,7 @@ import {
   estimateSpeechCostUsd,
   estimateTextCostUsd,
   estimateTranscriptionCostUsd,
+  getAiSpokenText,
   getAiUsageSummary,
   getAiVoiceProfiles,
   recordAiUsage,
@@ -259,6 +260,7 @@ export function useAiVoiceLink(input: {
       text: string,
       cacheKey: string,
       profileOverride?: AiVoiceProfile,
+      busyMessageId = cacheKey,
     ) => {
       const profile = profileOverride ?? profiles?.[companionId];
       if (!profile) throw new Error('That companion voice is still initializing.');
@@ -273,7 +275,7 @@ export function useAiVoiceLink(input: {
       ].join(':');
       const cached = audioCacheRef.current.get(effectiveCacheKey);
       if (cached) return cached;
-      setVoiceBusyMessageId(cacheKey);
+      setVoiceBusyMessageId(busyMessageId);
       try {
         const result = await requestAiSpeech({
           companionId,
@@ -323,16 +325,20 @@ export function useAiVoiceLink(input: {
 
   const playOne = useCallback(
     async (
-      message: Pick<AiConversationMessage, 'id' | 'message' | 'companionId'>,
+      message: Pick<AiConversationMessage, 'id' | 'message' | 'voiceSummary' | 'companionId'>,
       generation: number,
       profileOverride?: AiVoiceProfile,
+      fullText = false,
     ) => {
       if (!message.companionId) return;
+      const spokenText = getAiSpokenText(message, fullText);
+      const speechMode = spokenText === message.message.trim() ? 'full' : 'briefing';
       const buffer = await getSpeechBuffer(
         message.companionId,
-        message.message,
-        message.id,
+        spokenText,
+        `${message.id}:${speechMode}`,
         profileOverride,
+        message.id,
       );
       if (generation !== playbackGenerationRef.current) return;
       const audio = new AppAudioPlayer(buffer, () => playbackResolverRef.current?.());
@@ -359,8 +365,11 @@ export function useAiVoiceLink(input: {
 
   const playMessages = useCallback(
     async (
-      messages: Array<Pick<AiConversationMessage, 'id' | 'message' | 'companionId'>>,
+      messages: Array<
+        Pick<AiConversationMessage, 'id' | 'message' | 'voiceSummary' | 'companionId'>
+      >,
       profileOverride?: AiVoiceProfile,
+      options?: { fullText?: boolean },
     ) => {
       if (!input.settings?.aiVoiceOutputEnabled) {
         input.onNotice('Enable Voice Link first. Spoken companion voices are AI-generated.');
@@ -373,7 +382,7 @@ export function useAiVoiceLink(input: {
       try {
         for (const message of messages) {
           if (generation !== playbackGenerationRef.current) break;
-          await playOne(message, generation, profileOverride);
+          await playOne(message, generation, profileOverride, options?.fullText === true);
         }
       } catch (error) {
         input.onNotice(error instanceof Error ? error.message : 'Voice playback failed.');

@@ -41,6 +41,19 @@ Headquarters channel uses the private Sites sign-in and a server-side OpenAI con
 only the message, limited recent chat context, and a compact progress signal when the user presses
 Send. There is no analytics, advertising, or tracking.
 
+## Version 8.1.0 · Living Voice Economy
+
+Long AI transmissions now retain their complete written answer while the companions speak a concise
+one-to-three-sentence briefing in their own personality. Short replies still speak in full, Party
+Council and automatic playback use the economical version by default, and every summarized message
+keeps a manual **Play full** control. The briefing is produced inside the original structured
+intelligence response, so it does not require a second summarization request or alter any saved
+Cartesia casting, speed, or OpenAI fallback Soulprint.
+
+The Integrity mission and its connected Sanctuary support now use discreet language across every
+visible surface. Existing campaign progress remains safe because the mission’s stable internal ID is
+preserved while legacy labels are upgraded locally.
+
 ## Version 8.0.0 · A.R.C. Archives
 
 Version 8 brings the original A.R.C. Character Archives into The System as a complete creative
@@ -354,7 +367,7 @@ translation.
 
 Snow opens and closes each session. Selah leads the Scripture work, and the companion who best
 understands the selected struggle joins them. When sexual temptation and loneliness are selected
-together, Amara addresses pornography as possible counterfeit intimacy: a behavior that still needs
+together, Amara addresses explicit content as possible counterfeit intimacy: a behavior that still needs
 honest boundaries while the underlying longing for closeness also receives care. This connection is
 never assumed to explain every urge, and shame is never used as the recovery strategy.
 

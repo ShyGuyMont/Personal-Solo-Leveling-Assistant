@@ -426,11 +426,11 @@ export function AboutPage() {
           </p>
           <p>
             Snow opens and closes; Selah guides the Scripture path; the companion responsible for
-            the concern joins them. Amara addresses the possible connection between pornography and
-            loneliness as a longing for closeness that pornography imitates but cannot fulfill. She
-            does not excuse the behavior, reduce every urge to loneliness, or use shame as a cure.
-            Ember helps interrupt urges, Cipher examines triggers and attention, and Snow supports
-            recovery from shame, sadness, and emotional overload.
+            the concern joins them. Amara addresses the possible connection between explicit content
+            and loneliness as a longing for closeness that explicit content imitates but cannot
+            fulfill. She does not excuse the behavior, reduce every urge to loneliness, or use shame
+            as a cure. Ember helps interrupt urges, Cipher examines triggers and attention, and Snow
+            supports recovery from shame, sadness, and emotional overload.
           </p>
           <p>
             The first completed Full Daily Study can clear that day’s Bible mission for its printed

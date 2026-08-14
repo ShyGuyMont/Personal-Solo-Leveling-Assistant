@@ -528,6 +528,7 @@ Rules:
 - Director's Notes may appear in progressContext.party.directorNotes. They are Hunter-authored performance preferences for humor, challenge, care, casual behavior, conflict, bonds, and unwanted habits. Blend relevant notes into the established companion naturally; never quote the notes, announce that you are following a prompt, or let a note override factual grounding, safety, consent, identity boundaries, or the companion's core Soulprint.
 - If Bond Memory is enabled, return zero to two memoryCandidates only when the Hunter explicitly states a durable preference, goal, boundary, background fact, or commitment that would genuinely improve a future conversation. Write each candidate as a concise third-person fact about the Hunter. Never infer a diagnosis, emotion, identity, relationship motive, financial amount, sexual detail, authentication secret, or information about another person. Do not suggest temporary moods, one-off tasks, facts already present in approved memory, or anything merely mentioned by a companion.
 - If Bond Memory is disabled, memoryCandidates must be an empty array. A candidate is only a local suggestion; never claim it has been remembered or will be used later.
+- Use the discreet phrase "explicit content" when sexual-integrity support needs to name that behavior. Do not use the shorter explicit label or its clinical long-form variant in titles, replies, voice summaries, or proposals.
 - Be warm, useful, specific, and conversational. Avoid corporate language, therapy-script clichés, constant praise, and game-master narration unless it naturally fits The System.
 - Use only progress facts included in the supplied context. Never invent completions, streaks, history, feelings, diagnoses, or private facts. The supplied progression, classification roadmap, and recent-thirty-day counters are authoritative app records.
 - When asked about Class advancement or how long World Class may take, lead with the designed System path: the supplied theoretical fastest floor and sustainable range. Then state the hard remaining requirements. Present the Hunter's recent-pace extrapolation only as a secondary comparison, always name its sample size and confidence, and never frame it as the intended timeline or destiny. A sample under 21 finalized days is explicitly an early baseline, not a reliable long-range forecast. Do not convert completed days into calendar years without labeling the assumption of one completed day per calendar day. Include the supplied forecast caveat and identify any gate that cannot be reduced to a date. If a required fact is absent, say exactly what is absent instead of giving a vague answer.
@@ -548,6 +549,7 @@ Rules:
 - If the audience is one companion, return exactly one reply from that companion.
 - If the audience is the full party, choose only two to four relevant companions. Give each a different conversational job, and let them respond to each other only when it makes the exchange feel natural.
 - Keep each reply under 130 words unless the Hunter explicitly asks for detailed instructions.
+- Every reply must include voiceSummary. When message is 500 characters or shorter, voiceSummary may match it. When message is longer, voiceSummary must be a natural one-to-three-sentence spoken briefing of at most 320 characters in that same companion's voice. Preserve the conclusion, essential caveat, and next action; never announce that it is a summary.
 - Make the title a short description of this conversation, not a greeting.`;
 
 export function buildAudienceInstruction(audience, enabledIds = companionIds) {
@@ -680,8 +682,9 @@ const responseSchema = {
         properties: {
           companionId: { type: 'string', enum: companionIds },
           message: { type: 'string', minLength: 1, maxLength: 4_000 },
+          voiceSummary: { type: 'string', minLength: 1, maxLength: 320 },
         },
-        required: ['companionId', 'message'],
+        required: ['companionId', 'message', 'voiceSummary'],
         additionalProperties: false,
       },
     },
@@ -2002,6 +2005,33 @@ function workloadLabel(workload) {
   return labels[workload] ?? 'the companion response';
 }
 
+function sanitizeSensitiveLanguage(value) {
+  return String(value ?? '')
+    .replace(/\bpornography\b/gi, 'explicit sexual content')
+    .replace(/\bpornographic\b/gi, 'sexually explicit')
+    .replace(/\bporn\b/gi, 'explicit content');
+}
+
+function fallbackVoiceSummary(message) {
+  const plain = sanitizeSensitiveLanguage(message)
+    .replace(/[*_#>`]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (plain.length <= 320) return plain;
+  const firstSentences =
+    plain
+      .match(/[^.!?]+[.!?]+/g)
+      ?.slice(0, 2)
+      .join(' ')
+      .trim() ?? plain;
+  if (firstSentences.length <= 320) return firstSentences;
+  const clipped = firstSentences
+    .slice(0, 317)
+    .replace(/\s+\S*$/, '')
+    .trim();
+  return `${clipped || firstSentences.slice(0, 317).trim()}...`;
+}
+
 function bytesToBase64(buffer) {
   const bytes = new Uint8Array(buffer);
   let binary = '';
@@ -2427,6 +2457,7 @@ async function handleAiChat(request, env, url) {
   try {
     if (payload.audience !== 'party') {
       result.replies = result.replies.slice(0, 1).map((reply) => ({
+        ...reply,
         companionId: payload.audience,
         message: String(reply.message ?? '').trim(),
       }));
@@ -2439,6 +2470,18 @@ async function handleAiChat(request, env, url) {
         typeof reply.message === 'string' &&
         reply.message.trim(),
     );
+    result.replies = result.replies.map((reply) => {
+      const message = sanitizeSensitiveLanguage(reply.message).trim().slice(0, 4_000);
+      const requestedSummary =
+        typeof reply.voiceSummary === 'string' ? reply.voiceSummary.trim() : '';
+      return {
+        companionId: reply.companionId,
+        message,
+        voiceSummary: sanitizeSensitiveLanguage(requestedSummary || fallbackVoiceSummary(message))
+          .trim()
+          .slice(0, 320),
+      };
+    });
     if (!result.replies.length) throw new Error('Missing companion reply');
     const memoryEnabled = payload.context?.bondMemory?.enabled === true;
     const memoryCategories = new Set([

@@ -6,6 +6,7 @@ import {
   LoaderCircle,
   MessageSquareText,
   Mic,
+  Play,
   Radio,
   RadioTower,
   Send,
@@ -29,6 +30,7 @@ import {
   saveAiConversation,
   saveAiMemoryCandidates,
 } from '@/game/aiHeadquarters';
+import { hasAiVoiceSummary } from '@/game/aiVoice';
 import { buildAiProgressContext } from '@/game/aiContext';
 import {
   clearPendingAiProposal,
@@ -67,6 +69,7 @@ import {
   type AiLinkStatus,
 } from '@/services/aiHeadquarters';
 import { useGameStore } from '@/store/useGameStore';
+import { sanitizeSensitiveDisplayText } from '@/utils/privacy';
 import type {
   AiConversation,
   AiConversationMessage,
@@ -382,7 +385,7 @@ export function CompanionQuickLink() {
         }
         const replyTime = new Date().toISOString();
         const responseMessages = result.replies.map((reply) =>
-          createCompanionMessage(reply.companionId, reply.message, replyTime),
+          createCompanionMessage(reply.companionId, reply.message, replyTime, reply.voiceSummary),
         );
         const completedConversation = {
           ...pendingConversation,
@@ -1327,7 +1330,54 @@ export function CompanionQuickLink() {
                         {companion && <img src={getCompanionImage(companion.image)} alt="" />}
                         <div>
                           <span>{companion?.name ?? 'YOU'}</span>
-                          <p>{message.message}</p>
+                          <p>{sanitizeSensitiveDisplayText(message.message)}</p>
+                          {companion && settings?.aiVoiceOutputEnabled && (
+                            <div className="ai-message__voice-actions">
+                              <button
+                                className="ai-message__voice"
+                                type="button"
+                                onClick={() =>
+                                  voiceLink.playingMessageId === message.id
+                                    ? voiceLink.stopPlayback()
+                                    : voiceLink.playMessages([message])
+                                }
+                                disabled={
+                                  Boolean(voiceLink.voiceBusyMessageId) &&
+                                  voiceLink.voiceBusyMessageId !== message.id
+                                }
+                              >
+                                {voiceLink.voiceBusyMessageId === message.id ? (
+                                  <LoaderCircle className="is-spinning" size={13} />
+                                ) : voiceLink.playingMessageId === message.id ? (
+                                  <Square size={11} />
+                                ) : (
+                                  <Play size={12} />
+                                )}
+                                {voiceLink.voiceBusyMessageId === message.id
+                                  ? 'Forging voice...'
+                                  : voiceLink.playingMessageId === message.id
+                                    ? 'Stop'
+                                    : hasAiVoiceSummary(message)
+                                      ? 'Play briefing'
+                                      : 'Play voice'}
+                              </button>
+                              {hasAiVoiceSummary(message) &&
+                                voiceLink.playingMessageId !== message.id && (
+                                  <button
+                                    className="ai-message__voice"
+                                    type="button"
+                                    onClick={() =>
+                                      voiceLink.playMessages([message], undefined, {
+                                        fullText: true,
+                                      })
+                                    }
+                                    disabled={Boolean(voiceLink.voiceBusyMessageId)}
+                                  >
+                                    <Headphones size={12} /> Play full
+                                  </button>
+                                )}
+                            </div>
+                          )}
                         </div>
                       </article>
                     );

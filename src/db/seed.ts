@@ -13,6 +13,7 @@ import { createChallengeProgress, chooseRotatingChallenge } from '@/game/challen
 import { accountXpForLevel } from '@/game/xp';
 import { ALL_STATS, createInitialStat } from '@/game/stats';
 import { getSystemDateKey, startOfMonth, startOfWeek } from '@/utils/date';
+import { sanitizeSensitiveDisplayText } from '@/utils/privacy';
 import type {
   AccountProgression,
   CreatorSettings,
@@ -137,6 +138,29 @@ export async function seedReferenceData() {
     async () => {
       const existingMissions = await db.missions.count();
       if (!existingMissions) await db.missions.bulkPut(DEFAULT_MISSIONS);
+      const integrityMission = await db.missions.get('no-porn');
+      if (integrityMission) {
+        const name =
+          integrityMission.name.trim().toLowerCase() === 'no porn'
+            ? 'Integrity Protocol'
+            : sanitizeSensitiveDisplayText(integrityMission.name);
+        const description = sanitizeSensitiveDisplayText(integrityMission.description);
+        const customDescription = integrityMission.customDescription
+          ? sanitizeSensitiveDisplayText(integrityMission.customDescription)
+          : undefined;
+        if (
+          name !== integrityMission.name ||
+          description !== integrityMission.description ||
+          customDescription !== integrityMission.customDescription
+        ) {
+          await db.missions.put({
+            ...integrityMission,
+            name,
+            description,
+            customDescription,
+          });
+        }
+      }
       // Challenge templates are reference data, not user-authored records. Upserting them keeps
       // active and future challenges compatible when a retired mission is consolidated.
       await db.challenges.bulkPut(ALL_CHALLENGE_TEMPLATES);

@@ -773,6 +773,14 @@ describe('Companion Soulprint intelligence', () => {
 
     expect(response.status).toBe(200);
     expect(openAiBody).toBeDefined();
+    const responseFormat = openAiBody?.text as {
+      format: {
+        schema: { properties: { replies: { items: { required: string[] } } } };
+      };
+    };
+    expect(responseFormat.format.schema.properties.replies.items.required).toContain(
+      'voiceSummary',
+    );
     const input = openAiBody?.input as Array<{ role: string; content: string }>;
     expect(input[0].role).toBe('system');
     expect(input[0].content).toContain('Companion soulprints:');
@@ -783,6 +791,13 @@ describe('Companion Soulprint intelligence', () => {
     expect(await response.clone().json()).toMatchObject({
       route: 'quick',
       reasoningEffort: 'low',
+      replies: [
+        {
+          companionId: 'rook',
+          message: 'Ten. Clean answer.',
+          voiceSummary: 'Ten. Clean answer.',
+        },
+      ],
       usage: { cachedInputTokens: 60, reasoningTokens: 4 },
     });
   });

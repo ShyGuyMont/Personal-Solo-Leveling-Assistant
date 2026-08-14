@@ -429,6 +429,10 @@ function validateData(data: Record<string, unknown[]>) {
         typeof message.message !== 'string' ||
         !message.message.trim() ||
         message.message.length > 8_000 ||
+        (message.voiceSummary !== undefined &&
+          (typeof message.voiceSummary !== 'string' ||
+            !message.voiceSummary.trim() ||
+            message.voiceSummary.length > 320)) ||
         typeof message.createdAt !== 'string' ||
         !Number.isFinite(Date.parse(message.createdAt))
       ) {

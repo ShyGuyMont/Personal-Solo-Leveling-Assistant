@@ -32,6 +32,7 @@ import { Link } from '@/router';
 import { useGameStore } from '@/store/useGameStore';
 import { formatClassName } from '@/utils/format';
 import { getDocumentTheme } from '@/utils/theme';
+import { getMissionDisplayName, sanitizeSensitiveDisplayText } from '@/utils/privacy';
 import type {
   BackupSnapshot,
   CompanionId,
@@ -607,7 +608,7 @@ export function SettingsPage() {
               <div key={mission.id} className="mission-setting">
                 <label className="switch-row">
                   <span>
-                    <strong>{mission.name}</strong>
+                    <strong>{getMissionDisplayName(mission, draft.sensitiveMissionAlias)}</strong>
                     <small>
                       {mission.category} · {mission.accountXp} base XP
                     </small>
@@ -628,11 +629,16 @@ export function SettingsPage() {
                 <label className="field">
                   <span>Mission name</span>
                   <input
-                    value={mission.name}
+                    value={sanitizeSensitiveDisplayText(mission.name)}
                     onChange={(event) =>
                       setMissionDrafts((current) =>
                         current.map((item, itemIndex) =>
-                          itemIndex === index ? { ...item, name: event.target.value } : item,
+                          itemIndex === index
+                            ? {
+                                ...item,
+                                name: sanitizeSensitiveDisplayText(event.target.value),
+                              }
+                            : item,
                         ),
                       )
                     }
@@ -641,12 +647,17 @@ export function SettingsPage() {
                 <label className="field">
                   <span>Description</span>
                   <input
-                    value={mission.customDescription ?? mission.description}
+                    value={sanitizeSensitiveDisplayText(
+                      mission.customDescription ?? mission.description,
+                    )}
                     onChange={(event) =>
                       setMissionDrafts((current) =>
                         current.map((item, itemIndex) =>
                           itemIndex === index
-                            ? { ...item, customDescription: event.target.value }
+                            ? {
+                                ...item,
+                                customDescription: sanitizeSensitiveDisplayText(event.target.value),
+                              }
                             : item,
                         ),
                       )

@@ -36,6 +36,7 @@ describe('AI Headquarters local history', () => {
           'cipher',
           '  We start with one executable step.  ',
           '2026-08-11T12:00:02.000Z',
+          '  Start with one executable step.  ',
         ),
       ],
       updatedAt: '2026-08-11T12:00:02.000Z',
@@ -51,6 +52,7 @@ describe('AI Headquarters local history', () => {
       role: 'companion',
       companionId: 'cipher',
       message: 'We start with one executable step.',
+      voiceSummary: 'Start with one executable step.',
     });
   });
 

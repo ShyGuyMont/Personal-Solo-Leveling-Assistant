@@ -361,6 +361,7 @@ describe('save validation and recovery', () => {
           role: 'companion',
           companionId: 'cipher',
           message: 'We will reduce it to one executable step.',
+          voiceSummary: 'One executable step. Start there.',
           createdAt: now,
         },
       ],
@@ -557,6 +558,9 @@ describe('save validation and recovery', () => {
       'Help me move toward honest connection.',
     );
     expect((await db.aiConversations.get('ai:backup'))?.messages[1].companionId).toBe('cipher');
+    expect((await db.aiConversations.get('ai:backup'))?.messages[1].voiceSummary).toBe(
+      'One executable step. Start there.',
+    );
     expect((await db.aiMemories.get('ai-memory:backup'))?.status).toBe('approved');
     expect((await db.aiVoiceProfiles.get('snow'))?.accent).toBe('irish');
     expect((await db.aiUsageRecords.get('ai-usage:backup'))?.characters).toBe(120);

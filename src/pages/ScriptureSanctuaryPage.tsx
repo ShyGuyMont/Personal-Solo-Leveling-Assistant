@@ -571,9 +571,9 @@ export function ScriptureSanctuaryPage() {
           <p className="eyebrow">YOU DO NOT HAVE TO ARRIVE COMPOSED</p>
           <h2>Tell the truth about what you are carrying.</h2>
           <p>
-            Pornography can be connected to loneliness, stress, shame, or a longing for closeness.
-            The Sanctuary will address the behavior and the need beneath it—without excusing the
-            harm or making shame the strategy.
+            Explicit content can be connected to loneliness, stress, shame, or a longing for
+            closeness. The Sanctuary will address the behavior and the need beneath it—without
+            excusing the harm or making shame the strategy.
           </p>
         </div>
       </section>

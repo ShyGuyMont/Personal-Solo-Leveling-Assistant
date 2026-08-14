@@ -17,6 +17,7 @@ import {
   suggestDailyBriefing,
 } from '@/game/briefing';
 import { useGameStore } from '@/store/useGameStore';
+import { getMissionDisplayName } from '@/utils/privacy';
 import type { DailyCapacity } from '@/types/game';
 
 const CAPACITIES: Array<{
@@ -219,7 +220,7 @@ export function DailyBriefingOverlay() {
                 <option value="">Choose Main</option>
                 {options.map((mission) => (
                   <option key={mission.id} value={mission.id}>
-                    {mission.name}
+                    {getMissionDisplayName(mission, settings.sensitiveMissionAlias)}
                   </option>
                 ))}
               </select>
@@ -247,7 +248,7 @@ export function DailyBriefingOverlay() {
                       value={mission.id}
                       disabled={mission.id === selection.mainMissionId}
                     >
-                      {mission.name}
+                      {getMissionDisplayName(mission, settings.sensitiveMissionAlias)}
                     </option>
                   ))}
                 </select>
@@ -276,7 +277,7 @@ export function DailyBriefingOverlay() {
                         mission.id === selection.supportMissionId
                       }
                     >
-                      {mission.name}
+                      {getMissionDisplayName(mission, settings.sensitiveMissionAlias)}
                     </option>
                   ))}
                 </select>

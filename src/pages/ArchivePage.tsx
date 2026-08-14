@@ -501,7 +501,7 @@ export function ArchivePage() {
                 <option value="all">All missions</option>
                 {missions.map((mission) => (
                   <option key={mission.id} value={mission.id}>
-                    {mission.name}
+                    {getMissionDisplayName(mission, settings?.sensitiveMissionAlias)}
                   </option>
                 ))}
               </select>

@@ -6,11 +6,32 @@ import {
 import { db } from '@/db/database';
 import type {
   AiCartesiaPlan,
+  AiConversationMessage,
   AiUsageKind,
   AiUsageRecord,
   AiVoiceProfile,
   CompanionId,
 } from '@/types/game';
+import { sanitizeSensitiveDisplayText } from '@/utils/privacy';
+
+export const AI_VOICE_SUMMARY_THRESHOLD = 500;
+
+export function hasAiVoiceSummary(
+  message: Pick<AiConversationMessage, 'message' | 'voiceSummary'>,
+) {
+  return (
+    message.message.trim().length > AI_VOICE_SUMMARY_THRESHOLD &&
+    Boolean(message.voiceSummary?.trim())
+  );
+}
+
+export function getAiSpokenText(
+  message: Pick<AiConversationMessage, 'message' | 'voiceSummary'>,
+  fullText = false,
+) {
+  const text = !fullText && hasAiVoiceSummary(message) ? message.voiceSummary! : message.message;
+  return sanitizeSensitiveDisplayText(text.trim());
+}
 
 export interface AiUsageTotals {
   estimatedCostUsd: number;

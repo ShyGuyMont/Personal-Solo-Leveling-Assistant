@@ -1,4 +1,4 @@
-export const APP_VERSION = '8.0.0';
+export const APP_VERSION = '8.1.0';
 export const DATABASE_SCHEMA_VERSION = 27;
 export const SAVE_FORMAT_VERSION = 27;
 
@@ -9,6 +9,18 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 8.1.0 · Living Voice Economy',
+    detail:
+      'The companions keep their complete written intelligence while long transmissions gain concise, personality-faithful spoken briefings that protect the Hunter’s premium voice allowance.',
+    points: [
+      'Every online companion reply now carries a dedicated audio-first briefing in the same structured intelligence response, avoiding a second summarization call, extra delay, or any change to the full written answer.',
+      'Replies over 500 characters speak a natural one-to-three-sentence briefing by default in AI Headquarters and Quick Link; shorter conversations continue speaking in full.',
+      'Manual Play full controls remain available on every summarized reply, while Party Council and automatic playback use the economical briefing route by default.',
+      'Every finalized Cartesia casting, independent Cartesia speed, and complete OpenAI fallback Soulprint remains untouched and travels through Archive Shield exactly as before.',
+      'The sensitive Integrity mission now uses discreet language throughout missions, Sanctuary guidance, AI responses, settings, archives, briefings, and older locally stored conversation displays without changing its stable legacy ID or historical rewards.',
+    ],
+  },
   {
     title: 'Version 8.0.0 · A.R.C. Archives',
     detail:

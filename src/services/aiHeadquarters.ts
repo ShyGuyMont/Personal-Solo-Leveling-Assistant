@@ -393,6 +393,7 @@ export interface AiHeadquartersReply {
   replies: Array<{
     companionId: CompanionId;
     message: string;
+    voiceSummary?: string;
   }>;
   memoryCandidates: Array<{
     fact: string;
