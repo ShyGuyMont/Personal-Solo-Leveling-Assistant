@@ -39,6 +39,7 @@ export interface AiContextSource {
   challenges: ChallengeProgress[];
   systemDate: LocalDateKey;
   enabledCompanionIds: Settings['enabledCompanionIds'];
+  participantIds?: CompanionId[];
   query?: string;
   history?: AiConversationMessage[];
 }
@@ -480,12 +481,14 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
     })),
     party: {
       enabledCompanionIds: source.enabledCompanionIds,
+      participantIds: source.participantIds,
       directorNotes: Object.entries(source.settings.aiSoulprintNotes)
         .filter(([companionId]) =>
           source.audience === 'party'
-            ? source.enabledCompanionIds.includes(
-                companionId as (typeof source.enabledCompanionIds)[number],
-              )
+            ? (source.participantIds?.length
+                ? source.participantIds
+                : source.enabledCompanionIds
+              ).includes(companionId as (typeof source.enabledCompanionIds)[number])
             : companionId === source.audience,
         )
         .map(([companionId, notes]) => ({

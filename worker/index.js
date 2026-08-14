@@ -11,7 +11,20 @@ export const YOUTUBE_READONLY_SCOPES = [
 
 const YOUTUBE_OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
 
-export const COMPANION_INTELLIGENCE_VERSION = 'sovereign-agent-engine-6';
+export const COMPANION_INTELLIGENCE_VERSION = 'party-commons-engine-7';
+
+function requestedPartyParticipants(payload) {
+  if (payload.audience !== 'party') return [payload.audience];
+  return Array.isArray(payload.participantIds)
+    ? [...new Set(payload.participantIds)].filter((id) => companionIds.includes(id))
+    : [];
+}
+
+function partyIncludes(payload, companionId) {
+  if (payload.audience !== 'party') return payload.audience === companionId;
+  const participants = requestedPartyParticipants(payload);
+  return !participants.length || participants.includes(companionId);
+}
 
 const COUNSEL_SIGNALS =
   /\b(?:world\s+class|class|rank|level|xp|progress|progression|forecast|how\s+long|timeline|pace|plan|strategy|strategize|analy[sz]e|compare|trade-?off|why|should\s+i|what\s+should|recommend|decision|prioriti[sz]e|streak|challenge|trial|discipline|balanced\s+stats?|youtube|channel|content|video|stream|hook|thumbnail|audience|creator|a\.?r\.?c\.?|arc|canon|dossier|lore|plot|character|worldbuild(?:ing)?|arts?\s+codex)\b/i;
@@ -41,7 +54,7 @@ const CREATOR_UPDATE_SIGNALS =
   /\b(?:move|mark|set|update|change|advance|pause|publish|schedule|next\s+(?:action|step)|production\s+stage|status)\b/i;
 
 const RECIPE_WORK_SIGNALS =
-  /\b(?:new\s+recipe|create\s+(?:me\s+)?a\s+recipe|make\s+(?:me\s+)?a\s+recipe|add\s+(?:it|this|that|a\s+recipe)|save\s+(?:it|this|that|a\s+recipe)|private\s+grimoire|ingredients?|servings?|meal\s+idea)\b/i;
+  /\b(?:new\s+recipe|(?:create|make|forge|draft|build)\b.{0,48}\brecipe|add\s+(?:it|this|that|a\s+recipe)|save\s+(?:it|this|that|a\s+recipe)|private\s+grimoire|ingredients?|servings?|meal\s+idea)\b/i;
 
 const KITCHEN_COACH_SIGNALS =
   /\b(?:walk\s+me\s+through|cook\s+with|today'?s\s+(?:recipe|meal|kitchen\s+order)|recipe\s+of\s+the\s+day|current\s+(?:recipe|step)|next\s+step)\b/i;
@@ -91,7 +104,7 @@ export function selectIntelligenceWorkload(payload) {
     return 'calendar-command';
   }
 
-  if (payload.audience === 'haven' || payload.audience === 'party') {
+  if (payload.audience === 'haven' || partyIncludes(payload, 'haven')) {
     const hasKnownCreatorTarget =
       Array.isArray(payload.context?.specialists?.creator?.targeting?.requestedProjectTitles) &&
       payload.context.specialists.creator.targeting.requestedProjectTitles.length > 0;
@@ -114,21 +127,41 @@ export function selectIntelligenceWorkload(payload) {
     }
   }
   if (
-    (payload.audience === 'saffron' || payload.audience === 'party') &&
+    (payload.audience === 'saffron' || partyIncludes(payload, 'saffron')) &&
     proposing &&
     (RECIPE_WORK_SIGNALS.test(current) || RECIPE_WORK_SIGNALS.test(previousCompanion))
   ) {
     return 'recipe-forge';
   }
-  if (payload.audience === 'saffron' && KITCHEN_COACH_SIGNALS.test(recent)) {
+  if (
+    (payload.audience === 'saffron' ||
+      (payload.audience === 'party' && partyIncludes(payload, 'saffron'))) &&
+    KITCHEN_COACH_SIGNALS.test(recent)
+  ) {
     return 'kitchen-coach';
   }
   if (payload.audience === 'quill') return 'arc-forge';
-  if (payload.audience === 'party' && ARC_WORK_SIGNALS.test(recent)) return 'arc-forge';
-  if (payload.audience === 'cassian') return 'ledger-review';
+  if (
+    payload.audience === 'party' &&
+    partyIncludes(payload, 'quill') &&
+    ARC_WORK_SIGNALS.test(recent)
+  ) {
+    return 'arc-forge';
+  }
+  if (
+    payload.audience === 'cassian' ||
+    (payload.audience === 'party' &&
+      partyIncludes(payload, 'cassian') &&
+      /\b(?:money|budget|ledger|saving|spending|finance|debt|income)\b/i.test(recent))
+  ) {
+    return 'ledger-review';
+  }
   if (
     payload.audience === 'kairo' ||
     ((payload.audience === 'snow' || payload.audience === 'party') &&
+      (payload.audience !== 'party' ||
+        partyIncludes(payload, 'snow') ||
+        partyIncludes(payload, 'kairo')) &&
       CALENDAR_WORK_SIGNALS.test(recent))
   ) {
     return proposing && CALENDAR_MUTATION_SIGNALS.test(current)
@@ -136,8 +169,13 @@ export function selectIntelligenceWorkload(payload) {
       : 'calendar-counsel';
   }
   if (proposing && COMMAND_SIGNALS.test(current)) return 'system-command';
+  if (
+    (payload.audience === 'snow' ||
+      (payload.audience === 'party' && partyIncludes(payload, 'snow'))) &&
+    SYSTEM_PLAN_SIGNALS.test(recent)
+  )
+    return 'system-plan';
   if (payload.audience === 'party') return 'party-council';
-  if (payload.audience === 'snow' && SYSTEM_PLAN_SIGNALS.test(recent)) return 'system-plan';
   return 'conversation';
 }
 
@@ -587,23 +625,37 @@ Rules:
 - Never shame, insult, manipulate, threaten abandonment, or treat struggle as a moral defect.
 - For medical, mental-health, legal, financial, or immediate-safety concerns, stay within general supportive guidance and recommend appropriate qualified or emergency help when the situation warrants it.
 - If the audience is one companion, return exactly one reply from that companion.
-- If the audience is the full party, choose only two to four relevant companions. Give each a different conversational job, and let them respond to each other only when it makes the exchange feel natural.
+- If the audience is a shared room, use only its supplied participants. Choose two to four relevant companions, or everyone when the room has only two or three members and the Hunter is inviting interaction. Give each a different conversational job. Let them address, question, tease, challenge, support, and build on each other naturally instead of delivering isolated speeches to the Hunter.
 - Keep each reply under 130 words unless the Hunter explicitly asks for detailed instructions.
 - Every reply must include voiceSummary. When message is 500 characters or shorter, voiceSummary may match it. When message is longer, voiceSummary must be a natural one-to-three-sentence spoken briefing of at most 320 characters in that same companion's voice. Preserve the conclusion, essential caveat, and next action; never announce that it is a summary.
 - Make the title a short description of this conversation, not a greeting.`;
 
-export function buildAudienceInstruction(audience, enabledIds = companionIds) {
+export function buildAudienceInstruction(audience, enabledIds = companionIds, room = {}) {
   if (audience !== 'party') {
     return `Audience: ${audience}. Return exactly one reply, set companionId to ${audience}, and follow only ${companionProfiles[audience].name}'s soulprint.`;
   }
 
   const available = enabledIds.filter((id) => companionIds.includes(id));
-  return `Audience: the full party. Select two to four companions only from this enabled list: ${available.join(', ')}.
+  const roomName =
+    room.kind === 'spoiler-room'
+      ? 'A.R.C. Spoiler Room'
+      : room.kind === 'commons'
+        ? 'Party Commons'
+        : 'Party Council';
+  const lead = companionIds.includes(room.leadCompanionId)
+    ? ` The Hunter directly addressed ${room.leadCompanionId}; include that companion in the response.`
+    : '';
+  const event =
+    room.partyEvent && Array.isArray(room.partyEvent.companionIds)
+      ? `\nMembership event: ${room.partyEvent.kind} ${room.partyEvent.companionIds.join(', ')}. Make this transition visible in the conversation. For a join or handoff, let an existing participant naturally bring the newcomer in and let the newcomer answer with the carried context. Do not pretend they spoke before joining.`
+      : '';
+  return `Audience: ${roomName}. The current participants are: ${available.join(', ')}.${lead}${event}
 Selection guidance:
 - Match the Hunter's real need, not merely the keywords in the message.
-- Give every selected companion a distinct contribution: answer, perspective, practical step, respectful challenge, humor, or emotional support.
+- Choose up to four participants whose voices genuinely improve this turn. Give every selected responder a distinct contribution: answer, perspective, practical step, respectful challenge, humor, or emotional support.
 - For greetings and casual check-ins, rotate participation and favor two or three contrasting personalities rather than defaulting to the same specialists.
-- Order the replies like a natural exchange. One companion may briefly reference another, but nobody speaks twice and nobody exists merely to agree.`;
+- Order the replies like a natural exchange. Companions should respond to what another participant actually said when useful; nobody speaks twice and nobody exists merely to agree.
+- A shared room keeps one continuous context. Never tell the Hunter to repeat information already present in recentConversation.`;
 }
 
 export function buildSystemInstructions(
@@ -611,18 +663,23 @@ export function buildSystemInstructions(
   enabledIds = companionIds,
   commandMode = 'none',
   workload = 'conversation',
+  room = {},
 ) {
   const activeIds =
     audience === 'party'
       ? enabledIds.filter((id) => companionIds.includes(id))
       : [audience].filter((id) => companionIds.includes(id));
   const chemistry = audience === 'party' ? `\n\n${partyChemistry}` : '';
-  return `${baseInstructions}\n\nCompanion soulprints:\n${formatCompanionProfiles(activeIds)}${chemistry}\n\n${buildAudienceInstruction(audience, activeIds)}\n\n${buildCommandInstruction(commandMode, workload)}`;
+  const relayRoster =
+    audience === 'party' && Array.isArray(room.enabledIds)
+      ? `\n\nAvailable specialist relay roster: ${room.enabledIds.filter((id) => companionIds.includes(id)).join(', ')}. A companion outside the current room may be proposed as a handoff, but may not speak or own a command until the Hunter brings them into the room.`
+      : '';
+  return `${baseInstructions}\n\nCompanion soulprints:\n${formatCompanionProfiles(activeIds)}${chemistry}${relayRoster}\n\n${buildAudienceInstruction(audience, activeIds, room)}\n\n${buildCommandInstruction(commandMode, workload)}`;
 }
 
 function buildFocusedWorkloadInstruction(workload, commandMode) {
   if (workload === 'conversation' || workload === 'party-council') {
-    return `Focused workroom: ${workload === 'party-council' ? 'Party Council' : 'Companion Conversation'}. Return only title, replies, memoryCandidates, and handoff. Answer the Hunter naturally with the supplied context and recent conversation. This transmission does not prepare an app mutation. When a different enabled companion clearly owns the requested next step, prepare one concise handoff instead of leaving the Hunter at a verbal referral; otherwise return an empty handoff.`;
+    return `Focused workroom: ${workload === 'party-council' ? 'Shared Party Conversation' : 'Companion Conversation'}. Return only title, replies, memoryCandidates, and handoff. Answer the Hunter naturally with the supplied context and recent conversation. This transmission does not prepare an app mutation. When a different enabled companion clearly owns the requested next step, prepare one concise handoff instead of leaving the Hunter at a verbal referral; otherwise return an empty handoff.`;
   }
   if (workload === 'calendar-counsel') {
     return `Focused workroom: Calendar Counsel. Return only title, replies, memoryCandidates, and handoff. Use progressContext.calendar as the entire source of schedule truth. Lead with exact dates and local times, name conflicts and realistic open windows, distinguish scheduled facts from suggestions, and never imply that a question changed the calendar.`;
@@ -1907,8 +1964,51 @@ function validateChatPayload(payload) {
   if (!isObject(payload.context) || JSON.stringify(payload.context).length > 48_000) {
     return undefined;
   }
+  const participantIds = Array.isArray(payload.participantIds)
+    ? [...new Set(payload.participantIds)].filter((id) => companionIds.includes(id))
+    : [];
+  if (
+    payload.audience === 'party' &&
+    (participantIds.length > 12 ||
+      (payload.participantIds !== undefined &&
+        participantIds.length !== payload.participantIds.length))
+  ) {
+    return undefined;
+  }
+  const roomKinds = new Set(['direct', 'party-council', 'commons', 'spoiler-room']);
+  const roomKind = roomKinds.has(payload.roomKind)
+    ? payload.roomKind
+    : payload.audience === 'party'
+      ? 'party-council'
+      : 'direct';
+  const leadCompanionId = companionIds.includes(payload.leadCompanionId)
+    ? payload.leadCompanionId
+    : undefined;
+  const partyEvent =
+    isObject(payload.partyEvent) &&
+    ['join', 'leave', 'handoff', 'assemble'].includes(payload.partyEvent.kind) &&
+    Array.isArray(payload.partyEvent.companionIds) &&
+    payload.partyEvent.companionIds.length <= 12 &&
+    payload.partyEvent.companionIds.every((id) => companionIds.includes(id))
+      ? {
+          kind: payload.partyEvent.kind,
+          companionIds: [...new Set(payload.partyEvent.companionIds)],
+          initiatedBy:
+            payload.partyEvent.initiatedBy === 'hunter' ||
+            companionIds.includes(payload.partyEvent.initiatedBy)
+              ? payload.partyEvent.initiatedBy
+              : 'hunter',
+          summary: String(payload.partyEvent.summary ?? '')
+            .trim()
+            .slice(0, 800),
+        }
+      : undefined;
   return {
     audience: payload.audience,
+    participantIds,
+    roomKind,
+    leadCompanionId,
+    partyEvent,
     message: payload.message.trim(),
     history: payload.history,
     context: payload.context,
@@ -2508,14 +2608,37 @@ async function handleAiChat(request, env, url) {
       400,
     );
   }
+  const requestedParticipants = requestedPartyParticipants(payload);
+  const activeParticipantIds =
+    payload.audience === 'party'
+      ? requestedParticipants.length
+        ? requestedParticipants.filter((id) => enabledCompanionIds.includes(id))
+        : enabledCompanionIds
+      : [payload.audience];
+  if (!activeParticipantIds.length) {
+    return json(
+      { code: 'no-participants', message: 'No active companion remains in this room.' },
+      400,
+    );
+  }
   const systemInstructions = buildSystemInstructions(
     payload.audience,
-    enabledCompanionIds,
+    activeParticipantIds,
     payload.commandMode,
     workload,
+    {
+      kind: payload.roomKind,
+      leadCompanionId: payload.leadCompanionId,
+      partyEvent: payload.partyEvent,
+      enabledIds: enabledCompanionIds,
+    },
   );
   const conversationInput = JSON.stringify({
     audience: payload.audience,
+    participants: activeParticipantIds,
+    roomKind: payload.roomKind,
+    leadCompanionId: payload.leadCompanionId,
+    partyEvent: payload.partyEvent,
     progressContext: payload.context,
     recentConversation: payload.history,
     hunterMessage: payload.message,
@@ -2674,7 +2797,7 @@ async function handleAiChat(request, env, url) {
       (reply) =>
         isObject(reply) &&
         companionIds.includes(reply.companionId) &&
-        (payload.audience !== 'party' || enabledCompanionIds.includes(reply.companionId)) &&
+        (payload.audience !== 'party' || activeParticipantIds.includes(reply.companionId)) &&
         typeof reply.message === 'string' &&
         reply.message.trim(),
     );
@@ -2720,7 +2843,7 @@ async function handleAiChat(request, env, url) {
       handoff &&
       companionIds.includes(handoffCompanionId) &&
       enabledCompanionIds.includes(handoffCompanionId) &&
-      handoffCompanionId !== payload.audience &&
+      !activeParticipantIds.includes(handoffCompanionId) &&
       typeof handoff.summary === 'string' &&
       handoff.summary.trim() &&
       typeof handoff.prompt === 'string' &&
@@ -2762,7 +2885,7 @@ async function handleAiChat(request, env, url) {
       payload.commandMode === 'propose' &&
       workload === 'creator-update' &&
       (payload.audience === 'haven' ||
-        (payload.audience === 'party' && enabledCompanionIds.includes('haven'))) &&
+        (payload.audience === 'party' && activeParticipantIds.includes('haven'))) &&
       knownCreatorProject &&
       knownCreatorProject.title === creatorUpdate?.projectTitle &&
       (creatorUpdateStatus || creatorUpdateNextAction || creatorUpdateNotes) &&
@@ -2799,7 +2922,7 @@ async function handleAiChat(request, env, url) {
       payload.commandMode === 'propose' &&
       workload === 'arc-forge' &&
       (payload.audience === 'quill' ||
-        (payload.audience === 'party' && enabledCompanionIds.includes('quill'))) &&
+        (payload.audience === 'party' && activeParticipantIds.includes('quill'))) &&
       arcNoteTitle &&
       !existingArcSourceTitles.has(arcNoteTitle.toLowerCase()) &&
       arcNoteKinds.has(arcNote?.kind) &&
@@ -2838,7 +2961,7 @@ async function handleAiChat(request, env, url) {
     const commandCompanionAllowed =
       companionIds.includes(requestedCompanionId) &&
       (payload.audience === 'party'
-        ? enabledCompanionIds.includes(requestedCompanionId)
+        ? activeParticipantIds.includes(requestedCompanionId)
         : requestedCompanionId === payload.audience);
     const commandProposal =
       payload.commandMode === 'propose' &&
@@ -2883,7 +3006,7 @@ async function handleAiChat(request, env, url) {
     const operationCompanionAllowed =
       companionIds.includes(operationCompanionId) &&
       (payload.audience === 'party'
-        ? enabledCompanionIds.includes(operationCompanionId)
+        ? activeParticipantIds.includes(operationCompanionId)
         : operationCompanionId === payload.audience);
     const operationKind = operation?.kind;
     const operationOwnershipAllowed =
@@ -2972,7 +3095,9 @@ async function handleAiChat(request, env, url) {
     const missionOwnerAllowed =
       companionIds.includes(missionCompanionId) &&
       enabledCompanionIds.includes(missionCompanionId) &&
-      (payload.audience === 'party' ||
+      ((payload.audience === 'party' &&
+        (activeParticipantIds.includes(missionCompanionId) ||
+          activeParticipantIds.includes('snow'))) ||
         payload.audience === 'snow' ||
         payload.audience === missionCompanionId);
     const missionDueDate = String(mission?.dueDate ?? '').trim();
@@ -3064,7 +3189,7 @@ async function handleAiChat(request, env, url) {
     const recipe = isObject(result.recipe) ? result.recipe : undefined;
     const saffronCanPropose =
       payload.audience === 'saffron' ||
-      (payload.audience === 'party' && enabledCompanionIds.includes('saffron'));
+      (payload.audience === 'party' && activeParticipantIds.includes('saffron'));
     const recipeProposal =
       payload.commandMode === 'propose' &&
       saffronCanPropose &&
@@ -3107,7 +3232,7 @@ async function handleAiChat(request, env, url) {
     const content = isObject(result.content) ? result.content : undefined;
     const vesperCanPropose =
       payload.audience === 'haven' ||
-      (payload.audience === 'party' && enabledCompanionIds.includes('haven'));
+      (payload.audience === 'party' && activeParticipantIds.includes('haven'));
     const validPlatforms = new Set(['youtube', 'youtube-shorts', 'arc', 'other']);
     const validContentTypes = new Set([
       'long-form',
@@ -3230,7 +3355,7 @@ async function handleAiChat(request, env, url) {
       payload.audience === 'kairo' ||
       payload.audience === 'snow' ||
       (payload.audience === 'party' &&
-        (enabledCompanionIds.includes('kairo') || enabledCompanionIds.includes('snow'))) ||
+        (activeParticipantIds.includes('kairo') || activeParticipantIds.includes('snow'))) ||
       (companionIds.includes(payload.audience) && enabledCompanionIds.includes('kairo'));
     const knownCalendarEvents = Array.isArray(payload.context?.calendar?.upcoming)
       ? payload.context.calendar.upcoming.filter(

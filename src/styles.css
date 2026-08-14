@@ -5392,6 +5392,91 @@ html[data-theme='daybreak'] .about-rank-grid article {
   letter-spacing: 0.08em;
 }
 
+.ai-room-roster {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 12px;
+  background: rgba(134, 207, 255, 0.025);
+  border-bottom: 1px solid rgba(134, 207, 255, 0.09);
+}
+
+.ai-room-roster__members,
+.ai-room-roster__invite {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 6px;
+}
+
+.ai-room-roster__members {
+  flex-wrap: wrap;
+}
+
+.ai-room-roster__members > span {
+  --companion-accent: var(--ai-accent);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 6px 3px 3px;
+  color: var(--text-soft);
+  font-size: 0.53rem;
+  background: color-mix(in srgb, var(--companion-accent) 7%, rgba(255, 255, 255, 0.018));
+  border: 1px solid color-mix(in srgb, var(--companion-accent) 27%, var(--border-soft));
+  border-radius: 999px;
+}
+
+.ai-room-roster__members img {
+  width: 22px;
+  height: 22px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.ai-room-roster__members button {
+  display: grid;
+  width: 17px;
+  height: 17px;
+  place-items: center;
+  padding: 0;
+  color: var(--muted);
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.ai-room-roster__invite select,
+.ai-room-roster__invite button {
+  min-height: 30px;
+  color: var(--text-soft);
+  background: var(--panel-deep);
+  border: 1px solid var(--border-soft);
+  border-radius: 7px;
+  font-size: 0.52rem;
+}
+
+.ai-room-roster__invite select {
+  max-width: 155px;
+  padding: 0 7px;
+}
+
+.ai-room-roster__invite button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 8px;
+  cursor: pointer;
+}
+
+.ai-room-roster button:disabled,
+.ai-room-roster select:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
 .ai-message-stage__messages {
   display: flex;
   min-height: 350px;
@@ -22977,6 +23062,62 @@ html[data-motion='reduced'] .progression-overlay--rank-up > section {
 .quick-link__modes small {
   display: block;
   min-width: 0;
+}
+
+.quick-link__participants {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  margin: 8px 14px 0;
+  padding: 7px 9px;
+  background: rgba(67, 230, 194, 0.035);
+  border: 1px solid rgba(67, 230, 194, 0.14);
+  border-radius: 10px;
+}
+
+.quick-link__participants > span {
+  display: flex;
+  padding-left: 6px;
+}
+
+.quick-link__participants img {
+  width: 27px;
+  height: 27px;
+  margin-left: -6px;
+  object-fit: cover;
+  background: var(--panel-deep);
+  border: 2px solid var(--panel-deep);
+  border-radius: 50%;
+}
+
+.quick-link__participants p,
+.quick-link__participants strong,
+.quick-link__participants small {
+  display: block;
+  min-width: 0;
+  margin: 0;
+}
+
+.quick-link__participants p > strong {
+  color: var(--white);
+  font:
+    0.58rem 'SystemDisplay',
+    sans-serif;
+}
+
+.quick-link__participants p > small,
+.quick-link__participants > small {
+  overflow: hidden;
+  color: var(--muted-2);
+  font-size: 0.47rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.quick-link__participants > small {
+  grid-column: 1 / -1;
+  color: var(--mint);
 }
 
 .quick-link__modes strong {

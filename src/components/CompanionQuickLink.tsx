@@ -26,8 +26,12 @@ import {
   createCompanionMessage,
   createAiConversation,
   createHunterMessage,
+  addAiConversationParticipants,
+  getAiConversationKind,
+  getAiConversationParticipantIds,
   getAiConversation,
   getContinuingAiConversation,
+  removeAiConversationParticipants,
   saveAiConversation,
   saveAiMemoryCandidates,
 } from '@/game/aiHeadquarters';
@@ -76,6 +80,7 @@ import {
   commandSuccessAcknowledgement,
   navigationAcknowledgement,
   parseQuickLinkAddress,
+  parsePartyMembershipCommand,
   parseQuickNavigationCommand,
   releaseQuickLinkTransmission,
   type QuickLinkAction,
@@ -97,6 +102,8 @@ import { sanitizeSensitiveDisplayText } from '@/utils/privacy';
 import type {
   AiConversation,
   AiConversationMessage,
+  AiConversationKind,
+  AiPartyEvent,
   CompanionId,
   CompanionOperationRequest,
   DailyOperationsRecord,
@@ -164,6 +171,7 @@ export function CompanionQuickLink() {
   const [executingAction, setExecutingAction] = useState(false);
   const [continuityTurns, setContinuityTurns] = useState(0);
   const [activeCompanionId, setActiveCompanionId] = useState<CompanionId>('snow');
+  const [participantIds, setParticipantIds] = useState<CompanionId[]>(['snow']);
   const submitRef = useRef<(text: string) => Promise<void>>(async () => undefined);
   const transmissionLockRef = useRef(false);
   const recoveryStartedRef = useRef(false);
@@ -204,6 +212,7 @@ export function CompanionQuickLink() {
           updatedAt: message.createdAt,
         };
         conversationRef.current = updated;
+        setParticipantIds([companionId]);
         await saveAiConversation(updated);
         setReplies((existing) => [...existing, message]);
         setContinuityTurns(updated.messages.length);
@@ -246,12 +255,21 @@ export function CompanionQuickLink() {
     window.addEventListener('online', online);
     window.addEventListener('offline', offline);
     const openDirectLink = (event: Event) => {
-      const detail = (event as CustomEvent<{ companionId?: CompanionId; initialDraft?: string }>)
-        .detail;
+      const detail = (
+        event as CustomEvent<{
+          companionId?: CompanionId;
+          initialDraft?: string;
+          participantIds?: CompanionId[];
+          roomKind?: AiConversationKind;
+        }>
+      ).detail;
       const companionId = detail?.companionId;
       if (!companionId) return;
       voiceLinkRef.current.stopPlayback();
       setActiveCompanionId(companionId);
+      const requestedParticipants = (detail?.participantIds ?? []).filter((id) =>
+        settings?.enabledCompanionIds.includes(id),
+      );
       setReplies([]);
       setPendingAction(undefined);
       setPendingOperation(undefined);
@@ -269,9 +287,22 @@ export function CompanionQuickLink() {
       setNotice(`${getCompanion(companionId).name}'s live channel is ready.`);
       setOpen(true);
       void (async () => {
-        const continuing = await getContinuingAiConversation(companionId, new Date(), 24);
-        const conversation = continuing ?? createAiConversation(companionId);
+        const shared = requestedParticipants.length > 1;
+        const audience = shared ? ('party' as const) : companionId;
+        const continuing = await getContinuingAiConversation(audience, new Date(), 24, {
+          participantIds: requestedParticipants,
+          kind: detail?.roomKind,
+        });
+        const conversation =
+          continuing ??
+          createAiConversation(audience, new Date().toISOString(), {
+            participantIds: requestedParticipants,
+            kind: detail?.roomKind,
+          });
         conversationRef.current = conversation;
+        setParticipantIds(
+          getAiConversationParticipantIds(conversation, settings?.enabledCompanionIds),
+        );
         setReplies(conversation.messages);
         setContinuityTurns(conversation.messages.length);
         restorePendingProposal(await getPendingAiProposal(conversation.id));
@@ -290,7 +321,7 @@ export function CompanionQuickLink() {
       window.removeEventListener('offline', offline);
       window.removeEventListener('system:open-quick-link', openDirectLink);
     };
-  }, [restorePendingProposal, systemDate]);
+  }, [restorePendingProposal, settings?.enabledCompanionIds, systemDate]);
 
   useEffect(() => {
     if (
@@ -364,6 +395,9 @@ export function CompanionQuickLink() {
         }
         if (result.handoffProposal) setPendingHandoff(result.handoffProposal);
         conversationRef.current = completedConversation;
+        setParticipantIds(
+          getAiConversationParticipantIds(completedConversation, settings.enabledCompanionIds),
+        );
         setReplies(completedConversation.messages);
         setContinuityTurns(completedConversation.messages.length);
         setActiveCompanionId(
@@ -458,9 +492,23 @@ export function CompanionQuickLink() {
         return;
       }
 
-      const fallbackAudience = conversationRef.current?.audience ?? activeCompanionId;
+      const previousConversation = conversationRef.current;
+      const fallbackAudience = previousConversation?.audience ?? activeCompanionId;
       const addressed = parseQuickLinkAddress(text, fallbackAudience);
-      const addressedCompanion = addressed.audience === 'party' ? 'snow' : addressed.audience;
+      const membership =
+        parsePartyMembershipCommand(addressed.message || text) ??
+        (addressed.message !== text ? parsePartyMembershipCommand(text) : undefined);
+      const relay = intent === 'confirmed-handoff' ? pendingHandoff : undefined;
+      const requestedIds = relay
+        ? [relay.companionId]
+        : membership?.action === 'all'
+          ? settings.enabledCompanionIds
+          : (membership?.companionIds ?? addressed.companionIds ?? []);
+      const disabledId = requestedIds.find((id) => !settings.enabledCompanionIds.includes(id));
+      if (disabledId) {
+        setNotice(`${getCompanion(disabledId).name}'s link is disabled in Settings.`);
+        return;
+      }
       if (
         addressed.audience !== 'party' &&
         !settings.enabledCompanionIds.includes(addressed.audience)
@@ -468,10 +516,148 @@ export function CompanionQuickLink() {
         setNotice(`${getCompanion(addressed.audience).name}'s link is disabled in Settings.`);
         return;
       }
+
+      let conversation: AiConversation;
+      let requestAudience = addressed.audience;
+      let effectiveMessage = addressed.message || text;
+      let leadCompanionId: CompanionId | undefined =
+        addressed.audience === 'party' ? addressed.companionIds?.[0] : addressed.audience;
+      let partyEvent: AiPartyEvent | undefined;
+
+      if (relay) {
+        const base = previousConversation ?? createAiConversation(activeCompanionId);
+        conversation = addAiConversationParticipants(
+          base,
+          [relay.companionId],
+          undefined,
+          settings.enabledCompanionIds,
+        );
+        requestAudience = 'party';
+        effectiveMessage = relay.prompt;
+        leadCompanionId = relay.companionId;
+        partyEvent = {
+          kind: 'handoff',
+          companionIds: [relay.companionId],
+          initiatedBy: activeCompanionId,
+          summary: relay.summary,
+        };
+      } else if (membership) {
+        const base = previousConversation ?? createAiConversation(activeCompanionId);
+        if (membership.action === 'all') {
+          conversation = addAiConversationParticipants(
+            base,
+            settings.enabledCompanionIds,
+            undefined,
+            settings.enabledCompanionIds,
+          );
+          partyEvent = {
+            kind: 'assemble',
+            companionIds: settings.enabledCompanionIds,
+            initiatedBy: 'hunter',
+          };
+        } else if (membership.action === 'add') {
+          const currentIds = getAiConversationParticipantIds(base, settings.enabledCompanionIds);
+          const joining = membership.companionIds.filter((id) => !currentIds.includes(id));
+          conversation = joining.length
+            ? addAiConversationParticipants(base, joining, undefined, settings.enabledCompanionIds)
+            : base;
+          if (joining.length) {
+            partyEvent = { kind: 'join', companionIds: joining, initiatedBy: 'hunter' };
+          }
+        } else if (membership.action === 'only') {
+          const withKept = addAiConversationParticipants(
+            base,
+            membership.companionIds,
+            undefined,
+            settings.enabledCompanionIds,
+          );
+          const currentIds = getAiConversationParticipantIds(
+            withKept,
+            settings.enabledCompanionIds,
+          );
+          const leaving = currentIds.filter((id) => !membership.companionIds.includes(id));
+          conversation = removeAiConversationParticipants(
+            withKept,
+            leaving,
+            settings.enabledCompanionIds,
+          );
+          partyEvent = { kind: 'leave', companionIds: leaving, initiatedBy: 'hunter' };
+        } else {
+          const currentIds = getAiConversationParticipantIds(base, settings.enabledCompanionIds);
+          if (currentIds.every((id) => membership.companionIds.includes(id))) {
+            setNotice('At least one companion must remain in the conversation.');
+            return;
+          }
+          conversation = removeAiConversationParticipants(
+            base,
+            membership.companionIds,
+            settings.enabledCompanionIds,
+          );
+          partyEvent = {
+            kind: 'leave',
+            companionIds: membership.companionIds,
+            initiatedBy: 'hunter',
+          };
+        }
+        requestAudience = conversation.audience;
+        leadCompanionId =
+          addressed.audience === 'party'
+            ? getAiConversationParticipantIds(conversation, settings.enabledCompanionIds)[0]
+            : addressed.audience;
+      } else if (previousConversation?.audience === 'party') {
+        const currentIds = getAiConversationParticipantIds(
+          previousConversation,
+          settings.enabledCompanionIds,
+        );
+        if (addressed.audience !== 'party' && addressed.explicitlyAddressed) {
+          leadCompanionId = addressed.audience;
+          if (!currentIds.includes(addressed.audience)) {
+            conversation = addAiConversationParticipants(
+              previousConversation,
+              [addressed.audience],
+              undefined,
+              settings.enabledCompanionIds,
+            );
+            partyEvent = {
+              kind: 'join',
+              companionIds: [addressed.audience],
+              initiatedBy: 'hunter',
+            };
+          } else {
+            conversation = previousConversation;
+          }
+        } else if (addressed.companionIds?.length) {
+          const newIds = addressed.companionIds.filter((id) => !currentIds.includes(id));
+          conversation = addAiConversationParticipants(
+            previousConversation,
+            addressed.companionIds,
+            undefined,
+            settings.enabledCompanionIds,
+          );
+          if (newIds.length) {
+            partyEvent = { kind: 'join', companionIds: newIds, initiatedBy: 'hunter' };
+          }
+          leadCompanionId = addressed.companionIds[0];
+        } else {
+          conversation = previousConversation;
+        }
+        requestAudience = 'party';
+      } else {
+        const continuing = previousConversation?.audience === addressed.audience;
+        conversation = continuing ? previousConversation : createAiConversation(addressed.audience);
+      }
+
+      const activeIds = getAiConversationParticipantIds(conversation, settings.enabledCompanionIds);
+      if (!activeIds.length) {
+        setNotice('At least one companion must remain in the conversation.');
+        return;
+      }
+      const addressedCompanion = leadCompanionId ?? activeIds[0] ?? 'snow';
       if (!acquireQuickLinkTransmission(transmissionLockRef)) return;
       setSending(true);
       try {
         setActiveCompanionId(addressedCompanion);
+        setParticipantIds(activeIds);
         setDraft('');
         setPendingAction(undefined);
         if (pendingOperation) await cancelStagedCompanionOperation(systemDate);
@@ -493,14 +679,11 @@ export function CompanionQuickLink() {
             : `${getCompanion(addressed.audience).name} is thinking…`,
         );
 
-        const continuing = conversationRef.current?.audience === addressed.audience;
-        const conversation = continuing
-          ? conversationRef.current!
-          : createAiConversation(addressed.audience);
+        const continuing = previousConversation?.id === conversation.id;
         conversationRef.current = conversation;
         if (!continuing) setReplies([]);
         setContinuityTurns(conversation.messages.length);
-        const hunterMessage = createHunterMessage(addressed.message || text);
+        const hunterMessage = createHunterMessage(effectiveMessage);
         setReplies((current) => (continuing ? [...current, hunterMessage] : [hunterMessage]));
         const pendingConversation = {
           ...conversation,
@@ -510,7 +693,7 @@ export function CompanionQuickLink() {
         await saveAiConversation(pendingConversation);
         conversationRef.current = pendingConversation;
 
-        const navigation = parseQuickNavigationCommand(addressed.message);
+        const navigation = !partyEvent ? parseQuickNavigationCommand(effectiveMessage) : undefined;
         if (navigation) {
           const companionMessage = createCompanionMessage(
             addressedCompanion,
@@ -544,15 +727,19 @@ export function CompanionQuickLink() {
           transmissionId,
           conversationId: pendingConversation.id,
           hunterMessageId: hunterMessage.id,
-          audience: addressed.audience,
+          audience: requestAudience,
           startedAt: new Date().toISOString(),
         });
         const result = await requestAiHeadquartersReply({
-          audience: addressed.audience,
-          message: addressed.message || text,
+          audience: requestAudience,
+          participantIds: requestAudience === 'party' ? activeIds : undefined,
+          roomKind: getAiConversationKind(conversation),
+          leadCompanionId,
+          partyEvent,
+          message: effectiveMessage,
           history: conversation.messages,
           context: await buildAiProgressContext({
-            audience: addressed.audience,
+            audience: requestAudience,
             profile,
             settings,
             progression,
@@ -562,7 +749,8 @@ export function CompanionQuickLink() {
             challenges,
             systemDate,
             enabledCompanionIds: enabledCompanions.map((companion) => companion.id),
-            query: addressed.message || text,
+            participantIds: requestAudience === 'party' ? activeIds : undefined,
+            query: effectiveMessage,
             history: conversation.messages,
           }),
           commandMode: 'propose',
@@ -570,11 +758,7 @@ export function CompanionQuickLink() {
         });
         await voiceLink.trackTextUsage(result);
         if (settings.aiRelationshipMemoryEnabled) {
-          await saveAiMemoryCandidates(
-            result.memoryCandidates,
-            addressed.audience,
-            conversation.id,
-          );
+          await saveAiMemoryCandidates(result.memoryCandidates, requestAudience, conversation.id);
         }
         const replyTime = new Date().toISOString();
         const responseMessages = result.replies.map((reply) =>
@@ -590,7 +774,7 @@ export function CompanionQuickLink() {
         conversationRef.current = completedConversation;
         setReplies((current) => [...current, ...responseMessages]);
         setContinuityTurns(completedConversation.messages.length);
-        const pending = extractAiPendingProposal(result, actionCatalog, addressed.audience);
+        const pending = extractAiPendingProposal(result, actionCatalog, requestAudience);
         if (pending) await savePendingAiProposal(completedConversation.id, pending);
         const proposedAction = result.commandProposal
           ? actionCatalog.find((action) => action.actionId === result.commandProposal?.actionId)
@@ -625,7 +809,7 @@ export function CompanionQuickLink() {
           setActiveCompanionId('haven');
         }
         if (result.calendarProposal) {
-          const owner = addressed.audience === 'snow' ? 'snow' : 'kairo';
+          const owner = leadCompanionId === 'snow' ? 'snow' : 'kairo';
           setPendingCalendar(result.calendarProposal);
           setPendingCalendarOwner(owner);
           setActiveCompanionId(owner);
@@ -1450,6 +1634,11 @@ export function CompanionQuickLink() {
     const storedProposal = continuing ? await getPendingAiProposal(continuing.id) : undefined;
     conversationRef.current = continuing;
     setActiveCompanionId(operations?.pendingProposal?.companionId ?? 'snow');
+    setParticipantIds(
+      continuing
+        ? getAiConversationParticipantIds(continuing, settings?.enabledCompanionIds)
+        : ['snow'],
+    );
     setReplies(continuing?.messages ?? []);
     setPendingAction(undefined);
     setPendingOperation(
@@ -1477,6 +1666,14 @@ export function CompanionQuickLink() {
   }
 
   const activeCompanion = getCompanion(activeCompanionId);
+  const quickLinkTitle =
+    conversationRef.current?.audience === 'party'
+      ? getAiConversationKind(conversationRef.current) === 'spoiler-room'
+        ? 'A.R.C. Spoiler Room'
+        : getAiConversationKind(conversationRef.current) === 'commons'
+          ? 'Party Commons'
+          : 'Party Council'
+      : activeCompanion.name;
   const pendingOperationTitle = pendingOperation
     ? pendingOperation.kind === 'assemble-day'
       ? 'Party Operation'
@@ -1527,11 +1724,7 @@ export function CompanionQuickLink() {
                   <img src={getCompanionImage(activeCompanion.image)} alt="" />
                   <span>
                     <small>COMPANION QUICK LINK</small>
-                    <strong id="quick-link-title">
-                      {conversationRef.current?.audience === 'party'
-                        ? 'Party Channel'
-                        : activeCompanion.name}
-                    </strong>
+                    <strong id="quick-link-title">{quickLinkTitle}</strong>
                   </span>
                 </div>
                 <button type="button" onClick={close} aria-label="Close Quick Link">
@@ -1563,6 +1756,32 @@ export function CompanionQuickLink() {
                   </span>
                 </button>
               </nav>
+
+              {linkMode === 'command' && (
+                <div
+                  className="quick-link__participants"
+                  aria-label="Companions in this Quick Link"
+                >
+                  <span>
+                    {participantIds.map((companionId) => {
+                      const companion = getCompanion(companionId);
+                      return (
+                        <img
+                          key={companionId}
+                          src={getCompanionImage(companion.image)}
+                          alt={companion.name}
+                          title={companion.name}
+                        />
+                      );
+                    })}
+                  </span>
+                  <p>
+                    <strong>{quickLinkTitle}</strong>
+                    <small>{participantIds.map((id) => getCompanion(id).name).join(' · ')}</small>
+                  </p>
+                  <small>Say “add Saffron” or “remove Quill” anytime.</small>
+                </div>
+              )}
 
               {linkMode === 'command' ? (
                 <div className={`quick-link__core ${voiceLink.recording ? 'is-listening' : ''}`}>
@@ -1789,7 +2008,7 @@ export function CompanionQuickLink() {
                         );
                       }}
                     >
-                      <ArrowUpRight size={15} /> Relay to{' '}
+                      <ArrowUpRight size={15} /> Bring in{' '}
                       {getCompanion(pendingHandoff.companionId).name}
                     </button>
                     <button

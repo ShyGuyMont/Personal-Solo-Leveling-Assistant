@@ -2,23 +2,32 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CANON_VOICE_PROFILES } from '@/config/aiVoices';
 import { db } from '@/db/database';
 import {
+  addAiConversationParticipants,
   createAiConversation,
   createCompanionMessage,
   createHunterMessage,
   approveAiRelationshipMemory,
   forgetAiRelationshipMemory,
   getAiRelationshipMemories,
+  getContinuingAiConversation,
+  getAiConversationParticipantIds,
   getRelevantApprovedMemories,
   getRecentAiConversations,
   saveAiMemoryCandidates,
   saveAiConversation,
+  removeAiConversationParticipants,
 } from '@/game/aiHeadquarters';
 import {
   clearPendingAiTransmission,
   getPendingAiTransmission,
   savePendingAiTransmission,
 } from '@/game/aiTransmissions';
-import { requestAiSpeech, resumeAiHeadquartersReply } from '@/services/aiHeadquarters';
+import {
+  requestAiHeadquartersReply,
+  requestAiSpeech,
+  resumeAiHeadquartersReply,
+  type AiProgressContext,
+} from '@/services/aiHeadquarters';
 
 describe('AI Headquarters local history', () => {
   beforeEach(async () => {
@@ -61,6 +70,46 @@ describe('AI Headquarters local history', () => {
       message: 'We start with one executable step.',
       voiceSummary: 'Start with one executable step.',
     });
+  });
+
+  it('expands a direct link into Party Commons without losing its history', () => {
+    const direct = createAiConversation('snow', '2026-08-11T12:00:00.000Z');
+    direct.messages.push(createHunterMessage('Keep this context.'));
+
+    const commons = addAiConversationParticipants(direct, ['saffron']);
+    expect(commons).toMatchObject({
+      id: direct.id,
+      audience: 'party',
+      kind: 'commons',
+      participantIds: ['snow', 'saffron'],
+    });
+    expect(commons.messages[0].message).toBe('Keep this context.');
+
+    const privateAgain = removeAiConversationParticipants(commons, ['saffron']);
+    expect(privateAgain).toMatchObject({ audience: 'snow', kind: 'direct' });
+    expect(getAiConversationParticipantIds(privateAgain)).toEqual(['snow']);
+  });
+
+  it('continues only the exact shared room and preserves the spoiler-room identity', async () => {
+    const spoilerRoom = createAiConversation('party', '2026-08-11T12:00:00.000Z', {
+      kind: 'spoiler-room',
+      participantIds: ['snow', 'quill'],
+    });
+    await saveAiConversation(spoilerRoom);
+
+    await expect(
+      getContinuingAiConversation('party', new Date('2026-08-11T13:00:00.000Z'), 24, {
+        kind: 'spoiler-room',
+        participantIds: ['quill', 'snow'],
+      }),
+    ).resolves.toMatchObject({ id: spoilerRoom.id, kind: 'spoiler-room' });
+
+    await expect(
+      getContinuingAiConversation('party', new Date('2026-08-11T13:00:00.000Z'), 24, {
+        kind: 'commons',
+        participantIds: ['snow', 'saffron'],
+      }),
+    ).resolves.toMatchObject({ kind: 'commons', participantIds: ['snow', 'saffron'] });
   });
 
   it('keeps candidate memories inactive until the Hunter approves them', async () => {
@@ -235,5 +284,57 @@ describe('AI Headquarters local history', () => {
       pace: 0.9,
     });
     expect(CANON_VOICE_PROFILES.snow.pace).not.toBe(0.9);
+  });
+
+  it('sends exact room membership and handoff context through the secure link', async () => {
+    let requestBody: Record<string, unknown> | undefined;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_url: string, init: RequestInit) => {
+        requestBody = JSON.parse(String(init.body)) as Record<string, unknown>;
+        return new Response(
+          JSON.stringify({
+            model: 'gpt-5.6-terra',
+            route: 'counsel',
+            reasoningEffort: 'medium',
+            title: 'Party Commons',
+            replies: [{ companionId: 'saffron', message: 'I am in. What are we cooking?' }],
+            memoryCandidates: [],
+          }),
+          { status: 200, headers: { 'content-type': 'application/json' } },
+        );
+      }),
+    );
+
+    await requestAiHeadquartersReply({
+      audience: 'party',
+      participantIds: ['snow', 'saffron'],
+      roomKind: 'commons',
+      leadCompanionId: 'saffron',
+      partyEvent: {
+        kind: 'handoff',
+        companionIds: ['saffron'],
+        initiatedBy: 'snow',
+        summary: 'Saffron owns the Kitchen request.',
+      },
+      message: 'Help me build dinner.',
+      history: [],
+      context: {} as AiProgressContext,
+      commandMode: 'propose',
+      transmissionId: 'transmission_party_commons_test',
+    });
+
+    expect(requestBody).toMatchObject({
+      audience: 'party',
+      participantIds: ['snow', 'saffron'],
+      roomKind: 'commons',
+      leadCompanionId: 'saffron',
+      partyEvent: {
+        kind: 'handoff',
+        companionIds: ['saffron'],
+        initiatedBy: 'snow',
+      },
+      commandMode: 'propose',
+    });
   });
 });

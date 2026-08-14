@@ -4,6 +4,7 @@ import {
   buildQuickLinkActionCatalog,
   canBeginQuickLinkTransmission,
   navigationAcknowledgement,
+  parsePartyMembershipCommand,
   parseQuickLinkAddress,
   parseQuickNavigationCommand,
   releaseQuickLinkTransmission,
@@ -38,6 +39,26 @@ describe('Companion Quick Link', () => {
     expect(parseQuickLinkAddress('Everyone, how are you doing?').audience).toBe('party');
     expect(parseQuickLinkAddress('All I want is a simple answer').audience).toBe('snow');
     expect(parseQuickLinkAddress('Rook and Mira, build me a recovery plan').audience).toBe('party');
+  });
+
+  it('understands natural Party Commons membership commands without misreading normal requests', () => {
+    expect(parsePartyMembershipCommand('Snow, add Saffron to the chat')).toEqual({
+      action: 'add',
+      companionIds: ['snow', 'saffron'],
+    });
+    expect(parsePartyMembershipCommand('Remove Cipher from this conversation')).toEqual({
+      action: 'remove',
+      companionIds: ['cipher'],
+    });
+    expect(parsePartyMembershipCommand('Everyone out except Snow and Quill')).toEqual({
+      action: 'only',
+      companionIds: ['snow', 'quill'],
+    });
+    expect(parsePartyMembershipCommand('Bring the whole party in')).toEqual({
+      action: 'all',
+      companionIds: [],
+    });
+    expect(parsePartyMembershipCommand('Snow, send me to Saffron for a recipe')).toBeUndefined();
   });
 
   it('routes every specialist name and legacy alias without losing the relay brief', () => {

@@ -29,13 +29,18 @@ import { AiSoulprintStudio } from '@/components/AiSoulprintStudio';
 import { COMPANIONS, getCompanion, getCompanionImage } from '@/config/companions';
 import { db } from '@/db/database';
 import {
+  addAiConversationParticipants,
   approveAiRelationshipMemory,
   createAiConversation,
   createCompanionMessage,
   createHunterMessage,
   forgetAiRelationshipMemory,
+  getAiConversationDisplayName,
+  getAiConversationKind,
+  getAiConversationParticipantIds,
   getAiRelationshipMemories,
   getRecentAiConversations,
+  removeAiConversationParticipants,
   saveAiMemoryCandidates,
   saveAiConversation,
 } from '@/game/aiHeadquarters';
@@ -60,7 +65,12 @@ import {
   getPendingAiTransmission,
   savePendingAiTransmission,
 } from '@/game/aiTransmissions';
-import { buildQuickLinkActionCatalog, commandSuccessAcknowledgement } from '@/game/aiQuickLink';
+import {
+  buildQuickLinkActionCatalog,
+  commandSuccessAcknowledgement,
+  parsePartyMembershipCommand,
+  parseQuickLinkAddress,
+} from '@/game/aiQuickLink';
 import { applyCalendarProposal } from '@/game/calendar';
 import {
   applyCreatorProjectUpdate,
@@ -92,7 +102,10 @@ import { scrollChatViewportToBottom } from '@/utils/scroll';
 import type {
   AiConversation,
   AiConversationAudience,
+  AiConversationKind,
+  AiPartyEvent,
   AiRelationshipMemory,
+  CompanionId,
   LocalDateKey,
 } from '@/types/game';
 
@@ -114,6 +127,7 @@ export function AiHeadquartersPanel() {
   const [conversations, setConversations] = useState<AiConversation[]>([]);
   const [activeId, setActiveId] = useState<string>();
   const [draft, setDraft] = useState('');
+  const [inviteId, setInviteId] = useState<CompanionId | ''>('');
   const [status, setStatus] = useState<AiLinkStatus>();
   const [statusLoading, setStatusLoading] = useState(true);
   const [sending, setSending] = useState(false);
@@ -351,9 +365,17 @@ export function AiHeadquartersPanel() {
   const onlineMode = settings.aiLinkMode === 'online' && settings.aiDataSharingAcknowledged;
   const activeCompanion =
     activeConversation.audience === 'party' ? undefined : getCompanion(activeConversation.audience);
+  const activeParticipantIds = getAiConversationParticipantIds(
+    activeConversation,
+    enabledCompanions.map((companion) => companion.id),
+  );
+  const conversationDisplayName = getAiConversationDisplayName(activeConversation);
   const audienceAvailable =
     activeConversation.audience === 'party'
-      ? enabledCompanions.length > 0
+      ? activeParticipantIds.length > 0 &&
+        activeParticipantIds.every((id) =>
+          enabledCompanions.some((companion) => companion.id === id),
+        )
       : enabledCompanions.some((companion) => companion.id === activeConversation.audience);
   const linkReady = onlineMode && deviceOnline && status?.configured && audienceAvailable;
 
@@ -423,8 +445,11 @@ export function AiHeadquartersPanel() {
     setNotice('Bond Memory forgotten from this device.');
   }
 
-  async function startConversation(audience: AiConversationAudience = 'party') {
-    const conversation = createAiConversation(audience);
+  async function startConversation(
+    audience: AiConversationAudience = 'party',
+    options?: { kind?: AiConversationKind; participantIds?: CompanionId[]; title?: string },
+  ) {
+    const conversation = createAiConversation(audience, new Date().toISOString(), options);
     await updateConversation(conversation);
     setDraft('');
     setNotice('');
@@ -433,21 +458,169 @@ export function AiHeadquartersPanel() {
 
   async function selectAudience(audience: AiConversationAudience) {
     if (currentConversation.messages.length) {
-      await startConversation(audience);
+      await startConversation(
+        audience,
+        audience === 'party'
+          ? {
+              kind: 'party-council',
+              participantIds: enabledCompanions.map((companion) => companion.id),
+            }
+          : undefined,
+      );
       return;
     }
     const now = new Date().toISOString();
+    const participantIds =
+      audience === 'party' ? enabledCompanions.map((companion) => companion.id) : undefined;
     await updateConversation({
       ...currentConversation,
       audience,
+      kind: audience === 'party' ? 'party-council' : 'direct',
+      participantIds,
       title:
         audience === 'party' ? 'New Party Council' : `Direct Link · ${getCompanion(audience).name}`,
       updatedAt: now,
     });
   }
 
-  async function sendMessage() {
-    const message = draft.trim();
+  async function inviteCompanion(companionId: CompanionId) {
+    if (!companionId || sending || pendingProposal) return;
+    const joined = addAiConversationParticipants(
+      currentConversation,
+      [companionId],
+      undefined,
+      enabledCompanions.map((companion) => companion.id),
+    );
+    setInviteId('');
+    await sendMessage({
+      message: `Bring ${getCompanion(companionId).name} into this conversation.`,
+      conversation: joined,
+      leadCompanionId: companionId,
+      partyEvent: { kind: 'join', companionIds: [companionId], initiatedBy: 'hunter' },
+    });
+  }
+
+  async function removeCompanion(companionId: CompanionId) {
+    if (sending || pendingProposal || activeParticipantIds.length <= 1) return;
+    const remaining = removeAiConversationParticipants(
+      currentConversation,
+      [companionId],
+      enabledCompanions.map((companion) => companion.id),
+    );
+    await sendMessage({
+      message: `${getCompanion(companionId).name}, you can step out of this conversation now.`,
+      conversation: remaining,
+      partyEvent: { kind: 'leave', companionIds: [companionId], initiatedBy: 'hunter' },
+    });
+  }
+
+  async function sendMessage(options?: {
+    message?: string;
+    conversation?: AiConversation;
+    partyEvent?: AiPartyEvent;
+    leadCompanionId?: CompanionId;
+  }) {
+    const initialConversation = options?.conversation ?? currentConversation;
+    const rawMessage = (options?.message ?? draft).trim();
+    let conversation = initialConversation;
+    const message = rawMessage;
+    let partyEvent = options?.partyEvent;
+    let leadCompanionId = options?.leadCompanionId;
+
+    if (!partyEvent) {
+      const addressed = parseQuickLinkAddress(rawMessage, initialConversation.audience);
+      const membership =
+        parsePartyMembershipCommand(addressed.message || rawMessage) ??
+        (addressed.message !== rawMessage ? parsePartyMembershipCommand(rawMessage) : undefined);
+      const requestedIds = membership?.companionIds ?? addressed.companionIds ?? [];
+      const disabledId = requestedIds.find(
+        (id) => !enabledCompanions.some((companion) => companion.id === id),
+      );
+      if (disabledId) {
+        setNotice(`${getCompanion(disabledId).name}'s link is disabled in Settings.`);
+        return;
+      }
+      if (membership) {
+        if (membership.action === 'all') {
+          const everyone = enabledCompanions.map((companion) => companion.id);
+          conversation = addAiConversationParticipants(
+            initialConversation,
+            everyone,
+            undefined,
+            everyone,
+          );
+          partyEvent = { kind: 'assemble', companionIds: everyone, initiatedBy: 'hunter' };
+        } else if (membership.action === 'add') {
+          const currentIds = getAiConversationParticipantIds(
+            initialConversation,
+            enabledCompanions.map((companion) => companion.id),
+          );
+          const joining = membership.companionIds.filter((id) => !currentIds.includes(id));
+          conversation = joining.length
+            ? addAiConversationParticipants(
+                initialConversation,
+                joining,
+                undefined,
+                enabledCompanions.map((companion) => companion.id),
+              )
+            : initialConversation;
+          if (joining.length) {
+            partyEvent = { kind: 'join', companionIds: joining, initiatedBy: 'hunter' };
+          }
+        } else {
+          const base =
+            membership.action === 'only'
+              ? addAiConversationParticipants(
+                  initialConversation,
+                  membership.companionIds,
+                  undefined,
+                  enabledCompanions.map((companion) => companion.id),
+                )
+              : initialConversation;
+          const currentIds = getAiConversationParticipantIds(
+            base,
+            enabledCompanions.map((companion) => companion.id),
+          );
+          const leaving =
+            membership.action === 'only'
+              ? currentIds.filter((id) => !membership.companionIds.includes(id))
+              : membership.companionIds;
+          if (membership.action === 'remove' && currentIds.every((id) => leaving.includes(id))) {
+            setNotice('At least one companion must remain in the conversation.');
+            return;
+          }
+          conversation = removeAiConversationParticipants(
+            base,
+            leaving,
+            enabledCompanions.map((companion) => companion.id),
+          );
+          partyEvent = { kind: 'leave', companionIds: leaving, initiatedBy: 'hunter' };
+        }
+      } else if (initialConversation.audience === 'party') {
+        const currentIds = getAiConversationParticipantIds(
+          initialConversation,
+          enabledCompanions.map((companion) => companion.id),
+        );
+        const addressedIds =
+          addressed.audience === 'party'
+            ? (addressed.companionIds ?? [])
+            : addressed.explicitlyAddressed
+              ? [addressed.audience]
+              : [];
+        const joining = addressedIds.filter((id) => !currentIds.includes(id));
+        if (joining.length) {
+          conversation = addAiConversationParticipants(
+            initialConversation,
+            joining,
+            undefined,
+            enabledCompanions.map((companion) => companion.id),
+          );
+          partyEvent = { kind: 'join', companionIds: joining, initiatedBy: 'hunter' };
+        }
+        leadCompanionId = addressedIds[0];
+      }
+    }
+
     if (!message || sending || !linkReady) return;
     if (
       pendingProposal &&
@@ -455,9 +628,9 @@ export function AiHeadquartersPanel() {
     ) {
       const hunterMessage = createHunterMessage(message);
       const confirmationConversation: AiConversation = {
-        ...currentConversation,
+        ...conversation,
         updatedAt: hunterMessage.createdAt,
-        messages: [...currentConversation.messages, hunterMessage],
+        messages: [...conversation.messages, hunterMessage],
       };
       setDraft('');
       await updateConversation(confirmationConversation);
@@ -474,11 +647,12 @@ export function AiHeadquartersPanel() {
     setNotice('');
     setPendingHandoff(undefined);
     setDraft('');
+    if (conversation !== currentConversation) await updateConversation(conversation);
     const hunterMessage = createHunterMessage(message);
     const pendingConversation: AiConversation = {
-      ...currentConversation,
+      ...conversation,
       updatedAt: hunterMessage.createdAt,
-      messages: [...currentConversation.messages, hunterMessage],
+      messages: [...conversation.messages, hunterMessage],
     };
     await updateConversation(pendingConversation);
 
@@ -489,15 +663,25 @@ export function AiHeadquartersPanel() {
         transmissionId,
         conversationId: pendingConversation.id,
         hunterMessageId: hunterMessage.id,
-        audience: currentConversation.audience,
+        audience: conversation.audience,
         startedAt: new Date().toISOString(),
       });
       const result = await requestAiHeadquartersReply({
-        audience: currentConversation.audience,
+        audience: conversation.audience,
+        participantIds:
+          conversation.audience === 'party'
+            ? getAiConversationParticipantIds(
+                conversation,
+                enabledCompanions.map((companion) => companion.id),
+              )
+            : undefined,
+        roomKind: getAiConversationKind(conversation),
+        leadCompanionId,
+        partyEvent,
         message,
-        history: currentConversation.messages,
+        history: conversation.messages,
         context: await buildAiProgressContext({
-          audience: currentConversation.audience,
+          audience: conversation.audience,
           profile: currentProfile,
           settings: currentSettings,
           progression: currentProgression,
@@ -507,8 +691,15 @@ export function AiHeadquartersPanel() {
           challenges,
           systemDate,
           enabledCompanionIds: enabledCompanions.map((companion) => companion.id),
+          participantIds:
+            conversation.audience === 'party'
+              ? getAiConversationParticipantIds(
+                  conversation,
+                  enabledCompanions.map((companion) => companion.id),
+                )
+              : undefined,
           query: message,
-          history: currentConversation.messages,
+          history: conversation.messages,
         }),
         commandMode: 'propose',
         transmissionId,
@@ -517,8 +708,8 @@ export function AiHeadquartersPanel() {
       const memoryAdditions = currentSettings.aiRelationshipMemoryEnabled
         ? await saveAiMemoryCandidates(
             result.memoryCandidates,
-            currentConversation.audience,
-            currentConversation.id,
+            conversation.audience,
+            conversation.id,
           )
         : [];
       const replyTime = new Date().toISOString();
@@ -532,11 +723,7 @@ export function AiHeadquartersPanel() {
         messages: [...pendingConversation.messages, ...replyMessages],
       };
       await updateConversation(completedConversation);
-      const proposal = extractAiPendingProposal(
-        result,
-        actionCatalog,
-        currentConversation.audience,
-      );
+      const proposal = extractAiPendingProposal(result, actionCatalog, conversation.audience);
       if (proposal) {
         if (proposal.kind === 'operation') {
           await stageCompanionOperation(systemDate, proposal.payload, completedConversation.id);
@@ -884,7 +1071,7 @@ export function AiHeadquartersPanel() {
         </div>
         <div>
           <p className="eyebrow">AWAKENED LINK · SOULPRINT II</p>
-          <h2 id="ai-headquarters-title">Ten distinct lives. One party that remembers.</h2>
+          <h2 id="ai-headquarters-title">Twelve distinct lives. One party that remembers.</h2>
           <p>
             Call one companion or open the full council. Their sharper identities, history with one
             another, and optional Hunter-approved Bond Memory create continuity without surrendering
@@ -1095,7 +1282,9 @@ export function AiHeadquartersPanel() {
                     </span>
                   )}
                   <span>
-                    <strong>{conversation.title}</strong>
+                    <strong>
+                      {conversation.title || getAiConversationDisplayName(conversation)}
+                    </strong>
                     <small>
                       {conversation.audience === 'party' ? 'Full party' : companion?.name} ·{' '}
                       {conversation.messages.length} messages
@@ -1110,7 +1299,34 @@ export function AiHeadquartersPanel() {
         <div className="ai-command-link">
           <div className="ai-audience" aria-label="Choose who answers">
             <button
-              className={activeConversation.audience === 'party' ? 'is-active' : ''}
+              className={
+                activeConversation.audience === 'party' &&
+                getAiConversationKind(activeConversation) === 'commons'
+                  ? 'is-active'
+                  : ''
+              }
+              type="button"
+              onClick={() =>
+                startConversation('party', {
+                  kind: 'commons',
+                  participantIds: ['snow'],
+                  title: 'Party Commons',
+                })
+              }
+            >
+              <span>
+                <MessageCircleMore size={18} />
+              </span>
+              <strong>Party Commons</strong>
+              <small>Invite as needed</small>
+            </button>
+            <button
+              className={
+                activeConversation.audience === 'party' &&
+                getAiConversationKind(activeConversation) === 'party-council'
+                  ? 'is-active'
+                  : ''
+              }
               type="button"
               onClick={() => selectAudience('party')}
             >
@@ -1146,7 +1362,7 @@ export function AiHeadquartersPanel() {
                   </span>
                 )}
                 <div>
-                  <strong>{activeCompanion?.name ?? 'Party Council'}</strong>
+                  <strong>{activeCompanion?.name ?? conversationDisplayName}</strong>
                   <small>
                     {activeCompanion?.title ?? `${enabledCompanions.length} companion links`} ·
                     Level {progression.level} · {formatClassName(progression.rank)}
@@ -1189,6 +1405,62 @@ export function AiHeadquartersPanel() {
                 )}
               </div>
             </header>
+
+            <div className="ai-room-roster" aria-label="Companions in this conversation">
+              <div className="ai-room-roster__members">
+                {activeParticipantIds.map((companionId) => {
+                  const companion = getCompanion(companionId);
+                  return (
+                    <span
+                      key={companionId}
+                      style={{ '--companion-accent': companion.accent } as CSSProperties}
+                    >
+                      <img src={getCompanionImage(companion.image)} alt="" />
+                      {companion.name}
+                      {activeConversation.audience === 'party' &&
+                        activeParticipantIds.length > 1 && (
+                          <button
+                            type="button"
+                            aria-label={`Remove ${companion.name} from this conversation`}
+                            disabled={sending || Boolean(pendingProposal)}
+                            onClick={() => void removeCompanion(companionId)}
+                          >
+                            ×
+                          </button>
+                        )}
+                    </span>
+                  );
+                })}
+              </div>
+              {enabledCompanions.some(
+                (companion) => !activeParticipantIds.includes(companion.id),
+              ) && (
+                <div className="ai-room-roster__invite">
+                  <select
+                    value={inviteId}
+                    onChange={(event) => setInviteId(event.target.value as CompanionId | '')}
+                    aria-label="Choose a companion to invite"
+                    disabled={sending || Boolean(pendingProposal)}
+                  >
+                    <option value="">Add companion…</option>
+                    {enabledCompanions
+                      .filter((companion) => !activeParticipantIds.includes(companion.id))
+                      .map((companion) => (
+                        <option key={companion.id} value={companion.id}>
+                          {companion.name} · {companion.title}
+                        </option>
+                      ))}
+                  </select>
+                  <button
+                    type="button"
+                    disabled={!inviteId || sending || Boolean(pendingProposal)}
+                    onClick={() => inviteId && void inviteCompanion(inviteId)}
+                  >
+                    <Plus size={14} /> Invite
+                  </button>
+                </div>
+              )}
+            </div>
 
             <div ref={messageListRef} className="ai-message-stage__messages" aria-live="polite">
               {!activeConversation.messages.length && (
@@ -1307,16 +1579,30 @@ export function AiHeadquartersPanel() {
                     type="button"
                     onClick={() => {
                       const relay = pendingHandoff;
-                      void startConversation(relay.companionId).then(() => {
-                        setDraft(relay.prompt);
-                        setPendingHandoff(undefined);
-                        setNotice(
-                          `${getCompanion(relay.companionId).name}'s direct link has the full brief.`,
-                        );
+                      const joined = addAiConversationParticipants(
+                        currentConversation,
+                        [relay.companionId],
+                        undefined,
+                        enabledCompanions.map((companion) => companion.id),
+                      );
+                      setPendingHandoff(undefined);
+                      void sendMessage({
+                        message: relay.prompt,
+                        conversation: joined,
+                        leadCompanionId: relay.companionId,
+                        partyEvent: {
+                          kind: 'handoff',
+                          companionIds: [relay.companionId],
+                          initiatedBy:
+                            currentConversation.audience === 'party'
+                              ? 'hunter'
+                              : currentConversation.audience,
+                          summary: relay.summary,
+                        },
                       });
                     }}
                   >
-                    <ArrowUpRight size={16} /> Open specialist brief
+                    <ArrowUpRight size={16} /> Bring specialist into chat
                   </button>
                   <button
                     className="button button--ghost"
@@ -1455,7 +1741,7 @@ export function AiHeadquartersPanel() {
                 <button
                   className="button button--primary"
                   type="button"
-                  onClick={sendMessage}
+                  onClick={() => void sendMessage()}
                   disabled={!draft.trim() || !linkReady || sending}
                 >
                   {sending ? (

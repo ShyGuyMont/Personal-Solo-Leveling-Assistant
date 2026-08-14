@@ -28,18 +28,24 @@ interface CompanionIntelligenceModule {
   ) => string;
   baseInstructions: string;
   formatCompanionProfiles: () => string;
-  buildAudienceInstruction: (audience: string, enabledIds?: string[]) => string;
+  buildAudienceInstruction: (
+    audience: string,
+    enabledIds?: string[],
+    room?: Record<string, unknown>,
+  ) => string;
   buildSystemInstructions: (
     audience: string,
     enabledIds?: string[],
     commandMode?: 'none' | 'propose',
     workload?: string,
+    room?: Record<string, unknown>,
   ) => string;
   selectIntelligenceRoute: (
     payload: {
       audience: string;
       message: string;
       commandMode?: 'none' | 'propose';
+      participantIds?: string[];
       history?: Array<{ role: 'hunter' | 'companion'; companionId?: string; message: string }>;
       context?: Record<string, unknown>;
     },
@@ -197,6 +203,52 @@ describe('Companion Soulprint intelligence', () => {
     expect(instructions).toContain('archive, remove, delete, or cancel as retire');
     expect(instructions).toContain('first-person completion report');
     expect(instructions).toContain('instead of guessing or awarding credit');
+  });
+
+  it('turns Party Commons membership changes into a visible, participant-limited exchange', () => {
+    const instructions = intelligence.buildAudienceInstruction('party', ['snow', 'saffron'], {
+      kind: 'commons',
+      leadCompanionId: 'saffron',
+      partyEvent: {
+        kind: 'join',
+        companionIds: ['saffron'],
+        initiatedBy: 'snow',
+      },
+    });
+
+    expect(instructions).toContain('Party Commons');
+    expect(instructions).toContain('snow, saffron');
+    expect(instructions).toContain('Membership event: join saffron');
+    expect(instructions).toContain('let an existing participant naturally bring the newcomer in');
+    expect(instructions).not.toContain('cipher, haven');
+  });
+
+  it('keeps every specialist command lane operational inside shared rooms', () => {
+    const route = (participantIds: string[], message: string, commandMode = 'propose' as const) =>
+      intelligence.selectIntelligenceRoute({
+        audience: 'party',
+        participantIds,
+        message,
+        commandMode,
+        history: [],
+        context: { party: { enabledCompanionIds: intelligence.companionIds } },
+      }).workload;
+
+    expect(route(['snow', 'saffron'], 'Create a new chicken recipe for my grimoire')).toBe(
+      'recipe-forge',
+    );
+    expect(route(['snow', 'saffron'], "Walk me through today's recipe")).toBe('kitchen-coach');
+    expect(route(['snow', 'quill'], 'Review this A.R.C. character dossier')).toBe('arc-forge');
+    expect(route(['snow', 'haven'], 'Plan a specific new YouTube video')).toBe('content-forge');
+    expect(route(['snow', 'cassian'], 'How is my money and budget looking?')).toBe('ledger-review');
+    expect(route(['snow', 'kairo'], 'Add a calendar event tomorrow at 3 PM')).toBe(
+      'calendar-command',
+    );
+    expect(route(['snow', 'rook'], 'Assign me a new training mission')).toBe('system-command');
+    expect(route(['snow', 'rook'], 'Get my tasks for today together')).toBe('system-plan');
+
+    expect(route(['snow'], 'Review this A.R.C. character dossier')).not.toBe('arc-forge');
+    expect(route(['snow'], 'Create a new chicken recipe for my grimoire')).not.toBe('recipe-forge');
   });
 
   it('routes casual direct talk economically and deeper counsel to Terra', () => {

@@ -28,6 +28,12 @@ export interface AddressedQuickLink {
   audience: AiConversationAudience;
   message: string;
   explicitlyAddressed: boolean;
+  companionIds?: CompanionId[];
+}
+
+export interface PartyMembershipCommand {
+  action: 'add' | 'remove' | 'only' | 'all';
+  companionIds: CompanionId[];
 }
 
 export interface QuickNavigationCommand {
@@ -183,7 +189,58 @@ export function parseQuickLinkAddress(
     audience: isParty ? 'party' : firstCompanion,
     message: match[3].trim() || trimmed,
     explicitlyAddressed: true,
+    ...(secondCompanion
+      ? { companionIds: [firstCompanion, secondCompanion].filter(Boolean) as CompanionId[] }
+      : {}),
   };
+}
+
+function companionIdsNamedIn(value: string) {
+  const normalized = value.toLowerCase();
+  const ids: CompanionId[] = [];
+  for (const [alias, companionId] of Object.entries(COMPANION_ALIASES)) {
+    if (new RegExp(`\\b${alias}\\b`, 'i').test(normalized) && !ids.includes(companionId)) {
+      ids.push(companionId);
+    }
+  }
+  return ids;
+}
+
+export function parsePartyMembershipCommand(message: string): PartyMembershipCommand | undefined {
+  const normalized = message.trim();
+  if (!normalized) return undefined;
+  if (
+    /\b(?:bring|add|invite|call|loop|pull)\b.{0,32}\b(?:everyone|everybody|the\s+(?:whole\s+)?party)\b|\b(?:everyone|everybody)\b.{0,24}\b(?:join|in(?:to)?\s+(?:the\s+)?chat)\b/i.test(
+      normalized,
+    )
+  ) {
+    return { action: 'all', companionIds: [] };
+  }
+
+  const companionIds = companionIdsNamedIn(normalized);
+  if (!companionIds.length) return undefined;
+  if (
+    /\b(?:everyone|everybody|all(?:\s+of\s+you)?)\b.{0,28}\b(?:out|leave|go)\b.{0,20}\bexcept\b|\b(?:keep|leave)\b.{0,16}\bonly\b/i.test(
+      normalized,
+    )
+  ) {
+    return { action: 'only', companionIds };
+  }
+  if (
+    /\b(?:remove|dismiss|drop|release)\b|\bsend\b.{0,32}\b(?:out|away)\b|\b(?:leave|exit)\b.{0,24}\b(?:chat|conversation|commons|council)\b/i.test(
+      normalized,
+    )
+  ) {
+    return { action: 'remove', companionIds };
+  }
+  if (
+    /\b(?:add|bring|invite|call|loop|pull)\b.{0,48}\b(?:chat|conversation|commons|council|in|here|join)?\b|\b(?:join|bring)\b.{0,32}\b(?:us|chat|conversation)\b/i.test(
+      normalized,
+    )
+  ) {
+    return { action: 'add', companionIds };
+  }
+  return undefined;
 }
 
 export function parseQuickNavigationCommand(message: string): QuickNavigationCommand | undefined {

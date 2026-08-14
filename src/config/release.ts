@@ -1,4 +1,4 @@
-export const APP_VERSION = '9.2.0';
+export const APP_VERSION = '9.3.0';
 export const DATABASE_SCHEMA_VERSION = 28;
 export const SAVE_FORMAT_VERSION = 28;
 
@@ -9,6 +9,19 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 9.3.0 · Party Commons',
+    detail:
+      'Private companion links can now become living shared rooms without losing context, specialist relays happen visibly inside the same conversation, and every protected command lane remains operational wherever the responsible companion is present.',
+    points: [
+      'Party Commons keeps one continuous local conversation while the Hunter naturally adds, removes, or directly addresses companions by voice or text; the visible roster always shows who is currently in the room.',
+      'Specialist pivots no longer open an isolated blank thread: the current companion introduces the receiving expert, carries the full brief forward, and lets the expert answer in the same shared history.',
+      'AI Headquarters gains compact room controls for inviting and releasing companions, while Quick Link understands natural membership phrases such as “add Saffron,” “remove Quill,” “bring everyone,” and “keep only Snow and Cipher.”',
+      'The A.R.C. spoiler link now opens a dedicated Snow-and-Quill Spoiler Room so Quill can ground the canon while Snow reacts as the Hunter’s ride-or-die fan without taking authorship away.',
+      'Shared-room routing preserves missions, Party Operations, Training preparation, Kitchen coaching and recipes, Sanctuary work, Creator Forge, Reawakening campaigns, Ledger counsel, A.R.C. records, Calendar Command, navigation, and every visible confirmation wall.',
+      'Only companions visibly present may speak or own a specialist proposal; an absent specialist can be invited through a transparent relay but cannot silently act from outside the room.',
+    ],
+  },
   {
     title: 'Version 9.2.0 · Sovereign Command Center',
     detail:

@@ -1,7 +1,9 @@
 import { inferAiVoiceScene } from '@/config/aiVoices';
 import type {
   AiConversationAudience,
+  AiConversationKind,
   AiConversationMessage,
+  AiPartyEvent,
   AiVoiceProfile,
   AiVoiceProvider,
   AiVoiceScene,
@@ -116,6 +118,7 @@ export interface AiProgressContext {
   }>;
   party: {
     enabledCompanionIds: CompanionId[];
+    participantIds?: CompanionId[];
     directorNotes: Array<{
       companionId: CompanionId;
       humor: string;
@@ -820,6 +823,10 @@ export async function resumeAiHeadquartersReply(
 
 export async function requestAiHeadquartersReply(input: {
   audience: AiConversationAudience;
+  participantIds?: CompanionId[];
+  roomKind?: AiConversationKind;
+  leadCompanionId?: CompanionId;
+  partyEvent?: AiPartyEvent;
   message: string;
   history: AiConversationMessage[];
   context: AiProgressContext;
@@ -828,6 +835,10 @@ export async function requestAiHeadquartersReply(input: {
 }): Promise<AiHeadquartersReply> {
   const requestBody = JSON.stringify({
     audience: input.audience,
+    participantIds: input.participantIds,
+    roomKind: input.roomKind,
+    leadCompanionId: input.leadCompanionId,
+    partyEvent: input.partyEvent,
     message: input.message,
     history: input.history.slice(-16).map((item) => ({
       role: item.role,

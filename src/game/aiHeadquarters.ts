@@ -1,7 +1,9 @@
 import { db } from '@/db/database';
+import { COMPANIONS, getCompanion } from '@/config/companions';
 import type {
   AiConversation,
   AiConversationAudience,
+  AiConversationKind,
   AiConversationMessage,
   AiMemoryCategory,
   AiRelationshipMemory,
@@ -13,14 +15,114 @@ export interface AiMemoryCandidate {
   category: AiMemoryCategory;
 }
 
+const KNOWN_COMPANION_IDS = new Set(COMPANIONS.map((companion) => companion.id));
+
+export function normalizeAiConversationParticipants(
+  audience: AiConversationAudience,
+  participantIds: readonly CompanionId[] = [],
+) {
+  if (audience !== 'party') return [audience];
+  return [...new Set(participantIds)].filter((id) => KNOWN_COMPANION_IDS.has(id));
+}
+
+export function getAiConversationParticipantIds(
+  conversation: Pick<AiConversation, 'audience' | 'participantIds'>,
+  partyFallback: readonly CompanionId[] = [],
+) {
+  if (conversation.audience !== 'party') return [conversation.audience];
+  const explicit = normalizeAiConversationParticipants('party', conversation.participantIds);
+  return explicit.length ? explicit : normalizeAiConversationParticipants('party', partyFallback);
+}
+
+export function getAiConversationKind(conversation: Pick<AiConversation, 'audience' | 'kind'>) {
+  if (conversation.kind) return conversation.kind;
+  return conversation.audience === 'party' ? 'party-council' : 'direct';
+}
+
+export function getAiConversationDisplayName(conversation: AiConversation) {
+  const kind = getAiConversationKind(conversation);
+  if (kind === 'spoiler-room') return 'A.R.C. Spoiler Room';
+  if (kind === 'commons') return 'Party Commons';
+  if (conversation.audience === 'party') return 'Party Council';
+  return getCompanion(conversation.audience).name;
+}
+
+export function addAiConversationParticipants(
+  conversation: AiConversation,
+  companionIds: readonly CompanionId[],
+  kind?: Extract<AiConversationKind, 'commons' | 'spoiler-room'>,
+  partyFallback: readonly CompanionId[] = [],
+) {
+  const resolvedKind =
+    kind ?? (getAiConversationKind(conversation) === 'spoiler-room' ? 'spoiler-room' : 'commons');
+  const current = getAiConversationParticipantIds(conversation, partyFallback);
+  const participantIds = normalizeAiConversationParticipants('party', [
+    ...current,
+    ...companionIds,
+  ]);
+  const defaultTitle = resolvedKind === 'spoiler-room' ? 'A.R.C. Spoiler Room' : 'Party Commons';
+  return {
+    ...conversation,
+    audience: 'party' as const,
+    kind: resolvedKind,
+    participantIds,
+    title:
+      conversation.messages.length &&
+      !/^New (?:Direct Link|Party Council)$/i.test(conversation.title)
+        ? conversation.title
+        : defaultTitle,
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+export function removeAiConversationParticipants(
+  conversation: AiConversation,
+  companionIds: readonly CompanionId[],
+  partyFallback: readonly CompanionId[] = [],
+) {
+  const removed = new Set(companionIds);
+  const remaining = getAiConversationParticipantIds(conversation, partyFallback).filter(
+    (id) => !removed.has(id),
+  );
+  if (remaining.length === 1) {
+    const [audience] = remaining;
+    return {
+      ...conversation,
+      audience,
+      kind: 'direct' as const,
+      participantIds: undefined,
+      title: `Direct Link · ${getCompanion(audience).name}`,
+      updatedAt: new Date().toISOString(),
+    };
+  }
+  return {
+    ...conversation,
+    participantIds: remaining,
+    updatedAt: new Date().toISOString(),
+  };
+}
+
 export function createAiConversation(
   audience: AiConversationAudience = 'party',
   now = new Date().toISOString(),
+  options?: { kind?: AiConversationKind; participantIds?: CompanionId[]; title?: string },
 ): AiConversation {
+  const kind = options?.kind ?? (audience === 'party' ? 'party-council' : 'direct');
+  const participantIds = normalizeAiConversationParticipants(audience, options?.participantIds);
   return {
     id: crypto.randomUUID(),
-    title: audience === 'party' ? 'New Party Council' : 'New Direct Link',
+    title:
+      options?.title ??
+      (kind === 'spoiler-room'
+        ? 'A.R.C. Spoiler Room'
+        : kind === 'commons'
+          ? 'Party Commons'
+          : audience === 'party'
+            ? 'New Party Council'
+            : 'New Direct Link'),
     audience,
+    kind,
+    participantIds: audience === 'party' && participantIds.length ? participantIds : undefined,
     createdAt: now,
     updatedAt: now,
     messages: [],
@@ -65,14 +167,32 @@ export async function getContinuingAiConversation(
   audience: AiConversationAudience,
   now = new Date(),
   maxAgeHours = 12,
+  options?: { participantIds?: CompanionId[]; kind?: AiConversationKind },
 ) {
-  const conversations = await db.aiConversations.where('audience').equals(audience).toArray();
+  const requestedParticipants = normalizeAiConversationParticipants(
+    audience,
+    options?.participantIds,
+  ).sort();
+  const conversations = (
+    await db.aiConversations.where('audience').equals(audience).toArray()
+  ).filter((conversation) => {
+    if (options?.kind && getAiConversationKind(conversation) !== options.kind) return false;
+    if (audience !== 'party' || !requestedParticipants.length) return true;
+    const current = normalizeAiConversationParticipants(
+      'party',
+      conversation.participantIds,
+    ).sort();
+    return (
+      current.length === requestedParticipants.length &&
+      current.every((id, index) => id === requestedParticipants[index])
+    );
+  });
   const latest = conversations.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))[0];
-  if (!latest) return createAiConversation(audience, now.toISOString());
+  if (!latest) return createAiConversation(audience, now.toISOString(), options);
   const age = now.getTime() - new Date(latest.updatedAt).getTime();
   return age >= 0 && age <= maxAgeHours * 60 * 60 * 1_000
     ? latest
-    : createAiConversation(audience, now.toISOString());
+    : createAiConversation(audience, now.toISOString(), options);
 }
 
 export async function saveAiConversation(conversation: AiConversation) {

@@ -1049,6 +1049,15 @@ export interface SupportConversation {
 }
 
 export type AiConversationAudience = 'party' | CompanionId;
+export type AiConversationKind = 'direct' | 'party-council' | 'commons' | 'spoiler-room';
+export type AiPartyEventKind = 'join' | 'leave' | 'handoff' | 'assemble';
+
+export interface AiPartyEvent {
+  kind: AiPartyEventKind;
+  companionIds: CompanionId[];
+  initiatedBy?: CompanionId | 'hunter';
+  summary?: string;
+}
 
 export interface AiConversationMessage {
   id: string;
@@ -1063,6 +1072,8 @@ export interface AiConversation {
   id: string;
   title: string;
   audience: AiConversationAudience;
+  kind?: AiConversationKind;
+  participantIds?: CompanionId[];
   createdAt: string;
   updatedAt: string;
   messages: AiConversationMessage[];

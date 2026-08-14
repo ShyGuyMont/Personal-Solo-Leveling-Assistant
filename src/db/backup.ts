@@ -407,13 +407,23 @@ function validateData(data: Record<string, unknown[]>) {
   }
 
   const aiAudiences = new Set(['party', ...aiCompanionIds]);
+  const aiConversationKinds = new Set(['direct', 'party-council', 'commons', 'spoiler-room']);
   for (const row of data.aiConversations) {
+    if (!isObject(row)) {
+      throw new Error('An AI Headquarters conversation contains an impossible value.');
+    }
+    const participantIds: unknown[] = Array.isArray(row.participantIds) ? row.participantIds : [];
     if (
-      !isObject(row) ||
       typeof row.title !== 'string' ||
       !row.title.trim() ||
       row.title.length > 120 ||
       !aiAudiences.has(String(row.audience)) ||
+      (row.kind !== undefined && !aiConversationKinds.has(String(row.kind))) ||
+      (row.participantIds !== undefined && !Array.isArray(row.participantIds)) ||
+      participantIds.length > aiCompanionIds.size ||
+      new Set(participantIds).size !== participantIds.length ||
+      participantIds.some((id) => !aiCompanionIds.has(String(id))) ||
+      (participantIds.length > 0 && row.audience !== 'party') ||
       typeof row.createdAt !== 'string' ||
       !Number.isFinite(Date.parse(row.createdAt)) ||
       typeof row.updatedAt !== 'string' ||

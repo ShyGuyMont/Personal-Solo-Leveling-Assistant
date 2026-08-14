@@ -30,7 +30,13 @@ import {
   saveArcCharacter,
   scanArcContinuity,
 } from '@/game/arcArchives';
-import type { ArcCanonSource, ArcCanonSourceKind, ArcCharacterRecord } from '@/types/game';
+import type {
+  AiConversationKind,
+  ArcCanonSource,
+  ArcCanonSourceKind,
+  ArcCharacterRecord,
+  CompanionId,
+} from '@/types/game';
 
 type ArchiveView = 'library' | 'forge' | 'vault' | 'continuity';
 
@@ -77,7 +83,10 @@ export function ArcArchivesPage() {
 
   useEffect(() => {
     const onMessage = (event: MessageEvent) => {
-      if (event.origin !== window.location.origin || event.data?.source !== 'arc-character-archives') {
+      if (
+        event.origin !== window.location.origin ||
+        event.data?.source !== 'arc-character-archives'
+      ) {
         return;
       }
       if (event.data.type === 'arc:dossier-saved' || event.data.type === 'arc:dossier-snapshot') {
@@ -110,7 +119,13 @@ export function ArcArchivesPage() {
     const normalized = query.trim().toLowerCase();
     if (!normalized) return sources;
     return sources.filter((source) =>
-      [source.title, source.kind, source.tags.join(' '), source.characterNames.join(' '), source.text]
+      [
+        source.title,
+        source.kind,
+        source.tags.join(' '),
+        source.characterNames.join(' '),
+        source.text,
+      ]
         .join(' ')
         .toLowerCase()
         .includes(normalized),
@@ -119,9 +134,16 @@ export function ArcArchivesPage() {
 
   const findings = useMemo(() => scanArcContinuity(characters, sources), [characters, sources]);
 
-  function openQuickLink(companionId: 'quill' | 'snow', initialDraft: string) {
+  function openQuickLink(
+    companionId: 'quill' | 'snow',
+    initialDraft: string,
+    participantIds?: CompanionId[],
+    roomKind?: AiConversationKind,
+  ) {
     window.dispatchEvent(
-      new CustomEvent('system:open-quick-link', { detail: { companionId, initialDraft } }),
+      new CustomEvent('system:open-quick-link', {
+        detail: { companionId, initialDraft, participantIds, roomKind },
+      }),
     );
   }
 
@@ -267,27 +289,40 @@ export function ArcArchivesPage() {
             <button
               className="button button--ghost"
               onClick={() =>
-                openQuickLink('snow', 'Snow, I want to talk A.R.C. spoilers with you and Quill. ')
+                openQuickLink(
+                  'snow',
+                  'Snow and Quill, open the spoiler table. I want to talk A.R.C. with both of you.',
+                  ['snow', 'quill'],
+                  'spoiler-room',
+                )
               }
             >
-              <Snowflake size={17} /> Spoiler link with Snow
+              <Snowflake size={17} /> Snow + Quill Spoiler Room
             </button>
           </div>
         </div>
         <div className="arc-hero__telemetry">
-          <span><strong>{characters.length}</strong> Characters</span>
-          <span><strong>{sources.length}</strong> Canon sources</span>
-          <span><strong>152</strong> Recorded Arts</span>
+          <span>
+            <strong>{characters.length}</strong> Characters
+          </span>
+          <span>
+            <strong>{sources.length}</strong> Canon sources
+          </span>
+          <span>
+            <strong>152</strong> Recorded Arts
+          </span>
         </div>
       </section>
 
       <nav className="arc-command-nav" aria-label="A.R.C. Archives views">
-        {([
-          ['library', LibraryBig, 'Character Library'],
-          ['forge', FileJson, 'Dossier Forge'],
-          ['vault', BookOpen, 'Canon Vault'],
-          ['continuity', BrainCircuit, 'Continuity Scan'],
-        ] as const).map(([id, Icon, label]) => (
+        {(
+          [
+            ['library', LibraryBig, 'Character Library'],
+            ['forge', FileJson, 'Dossier Forge'],
+            ['vault', BookOpen, 'Canon Vault'],
+            ['continuity', BrainCircuit, 'Continuity Scan'],
+          ] as const
+        ).map(([id, Icon, label]) => (
           <button key={id} className={view === id ? 'is-active' : ''} onClick={() => setView(id)}>
             <Icon size={17} />
             <span>{label}</span>
@@ -305,16 +340,28 @@ export function ArcArchivesPage() {
             <div>
               <span className="section-kicker">PRIVATE · ON-DEVICE</span>
               <h2>Character Library</h2>
-              <p>Import any v4 or legacy A.R.C. JSON. Existing names update instead of multiplying.</p>
+              <p>
+                Import any v4 or legacy A.R.C. JSON. Existing names update instead of multiplying.
+              </p>
             </div>
             <label className="button">
               <Upload size={17} /> Import dossiers
-              <input type="file" accept=".json,application/json" multiple hidden onChange={importDossiers} />
+              <input
+                type="file"
+                accept=".json,application/json"
+                multiple
+                hidden
+                onChange={importDossiers}
+              />
             </label>
           </header>
           <label className="arc-search">
             <Search size={17} />
-            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search name, alias, Style, faction, or Class…" />
+            <input
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Search name, alias, Style, faction, or Class…"
+            />
           </label>
           {filteredCharacters.length ? (
             <div className="arc-character-grid">
@@ -327,9 +374,20 @@ export function ArcArchivesPage() {
                   <h3>{record.name}</h3>
                   <p>{record.alias || 'Alias not recorded'}</p>
                   <dl>
-                    <div><dt>Overall</dt><dd>{record.overallClass}</dd></div>
-                    <div><dt>Story path</dt><dd>{record.startingClass || '—'} → {record.endingClass || '—'}</dd></div>
-                    <div><dt>Faction</dt><dd>{record.faction || 'Unfiled'}</dd></div>
+                    <div>
+                      <dt>Overall</dt>
+                      <dd>{record.overallClass}</dd>
+                    </div>
+                    <div>
+                      <dt>Story path</dt>
+                      <dd>
+                        {record.startingClass || '—'} → {record.endingClass || '—'}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Faction</dt>
+                      <dd>{record.faction || 'Unfiled'}</dd>
+                    </div>
                   </dl>
                   <footer>
                     <button
@@ -342,9 +400,19 @@ export function ArcArchivesPage() {
                     >
                       <MessageCircleMore size={15} /> Review
                     </button>
-                    <button onClick={() => loadInForge(record)}><FileJson size={15} /> Open</button>
-                    <button onClick={() => downloadArcDossier(record)}><Download size={15} /> JSON</button>
-                    <button className="is-danger" onClick={() => void removeCharacter(record)} aria-label={`Remove ${record.name}`}><Trash2 size={15} /></button>
+                    <button onClick={() => loadInForge(record)}>
+                      <FileJson size={15} /> Open
+                    </button>
+                    <button onClick={() => downloadArcDossier(record)}>
+                      <Download size={15} /> JSON
+                    </button>
+                    <button
+                      className="is-danger"
+                      onClick={() => void removeCharacter(record)}
+                      aria-label={`Remove ${record.name}`}
+                    >
+                      <Trash2 size={15} />
+                    </button>
                   </footer>
                 </article>
               ))}
@@ -352,9 +420,15 @@ export function ArcArchivesPage() {
           ) : (
             <div className="arc-empty">
               <LibraryBig size={34} />
-              <h3>{characters.length ? 'No records match that signal.' : 'The shelves are ready.'}</h3>
-              <p>Import your existing character JSON files or create the first dossier in the Forge.</p>
-              <button className="button button--ghost" onClick={() => setView('forge')}>Open Dossier Forge</button>
+              <h3>
+                {characters.length ? 'No records match that signal.' : 'The shelves are ready.'}
+              </h3>
+              <p>
+                Import your existing character JSON files or create the first dossier in the Forge.
+              </p>
+              <button className="button button--ghost" onClick={() => setView('forge')}>
+                Open Dossier Forge
+              </button>
             </div>
           )}
         </section>
@@ -366,13 +440,32 @@ export function ArcArchivesPage() {
             <div>
               <span className="section-kicker">ORIGINAL A.R.C. ENGINE · SYSTEM LINKED</span>
               <h2>Dossier Forge + Arts Codex</h2>
-              <p>Build, preview, print to PDF, and save JSON exactly as before. Saving also updates the private Library.</p>
+              <p>
+                Build, preview, print to PDF, and save JSON exactly as before. Saving also updates
+                the private Library.
+              </p>
             </div>
             <div className="arc-forge-actions">
-              <button className="button button--ghost" onClick={() => frameRef.current?.contentWindow?.postMessage({ type: 'arc:open-codex' }, window.location.origin)}>
+              <button
+                className="button button--ghost"
+                onClick={() =>
+                  frameRef.current?.contentWindow?.postMessage(
+                    { type: 'arc:open-codex' },
+                    window.location.origin,
+                  )
+                }
+              >
                 <BookOpen size={17} /> 152-Art Codex
               </button>
-              <button className="button" onClick={() => frameRef.current?.contentWindow?.postMessage({ type: 'arc:request-dossier' }, window.location.origin)}>
+              <button
+                className="button"
+                onClick={() =>
+                  frameRef.current?.contentWindow?.postMessage(
+                    { type: 'arc:request-dossier' },
+                    window.location.origin,
+                  )
+                }
+              >
                 <Save size={17} /> Save to System Library
               </button>
             </div>
@@ -394,38 +487,114 @@ export function ArcArchivesPage() {
             <div>
               <span className="section-kicker">LOCAL RETRIEVAL · SOURCE-AWARE</span>
               <h2>Canon Vault</h2>
-              <p>Import Word, Text, Markdown, or JSON records. Quill retrieves only relevant sources and labels established canon, inference, and new ideas separately.</p>
+              <p>
+                Import Word, Text, Markdown, or JSON records. Quill retrieves only relevant sources
+                and labels established canon, inference, and new ideas separately.
+              </p>
             </div>
             <div className="arc-forge-actions">
               {sources.length > 0 && (
-                <button className="button button--ghost" onClick={() => downloadArcKnowledgePack(sources)}>
+                <button
+                  className="button button--ghost"
+                  onClick={() => downloadArcKnowledgePack(sources)}
+                >
                   <Download size={17} /> Export Knowledge Pack
                 </button>
               )}
               <label className="button">
                 <FilePlus2 size={17} /> Import lore files
-                <input type="file" accept=".docx,.txt,.md,.json,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,text/markdown,application/json" multiple hidden onChange={importCanon} />
+                <input
+                  type="file"
+                  accept=".docx,.txt,.md,.json,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,text/markdown,application/json"
+                  multiple
+                  hidden
+                  onChange={importCanon}
+                />
               </label>
             </div>
           </header>
           <div className="arc-vault-layout">
             <div className="arc-source-form">
               <h3>File a canon source</h3>
-              <label>Title<input value={sourceTitle} onChange={(event) => setSourceTitle(event.target.value)} placeholder="The Origin of Nature Energy" /></label>
-              <label>Record type<select value={sourceKind} onChange={(event) => setSourceKind(event.target.value as ArcCanonSourceKind)}>{SOURCE_KINDS.map((kind) => <option key={kind.value} value={kind.value}>{kind.label}</option>)}</select></label>
-              <label>Tags<input value={sourceTags} onChange={(event) => setSourceTags(event.target.value)} placeholder="Brigade, Nature Energy, Volume 1" /></label>
-              <label>Characters named<input value={sourceCharacters} onChange={(event) => setSourceCharacters(event.target.value)} placeholder="Laz, Lucius, Fleur" /></label>
-              <label>Canon text<textarea value={sourceText} onChange={(event) => setSourceText(event.target.value)} rows={10} placeholder="Paste the authoritative record here…" /></label>
-              <button className="button" onClick={() => void addManualSource()}><ShieldCheck size={17} /> Secure source</button>
+              <label>
+                Title
+                <input
+                  value={sourceTitle}
+                  onChange={(event) => setSourceTitle(event.target.value)}
+                  placeholder="The Origin of Nature Energy"
+                />
+              </label>
+              <label>
+                Record type
+                <select
+                  value={sourceKind}
+                  onChange={(event) => setSourceKind(event.target.value as ArcCanonSourceKind)}
+                >
+                  {SOURCE_KINDS.map((kind) => (
+                    <option key={kind.value} value={kind.value}>
+                      {kind.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                Tags
+                <input
+                  value={sourceTags}
+                  onChange={(event) => setSourceTags(event.target.value)}
+                  placeholder="Brigade, Nature Energy, Volume 1"
+                />
+              </label>
+              <label>
+                Characters named
+                <input
+                  value={sourceCharacters}
+                  onChange={(event) => setSourceCharacters(event.target.value)}
+                  placeholder="Laz, Lucius, Fleur"
+                />
+              </label>
+              <label>
+                Canon text
+                <textarea
+                  value={sourceText}
+                  onChange={(event) => setSourceText(event.target.value)}
+                  rows={10}
+                  placeholder="Paste the authoritative record here…"
+                />
+              </label>
+              <button className="button" onClick={() => void addManualSource()}>
+                <ShieldCheck size={17} /> Secure source
+              </button>
             </div>
             <div className="arc-source-list">
-              <label className="arc-search"><Search size={17} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search the Canon Vault…" /></label>
+              <label className="arc-search">
+                <Search size={17} />
+                <input
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Search the Canon Vault…"
+                />
+              </label>
               {filteredSources.map((source) => (
                 <article key={source.id}>
-                  <header><span>{source.kind.replace('-', ' ')}</span><button onClick={() => void removeSource(source)} aria-label={`Remove ${source.title}`}><Trash2 size={14} /></button></header>
+                  <header>
+                    <span>{source.kind.replace('-', ' ')}</span>
+                    <button
+                      onClick={() => void removeSource(source)}
+                      aria-label={`Remove ${source.title}`}
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </header>
                   <h3>{source.title}</h3>
-                  <p>{source.text.slice(0, 260)}{source.text.length > 260 ? '…' : ''}</p>
-                  <small>{[...source.tags, ...source.characterNames].slice(0, 8).join(' · ') || 'No index tags yet'}</small>
+                  <p>
+                    {source.text.slice(0, 260)}
+                    {source.text.length > 260 ? '…' : ''}
+                  </p>
+                  <small>
+                    {[...source.tags, ...source.characterNames].slice(0, 8).join(' · ') ||
+                      'No index tags yet'}
+                  </small>
                   <footer className="arc-source-actions">
                     <button
                       onClick={() =>
@@ -440,7 +609,16 @@ export function ArcArchivesPage() {
                   </footer>
                 </article>
               ))}
-              {!filteredSources.length && <div className="arc-empty arc-empty--compact"><BookOpen size={28} /><h3>No canon sources filed yet.</h3><p>Modern Word (.docx), Text, Markdown, JSON, and single-file Quill Knowledge Packs are supported.</p></div>}
+              {!filteredSources.length && (
+                <div className="arc-empty arc-empty--compact">
+                  <BookOpen size={28} />
+                  <h3>No canon sources filed yet.</h3>
+                  <p>
+                    Modern Word (.docx), Text, Markdown, JSON, and single-file Quill Knowledge Packs
+                    are supported.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </section>
@@ -452,23 +630,46 @@ export function ArcArchivesPage() {
             <div>
               <span className="section-kicker">ARCHIVE INTEGRITY · NON-DESTRUCTIVE</span>
               <h2>Continuity Scanner</h2>
-              <p>The scanner flags gaps and collisions. It never rewrites canon; Quill proposes and you decide.</p>
+              <p>
+                The scanner flags gaps and collisions. It never rewrites canon; Quill proposes and
+                you decide.
+              </p>
             </div>
-            <button className="button" onClick={() => openQuickLink('quill', `Quill, run a deep continuity review of the ${characters.length} dossiers and ${sources.length} canon sources in my Archives. Cite each record you rely on, distinguish contradictions from open questions, and do not change canon. `)}>
+            <button
+              className="button"
+              onClick={() =>
+                openQuickLink(
+                  'quill',
+                  `Quill, run a deep continuity review of the ${characters.length} dossiers and ${sources.length} canon sources in my Archives. Cite each record you rely on, distinguish contradictions from open questions, and do not change canon. `,
+                )
+              }
+            >
               <BrainCircuit size={17} /> Deep review with Quill
             </button>
           </header>
           <div className="arc-findings">
             {findings.map((finding, index) => (
               <article key={`${finding.title}-${index}`} data-level={finding.level}>
-                <span>{finding.level === 'clear' ? <CheckCircle2 size={19} /> : <Sparkles size={19} />}</span>
-                <div><small>{finding.level}</small><h3>{finding.title}</h3><p>{finding.detail}</p></div>
+                <span>
+                  {finding.level === 'clear' ? <CheckCircle2 size={19} /> : <Sparkles size={19} />}
+                </span>
+                <div>
+                  <small>{finding.level}</small>
+                  <h3>{finding.title}</h3>
+                  <p>{finding.detail}</p>
+                </div>
               </article>
             ))}
           </div>
           <aside className="arc-truth-protocol">
             <ShieldCheck size={24} />
-            <div><h3>Canon Truth Protocol</h3><p>Established facts require a named local source. Inferences are labeled. New ideas remain proposals until you approve and file them. No companion silently edits A.R.C.</p></div>
+            <div>
+              <h3>Canon Truth Protocol</h3>
+              <p>
+                Established facts require a named local source. Inferences are labeled. New ideas
+                remain proposals until you approve and file them. No companion silently edits A.R.C.
+              </p>
+            </div>
           </aside>
         </section>
       )}

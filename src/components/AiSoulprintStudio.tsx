@@ -159,7 +159,8 @@ export function AiSoulprintStudio({
         <span>
           <strong>Soulprint Studio</strong>
           <small>
-            Your Director's Notes · {authoredCount}/10 companion{authoredCount === 1 ? '' : 's'}
+            Your Director's Notes · {authoredCount}/{COMPANIONS.length} companion
+            {authoredCount === 1 ? '' : 's'}
           </small>
         </span>
         <ChevronDown size={17} />
