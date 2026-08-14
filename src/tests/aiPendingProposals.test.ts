@@ -65,6 +65,25 @@ describe('persistent AI action previews', () => {
       ],
       [
         reply({
+          missionProposal: {
+            action: 'create',
+            missionId: '',
+            title: 'One clean production block',
+            description: 'Record one honest session and preserve the strongest moment.',
+            category: 'creator',
+            companionId: 'haven',
+            difficulty: 'standard',
+            dueDate: '2026-08-15',
+            recurrence: 'none',
+            recurrenceInterval: 1,
+            checklistItems: ['Record the session', 'Mark one usable moment'],
+            confirmation: 'Forge this separate Companion Order?',
+          },
+        }),
+        'mission',
+      ],
+      [
+        reply({
           recipeProposal: {
             name: 'Test Bowl',
             codename: 'Clean Flame',

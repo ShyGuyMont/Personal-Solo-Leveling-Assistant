@@ -20,6 +20,12 @@ export type AiPendingProposal =
       payload: NonNullable<AiHeadquartersReply['operationProposal']>;
     }
   | {
+      kind: 'mission';
+      ownerId: CompanionId;
+      createdAt: string;
+      payload: NonNullable<AiHeadquartersReply['missionProposal']>;
+    }
+  | {
       kind: 'recipe';
       ownerId: 'saffron';
       createdAt: string;
@@ -87,6 +93,14 @@ export function extractAiPendingProposal(
       payload: result.operationProposal,
     };
   }
+  if (result.missionProposal) {
+    return {
+      kind: 'mission',
+      ownerId: result.missionProposal.companionId,
+      createdAt,
+      payload: result.missionProposal,
+    };
+  }
   if (result.recipeProposal) {
     return { kind: 'recipe', ownerId: 'saffron', createdAt, payload: result.recipeProposal };
   }
@@ -130,6 +144,7 @@ function isPendingProposal(value: unknown): value is AiPendingProposal {
     [
       'command',
       'operation',
+      'mission',
       'recipe',
       'content',
       'campaign',

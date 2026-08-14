@@ -237,7 +237,7 @@ export async function applyCreatorProjectUpdate(input: {
   if (!project) throw new Error('That Creator Forge operation no longer exists.');
   const note = cleanText(input.notesAppend, 1_500);
   const notes = note
-    ? [project.notes.trim(), `[Vesper update Â· ${new Date().toLocaleDateString()}] ${note}`]
+    ? [project.notes.trim(), `[Vesper update · ${new Date().toLocaleDateString()}] ${note}`]
         .filter(Boolean)
         .join('\n\n')
         .slice(0, 4_000)

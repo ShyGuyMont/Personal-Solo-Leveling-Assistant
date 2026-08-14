@@ -6,16 +6,19 @@ import {
   Eye,
   EyeOff,
   Landmark,
+  Pencil,
   PiggyBank,
   Plus,
   ReceiptText,
   ShieldCheck,
   Trash2,
   UtensilsCrossed,
+  WalletCards,
 } from 'lucide-react';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { getCompanion, getCompanionImage } from '@/config/companions';
 import {
+  addTreasuryAccount,
   addTreasuryBill,
   addTreasuryDebt,
   addTreasuryExpense,
@@ -30,11 +33,13 @@ import {
   recordSavingsContribution,
   saveTreasuryWeekPlan,
   updateTreasuryChallengeSettings,
+  updateTreasuryAccount,
 } from '@/game/treasury';
 import { Link } from '@/router';
 import { useGameStore } from '@/store/useGameStore';
 import type {
   LocalDateKey,
+  TreasuryAccount,
   TreasuryBill,
   TreasuryDebt,
   TreasuryExpenseCategory,
@@ -42,11 +47,12 @@ import type {
   TreasuryTransaction,
 } from '@/types/game';
 
-type Tab = 'command' | 'ledger' | 'bills' | 'debt' | 'savings' | 'review';
+type Tab = 'command' | 'accounts' | 'ledger' | 'bills' | 'debt' | 'savings' | 'review';
 type DashboardData = Awaited<ReturnType<typeof getTreasuryDashboard>>;
 
 const TABS: Array<{ id: Tab; label: string }> = [
   { id: 'command', label: 'Command' },
+  { id: 'accounts', label: 'Accounts' },
   { id: 'ledger', label: 'Ledger' },
   { id: 'bills', label: 'Bills' },
   { id: 'debt', label: 'Debt' },
@@ -241,6 +247,9 @@ export function TreasuryPage() {
           act={act}
         />
       )}
+      {tab === 'accounts' && (
+        <AccountsTab accounts={data.accounts} hidden={hidden} busy={busy} act={act} />
+      )}
       {tab === 'bills' && (
         <BillsTab date={systemDate} bills={data.bills} hidden={hidden} busy={busy} act={act} />
       )}
@@ -301,7 +310,6 @@ function CommandTab({
   const totalDebt = data.debts
     .filter((item) => item.active)
     .reduce((sum, item) => sum + item.balanceCents, 0);
-  const saved = data.savingsGoals.reduce((sum, item) => sum + item.currentCents, 0);
   const stabilityAccent =
     summary.stabilityScore >= 80 ? '#43e6c2' : summary.stabilityScore >= 60 ? '#f4c95d' : '#ff795f';
   return (
@@ -324,12 +332,34 @@ function CommandTab({
           <small>{dollars(summary.diningCents, hidden)} dining</small>
         </article>
         <article className="panel">
-          <span>Future directed</span>
-          <strong>{dollars(summary.debtPaidCents + summary.savingsCents, hidden)}</strong>
+          <span>Known net worth</span>
+          <strong>{dollars(data.netWorthCents, hidden)}</strong>
           <small>
-            {dollars(totalDebt, hidden)} debt · {dollars(saved, hidden)} saved
+            {data.accounts.filter((item) => item.active && item.includeInNetWorth).length} assets ·{' '}
+            {dollars(totalDebt, hidden)} debt
           </small>
         </article>
+      </section>
+
+      <section className="panel treasury-forecast-strip">
+        <div>
+          <span>Monthly recurring bills</span>
+          <strong>{dollars(data.monthlyObligationsCents, hidden)}</strong>
+        </div>
+        <div>
+          <span>Debt minimums</span>
+          <strong>{dollars(data.minimumDebtPaymentsCents, hidden)}</strong>
+        </div>
+        <div>
+          <span>Known monthly floor</span>
+          <strong>
+            {dollars(data.monthlyObligationsCents + data.minimumDebtPaymentsCents, hidden)}
+          </strong>
+        </div>
+        <p>
+          Planning signal only. Cassian never assumes a bill is paid or a balance changed until the
+          matching record is confirmed.
+        </p>
       </section>
 
       <ChallengeCard
@@ -499,6 +529,158 @@ function ChallengeCard({
         )}
       </div>
     </section>
+  );
+}
+
+function AccountsTab({
+  accounts,
+  hidden,
+  busy,
+  act,
+}: {
+  accounts: TreasuryAccount[];
+  hidden: boolean;
+  busy: boolean;
+  act: (action: () => Promise<unknown>) => Promise<void>;
+}) {
+  const [name, setName] = useState('');
+  const [kind, setKind] = useState<TreasuryAccount['kind']>('checking');
+  const [balance, setBalance] = useState('');
+  const [include, setInclude] = useState(true);
+  const [editingId, setEditingId] = useState<string>();
+  const [editingBalance, setEditingBalance] = useState('');
+  const active = accounts.filter((item) => item.active);
+  const total = active
+    .filter((item) => item.includeInNetWorth)
+    .reduce((sum, item) => sum + item.balanceCents, 0);
+
+  return (
+    <div className="treasury-two-column">
+      <form
+        className="panel treasury-form"
+        onSubmit={(event) => {
+          event.preventDefault();
+          void act(async () => {
+            await addTreasuryAccount({
+              name,
+              kind,
+              balanceCents: cents(balance),
+              includeInNetWorth: include,
+            });
+            setName('');
+            setBalance('');
+          });
+        }}
+      >
+        <div className="treasury-section-heading">
+          <div>
+            <p className="eyebrow">BALANCE MAP</p>
+            <h2>Add an account</h2>
+          </div>
+          <WalletCards size={20} />
+        </div>
+        <label>
+          <span>Account name</span>
+          <input value={name} onChange={(event) => setName(event.target.value)} required />
+        </label>
+        <label>
+          <span>Account type</span>
+          <select
+            value={kind}
+            onChange={(event) => setKind(event.target.value as TreasuryAccount['kind'])}
+          >
+            {(['checking', 'savings', 'cash', 'investment', 'property', 'other'] as const).map(
+              (item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ),
+            )}
+          </select>
+        </label>
+        <MoneyInput label="Current balance" value={balance} onChange={setBalance} />
+        <label className="treasury-check">
+          <input
+            type="checkbox"
+            checked={include}
+            onChange={(event) => setInclude(event.target.checked)}
+          />
+          <span>Include this balance in net worth</span>
+        </label>
+        <button className="button button--primary" disabled={busy}>
+          <Plus size={16} /> Add account
+        </button>
+        <p className="treasury-form__note">
+          Manual balance snapshots only. The System never connects to your bank or moves money.
+        </p>
+      </form>
+
+      <section className="panel treasury-list-panel">
+        <div className="treasury-section-heading">
+          <div>
+            <p className="eyebrow">KNOWN ASSETS</p>
+            <h2>{dollars(total, hidden)}</h2>
+          </div>
+          <span>{active.length} active</span>
+        </div>
+        <div className="treasury-record-list treasury-account-list">
+          {active.length ? (
+            active.map((account) => (
+              <article key={account.id}>
+                <span className="treasury-record-icon is-savings">
+                  <WalletCards size={18} />
+                </span>
+                <div>
+                  <strong>{account.name}</strong>
+                  <small>
+                    {account.kind}
+                    {!account.includeInNetWorth ? ' · excluded from net worth' : ''}
+                  </small>
+                </div>
+                {editingId === account.id ? (
+                  <div className="treasury-account-edit">
+                    <input
+                      inputMode="decimal"
+                      value={editingBalance}
+                      onChange={(event) => setEditingBalance(event.target.value)}
+                      aria-label={`New balance for ${account.name}`}
+                    />
+                    <button
+                      aria-label={`Save ${account.name} balance`}
+                      disabled={busy}
+                      onClick={() =>
+                        void act(async () => {
+                          await updateTreasuryAccount(account.id, {
+                            balanceCents: cents(editingBalance),
+                          });
+                          setEditingId(undefined);
+                        })
+                      }
+                    >
+                      <Check size={15} />
+                    </button>
+                  </div>
+                ) : (
+                  <b>{dollars(account.balanceCents, hidden)}</b>
+                )}
+                <button
+                  aria-label={`Edit ${account.name} balance`}
+                  disabled={busy}
+                  onClick={() => {
+                    setEditingId(account.id);
+                    setEditingBalance(String(account.balanceCents / 100));
+                  }}
+                >
+                  <Pencil size={15} />
+                </button>
+              </article>
+            ))
+          ) : (
+            <div className="treasury-empty">No account snapshots yet.</div>
+          )}
+        </div>
+      </section>
+    </div>
   );
 }
 

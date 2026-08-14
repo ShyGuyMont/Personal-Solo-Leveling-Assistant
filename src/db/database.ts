@@ -1,6 +1,7 @@
 import Dexie, { type EntityTable } from 'dexie';
 import type {
   AccountProgression,
+  AgentMission,
   Achievement,
   AiConversation,
   AiRelationshipMemory,
@@ -32,6 +33,7 @@ import type {
   LevelHistory,
   MissionDefinition,
   InventoryItem,
+  IntegrityShieldProfile,
   Profile,
   ProgressionEvent,
   CompanionReaction,
@@ -48,6 +50,7 @@ import type {
   StatTransaction,
   StreakRecord,
   TreasuryBill,
+  TreasuryAccount,
   TreasuryDailyChallenge,
   TreasuryDebt,
   TreasurySavingsGoal,
@@ -66,6 +69,7 @@ export class SystemDatabase extends Dexie {
   settings!: EntityTable<Settings, 'id'>;
   missions!: EntityTable<MissionDefinition, 'id'>;
   dailyMissions!: EntityTable<DailyMissionRecord, 'id'>;
+  agentMissions!: EntityTable<AgentMission, 'id'>;
   dailyReviews!: EntityTable<DailyReview, 'id'>;
   progression!: EntityTable<AccountProgression, 'id'>;
   stats!: EntityTable<StatProgress, 'id'>;
@@ -99,6 +103,7 @@ export class SystemDatabase extends Dexie {
   companionQuestProgress!: EntityTable<CompanionQuestProgress, 'id'>;
   monthlyCouncils!: EntityTable<MonthlyCouncil, 'id'>;
   treasurySettings!: EntityTable<TreasurySettings, 'id'>;
+  treasuryAccounts!: EntityTable<TreasuryAccount, 'id'>;
   treasuryTransactions!: EntityTable<TreasuryTransaction, 'id'>;
   treasuryBills!: EntityTable<TreasuryBill, 'id'>;
   treasuryDebts!: EntityTable<TreasuryDebt, 'id'>;
@@ -120,6 +125,7 @@ export class SystemDatabase extends Dexie {
   creatorProjects!: EntityTable<CreatorProject, 'id'>;
   creatorVideoInsights!: EntityTable<CreatorVideoInsight, 'id'>;
   calendarEvents!: EntityTable<CalendarEvent, 'id'>;
+  integrityShields!: EntityTable<IntegrityShieldProfile, 'id'>;
   appMetadata!: EntityTable<AppMetadata, 'id'>;
 
   constructor(name = 'the-system-db') {
@@ -821,6 +827,33 @@ export class SystemDatabase extends Dexie {
         await metadata.put({ id: 'schema-seeded', value: 27, updatedAt: now });
         await metadata.put({ id: 'app-version', value: '8.0.0', updatedAt: now });
       });
+    this.version(28)
+      .stores({
+        agentMissions:
+          'id,status,companionId,category,dueDate,lastCompletedOn,updatedAt,[status+dueDate]',
+        treasuryAccounts: 'id,kind,active,updatedAt',
+        integrityShields: 'id,enabled,enforcement,updatedAt',
+      })
+      .upgrade(async (transaction) => {
+        const now = new Date().toISOString();
+        const shields = transaction.table<IntegrityShieldProfile, string>('integrityShields');
+        await shields.put({
+          id: 'primary',
+          enabled: false,
+          enforcement: 'not-configured',
+          adultWebLimitEnabled: false,
+          restrictedSitesConfigured: false,
+          settingsPasscodeProtected: false,
+          accountabilityEnabled: true,
+          interruptionPlan:
+            'Close the current screen, move to a shared space, take ten slow breaths, and contact a trusted person if the pull remains strong.',
+          createdAt: now,
+          updatedAt: now,
+        });
+        const metadata = transaction.table<AppMetadata, string>('appMetadata');
+        await metadata.put({ id: 'schema-seeded', value: 28, updatedAt: now });
+        await metadata.put({ id: 'app-version', value: '9.0.0', updatedAt: now });
+      });
   }
 }
 
@@ -831,6 +864,7 @@ export const TABLE_NAMES = [
   'settings',
   'missions',
   'dailyMissions',
+  'agentMissions',
   'dailyReviews',
   'progression',
   'stats',
@@ -863,6 +897,7 @@ export const TABLE_NAMES = [
   'companionQuestProgress',
   'monthlyCouncils',
   'treasurySettings',
+  'treasuryAccounts',
   'treasuryTransactions',
   'treasuryBills',
   'treasuryDebts',
@@ -884,6 +919,7 @@ export const TABLE_NAMES = [
   'creatorProjects',
   'creatorVideoInsights',
   'calendarEvents',
+  'integrityShields',
   'appMetadata',
 ] as const;
 

@@ -11,7 +11,7 @@ export const YOUTUBE_READONLY_SCOPES = [
 
 const YOUTUBE_OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
 
-export const COMPANION_INTELLIGENCE_VERSION = 'sovereign-command-network-4';
+export const COMPANION_INTELLIGENCE_VERSION = 'sovereign-agent-engine-5';
 
 const COUNSEL_SIGNALS =
   /\b(?:world\s+class|class|rank|level|xp|progress|progression|forecast|how\s+long|timeline|pace|plan|strategy|strategize|analy[sz]e|compare|trade-?off|why|should\s+i|what\s+should|recommend|decision|prioriti[sz]e|streak|challenge|trial|discipline|balanced\s+stats?|youtube|channel|content|video|stream|hook|thumbnail|audience|creator|a\.?r\.?c\.?|arc|canon|dossier|lore|plot|character|worldbuild(?:ing)?|arts?\s+codex)\b/i;
@@ -672,7 +672,7 @@ export function buildCommandInstruction(commandMode, workload = 'conversation') 
   const focusedInstruction = buildFocusedWorkloadInstruction(workload, commandMode);
   if (focusedInstruction) return focusedInstruction;
   if (commandMode !== 'propose') {
-    return `Command Mode is disabled. Return handoff strings empty. Return creatorUpdate and arcNote strings empty and their arrays empty. Return command.actionId, command.summary, and command.confirmation as empty strings. Set command.companionId to snow. Return operation.kind, operation.trainingLocation, operation.foodConstraints, operation.sanctuaryMode, operation.primaryConcern, operation.secondaryConcern, operation.summary, and operation.confirmation as empty strings; set operation.companionId to snow and all three operation include flags to false. Return recipe.name and every other recipe string as empty, recipe numbers as 0, and recipe arrays empty. Return every content string as empty. Return campaign.name, campaign.strategy, and campaign.confirmation as empty strings, campaign.weeks as 0, and campaign.operations as an empty array. Return calendar strings, calendar.linkedCompanionId, and calendar.linkedRealm empty, calendar.allDay false, and calendar.recurrenceInterval 0.`;
+    return `Command Mode is disabled. Return handoff strings empty. Return creatorUpdate and arcNote strings empty and their arrays empty. Return command.actionId, command.summary, and command.confirmation as empty strings. Set command.companionId to snow. Return operation.kind, operation.trainingLocation, operation.foodConstraints, operation.sanctuaryMode, operation.primaryConcern, operation.secondaryConcern, operation.summary, and operation.confirmation as empty strings; set operation.companionId to snow and all three operation include flags to false. Return every mission string empty, mission.recurrenceInterval 0, and mission.checklistItems empty; set mission.companionId to snow. Return recipe.name and every other recipe string as empty, recipe numbers as 0, and recipe arrays empty. Return every content string as empty. Return campaign.name, campaign.strategy, and campaign.confirmation as empty strings, campaign.weeks as 0, and campaign.operations as an empty array. Return calendar strings, calendar.linkedCompanionId, and calendar.linkedRealm empty, calendar.allDay false, and calendar.recurrenceInterval 0.`;
   }
   return `Command Mode is active. The only actions you may prepare are listed in progressContext.commands.allowedActions.
 - If another enabled specialist clearly owns the requested work, use handoff instead of pretending the addressed companion can perform it. Set all handoff strings empty when no relay is needed. A handoff is read-only and never replaces the confirmation required by the specialist's eventual proposal.
@@ -692,6 +692,13 @@ export function buildCommandInstruction(commandMode, workload = 'conversation') 
 - Selah may return prepare-sanctuary when the Hunter asks her to prepare a Scripture session. Snow or the party may do this only as part of assemble-day. Ask for study versus stronghold and a primary concern when either is missing.
 - Never return an operation for a hypothetical question, ordinary advice, or a request merely to discuss options. Never combine operation with command, recipe, content, or campaign in the same response. Leave operation.kind empty when more information is required.
 - A confirmed operation may create or preload assignments, but it may not finish, fail, decline, delete, spend, award, or reset anything. Existing active work must be preserved rather than silently replaced.
+- Companion Orders are the separate optional mission layer in progressContext.companionOrders. They never rewrite, replace, delete, or change the XP of the original Daily Missions.
+- When the Hunter clearly asks a companion to assign, forge, add, or create a new mission, prepare mission.action create with a useful title, honest completion brief, one realm category, the responsible enabled companion, a fixed threat tier, optional due date, recurrence, and up to twelve concrete checklist steps. Threat tier determines reward locally; never promise or invent a custom XP amount.
+- For update, complete, reopen, or retire, copy missionId exactly from progressContext.companionOrders.active. Never guess an ID or substitute a similarly named order. The assigned companion, Snow, or Party Council may manage it; another specialist should hand off to its owner.
+- For update, return only the fields the Hunter explicitly asked to change. Leave every unchanged mission string empty, recurrenceInterval 0, and checklistItems empty; the local engine preserves the existing values. Do not smuggle extra changes into an update.
+- A recurring order may be daily, weekly, or monthly. recurrenceInterval is 1 to 12. One-time orders use none. Ask one concise follow-up when the Hunter's requested outcome is too vague to define an honest clear.
+- Every Companion Order mutation is only a preview. The reply and mission.confirmation must name the exact effect and wait for the Hunter's visible confirmation. Never combine mission with command, operation, recipe, content, campaign, calendar, creatorUpdate, or arcNote.
+- If no Companion Order should be proposed, return every mission string empty, mission.recurrenceInterval 0, and mission.checklistItems empty; set mission.companionId to the addressed companion.
 - Saffron may also prepare one complete recipe for the Private Grimoire when the Hunter clearly asks Saffron or the Party to create, add, or save a recipe and supplies enough direction to make a useful draft. This is separate from command.actionId and still requires confirmation.
 - A recipe draft must contain concrete quantities, ordered steps, equipment, storage guidance, and conservative food-safety guidance. Do not invent an allergy, dietary restriction, ingredient availability, or medical claim. Use progressContext.kitchen.savedRecipeNames to avoid duplicates.
 - When the Hunter asks to walk through today's Kitchen Order, use progressContext.kitchen.todayOrder exactly, keep track of the current step through recentConversation, answer interruptions naturally, and do not create a new recipe unless asked.
@@ -890,6 +897,48 @@ const responseSchema = {
       ],
       additionalProperties: false,
     },
+    mission: {
+      type: 'object',
+      properties: {
+        action: {
+          type: 'string',
+          enum: ['', 'create', 'update', 'complete', 'reopen', 'retire'],
+        },
+        missionId: { type: 'string', maxLength: 200 },
+        title: { type: 'string', maxLength: 120 },
+        description: { type: 'string', maxLength: 1200 },
+        category: {
+          type: 'string',
+          enum: ['', 'faith', 'discipline', 'physical', 'creator', 'character'],
+        },
+        companionId: { type: 'string', enum: companionIds },
+        difficulty: { type: 'string', enum: ['', 'minor', 'standard', 'major', 'boss'] },
+        dueDate: { type: 'string', maxLength: 10 },
+        recurrence: { type: 'string', enum: ['', 'none', 'daily', 'weekly', 'monthly'] },
+        recurrenceInterval: { type: 'integer', minimum: 0, maximum: 12 },
+        checklistItems: {
+          type: 'array',
+          maxItems: 12,
+          items: { type: 'string', minLength: 1, maxLength: 160 },
+        },
+        confirmation: { type: 'string', maxLength: 320 },
+      },
+      required: [
+        'action',
+        'missionId',
+        'title',
+        'description',
+        'category',
+        'companionId',
+        'difficulty',
+        'dueDate',
+        'recurrence',
+        'recurrenceInterval',
+        'checklistItems',
+        'confirmation',
+      ],
+      additionalProperties: false,
+    },
     recipe: {
       type: 'object',
       properties: {
@@ -1084,6 +1133,7 @@ const responseSchema = {
     'arcNote',
     'command',
     'operation',
+    'mission',
     'recipe',
     'content',
     'campaign',
@@ -2848,6 +2898,117 @@ async function handleAiChat(request, env, url) {
             confirmation: operation.confirmation.trim().slice(0, 240),
           }
         : undefined;
+    const mission = isObject(result.mission) ? result.mission : undefined;
+    const missionActions = new Set(['create', 'update', 'complete', 'reopen', 'retire']);
+    const missionCategories = new Set(['faith', 'discipline', 'physical', 'creator', 'character']);
+    const missionDifficulties = new Set(['minor', 'standard', 'major', 'boss']);
+    const missionRecurrences = new Set(['none', 'daily', 'weekly', 'monthly']);
+    const knownAgentMissions = Array.isArray(payload.context?.companionOrders?.active)
+      ? payload.context.companionOrders.active.filter(
+          (entry) =>
+            isObject(entry) &&
+            typeof entry.id === 'string' &&
+            typeof entry.companionId === 'string',
+        )
+      : [];
+    const missionAction = mission?.action;
+    const requestedMissionId = String(mission?.missionId ?? '').trim();
+    const knownMission = knownAgentMissions.find((entry) => entry.id === requestedMissionId);
+    const missionCompanionId = String(
+      missionAction === 'create' ? (mission?.companionId ?? '') : (knownMission?.companionId ?? ''),
+    );
+    const missionOwnerAllowed =
+      companionIds.includes(missionCompanionId) &&
+      enabledCompanionIds.includes(missionCompanionId) &&
+      (payload.audience === 'party' ||
+        payload.audience === 'snow' ||
+        payload.audience === missionCompanionId);
+    const missionDueDate = String(mission?.dueDate ?? '').trim();
+    const missionChecklist = Array.isArray(mission?.checklistItems)
+      ? [
+          ...new Set(mission.checklistItems.map((item) => String(item).trim()).filter(Boolean)),
+        ].slice(0, 12)
+      : [];
+    const createMissionValid =
+      missionAction === 'create' &&
+      !requestedMissionId &&
+      typeof mission?.title === 'string' &&
+      mission.title.trim() &&
+      missionCategories.has(mission.category) &&
+      missionDifficulties.has(mission.difficulty) &&
+      missionRecurrences.has(mission.recurrence) &&
+      Number.isInteger(mission.recurrenceInterval) &&
+      mission.recurrenceInterval >= 1 &&
+      mission.recurrenceInterval <= 12;
+    const existingMissionValid =
+      missionAction !== 'create' && Boolean(knownMission) && Boolean(requestedMissionId);
+    const existingMissionActionValid =
+      existingMissionValid &&
+      (missionAction === 'update' ||
+        missionAction === 'retire' ||
+        (missionAction === 'complete' &&
+          knownMission.status === 'active' &&
+          !knownMission.completedToday &&
+          Number(knownMission.checklistRemaining) === 0) ||
+        (missionAction === 'reopen' && knownMission.completedToday === true));
+    const missionProposal =
+      payload.commandMode === 'propose' &&
+      mission &&
+      missionActions.has(missionAction) &&
+      missionOwnerAllowed &&
+      (createMissionValid || existingMissionActionValid) &&
+      (!missionDueDate || /^\d{4}-\d{2}-\d{2}$/.test(missionDueDate)) &&
+      typeof mission.confirmation === 'string' &&
+      mission.confirmation.trim()
+        ? {
+            action: missionAction,
+            missionId: requestedMissionId,
+            title:
+              missionAction === 'create'
+                ? mission.title.trim().slice(0, 120)
+                : String(
+                    missionAction === 'update' && String(mission.title ?? '').trim()
+                      ? mission.title
+                      : (knownMission?.title ?? ''),
+                  )
+                    .trim()
+                    .slice(0, 120),
+            description: String(
+              missionAction === 'create' ||
+                (missionAction === 'update' && String(mission.description ?? '').trim())
+                ? (mission.description ?? '')
+                : (knownMission?.description ?? ''),
+            )
+              .trim()
+              .slice(0, 1_200),
+            category: missionCategories.has(mission.category)
+              ? mission.category
+              : (knownMission?.category ?? ''),
+            companionId: missionCompanionId,
+            difficulty: missionDifficulties.has(mission.difficulty)
+              ? mission.difficulty
+              : (knownMission?.difficulty ?? 'standard'),
+            dueDate:
+              missionAction === 'create' ||
+              (missionAction === 'update' && /^\d{4}-\d{2}-\d{2}$/.test(missionDueDate))
+                ? missionDueDate
+                : String(knownMission?.dueDate ?? ''),
+            recurrence: missionRecurrences.has(mission.recurrence)
+              ? mission.recurrence
+              : (knownMission?.recurrence ?? 'none'),
+            recurrenceInterval:
+              Number.isInteger(mission.recurrenceInterval) && mission.recurrenceInterval >= 1
+                ? mission.recurrenceInterval
+                : Number(knownMission?.recurrenceInterval) || 1,
+            checklistItems:
+              missionAction === 'create' || missionChecklist.length
+                ? missionChecklist
+                : Array.isArray(knownMission?.checklistItems)
+                  ? knownMission.checklistItems.slice(0, 12)
+                  : [],
+            confirmation: mission.confirmation.trim().slice(0, 320),
+          }
+        : undefined;
     const recipe = isObject(result.recipe) ? result.recipe : undefined;
     const saffronCanPropose =
       payload.audience === 'saffron' ||
@@ -3091,19 +3252,29 @@ async function handleAiChat(request, env, url) {
       replies: result.replies.slice(0, payload.audience === 'party' ? 4 : 1),
       memoryCandidates,
       commandProposal:
-        operationProposal || calendarProposal || creatorUpdateProposal || arcNoteProposal
+        operationProposal ||
+        missionProposal ||
+        calendarProposal ||
+        creatorUpdateProposal ||
+        arcNoteProposal
           ? undefined
           : commandProposal,
       operationProposal:
-        calendarProposal || creatorUpdateProposal || arcNoteProposal
+        missionProposal || calendarProposal || creatorUpdateProposal || arcNoteProposal
           ? undefined
           : operationProposal,
+      missionProposal,
       recipeProposal:
-        operationProposal || calendarProposal || creatorUpdateProposal || arcNoteProposal
+        operationProposal ||
+        missionProposal ||
+        calendarProposal ||
+        creatorUpdateProposal ||
+        arcNoteProposal
           ? undefined
           : recipeProposal,
       contentProposal:
         operationProposal ||
+        missionProposal ||
         campaignProposal ||
         calendarProposal ||
         creatorUpdateProposal ||
@@ -3111,15 +3282,20 @@ async function handleAiChat(request, env, url) {
           ? undefined
           : contentProposal,
       campaignProposal:
-        operationProposal || calendarProposal || creatorUpdateProposal || arcNoteProposal
+        operationProposal ||
+        missionProposal ||
+        calendarProposal ||
+        creatorUpdateProposal ||
+        arcNoteProposal
           ? undefined
           : campaignProposal,
-      calendarProposal,
-      creatorUpdateProposal,
-      arcNoteProposal,
+      calendarProposal: missionProposal ? undefined : calendarProposal,
+      creatorUpdateProposal: missionProposal ? undefined : creatorUpdateProposal,
+      arcNoteProposal: missionProposal ? undefined : arcNoteProposal,
       handoffProposal:
         commandProposal ||
         operationProposal ||
+        missionProposal ||
         recipeProposal ||
         contentProposal ||
         campaignProposal ||

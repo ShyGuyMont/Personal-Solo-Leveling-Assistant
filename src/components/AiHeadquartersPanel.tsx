@@ -40,6 +40,13 @@ import {
   saveAiConversation,
 } from '@/game/aiHeadquarters';
 import { hasAiVoiceSummary } from '@/game/aiVoice';
+import {
+  completeAgentMission,
+  createAgentMission,
+  reopenAgentMission,
+  retireAgentMission,
+  updateAgentMission,
+} from '@/game/agentMissions';
 import { buildAiProgressContext } from '@/game/aiContext';
 import {
   clearPendingAiProposal,
@@ -75,7 +82,12 @@ import { useAiVoiceLink } from '@/hooks/useAiVoiceLink';
 import { formatClassName } from '@/utils/format';
 import { sanitizeSensitiveDisplayText } from '@/utils/privacy';
 import { scrollChatViewportToBottom } from '@/utils/scroll';
-import type { AiConversation, AiConversationAudience, AiRelationshipMemory } from '@/types/game';
+import type {
+  AiConversation,
+  AiConversationAudience,
+  AiRelationshipMemory,
+  LocalDateKey,
+} from '@/types/game';
 
 export function AiHeadquartersPanel() {
   const {
@@ -352,11 +364,10 @@ export function AiHeadquartersPanel() {
       return;
     }
     if (pendingProposal) {
-      if (pendingProposal.kind === 'operation') {
-        await cancelStagedCompanionOperation(systemDate);
-      }
-      await clearPendingAiProposal(currentConversation.id);
-      setPendingProposal(undefined);
+      setNotice(
+        'A prepared command is still waiting for your decision. Confirm or dismiss it before sending another message.',
+      );
+      return;
     }
     setSending(true);
     setNotice('');
@@ -547,6 +558,46 @@ export function AiHeadquartersPanel() {
         acknowledgement = record.preparationNotes.length
           ? `The preparation is saved with ${record.preparationNotes.length} visible flag${record.preparationNotes.length === 1 ? '' : 's'}. I preserved every existing assignment instead of forcing a replacement.${kitchenBoundary}`
           : `${prepared.join(', ')} ${prepared.length === 1 ? 'is' : 'are'} loaded in the proper section${prepared.length === 1 ? '' : 's'}. Nothing was completed and no XP was awarded.${kitchenBoundary}`;
+      } else if (pendingProposal.kind === 'mission') {
+        const proposal = pendingProposal.payload;
+        if (proposal.action === 'create') {
+          const mission = await createAgentMission({
+            title: proposal.title,
+            description: proposal.description,
+            category: proposal.category,
+            companionId: proposal.companionId,
+            createdBy: pendingProposal.ownerId,
+            source: pendingProposal.ownerId === 'snow' ? 'party' : 'companion',
+            difficulty: proposal.difficulty,
+            dueDate: (proposal.dueDate || undefined) as LocalDateKey | undefined,
+            recurrence: proposal.recurrence,
+            recurrenceInterval: proposal.recurrenceInterval,
+            checklistItems: proposal.checklistItems,
+          });
+          acknowledgement = `“${mission.title}” is now a real Companion Order under ${getCompanion(mission.companionId).name}. The original Daily Mission cycle was not changed.`;
+        } else if (proposal.action === 'update') {
+          const mission = await updateAgentMission(proposal.missionId, {
+            title: proposal.title || undefined,
+            description: proposal.description || undefined,
+            category: proposal.category || undefined,
+            companionId: proposal.companionId,
+            difficulty: proposal.difficulty,
+            dueDate: (proposal.dueDate || undefined) as LocalDateKey | undefined,
+            recurrence: proposal.recurrence,
+            recurrenceInterval: proposal.recurrenceInterval,
+            checklistItems: proposal.checklistItems,
+          });
+          acknowledgement = `“${mission.title}” is updated in Mission Forge. Its audit history remains intact.`;
+        } else if (proposal.action === 'complete') {
+          const result = await completeAgentMission(proposal.missionId, systemDate);
+          acknowledgement = `“${result.mission?.title ?? proposal.title}” is confirmed clear. ${result.awardedXp ? `${result.awardedXp} XP was applied after the local save.` : 'The clear was recorded after today’s Agent XP ceiling, so no additional XP was created.'}`;
+        } else if (proposal.action === 'reopen') {
+          const mission = await reopenAgentMission(proposal.missionId, systemDate);
+          acknowledgement = `“${mission?.title ?? proposal.title}” is reopened and today’s reward was reversed.`;
+        } else {
+          const mission = await retireAgentMission(proposal.missionId);
+          acknowledgement = `“${mission.title}” is retired without deleting its history.`;
+        }
       } else if (pendingProposal.kind === 'recipe') {
         const recipe = await saveCustomKitchenRecipe(pendingProposal.payload);
         acknowledgement = `${recipe.name} is now in the Private Grimoire and Daily Rotation. Open Kitchen whenever you want Saffron's full cooking checklist.`;
@@ -627,6 +678,14 @@ export function AiHeadquartersPanel() {
         eyebrow: 'PARTY OPERATION',
         title: proposal.payload.kind.replaceAll('-', ' '),
         summary: proposal.payload.summary,
+        confirmation: proposal.payload.confirmation,
+      };
+    }
+    if (proposal.kind === 'mission') {
+      return {
+        eyebrow: 'SOVEREIGN MISSION FORGE',
+        title: proposal.payload.title || 'Companion Order',
+        summary: `${proposal.payload.action} · ${getCompanion(proposal.payload.companionId).name} · ${proposal.payload.difficulty} threat`,
         confirmation: proposal.payload.confirmation,
       };
     }

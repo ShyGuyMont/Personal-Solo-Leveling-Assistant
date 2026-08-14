@@ -27,6 +27,25 @@ export interface AiProgressContext {
     availableMissions: number;
     pendingMissionNames: string[];
   };
+  companionOrders: {
+    dailyXpCap: number;
+    active: Array<{
+      id: string;
+      title: string;
+      description: string;
+      category: string;
+      companionId: CompanionId;
+      difficulty: string;
+      accountXp: number;
+      dueDate?: LocalDateKey;
+      recurrence: string;
+      recurrenceInterval: number;
+      status: string;
+      completedToday: boolean;
+      checklistRemaining: number;
+      checklistItems: string[];
+    }>;
+  };
   progression: {
     totalXp: number;
     currentLevelXp: number;
@@ -194,6 +213,14 @@ export interface AiProgressContext {
         outcome?: string;
       }>;
       privateWritingExcluded: true;
+      integrityShield?: {
+        trackingEnabled: boolean;
+        enforcement: string;
+        adultWebLimitEnabled: boolean;
+        restrictedSitesConfigured: boolean;
+        settingsPasscodeProtected: boolean;
+        lastVerifiedAt?: string;
+      };
     };
     training: {
       bodyDiagnostic: {
@@ -360,6 +387,10 @@ export interface AiProgressContext {
         activeSavingsGoalCount: number;
         savingsCurrentCents: number;
         savingsTargetCents: number;
+        accountCount: number;
+        accountAssetsCents: number;
+        knownNetWorthCents: number;
+        monthlyRecurringBillsCents: number;
       };
     };
   };
@@ -425,6 +456,20 @@ export interface AiHeadquartersReply {
     confirmation: string;
   };
   operationProposal?: CompanionOperationRequest;
+  missionProposal?: {
+    action: 'create' | 'update' | 'complete' | 'reopen' | 'retire';
+    missionId: string;
+    title: string;
+    description: string;
+    category: 'faith' | 'discipline' | 'physical' | 'creator' | 'character';
+    companionId: CompanionId;
+    difficulty: 'minor' | 'standard' | 'major' | 'boss';
+    dueDate: string;
+    recurrence: 'none' | 'daily' | 'weekly' | 'monthly';
+    recurrenceInterval: number;
+    checklistItems: string[];
+    confirmation: string;
+  };
   recipeProposal?: {
     name: string;
     codename: string;
@@ -765,6 +810,10 @@ export async function requestAiHeadquartersReply(input: {
                 ? (payload.operationProposal as Record<string, unknown>).includeTraining
                 : Boolean((payload.operationProposal as Record<string, unknown>).trainingLocation),
           } as AiHeadquartersReply['operationProposal'])
+        : undefined,
+    missionProposal:
+      payload.missionProposal && typeof payload.missionProposal === 'object'
+        ? (payload.missionProposal as AiHeadquartersReply['missionProposal'])
         : undefined,
     recipeProposal:
       payload.recipeProposal && typeof payload.recipeProposal === 'object'

@@ -1,6 +1,7 @@
 import { Filter, ListChecks } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { MissionCard } from '@/components/MissionCard';
+import { AgentMissionBoard } from '@/components/AgentMissionBoard';
 import { ProgressBar } from '@/components/ProgressBar';
 import { CATEGORY_LABELS } from '@/config/missions';
 import { getActiveMissions } from '@/game/engine';
@@ -8,7 +9,7 @@ import { useGameStore } from '@/store/useGameStore';
 import type { MissionCategory, MissionStatus } from '@/types/game';
 
 export function MissionsPage() {
-  const { missions, todayRecords, settings, systemDate } = useGameStore();
+  const { missions, todayRecords, settings, systemDate, refresh } = useGameStore();
   const [filter, setFilter] = useState<MissionStatus | 'all'>('all');
   const active = useMemo(
     () => (settings ? getActiveMissions(missions, settings, systemDate) : []),
@@ -54,6 +55,13 @@ export function MissionsPage() {
           ))}
         </div>
       </section>
+      {settings && (
+        <AgentMissionBoard
+          systemDate={systemDate}
+          enabledCompanionIds={settings.enabledCompanionIds}
+          onProgressionChanged={refresh}
+        />
+      )}
       <div className="mission-groups">
         {categories.map((category) => {
           const categoryMissions = active.filter((mission) => {

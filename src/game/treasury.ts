@@ -7,6 +7,7 @@ import { addDays, startOfWeek } from '@/utils/date';
 import { stableId } from '@/utils/id';
 import type {
   LocalDateKey,
+  TreasuryAccount,
   TreasuryBill,
   TreasuryChallengeOutcome,
   TreasuryDailyChallenge,
@@ -222,6 +223,60 @@ export async function addTreasuryExpense(input: {
     }
   });
   return record;
+}
+
+export async function addTreasuryAccount(input: {
+  name: string;
+  kind: TreasuryAccount['kind'];
+  balanceCents: number;
+  includeInNetWorth?: boolean;
+  note?: string;
+}) {
+  if (!Number.isInteger(input.balanceCents) || Math.abs(input.balanceCents) > 1_000_000_000_00) {
+    throw new Error('Account balance must be a valid amount below $1 billion.');
+  }
+  const now = new Date().toISOString();
+  const account: TreasuryAccount = {
+    id: crypto.randomUUID(),
+    name: requireName(input.name, 'Account name'),
+    kind: input.kind,
+    balanceCents: input.balanceCents,
+    includeInNetWorth: input.includeInNetWorth ?? true,
+    active: true,
+    note: input.note?.trim().slice(0, 500),
+    createdAt: now,
+    updatedAt: now,
+  };
+  await db.treasuryAccounts.put(account);
+  return account;
+}
+
+export async function updateTreasuryAccount(
+  id: string,
+  input: Partial<
+    Pick<
+      TreasuryAccount,
+      'name' | 'kind' | 'balanceCents' | 'includeInNetWorth' | 'active' | 'note'
+    >
+  >,
+) {
+  const current = await db.treasuryAccounts.get(id);
+  if (!current) throw new Error('That Treasury account could not be found.');
+  if (
+    input.balanceCents !== undefined &&
+    (!Number.isInteger(input.balanceCents) || Math.abs(input.balanceCents) > 1_000_000_000_00)
+  ) {
+    throw new Error('Account balance must be a valid amount below $1 billion.');
+  }
+  const next: TreasuryAccount = {
+    ...current,
+    ...input,
+    name: input.name ? requireName(input.name, 'Account name') : current.name,
+    note: input.note?.trim().slice(0, 500) ?? current.note,
+    updatedAt: new Date().toISOString(),
+  };
+  await db.treasuryAccounts.put(next);
+  return next;
 }
 
 export async function addTreasuryBill(input: {
@@ -646,10 +701,11 @@ export async function completeTreasuryRecovery(date: LocalDateKey, plan: string)
 
 export async function getTreasuryDashboard(date: LocalDateKey, weekStartsOn: number) {
   const week = await ensureTreasuryWeek(date, weekStartsOn);
-  const [summary, settings, transactions, bills, debts, savingsGoals, challenges] =
+  const [summary, settings, accounts, transactions, bills, debts, savingsGoals, challenges] =
     await Promise.all([
       getTreasuryWeekSummary(week),
       ensureTreasurySettings(),
+      db.treasuryAccounts.toArray(),
       db.treasuryTransactions
         .toArray()
         .then((items) =>
@@ -660,15 +716,40 @@ export async function getTreasuryDashboard(date: LocalDateKey, weekStartsOn: num
       db.treasurySavingsGoals.toArray(),
       db.treasuryChallenges.orderBy('date').reverse().toArray(),
     ]);
+  const activeAccounts = accounts.filter((item) => item.active && item.includeInNetWorth);
+  const activeDebts = debts.filter((item) => item.active);
+  const netWorthCents =
+    activeAccounts.reduce((sum, item) => sum + item.balanceCents, 0) -
+    activeDebts.reduce((sum, item) => sum + item.balanceCents, 0);
+  const monthlyObligationsCents = bills
+    .filter((item) => item.active)
+    .reduce(
+      (sum, item) =>
+        sum +
+        (item.cadence === 'weekly'
+          ? Math.round((item.amountCents * 52) / 12)
+          : item.cadence === 'monthly'
+            ? item.amountCents
+            : 0),
+      0,
+    );
+  const minimumDebtPaymentsCents = activeDebts.reduce(
+    (sum, item) => sum + (item.minimumPaymentCents ?? 0),
+    0,
+  );
   return {
     week,
     summary,
     settings,
+    accounts,
     transactions,
     bills,
     debts,
     savingsGoals,
     challenges,
+    netWorthCents,
+    monthlyObligationsCents,
+    minimumDebtPaymentsCents,
   };
 }
 

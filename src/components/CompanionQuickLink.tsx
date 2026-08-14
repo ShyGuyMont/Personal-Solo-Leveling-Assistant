@@ -32,6 +32,13 @@ import {
   saveAiMemoryCandidates,
 } from '@/game/aiHeadquarters';
 import { hasAiVoiceSummary } from '@/game/aiVoice';
+import {
+  completeAgentMission,
+  createAgentMission,
+  reopenAgentMission,
+  retireAgentMission,
+  updateAgentMission,
+} from '@/game/agentMissions';
 import { buildAiProgressContext } from '@/game/aiContext';
 import {
   clearPendingAiProposal,
@@ -82,6 +89,7 @@ import type {
   CompanionId,
   CompanionOperationRequest,
   DailyOperationsRecord,
+  LocalDateKey,
 } from '@/types/game';
 
 interface PendingQuickLinkAction {
@@ -114,6 +122,8 @@ export function CompanionQuickLink() {
   const [replies, setReplies] = useState<AiConversationMessage[]>([]);
   const [pendingAction, setPendingAction] = useState<PendingQuickLinkAction>();
   const [pendingOperation, setPendingOperation] = useState<CompanionOperationRequest>();
+  const [pendingMission, setPendingMission] =
+    useState<NonNullable<AiHeadquartersReply['missionProposal']>>();
   const [pendingRecipe, setPendingRecipe] =
     useState<NonNullable<AiHeadquartersReply['recipeProposal']>>();
   const [pendingContent, setPendingContent] =
@@ -129,6 +139,18 @@ export function CompanionQuickLink() {
     useState<NonNullable<AiHeadquartersReply['creatorUpdateProposal']>>();
   const [pendingArcNote, setPendingArcNote] =
     useState<NonNullable<AiHeadquartersReply['arcNoteProposal']>>();
+  const confirmationWaiting = Boolean(
+    pendingAction ||
+    pendingOperation ||
+    pendingMission ||
+    pendingRecipe ||
+    pendingContent ||
+    pendingCampaign ||
+    pendingCalendar ||
+    pendingHandoff ||
+    pendingCreatorUpdate ||
+    pendingArcNote,
+  );
   const [executingAction, setExecutingAction] = useState(false);
   const [continuityTurns, setContinuityTurns] = useState(0);
   const [activeCompanionId, setActiveCompanionId] = useState<CompanionId>('snow');
@@ -192,6 +214,7 @@ export function CompanionQuickLink() {
     if (!proposal) return;
     if (proposal.kind === 'command') setPendingAction(proposal.payload);
     if (proposal.kind === 'operation') setPendingOperation(proposal.payload);
+    if (proposal.kind === 'mission') setPendingMission(proposal.payload);
     if (proposal.kind === 'recipe') setPendingRecipe(proposal.payload);
     if (proposal.kind === 'content') setPendingContent(proposal.payload);
     if (proposal.kind === 'campaign') setPendingCampaign(proposal.payload);
@@ -220,6 +243,7 @@ export function CompanionQuickLink() {
       setReplies([]);
       setPendingAction(undefined);
       setPendingOperation(undefined);
+      setPendingMission(undefined);
       setPendingRecipe(undefined);
       setPendingContent(undefined);
       setPendingCampaign(undefined);
@@ -297,6 +321,12 @@ export function CompanionQuickLink() {
         }
         return;
       }
+      if (confirmationWaiting) {
+        setNotice(
+          'A prepared command is still waiting below. Confirm or cancel it before opening another transmission.',
+        );
+        return;
+      }
 
       const fallbackAudience = conversationRef.current?.audience ?? activeCompanionId;
       const addressed = parseQuickLinkAddress(text, fallbackAudience);
@@ -316,6 +346,7 @@ export function CompanionQuickLink() {
         await clearPendingAiProposal(conversationRef.current.id);
       }
       setPendingOperation(undefined);
+      setPendingMission(undefined);
       setPendingRecipe(undefined);
       setPendingContent(undefined);
       setPendingCampaign(undefined);
@@ -436,6 +467,10 @@ export function CompanionQuickLink() {
           setPendingOperation(result.operationProposal);
           setActiveCompanionId(result.operationProposal.companionId);
         }
+        if (result.missionProposal) {
+          setPendingMission(result.missionProposal);
+          setActiveCompanionId(result.missionProposal.companionId);
+        }
         if (result.recipeProposal) {
           setPendingRecipe(result.recipeProposal);
           setActiveCompanionId('saffron');
@@ -466,6 +501,7 @@ export function CompanionQuickLink() {
         setNotice(
           proposedAction ||
             result.operationProposal ||
+            result.missionProposal ||
             result.recipeProposal ||
             result.contentProposal ||
             result.campaignProposal ||
@@ -497,6 +533,7 @@ export function CompanionQuickLink() {
       challenges,
       actionCatalog,
       activeCompanionId,
+      confirmationWaiting,
       deviceOnline,
       enabledCompanions,
       missions,
@@ -577,6 +614,72 @@ export function CompanionQuickLink() {
           : error instanceof Error
             ? error.message
             : 'The command could not be completed.',
+      );
+    } finally {
+      executionLockRef.current = false;
+      setExecutingAction(false);
+    }
+  }
+
+  async function executePendingMission() {
+    if (!pendingMission || executingAction || executionLockRef.current) return;
+    executionLockRef.current = true;
+    setExecutingAction(true);
+    let applied = false;
+    try {
+      let acknowledgement = '';
+      if (pendingMission.action === 'create') {
+        const mission = await createAgentMission({
+          title: pendingMission.title,
+          description: pendingMission.description,
+          category: pendingMission.category,
+          companionId: pendingMission.companionId,
+          createdBy: pendingMission.companionId,
+          source: pendingMission.companionId === 'snow' ? 'party' : 'companion',
+          difficulty: pendingMission.difficulty,
+          dueDate: (pendingMission.dueDate || undefined) as LocalDateKey | undefined,
+          recurrence: pendingMission.recurrence,
+          recurrenceInterval: pendingMission.recurrenceInterval,
+          checklistItems: pendingMission.checklistItems,
+        });
+        acknowledgement = `“${mission.title}” is secured under ${getCompanion(mission.companionId).name}. The Daily Mission cycle is unchanged.`;
+      } else if (pendingMission.action === 'update') {
+        const mission = await updateAgentMission(pendingMission.missionId, {
+          title: pendingMission.title || undefined,
+          description: pendingMission.description || undefined,
+          category: pendingMission.category || undefined,
+          companionId: pendingMission.companionId,
+          difficulty: pendingMission.difficulty,
+          dueDate: (pendingMission.dueDate || undefined) as LocalDateKey | undefined,
+          recurrence: pendingMission.recurrence,
+          recurrenceInterval: pendingMission.recurrenceInterval,
+          checklistItems: pendingMission.checklistItems,
+        });
+        acknowledgement = `“${mission.title}” is updated. Its previous record remains in the audit trail.`;
+      } else if (pendingMission.action === 'complete') {
+        const result = await completeAgentMission(pendingMission.missionId, systemDate);
+        acknowledgement = `“${result.mission?.title ?? pendingMission.title}” is confirmed clear. ${result.awardedXp ? `${result.awardedXp} XP applied.` : 'The clear is recorded with no extra XP beyond today’s Agent ceiling.'}`;
+      } else if (pendingMission.action === 'reopen') {
+        const mission = await reopenAgentMission(pendingMission.missionId, systemDate);
+        acknowledgement = `“${mission?.title ?? pendingMission.title}” is reopened and today’s reward was reversed.`;
+      } else {
+        const mission = await retireAgentMission(pendingMission.missionId);
+        acknowledgement = `“${mission.title}” is retired without deleting its history.`;
+      }
+      applied = true;
+      const owner = pendingMission.companionId;
+      setPendingMission(undefined);
+      await appendLocalAcknowledgement(owner, acknowledgement);
+      if (conversationRef.current) await clearPendingAiProposal(conversationRef.current.id);
+      await refresh();
+      setNotice('Companion Order confirmed · local Mission Forge synchronized.');
+    } catch (error) {
+      setNotice(
+        applied
+          ? 'The mission changed locally. Only the companion acknowledgement failed to save.'
+          : error instanceof Error
+            ? error.message
+            : 'The Companion Order could not be applied.',
       );
     } finally {
       executionLockRef.current = false;
@@ -1158,6 +1261,7 @@ export function CompanionQuickLink() {
     setReplies([]);
     setContinuityTurns(0);
     setPendingAction(undefined);
+    setPendingMission(undefined);
     setPendingRecipe(undefined);
     setPendingContent(undefined);
     setPendingCampaign(undefined);
@@ -1195,6 +1299,7 @@ export function CompanionQuickLink() {
     setPendingOperation(
       operations?.status === 'awaiting-confirmation' ? operations.pendingProposal : undefined,
     );
+    setPendingMission(undefined);
     setPendingRecipe(undefined);
     setPendingContent(undefined);
     setContinuityTurns(continuing?.messages.length ?? 0);
@@ -1578,6 +1683,81 @@ export function CompanionQuickLink() {
                         void dismissPendingPreview(
                           () => setPendingAction(undefined),
                           'Command dismissed. No campaign data changed.',
+                        );
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </section>
+              )}
+
+              {linkMode === 'command' && pendingMission && (
+                <section
+                  className="quick-link__command quick-link__mission-command"
+                  aria-live="polite"
+                >
+                  <header>
+                    <span>
+                      <Sparkles size={15} /> SOVEREIGN MISSION FORGE
+                    </span>
+                    <small>CONFIRMATION REQUIRED</small>
+                  </header>
+                  <strong>{pendingMission.title || 'Companion Order'}</strong>
+                  <p>
+                    {pendingMission.description || `${pendingMission.action} this Companion Order.`}
+                  </p>
+                  <div className="quick-link__recipe-meta">
+                    <span>{pendingMission.action}</span>
+                    <span>{getCompanion(pendingMission.companionId).name}</span>
+                    <span>{pendingMission.difficulty} threat</span>
+                    {pendingMission.dueDate && <span>due {pendingMission.dueDate}</span>}
+                    {pendingMission.recurrence !== 'none' && (
+                      <span>{pendingMission.recurrence}</span>
+                    )}
+                  </div>
+                  {pendingMission.checklistItems.length > 0 && (
+                    <ol className="quick-link__mission-steps">
+                      {pendingMission.checklistItems.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ol>
+                  )}
+                  <dl>
+                    <div>
+                      <dt>LOCKED FOUNDATION</dt>
+                      <dd>
+                        This changes only the separate Companion Order layer. Daily Missions and
+                        their configured rewards remain untouched.
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>COMPANION CHECK</dt>
+                      <dd>{pendingMission.confirmation}</dd>
+                    </div>
+                  </dl>
+                  <div className="quick-link__command-actions">
+                    <button
+                      type="button"
+                      className="button button--primary"
+                      disabled={executingAction}
+                      onClick={() => void executePendingMission()}
+                    >
+                      {executingAction ? (
+                        <LoaderCircle className="is-spinning" size={15} />
+                      ) : (
+                        <Check size={15} />
+                      )}
+                      Confirm order
+                    </button>
+                    <button
+                      type="button"
+                      className="button button--ghost"
+                      disabled={executingAction}
+                      onClick={() => {
+                        void dismissPendingPreview(
+                          () => setPendingMission(undefined),
+                          'Mission preview dismissed. No record changed.',
                         );
                       }}
                     >

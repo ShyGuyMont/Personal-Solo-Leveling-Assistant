@@ -669,6 +669,37 @@ export interface DailyMissionRecord {
   protectionSource?: 'monthly-exception' | 'mission-pass';
 }
 
+export type AgentMissionDifficulty = 'minor' | 'standard' | 'major' | 'boss';
+export type AgentMissionRecurrence = 'none' | 'daily' | 'weekly' | 'monthly';
+export type AgentMissionStatus = 'active' | 'completed' | 'retired';
+export type AgentMissionSource = 'hunter' | 'companion' | 'party';
+
+export interface AgentMission {
+  id: string;
+  title: string;
+  description: string;
+  category: MissionCategory;
+  companionId: CompanionId;
+  createdBy: CompanionId | 'hunter';
+  source: AgentMissionSource;
+  difficulty: AgentMissionDifficulty;
+  accountXp: number;
+  statRewards: StatReward[];
+  status: AgentMissionStatus;
+  dueDate?: LocalDateKey;
+  recurrence: AgentMissionRecurrence;
+  recurrenceInterval: number;
+  checklistItems: string[];
+  checklist: Record<string, boolean>;
+  completionCount: number;
+  lastCompletedOn?: LocalDateKey;
+  completedAt?: string;
+  retiredAt?: string;
+  rewardTransactionIds: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface DailyReview {
   id: LocalDateKey;
   date: LocalDateKey;
@@ -1326,6 +1357,21 @@ export interface TreasurySettings {
   updatedAt: string;
 }
 
+export type TreasuryAccountKind =
+  'checking' | 'savings' | 'cash' | 'investment' | 'property' | 'other';
+
+export interface TreasuryAccount {
+  id: string;
+  name: string;
+  kind: TreasuryAccountKind;
+  balanceCents: number;
+  includeInNetWorth: boolean;
+  active: boolean;
+  note?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface TreasuryTransaction {
   id: string;
   date: LocalDateKey;
@@ -1471,6 +1517,22 @@ export interface CalendarEventOccurrence {
   linkedRealm?: CalendarRealm;
   status: CalendarEventStatus;
   recurring: boolean;
+}
+
+export type IntegrityShieldEnforcement = 'not-configured' | 'screen-time' | 'managed-filter';
+
+export interface IntegrityShieldProfile {
+  id: 'primary';
+  enabled: boolean;
+  enforcement: IntegrityShieldEnforcement;
+  adultWebLimitEnabled: boolean;
+  restrictedSitesConfigured: boolean;
+  settingsPasscodeProtected: boolean;
+  accountabilityEnabled: boolean;
+  lastVerifiedAt?: string;
+  interruptionPlan: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface AppMetadata {

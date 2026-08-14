@@ -465,7 +465,7 @@ describe('save validation and recovery', () => {
     });
 
     const save = await createSaveFile();
-    expect(save.version).toBe(27);
+    expect(save.version).toBe(28);
     for (const table of [
       'dailyBriefings',
       'dailyOperations',
@@ -485,6 +485,7 @@ describe('save validation and recovery', () => {
       'arcCharacters',
       'arcCanonSources',
       'calendarEvents',
+      'integrityShields',
     ]) {
       expect(save.data[table]).toHaveLength(1);
     }
@@ -590,7 +591,7 @@ describe('save validation and recovery', () => {
     save.checksum = await digest(save.data);
 
     const prepared = await prepareSaveImport(asFile(save));
-    expect(prepared.save.version).toBe(27);
+    expect(prepared.save.version).toBe(28);
     expect(prepared.save.data.dailyBriefings).toEqual([]);
     expect(prepared.save.data.dailyOperations).toEqual([]);
     const migrated = prepared.save.data.settings[0] as Record<string, unknown>;

@@ -10,7 +10,7 @@ import type {
   Settings,
 } from '@/types/game';
 
-export const SAVE_VERSION = 27;
+export const SAVE_VERSION = 28;
 export const MAX_IMPORT_BYTES = 32 * 1024 * 1024;
 const MAX_SNAPSHOTS = 5;
 const FORBIDDEN_KEYS = new Set(['__proto__', 'prototype', 'constructor']);
@@ -171,6 +171,28 @@ function migrateData(
     data.arcCanonSources ??= [];
   }
   if (version <= 26) data.calendarEvents ??= [];
+  if (version <= 27) {
+    data.agentMissions ??= [];
+    data.treasuryAccounts ??= [];
+    if (!data.integrityShields?.some((row) => isObject(row) && row.id === 'primary')) {
+      const now = new Date().toISOString();
+      data.integrityShields = [
+        {
+          id: 'primary',
+          enabled: false,
+          enforcement: 'not-configured',
+          adultWebLimitEnabled: false,
+          restrictedSitesConfigured: false,
+          settingsPasscodeProtected: false,
+          accountabilityEnabled: true,
+          interruptionPlan:
+            'Close the current screen, move to a shared space, take ten slow breaths, and contact a trusted person if the pull remains strong.',
+          createdAt: now,
+          updatedAt: now,
+        },
+      ];
+    }
+  }
   data.dailyOperations = data.dailyOperations.map((row) => {
     if (!isObject(row) || !isObject(row.pendingProposal)) return row;
     const pendingProposal = row.pendingProposal;
@@ -845,6 +867,76 @@ function validateData(data: Record<string, unknown[]>) {
   }
   const validDate = (value: unknown) =>
     typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value);
+  const agentDifficulties = new Set(['minor', 'standard', 'major', 'boss']);
+  const agentRecurrences = new Set(['none', 'daily', 'weekly', 'monthly']);
+  const agentStatuses = new Set(['active', 'completed', 'retired']);
+  const missionCategories = new Set(['faith', 'discipline', 'physical', 'creator', 'character']);
+  const agentSources = new Set(['hunter', 'companion', 'party']);
+  const agentRewards = {
+    minor: { accountXp: 20, statXp: 10 },
+    standard: { accountXp: 40, statXp: 20 },
+    major: { accountXp: 70, statXp: 35 },
+    boss: { accountXp: 120, statXp: 60 },
+  } as const;
+  const missionCategoryStats = {
+    faith: 'faith',
+    discipline: 'discipline',
+    physical: 'vitality',
+    creator: 'creativity',
+    character: 'character',
+  } as const;
+  for (const row of data.agentMissions) {
+    const checklistItems =
+      isObject(row) && Array.isArray(row.checklistItems) ? row.checklistItems : [];
+    const checklist = isObject(row) && isObject(row.checklist) ? row.checklist : {};
+    const difficulty = String(isObject(row) ? row.difficulty : '') as keyof typeof agentRewards;
+    const category = String(isObject(row) ? row.category : '') as keyof typeof missionCategoryStats;
+    const expectedReward = agentRewards[difficulty];
+    if (
+      !isObject(row) ||
+      typeof row.title !== 'string' ||
+      !row.title.trim() ||
+      row.title.length > 120 ||
+      typeof row.description !== 'string' ||
+      row.description.length > 1_200 ||
+      !missionCategories.has(String(row.category)) ||
+      !aiCompanionIds.has(String(row.companionId)) ||
+      (row.createdBy !== 'hunter' && !aiCompanionIds.has(String(row.createdBy))) ||
+      !agentSources.has(String(row.source)) ||
+      !agentDifficulties.has(String(row.difficulty)) ||
+      !Number.isInteger(row.accountXp) ||
+      Number(row.accountXp) !== expectedReward?.accountXp ||
+      !agentStatuses.has(String(row.status)) ||
+      (row.dueDate !== undefined && !validDate(row.dueDate)) ||
+      !agentRecurrences.has(String(row.recurrence)) ||
+      !Number.isInteger(row.recurrenceInterval) ||
+      Number(row.recurrenceInterval) < 1 ||
+      Number(row.recurrenceInterval) > 12 ||
+      checklistItems.length > 12 ||
+      checklistItems.some(
+        (item) => typeof item !== 'string' || !item.trim() || item.length > 160,
+      ) ||
+      !isObject(row.checklist) ||
+      Object.keys(checklist).some((item) => !checklistItems.includes(item)) ||
+      checklistItems.some((item) => typeof checklist[item] !== 'boolean') ||
+      !Array.isArray(row.statRewards) ||
+      row.statRewards.length !== 1 ||
+      !isObject(row.statRewards[0]) ||
+      row.statRewards[0].stat !== missionCategoryStats[category] ||
+      row.statRewards[0].xp !== expectedReward?.statXp ||
+      !Number.isInteger(row.completionCount) ||
+      Number(row.completionCount) < 0 ||
+      !Array.isArray(row.rewardTransactionIds) ||
+      row.rewardTransactionIds.some((id) => typeof id !== 'string' || id.length > 240) ||
+      (row.lastCompletedOn !== undefined && !validDate(row.lastCompletedOn)) ||
+      typeof row.createdAt !== 'string' ||
+      !Number.isFinite(Date.parse(row.createdAt)) ||
+      typeof row.updatedAt !== 'string' ||
+      !Number.isFinite(Date.parse(row.updatedAt))
+    ) {
+      throw new Error('A Companion Order contains an impossible value.');
+    }
+  }
   const operationStatuses = new Set(['awaiting-confirmation', 'preparing', 'ready', 'partial']);
   const operationKinds = new Set([
     'assemble-day',
@@ -874,7 +966,7 @@ function validateData(data: Record<string, unknown[]>) {
   const validCompanions = (value: unknown) =>
     Array.isArray(value) &&
     value.length > 0 &&
-    value.length <= 10 &&
+    value.length <= 12 &&
     value.every((id) => aiCompanionIds.has(String(id)));
   const validPreparedBase = (value: Record<string, unknown>) =>
     typeof value.sessionId === 'string' &&
@@ -999,6 +1091,34 @@ function validateData(data: Record<string, unknown[]>) {
     Number.isInteger(value) &&
     Number(value) >= (allowZero ? 0 : 1) &&
     Number(value) <= 1_000_000_000;
+  const treasuryAccountKinds = new Set([
+    'checking',
+    'savings',
+    'cash',
+    'investment',
+    'property',
+    'other',
+  ]);
+  for (const row of data.treasuryAccounts) {
+    if (
+      !isObject(row) ||
+      typeof row.name !== 'string' ||
+      !row.name.trim() ||
+      row.name.length > 100 ||
+      !treasuryAccountKinds.has(String(row.kind)) ||
+      !Number.isInteger(row.balanceCents) ||
+      Math.abs(Number(row.balanceCents)) > 100_000_000_000 ||
+      typeof row.includeInNetWorth !== 'boolean' ||
+      typeof row.active !== 'boolean' ||
+      (row.note !== undefined && (typeof row.note !== 'string' || row.note.length > 500)) ||
+      typeof row.createdAt !== 'string' ||
+      !Number.isFinite(Date.parse(row.createdAt)) ||
+      typeof row.updatedAt !== 'string' ||
+      !Number.isFinite(Date.parse(row.updatedAt))
+    ) {
+      throw new Error('A Treasury account snapshot contains an impossible value.');
+    }
+  }
   const transactionKinds = new Set([
     'income',
     'expense',
@@ -1071,6 +1191,27 @@ function validateData(data: Record<string, unknown[]>) {
     ) {
       throw new Error('A Treasury challenge contains an impossible value.');
     }
+  }
+  const shield = requiredSingleton<Record<string, unknown>>(data, 'integrityShields');
+  if (
+    typeof shield.enabled !== 'boolean' ||
+    !['not-configured', 'screen-time', 'managed-filter'].includes(String(shield.enforcement)) ||
+    typeof shield.adultWebLimitEnabled !== 'boolean' ||
+    typeof shield.restrictedSitesConfigured !== 'boolean' ||
+    typeof shield.settingsPasscodeProtected !== 'boolean' ||
+    typeof shield.accountabilityEnabled !== 'boolean' ||
+    typeof shield.interruptionPlan !== 'string' ||
+    !shield.interruptionPlan.trim() ||
+    shield.interruptionPlan.length > 1_000 ||
+    typeof shield.createdAt !== 'string' ||
+    !Number.isFinite(Date.parse(shield.createdAt)) ||
+    typeof shield.updatedAt !== 'string' ||
+    !Number.isFinite(Date.parse(shield.updatedAt)) ||
+    (shield.lastVerifiedAt !== undefined &&
+      (typeof shield.lastVerifiedAt !== 'string' ||
+        !Number.isFinite(Date.parse(shield.lastVerifiedAt))))
+  ) {
+    throw new Error('The Explicit Content Shield contains an impossible value.');
   }
   const trainingLocations = new Set(['home', 'gym', 'conditioning', 'recovery']);
   const trainingStatuses = new Set(['assigned', 'active', 'paused', 'completed', 'abandoned']);

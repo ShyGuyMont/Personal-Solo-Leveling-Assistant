@@ -26,6 +26,7 @@ import type {
   StatProgress,
 } from '@/types/game';
 import { addDays } from '@/utils/date';
+import { AGENT_MISSION_DAILY_XP_CAP } from '@/game/agentMissions';
 
 export interface AiContextSource {
   audience: AiConversationAudience;
@@ -211,6 +212,7 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
     treasuryBills,
     treasuryDebts,
     treasurySavingsGoals,
+    treasuryAccounts,
     creatorSettings,
     creatorSnapshots,
     creatorProjects,
@@ -219,6 +221,8 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
     bodyDiagnostic,
     arcKnowledge,
     calendarEvents,
+    agentMissions,
+    integrityShield,
   ] = await Promise.all([
     db.dailyReviews.where('date').aboveOrEqual(recentStart).toArray(),
     db.dailyMissions.where('date').aboveOrEqual(recentStart).toArray(),
@@ -239,6 +243,7 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
     treasurySharingAllowed ? db.treasuryBills.toArray() : Promise.resolve([]),
     treasurySharingAllowed ? db.treasuryDebts.toArray() : Promise.resolve([]),
     treasurySharingAllowed ? db.treasurySavingsGoals.toArray() : Promise.resolve([]),
+    treasurySharingAllowed ? db.treasuryAccounts.toArray() : Promise.resolve([]),
     creatorSharingAllowed ? db.creatorSettings.get('primary') : Promise.resolve(undefined),
     creatorSharingAllowed
       ? db.creatorSnapshots.orderBy('capturedAt').reverse().limit(30).toArray()
@@ -255,6 +260,10 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
       ? buildArcKnowledgeContext(source.query ?? '', source.history ?? [])
       : Promise.resolve(emptyArcKnowledgeContext()),
     shouldShareCalendar(source) ? db.calendarEvents.toArray() : Promise.resolve([]),
+    db.agentMissions.toArray(),
+    ['snow', 'selah', 'amara', 'cipher', 'party'].includes(source.audience)
+      ? db.integrityShields.get('primary')
+      : Promise.resolve(undefined),
   ]);
 
   const available = source.missions.filter((mission) => mission.enabled && !mission.archived);
@@ -364,6 +373,30 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
         .filter((mission) => !completedToday.has(mission.id))
         .slice(0, 12)
         .map((mission) => mission.name),
+    },
+    companionOrders: {
+      dailyXpCap: AGENT_MISSION_DAILY_XP_CAP,
+      active: agentMissions
+        .filter((mission) => mission.status !== 'retired')
+        .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt))
+        .slice(0, 40)
+        .map((mission) => ({
+          id: mission.id,
+          title: mission.title,
+          description: mission.description.slice(0, 500),
+          category: mission.category,
+          companionId: mission.companionId,
+          difficulty: mission.difficulty,
+          accountXp: mission.accountXp,
+          dueDate: mission.dueDate,
+          recurrence: mission.recurrence,
+          recurrenceInterval: mission.recurrenceInterval,
+          status: mission.status,
+          completedToday: mission.lastCompletedOn === source.systemDate,
+          checklistRemaining: mission.checklistItems.filter((item) => !mission.checklist[item])
+            .length,
+          checklistItems: mission.checklistItems,
+        })),
     },
     progression: {
       totalXp: source.progression.totalXp,
@@ -594,6 +627,16 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
             outcome: session.outcome,
           })),
         privateWritingExcluded: true,
+        integrityShield: integrityShield
+          ? {
+              trackingEnabled: integrityShield.enabled,
+              enforcement: integrityShield.enforcement,
+              adultWebLimitEnabled: integrityShield.adultWebLimitEnabled,
+              restrictedSitesConfigured: integrityShield.restrictedSitesConfigured,
+              settingsPasscodeProtected: integrityShield.settingsPasscodeProtected,
+              lastVerifiedAt: integrityShield.lastVerifiedAt,
+            }
+          : undefined,
       },
       training: {
         bodyDiagnostic: {
@@ -798,6 +841,23 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
               savingsTargetCents: sumBy(
                 treasurySavingsGoals.filter((goal) => goal.active),
                 (goal) => goal.targetCents,
+              ),
+              accountCount: treasuryAccounts.filter((account) => account.active).length,
+              accountAssetsCents: sumBy(
+                treasuryAccounts.filter((account) => account.active && account.includeInNetWorth),
+                (account) => account.balanceCents,
+              ),
+              knownNetWorthCents:
+                sumBy(
+                  treasuryAccounts.filter((account) => account.active && account.includeInNetWorth),
+                  (account) => account.balanceCents,
+                ) - sumBy(activeDebts, (debt) => debt.balanceCents),
+              monthlyRecurringBillsCents: sumBy(
+                treasuryBills.filter((bill) => bill.active && bill.cadence !== 'one-time'),
+                (bill) =>
+                  bill.cadence === 'weekly'
+                    ? Math.round((bill.amountCents * 52) / 12)
+                    : bill.amountCents,
               ),
             },
           }

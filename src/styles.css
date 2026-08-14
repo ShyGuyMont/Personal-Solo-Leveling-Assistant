@@ -8850,6 +8850,276 @@ p {
   font-size: 1.35rem;
 }
 
+.agent-mission-board {
+  display: grid;
+  gap: 18px;
+  margin-bottom: 30px;
+  overflow: hidden;
+  border-color: color-mix(in srgb, var(--mint) 35%, var(--border-soft));
+  background:
+    radial-gradient(circle at 90% 0%, rgba(67, 230, 194, 0.12), transparent 34%),
+    linear-gradient(145deg, rgba(18, 28, 34, 0.97), rgba(7, 12, 18, 0.98));
+}
+
+.agent-mission-board__header,
+.agent-mission-board__controls,
+.agent-mission-card > header,
+.agent-mission-card__meta,
+.agent-mission-card__actions {
+  display: flex;
+  align-items: center;
+}
+
+.agent-mission-board__header {
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.agent-mission-board__header h2,
+.agent-mission-card h3 {
+  margin: 0;
+}
+
+.agent-mission-board__header > div:first-child > p:last-child {
+  max-width: 720px;
+  margin: 6px 0 0;
+  color: var(--muted);
+}
+
+.agent-mission-board__signal {
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: center;
+  gap: 0 8px;
+  min-width: 96px;
+  padding: 11px 14px;
+  color: var(--mint);
+  border: 1px solid rgba(67, 230, 194, 0.26);
+  border-radius: 15px;
+  background: rgba(67, 230, 194, 0.06);
+}
+
+.agent-mission-board__signal strong {
+  font:
+    700 1.25rem Rajdhani,
+    sans-serif;
+}
+
+.agent-mission-board__signal span {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.agent-mission-board__rules {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.agent-mission-board__rules span,
+.agent-mission-card__meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 0.68rem;
+}
+
+.agent-mission-board__rules span {
+  padding: 7px 10px;
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  background: rgba(3, 8, 12, 0.42);
+}
+
+.agent-mission-board__controls,
+.agent-mission-card__actions {
+  gap: 9px;
+  flex-wrap: wrap;
+}
+
+.agent-mission-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 13px;
+  padding: 18px;
+  border: 1px solid rgba(67, 230, 194, 0.2);
+  border-radius: 18px;
+  background: rgba(2, 8, 12, 0.6);
+}
+
+.agent-mission-form label {
+  display: grid;
+  gap: 7px;
+}
+
+.agent-mission-form label > span {
+  color: var(--muted);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.agent-mission-form input,
+.agent-mission-form select,
+.agent-mission-form textarea {
+  width: 100%;
+  color: var(--text);
+  border: 1px solid var(--border-soft);
+  border-radius: 11px;
+  background: rgba(4, 9, 14, 0.84);
+}
+
+.agent-mission-form__wide {
+  grid-column: 1 / -1;
+}
+
+.agent-mission-board__notice {
+  margin: 0;
+  padding: 10px 12px;
+  color: var(--mint);
+  border-left: 2px solid var(--mint);
+  background: rgba(67, 230, 194, 0.05);
+}
+
+.agent-mission-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.agent-mission-card {
+  display: grid;
+  gap: 13px;
+  padding: 16px;
+  border: 1px solid color-mix(in srgb, var(--companion-accent) 28%, var(--border-soft));
+  border-radius: 18px;
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--companion-accent) 7%, rgba(10, 16, 22, 0.96)),
+    rgba(5, 10, 15, 0.98)
+  );
+}
+
+.agent-mission-card.is-complete {
+  border-color: rgba(67, 230, 194, 0.38);
+  box-shadow: inset 0 0 30px rgba(67, 230, 194, 0.035);
+}
+
+.agent-mission-card > header {
+  gap: 10px;
+}
+
+.agent-mission-card > header img {
+  width: 44px;
+  height: 44px;
+  object-fit: cover;
+  border: 1px solid color-mix(in srgb, var(--companion-accent) 55%, transparent);
+  border-radius: 13px;
+}
+
+.agent-mission-card > header > div {
+  min-width: 0;
+  flex: 1;
+}
+
+.agent-mission-card h3 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.agent-mission-card > p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.agent-mission-card__xp {
+  color: var(--mint);
+  font:
+    700 0.75rem Rajdhani,
+    sans-serif;
+  white-space: nowrap;
+}
+
+.agent-mission-card__meta {
+  flex-wrap: wrap;
+  gap: 8px 13px;
+  text-transform: capitalize;
+}
+
+.agent-mission-card__checklist {
+  display: grid;
+  gap: 8px;
+  padding: 11px;
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  background: rgba(2, 7, 11, 0.46);
+}
+
+.agent-mission-card__checklist label {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.agent-mission-card__checklist input {
+  accent-color: var(--mint);
+}
+
+.agent-mission-card__cleared {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--mint);
+  font-weight: 700;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.agent-mission-empty {
+  grid-column: 1 / -1;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 28px;
+  color: var(--muted);
+  text-align: center;
+  border: 1px dashed rgba(67, 230, 194, 0.2);
+  border-radius: 16px;
+}
+
+.agent-mission-empty svg,
+.agent-mission-empty strong {
+  color: var(--mint);
+}
+
+@media (max-width: 720px) {
+  .agent-mission-board__header {
+    align-items: flex-start;
+  }
+
+  .agent-mission-board__signal {
+    min-width: 82px;
+  }
+
+  .agent-mission-form,
+  .agent-mission-list {
+    grid-template-columns: 1fr;
+  }
+
+  .agent-mission-form__wide,
+  .agent-mission-empty {
+    grid-column: 1;
+  }
+}
+
 .filter-chips {
   display: flex;
   align-items: center;
@@ -15680,7 +15950,7 @@ html[data-theme='daybreak'] .companion-card {
 
 .treasury-tabs {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 4px;
   padding: 5px;
   overflow-x: auto;
@@ -15712,6 +15982,80 @@ html[data-theme='daybreak'] .companion-card {
 .treasury-stack {
   display: grid;
   gap: 16px;
+}
+
+.treasury-forecast-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.treasury-forecast-strip > div {
+  display: grid;
+  gap: 5px;
+  padding: 16px;
+  background: rgba(6, 13, 17, 0.72);
+}
+
+.treasury-forecast-strip span {
+  color: var(--muted-2);
+  font:
+    700 0.66rem Rajdhani,
+    sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.treasury-forecast-strip strong {
+  color: var(--treasury-gold);
+  font:
+    700 1.15rem Rajdhani,
+    sans-serif;
+}
+
+.treasury-forecast-strip > p {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 11px 16px;
+  color: var(--muted-2);
+  font-size: 0.69rem;
+  border-top: 1px solid var(--border-soft);
+}
+
+.treasury-form__note {
+  margin: 0;
+  color: var(--muted-2);
+  font-size: 0.7rem;
+  line-height: 1.5;
+}
+
+.treasury-account-edit {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.treasury-account-edit input {
+  width: 92px;
+  min-height: 34px;
+  padding: 6px 8px;
+  color: var(--text);
+  border: 1px solid var(--treasury-gold);
+  border-radius: 8px;
+  background: rgba(4, 9, 14, 0.9);
+}
+
+.treasury-account-edit button {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  color: var(--treasury-gold);
+  border: 1px solid rgba(244, 201, 93, 0.3);
+  border-radius: 8px;
+  background: rgba(244, 201, 93, 0.07);
 }
 
 .treasury-summary-grid {
@@ -16273,6 +16617,14 @@ html[data-theme='daybreak'] .treasury-challenge-panel {
 
   .treasury-two-column {
     grid-template-columns: 1fr;
+  }
+
+  .treasury-forecast-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .treasury-forecast-strip > p {
+    grid-column: 1;
   }
 
   .treasury-hero {
@@ -19595,6 +19947,183 @@ html[data-theme='daybreak'] .panel.sanctuary-dashboard-card {
   justify-self: start;
   gap: 6px;
   color: var(--muted);
+}
+
+.integrity-shield-panel {
+  display: grid;
+  gap: 17px;
+  overflow: hidden;
+  border-color: rgba(188, 167, 255, 0.28);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(188, 167, 255, 0.14), transparent 36%),
+    linear-gradient(145deg, rgba(16, 21, 31, 0.97), rgba(7, 11, 18, 0.98));
+}
+
+.integrity-shield-panel > header,
+.integrity-shield-panel__status,
+.integrity-shield-panel__actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.integrity-shield-panel > header h2,
+.integrity-shield-panel > header p {
+  margin: 0;
+}
+
+.integrity-shield-panel > header p:last-child {
+  margin-top: 6px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.integrity-shield-panel__sigil {
+  display: grid;
+  width: 58px;
+  height: 58px;
+  flex: 0 0 auto;
+  color: var(--sanctuary-violet);
+  place-items: center;
+  border: 1px solid rgba(188, 167, 255, 0.27);
+  border-radius: 17px;
+  background: rgba(188, 167, 255, 0.07);
+}
+
+.integrity-shield-panel__sigil.is-active {
+  color: var(--mint);
+  border-color: rgba(67, 230, 194, 0.34);
+  background: rgba(67, 230, 194, 0.08);
+  box-shadow: 0 0 28px rgba(67, 230, 194, 0.1);
+}
+
+.integrity-shield-panel__status {
+  justify-content: space-between;
+  padding: 12px;
+  border: 1px solid var(--border-soft);
+  border-radius: 14px;
+  background: rgba(3, 8, 14, 0.48);
+}
+
+.integrity-shield-panel__status > span {
+  display: grid;
+  gap: 3px;
+}
+
+.integrity-shield-panel__status strong {
+  color: var(--sanctuary-violet);
+  font:
+    700 0.72rem Rajdhani,
+    sans-serif;
+  letter-spacing: 0.1em;
+}
+
+.integrity-shield-panel__status small,
+.integrity-shield-panel__verified {
+  color: var(--muted-2);
+}
+
+.integrity-shield-switch {
+  min-height: 38px;
+  padding: 7px 12px;
+  color: var(--muted);
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.integrity-shield-switch.is-on {
+  color: #081511;
+  border-color: var(--mint);
+  background: var(--mint);
+}
+
+.integrity-shield-panel__steps {
+  display: grid;
+  gap: 8px;
+}
+
+.integrity-shield-panel__steps label {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: 11px;
+  padding: 12px;
+  border: 1px solid var(--border-soft);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.022);
+}
+
+.integrity-shield-panel__steps input {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: var(--mint);
+}
+
+.integrity-shield-panel__steps span {
+  display: grid;
+  gap: 3px;
+}
+
+.integrity-shield-panel__steps small {
+  color: var(--muted-2);
+  line-height: 1.45;
+}
+
+.integrity-shield-panel__actions {
+  flex-wrap: wrap;
+}
+
+.integrity-shield-panel__plan {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid rgba(255, 143, 183, 0.18);
+  border-radius: 14px;
+  background: rgba(255, 143, 183, 0.035);
+}
+
+.integrity-shield-panel__plan > span {
+  color: var(--sanctuary-rose);
+  font:
+    700 0.68rem Rajdhani,
+    sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.integrity-shield-panel__plan textarea {
+  width: 100%;
+  color: var(--text);
+  border: 1px solid var(--border-soft);
+  border-radius: 11px;
+  background: rgba(4, 9, 14, 0.78);
+}
+
+.integrity-shield-panel__plan .button {
+  justify-self: start;
+}
+
+.integrity-shield-panel__notice {
+  margin: 0;
+  color: var(--mint);
+}
+
+@media (max-width: 620px) {
+  .integrity-shield-panel > header {
+    align-items: flex-start;
+  }
+
+  .integrity-shield-panel__sigil {
+    width: 48px;
+    height: 48px;
+  }
+
+  .integrity-shield-panel__status {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 }
 
 .sanctuary-error {
@@ -22954,6 +23483,29 @@ html[data-motion='reduced'] .progression-overlay--rank-up > section {
 
 .quick-link__recipe-command {
   border-color: color-mix(in srgb, #ff8f5c 42%, transparent);
+}
+
+.quick-link__mission-command {
+  background:
+    radial-gradient(circle at 88% 12%, rgba(167, 139, 250, 0.12), transparent 34%),
+    linear-gradient(135deg, color-mix(in srgb, var(--mint) 10%, transparent), transparent 58%),
+    rgba(2, 7, 11, 0.94);
+  border-color: color-mix(in srgb, var(--violet) 48%, var(--mint));
+}
+
+.quick-link__mission-steps {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  padding: 8px 8px 8px 28px;
+  background: rgba(167, 139, 250, 0.045);
+  border: 1px solid rgba(167, 139, 250, 0.14);
+  border-radius: 9px;
+}
+
+.quick-link__mission-steps li::marker {
+  color: var(--violet);
+  font-family: 'SystemDisplay', sans-serif;
 }
 
 .quick-link__recipe-meta {
