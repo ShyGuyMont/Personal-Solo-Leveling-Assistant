@@ -3370,6 +3370,1070 @@ html[data-motion='reduced'] .ascension-core__neural-web i {
     drop-shadow(0 0 16px color-mix(in srgb, var(--core-primary) 42%, transparent));
 }
 
+/* Version 10.3.0 · Dual Resonance */
+.ascension-core__energy-wings,
+.ascension-core__chromatic-shell,
+.ascension-core__plasma-arcs,
+.ascension-core__dual-reactor,
+.ascension-core__reactor-facets,
+.ascension-core__power-spine {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  pointer-events: none;
+  translate: -50% -58%;
+  transform-style: preserve-3d;
+}
+
+.ascension-core__energy-wings {
+  z-index: 1;
+  width: 366px;
+  height: 226px;
+  filter: drop-shadow(-18px 0 20px color-mix(in srgb, var(--system-state-accent) 22%, transparent))
+    drop-shadow(18px 0 22px color-mix(in srgb, var(--realm-secondary) 24%, transparent));
+}
+
+.ascension-core__energy-wings span {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 168px;
+  height: 68px;
+  clip-path: polygon(0 43%, 24% 15%, 72% 0, 100% 43%, 77% 100%, 22% 79%, 0 57%);
+  opacity: 0.34;
+  transform-origin: 0 50%;
+  animation: dualEnergyWingBreath 5.6s ease-in-out infinite;
+}
+
+.ascension-core__energy-wings span:nth-child(1) {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, white 45%, var(--system-state-accent)),
+    color-mix(in srgb, var(--system-state-accent) 42%, transparent) 24%,
+    transparent 88%
+  );
+  transform: translateY(-50%) rotate(-21deg) skewX(-10deg);
+}
+
+.ascension-core__energy-wings span:nth-child(2) {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, white 45%, var(--realm-secondary)),
+    color-mix(in srgb, var(--realm-secondary) 45%, transparent) 24%,
+    transparent 88%
+  );
+  transform: translateY(-50%) rotate(201deg) skewX(-10deg);
+  animation-delay: -2.8s;
+}
+
+.ascension-core__energy-wings span:nth-child(3) {
+  width: 132px;
+  height: 44px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, white 32%, var(--system-state-accent)),
+    color-mix(in srgb, var(--system-state-accent) 27%, transparent) 36%,
+    transparent 90%
+  );
+  transform: translateY(-50%) rotate(32deg) skewX(12deg);
+  animation-delay: -1.4s;
+}
+
+.ascension-core__energy-wings span:nth-child(4) {
+  width: 132px;
+  height: 44px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, white 32%, var(--realm-secondary)),
+    color-mix(in srgb, var(--realm-secondary) 29%, transparent) 36%,
+    transparent 90%
+  );
+  transform: translateY(-50%) rotate(148deg) skewX(12deg);
+  animation-delay: -4.2s;
+}
+
+.ascension-core__chromatic-shell {
+  z-index: 2;
+  width: 338px;
+  height: 338px;
+  opacity: 0.72;
+  filter: drop-shadow(0 0 12px color-mix(in srgb, var(--system-state-accent) 26%, transparent))
+    drop-shadow(0 0 17px color-mix(in srgb, var(--realm-secondary) 22%, transparent));
+}
+
+.ascension-core__chromatic-shell span {
+  position: absolute;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0 8%,
+    color-mix(in srgb, var(--system-state-accent) 88%, white) 12% 24%,
+    transparent 29% 48%,
+    color-mix(in srgb, var(--realm-secondary) 88%, white) 53% 67%,
+    transparent 72% 100%
+  );
+  padding: 2px;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+.ascension-core__chromatic-shell span:nth-child(1) {
+  inset: 2%;
+  animation: dualResonanceShellOne 13s linear infinite;
+}
+
+.ascension-core__chromatic-shell span:nth-child(2) {
+  inset: 12%;
+  background: conic-gradient(
+    from 180deg,
+    transparent 0 12%,
+    color-mix(in srgb, var(--realm-secondary) 94%, white) 17% 33%,
+    transparent 38% 57%,
+    color-mix(in srgb, var(--system-state-accent) 92%, white) 62% 78%,
+    transparent 83% 100%
+  );
+  animation: dualResonanceShellTwo 9s linear infinite reverse;
+}
+
+.ascension-core__chromatic-shell span:nth-child(3) {
+  inset: 22%;
+  background: repeating-conic-gradient(
+    from 20deg,
+    color-mix(in srgb, var(--system-state-accent) 72%, transparent) 0 4deg,
+    transparent 4deg 21deg,
+    color-mix(in srgb, var(--realm-secondary) 72%, transparent) 21deg 25deg,
+    transparent 25deg 42deg
+  );
+  padding: 1px;
+  animation: dualResonanceShellOne 6.6s linear infinite;
+}
+
+.ascension-core__plasma-arcs {
+  z-index: 3;
+  width: 304px;
+  height: 304px;
+  perspective: 760px;
+}
+
+.ascension-core__plasma-arcs span {
+  position: absolute;
+  inset: 10%;
+  border-top: 2px solid color-mix(in srgb, var(--system-state-accent) 86%, white);
+  border-right: 1px solid color-mix(in srgb, var(--system-state-accent) 34%, transparent);
+  border-bottom: 2px solid color-mix(in srgb, var(--realm-secondary) 88%, white);
+  border-left: 1px solid color-mix(in srgb, var(--realm-secondary) 38%, transparent);
+  border-radius: 50%;
+  box-shadow:
+    0 -5px 14px color-mix(in srgb, var(--system-state-accent) 28%, transparent),
+    0 5px 16px color-mix(in srgb, var(--realm-secondary) 31%, transparent),
+    inset 0 0 20px color-mix(in srgb, white 3%, transparent);
+  opacity: 0.56;
+  animation: dualResonancePlasmaArc 5.8s ease-in-out infinite;
+  animation-delay: var(--plasma-delay);
+  will-change: transform, opacity, filter;
+}
+
+.ascension-core__plasma-arcs span:nth-child(even) {
+  animation-direction: alternate-reverse;
+}
+
+.ascension-core__dual-reactor {
+  z-index: 3;
+  width: 250px;
+  height: 116px;
+  align-items: center;
+}
+
+.ascension-core__dual-reactor span {
+  position: absolute;
+  top: 50%;
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  translate: 0 -50%;
+  mix-blend-mode: screen;
+}
+
+.ascension-core__dual-reactor span:first-child {
+  left: 0;
+  background: radial-gradient(
+    circle,
+    white 0 3%,
+    color-mix(in srgb, var(--system-state-accent) 86%, white) 4% 12%,
+    color-mix(in srgb, var(--system-state-accent) 54%, transparent) 22%,
+    transparent 68%
+  );
+  box-shadow: 0 0 40px color-mix(in srgb, var(--system-state-accent) 36%, transparent);
+  animation: dualReactorPrimary 3.8s ease-in-out infinite;
+}
+
+.ascension-core__dual-reactor span:nth-child(2) {
+  right: 0;
+  background: radial-gradient(
+    circle,
+    white 0 3%,
+    color-mix(in srgb, var(--realm-secondary) 86%, white) 4% 12%,
+    color-mix(in srgb, var(--realm-secondary) 58%, transparent) 22%,
+    transparent 68%
+  );
+  box-shadow: 0 0 42px color-mix(in srgb, var(--realm-secondary) 40%, transparent);
+  animation: dualReactorSecondary 3.8s ease-in-out infinite;
+}
+
+.ascension-core__dual-reactor i {
+  position: absolute;
+  top: 50%;
+  right: 34px;
+  left: 34px;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--system-state-accent) 14%,
+    white 48% 52%,
+    var(--realm-secondary) 86%,
+    transparent
+  );
+  box-shadow:
+    0 0 10px color-mix(in srgb, var(--system-state-accent) 56%, transparent),
+    0 0 16px color-mix(in srgb, var(--realm-secondary) 48%, transparent);
+  opacity: 0.72;
+  translate: 0 -50%;
+  animation: dualReactorBridge 2.4s ease-in-out infinite;
+}
+
+.ascension-core__dual-reactor b {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 24px;
+  height: 24px;
+  background: conic-gradient(
+    var(--system-state-accent),
+    white,
+    var(--realm-secondary),
+    white,
+    var(--system-state-accent)
+  );
+  border: 2px solid color-mix(in srgb, white 72%, var(--system-state-accent));
+  border-radius: 50%;
+  box-shadow:
+    0 0 16px 4px color-mix(in srgb, var(--system-state-accent) 31%, transparent),
+    0 0 29px 7px color-mix(in srgb, var(--realm-secondary) 27%, transparent),
+    inset 0 0 9px rgb(255 255 255 / 70%);
+  translate: -50% -50%;
+  animation: dualReactorNucleus 2.8s linear infinite;
+}
+
+.ascension-core__reactor-facets {
+  z-index: 3;
+  width: 250px;
+  height: 250px;
+  perspective: 700px;
+}
+
+.ascension-core__reactor-facets span {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 42px;
+  height: 88px;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, white 28%, var(--system-state-accent)) 0 7%,
+    color-mix(in srgb, var(--system-state-accent) 31%, transparent) 22%,
+    transparent 66%
+  );
+  border: 1px solid color-mix(in srgb, var(--system-state-accent) 54%, transparent);
+  clip-path: polygon(50% 0, 100% 34%, 77% 100%, 23% 100%, 0 34%);
+  opacity: 0.48;
+  transform: translate(-50%, -50%) rotate(var(--facet-angle)) translateY(-94px) rotateX(34deg)
+    scaleY(0.88);
+  transform-origin: 50% 100%;
+  animation: dualFacetRespiration 4.6s ease-in-out infinite;
+  animation-delay: var(--facet-delay);
+  will-change: transform, opacity, filter;
+}
+
+.ascension-core__reactor-facets span:nth-child(even) {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, white 28%, var(--realm-secondary)) 0 7%,
+    color-mix(in srgb, var(--realm-secondary) 34%, transparent) 22%,
+    transparent 66%
+  );
+  border-color: color-mix(in srgb, var(--realm-secondary) 58%, transparent);
+}
+
+.ascension-core__power-spine {
+  z-index: 3;
+  width: 38px;
+  height: 286px;
+  filter: drop-shadow(0 -14px 15px color-mix(in srgb, var(--system-state-accent) 31%, transparent))
+    drop-shadow(0 14px 17px color-mix(in srgb, var(--realm-secondary) 34%, transparent));
+  opacity: 0.64;
+  animation: dualPowerSpinePulse 3.7s ease-in-out infinite;
+}
+
+.ascension-core__power-spine::before {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    color-mix(in srgb, var(--system-state-accent) 54%, transparent) 18%,
+    white 48% 52%,
+    color-mix(in srgb, var(--realm-secondary) 58%, transparent) 82%,
+    transparent
+  );
+  clip-path: polygon(
+    47% 0,
+    53% 0,
+    61% 42%,
+    100% 50%,
+    61% 58%,
+    53% 100%,
+    47% 100%,
+    39% 58%,
+    0 50%,
+    39% 42%
+  );
+  content: '';
+}
+
+.ascension-core__power-spine i {
+  position: absolute;
+  top: 13%;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  background: color-mix(in srgb, white 70%, var(--system-state-accent));
+  border: 1px solid white;
+  box-shadow: 0 0 13px 3px color-mix(in srgb, var(--system-state-accent) 55%, transparent);
+  rotate: 45deg;
+  translate: -50% -50%;
+  animation: dualSpineNode 2.9s ease-in-out infinite;
+}
+
+.ascension-core__power-spine i:nth-child(1) {
+  top: 13%;
+}
+
+.ascension-core__power-spine i:nth-child(2) {
+  top: 31%;
+  animation-delay: -0.58s;
+}
+
+.ascension-core__power-spine i:nth-child(3) {
+  top: 49%;
+  animation-delay: -1.16s;
+}
+
+.ascension-core__power-spine i:nth-child(4) {
+  top: 67%;
+  background: color-mix(in srgb, white 70%, var(--realm-secondary));
+  box-shadow: 0 0 13px 3px color-mix(in srgb, var(--realm-secondary) 58%, transparent);
+  animation-delay: -1.74s;
+}
+
+.ascension-core__power-spine i:nth-child(5) {
+  top: 85%;
+  background: color-mix(in srgb, white 70%, var(--realm-secondary));
+  box-shadow: 0 0 13px 3px color-mix(in srgb, var(--realm-secondary) 58%, transparent);
+  animation-delay: -2.32s;
+}
+
+.ascension-core:not([data-core-attunement='protocol-linked'])::before {
+  background:
+    radial-gradient(
+      circle at 34% 48%,
+      color-mix(in srgb, var(--core-primary) 24%, transparent),
+      transparent 47%
+    ),
+    radial-gradient(
+      circle at 66% 52%,
+      color-mix(in srgb, var(--core-secondary) 25%, transparent),
+      transparent 49%
+    );
+}
+
+.ascension-core:not([data-core-attunement='protocol-linked'])::after {
+  background:
+    radial-gradient(
+      ellipse at 34% 50%,
+      color-mix(in srgb, var(--core-primary) 43%, transparent),
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse at 66% 50%,
+      color-mix(in srgb, var(--core-secondary) 43%, transparent),
+      transparent 55%
+    );
+  border-color: color-mix(in srgb, var(--core-secondary) 25%, var(--core-primary));
+  box-shadow:
+    -34px 0 48px color-mix(in srgb, var(--core-primary) 18%, transparent),
+    34px 0 48px color-mix(in srgb, var(--core-secondary) 18%, transparent);
+}
+
+.ascension-core:not([data-core-attunement='protocol-linked']) .ascension-core__life-field::before {
+  background:
+    radial-gradient(
+      circle at 31% 50%,
+      white 0 1%,
+      color-mix(in srgb, var(--core-primary) 48%, transparent) 7%,
+      transparent 38%
+    ),
+    radial-gradient(
+      circle at 69% 50%,
+      white 0 1%,
+      color-mix(in srgb, var(--core-secondary) 52%, transparent) 7%,
+      transparent 38%
+    );
+  filter: drop-shadow(0 0 22px color-mix(in srgb, var(--core-primary) 42%, transparent))
+    drop-shadow(0 0 25px color-mix(in srgb, var(--core-secondary) 44%, transparent));
+  opacity: 0.72;
+}
+
+.ascension-core:not([data-core-attunement='protocol-linked']) .ascension-core__life-field::after {
+  width: 76px;
+  height: 76px;
+  background: conic-gradient(
+    from 90deg,
+    var(--core-primary) 0 42%,
+    white 48% 52%,
+    var(--core-secondary) 58% 100%
+  );
+  border: 0;
+  padding: 2px;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  box-shadow:
+    0 0 21px color-mix(in srgb, var(--core-primary) 38%, transparent),
+    0 0 31px color-mix(in srgb, var(--core-secondary) 35%, transparent);
+  opacity: 0.7;
+}
+
+.ascension-core:not([data-core-attunement='protocol-linked'])
+  .ascension-core__particle-orbit
+  i:nth-child(odd),
+.ascension-core:not([data-core-attunement='protocol-linked'])
+  .ascension-core__life-sparks
+  i:nth-child(odd) {
+  background: color-mix(in srgb, white 67%, var(--core-primary));
+  box-shadow:
+    0 0 8px 2px color-mix(in srgb, var(--core-primary) 78%, transparent),
+    0 0 20px color-mix(in srgb, var(--core-primary) 42%, transparent);
+}
+
+.ascension-core:not([data-core-attunement='protocol-linked'])
+  .ascension-core__particle-orbit
+  i:nth-child(even),
+.ascension-core:not([data-core-attunement='protocol-linked'])
+  .ascension-core__life-sparks
+  i:nth-child(even) {
+  background: color-mix(in srgb, white 64%, var(--core-secondary));
+  box-shadow:
+    0 0 9px 2px color-mix(in srgb, var(--core-secondary) 82%, transparent),
+    0 0 22px color-mix(in srgb, var(--core-secondary) 46%, transparent);
+}
+
+.ascension-core:not([data-core-attunement='protocol-linked'])
+  .ascension-core__bio-aura
+  span:nth-child(2) {
+  border-color: color-mix(in srgb, var(--core-secondary) 68%, transparent);
+  box-shadow:
+    inset 0 0 34px color-mix(in srgb, var(--core-secondary) 12%, transparent),
+    0 0 27px color-mix(in srgb, var(--core-secondary) 18%, transparent);
+}
+
+.ascension-core:not([data-core-attunement='protocol-linked'])
+  .ascension-core__neural-web
+  span:nth-child(odd) {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--core-primary) 74%, transparent) 18%,
+    color-mix(in srgb, white 32%, var(--core-primary)) 74%,
+    transparent
+  );
+}
+
+.ascension-core:not([data-core-attunement='protocol-linked'])
+  .ascension-core__neural-web
+  span:nth-child(even) {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--core-secondary) 76%, transparent) 18%,
+    color-mix(in srgb, white 32%, var(--core-secondary)) 74%,
+    transparent
+  );
+}
+
+.ascension-core:not([data-core-attunement='protocol-linked'])
+  .ascension-core__neural-web
+  span:nth-child(odd)
+  i {
+  background: color-mix(in srgb, white 74%, var(--core-primary));
+  box-shadow: 0 0 12px 3px color-mix(in srgb, var(--core-primary) 82%, transparent);
+}
+
+.ascension-core:not([data-core-attunement='protocol-linked'])
+  .ascension-core__neural-web
+  span:nth-child(even)
+  i {
+  background: color-mix(in srgb, white 74%, var(--core-secondary));
+  box-shadow: 0 0 12px 3px color-mix(in srgb, var(--core-secondary) 84%, transparent);
+}
+
+.ascension-core:not([data-core-attunement='protocol-linked']) .ascension-core__field {
+  background:
+    radial-gradient(
+      circle at 35% 50%,
+      color-mix(in srgb, white 84%, var(--core-primary)) 0 1%,
+      var(--core-primary) 2%,
+      color-mix(in srgb, var(--core-primary) 16%, transparent) 12%,
+      transparent 35%
+    ),
+    radial-gradient(
+      circle at 65% 50%,
+      color-mix(in srgb, white 84%, var(--core-secondary)) 0 1%,
+      var(--core-secondary) 2%,
+      color-mix(in srgb, var(--core-secondary) 18%, transparent) 12%,
+      transparent 35%
+    ),
+    conic-gradient(
+      from -90deg,
+      color-mix(in srgb, var(--core-primary) 68%, white) 0 21%,
+      transparent 25% 29%,
+      color-mix(in srgb, var(--core-secondary) 69%, white) 33% 54%,
+      transparent 58% 62%,
+      color-mix(in srgb, var(--core-primary) 47%, transparent) 66% 78%,
+      color-mix(in srgb, var(--core-secondary) 49%, transparent) 83% 95%,
+      transparent
+    ),
+    repeating-conic-gradient(
+      from 0deg,
+      transparent 0deg 11deg,
+      color-mix(in srgb, var(--core-primary) 25%, transparent) 11deg 12deg,
+      transparent 12deg 23deg,
+      color-mix(in srgb, var(--core-secondary) 27%, transparent) 23deg 24deg
+    );
+  border-color: color-mix(in srgb, var(--core-primary) 50%, var(--core-secondary));
+  box-shadow:
+    -22px 0 67px color-mix(in srgb, var(--core-primary) 31%, transparent),
+    22px 0 70px color-mix(in srgb, var(--core-secondary) 32%, transparent),
+    inset -21px 0 44px color-mix(in srgb, var(--core-primary) 19%, transparent),
+    inset 21px 0 46px color-mix(in srgb, var(--core-secondary) 20%, transparent);
+}
+
+.ascension-core:not([data-core-attunement='protocol-linked']) .ascension-core__field::before {
+  background: linear-gradient(
+    transparent,
+    color-mix(in srgb, var(--core-primary) 58%, transparent) 28%,
+    white 48% 52%,
+    color-mix(in srgb, var(--core-secondary) 61%, transparent) 72%,
+    transparent
+  );
+  box-shadow:
+    0 -18px 19px color-mix(in srgb, var(--core-primary) 35%, transparent),
+    0 18px 21px color-mix(in srgb, var(--core-secondary) 37%, transparent);
+}
+
+.ascension-core:not([data-core-attunement='protocol-linked']) .ascension-core__field::after {
+  background:
+    radial-gradient(
+      ellipse at 30% 50%,
+      color-mix(in srgb, var(--core-primary) 54%, transparent),
+      transparent 62%
+    ),
+    radial-gradient(
+      ellipse at 70% 50%,
+      color-mix(in srgb, var(--core-secondary) 56%, transparent),
+      transparent 62%
+    );
+  border-color: color-mix(in srgb, var(--core-primary) 32%, var(--core-secondary));
+}
+
+.ascension-core:not([data-core-attunement='protocol-linked'])
+  .ascension-core__field
+  i:nth-child(odd) {
+  background: color-mix(in srgb, white 72%, var(--core-primary));
+  box-shadow: 0 0 13px 3px var(--core-primary);
+}
+
+.ascension-core:not([data-core-attunement='protocol-linked'])
+  .ascension-core__field
+  i:nth-child(even) {
+  background: color-mix(in srgb, white 72%, var(--core-secondary));
+  box-shadow: 0 0 13px 3px var(--core-secondary);
+}
+
+.ascension-core:not([data-core-attunement='protocol-linked'])
+  .ascension-core__cage
+  span:nth-child(1) {
+  border-color: color-mix(in srgb, var(--core-primary) 66%, transparent);
+  box-shadow: 0 0 23px color-mix(in srgb, var(--core-primary) 18%, transparent);
+}
+
+.ascension-core:not([data-core-attunement='protocol-linked'])
+  .ascension-core__cage
+  span:nth-child(2) {
+  border-color: color-mix(in srgb, var(--core-secondary) 72%, transparent);
+  box-shadow: 0 0 25px color-mix(in srgb, var(--core-secondary) 21%, transparent);
+}
+
+.ascension-core:not([data-core-attunement='protocol-linked'])
+  .ascension-core__cage
+  span:nth-child(3) {
+  border-color: color-mix(in srgb, var(--core-primary) 48%, var(--core-secondary));
+}
+
+.ascension-core:not([data-core-attunement='protocol-linked']) .ascension-core__emblem::before {
+  border-color: color-mix(in srgb, var(--core-primary) 62%, transparent);
+  box-shadow: 0 0 29px color-mix(in srgb, var(--core-primary) 19%, transparent);
+}
+
+.ascension-core:not([data-core-attunement='protocol-linked']) .ascension-core__emblem::after {
+  border-color: color-mix(in srgb, var(--core-secondary) 70%, transparent);
+  box-shadow: 0 0 32px color-mix(in srgb, var(--core-secondary) 22%, transparent);
+}
+
+.ascension-core:not([data-core-attunement='protocol-linked']) .class-emblem {
+  box-shadow:
+    -17px 0 46px color-mix(in srgb, var(--core-primary) 26%, transparent),
+    17px 0 50px color-mix(in srgb, var(--core-secondary) 28%, transparent),
+    inset -14px 0 29px color-mix(in srgb, var(--core-primary) 12%, transparent),
+    inset 14px 0 31px color-mix(in srgb, var(--core-secondary) 14%, transparent);
+}
+
+.ascension-core:not([data-core-attunement='protocol-linked']) .headquarters-stage__orbit {
+  border-color: color-mix(in srgb, var(--core-primary) 32%, var(--core-secondary));
+  box-shadow:
+    -18px 0 24px color-mix(in srgb, var(--core-primary) 15%, transparent),
+    18px 0 26px color-mix(in srgb, var(--core-secondary) 17%, transparent);
+}
+
+.ascension-core:not([data-core-attunement='protocol-linked'])
+  .headquarters-stage__orbit
+  i:nth-child(1) {
+  border-top-color: var(--core-primary);
+  border-left-color: color-mix(in srgb, var(--core-primary) 47%, transparent);
+}
+
+.ascension-core:not([data-core-attunement='protocol-linked'])
+  .headquarters-stage__orbit
+  i:nth-child(2) {
+  border-right-color: var(--core-secondary);
+  border-bottom-color: color-mix(in srgb, var(--core-secondary) 54%, transparent);
+}
+
+.ascension-core:not([data-core-attunement='protocol-linked'])
+  .headquarters-stage__orbit
+  i:nth-child(3) {
+  background: conic-gradient(
+    var(--core-primary),
+    white,
+    var(--core-secondary),
+    var(--core-primary)
+  );
+  box-shadow:
+    -12px 0 36px 12px color-mix(in srgb, var(--core-primary) 32%, transparent),
+    12px 0 39px 13px color-mix(in srgb, var(--core-secondary) 34%, transparent);
+}
+
+.ascension-core:not([data-core-attunement='protocol-linked']) .ascension-core__halo::before {
+  filter: drop-shadow(0 0 16px color-mix(in srgb, var(--core-primary) 67%, transparent));
+  padding: 3px;
+}
+
+.ascension-core:not([data-core-attunement='protocol-linked']) .ascension-core__halo::after {
+  filter: drop-shadow(0 0 18px color-mix(in srgb, var(--core-secondary) 72%, transparent));
+  padding: 2px;
+}
+
+.ascension-core:not([data-core-attunement='protocol-linked'])
+  .ascension-core__aperture
+  span:nth-child(2) {
+  border-color: color-mix(in srgb, var(--core-secondary) 76%, transparent);
+  box-shadow: 0 0 22px color-mix(in srgb, var(--core-secondary) 19%, transparent);
+}
+
+.ascension-core:not([data-core-attunement='protocol-linked'])
+  .ascension-core__aperture
+  span:nth-child(4) {
+  background: conic-gradient(
+    var(--core-primary),
+    white,
+    var(--core-secondary),
+    var(--core-primary)
+  );
+  box-shadow:
+    -8px 0 27px 7px color-mix(in srgb, var(--core-primary) 35%, transparent),
+    8px 0 29px 8px color-mix(in srgb, var(--core-secondary) 37%, transparent);
+}
+
+.ascension-core:not([data-core-attunement='protocol-linked']) .ascension-core__satellite {
+  --satellite-energy: var(--core-primary);
+
+  color: color-mix(in srgb, var(--satellite-energy) 79%, white);
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--satellite-energy) 18%, var(--panel-strong)),
+    color-mix(in srgb, var(--panel) 88%, transparent)
+  );
+  border-color: color-mix(in srgb, var(--satellite-energy) 58%, var(--border));
+  box-shadow:
+    0 12px 26px rgb(0 0 0 / 27%),
+    0 0 19px color-mix(in srgb, var(--satellite-energy) 16%, transparent);
+}
+
+.ascension-core:not([data-core-attunement='protocol-linked'])
+  :is(.ascension-core__satellite--sync, .ascension-core__satellite--streak) {
+  --satellite-energy: var(--core-secondary);
+}
+
+.ascension-core:not([data-core-attunement='protocol-linked']) .ascension-core__readout {
+  background:
+    radial-gradient(
+      ellipse at 25% 50%,
+      color-mix(in srgb, var(--core-primary) 12%, transparent),
+      transparent 48%
+    ),
+    radial-gradient(
+      ellipse at 75% 50%,
+      color-mix(in srgb, var(--core-secondary) 13%, transparent),
+      transparent 48%
+    ),
+    linear-gradient(90deg, transparent, rgba(3, 8, 12, 0.82), transparent);
+  border-top-color: color-mix(in srgb, var(--core-primary) 37%, transparent);
+  border-bottom-color: color-mix(in srgb, var(--core-secondary) 39%, transparent);
+}
+
+.ascension-core:not([data-core-attunement='protocol-linked']) .ascension-core__readout span {
+  background: linear-gradient(90deg, var(--core-primary), white 48% 52%, var(--core-secondary));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: none;
+}
+
+.ascension-core:not([data-core-attunement='protocol-linked']) .ascension-core__readout em {
+  color: color-mix(in srgb, var(--core-secondary) 62%, white);
+  text-shadow: 0 0 13px color-mix(in srgb, var(--core-secondary) 31%, transparent);
+}
+
+.ascension-core:not([data-core-attunement='protocol-linked']) .ascension-core__activation {
+  color: color-mix(in srgb, var(--core-primary) 48%, white) !important;
+  background:
+    linear-gradient(var(--panel-strong), var(--panel-strong)) padding-box,
+    linear-gradient(90deg, var(--core-primary), var(--core-secondary)) border-box;
+  border: 1px solid transparent;
+  box-shadow:
+    -8px 0 18px color-mix(in srgb, var(--core-primary) 12%, transparent),
+    8px 0 18px color-mix(in srgb, var(--core-secondary) 13%, transparent);
+}
+
+.ascension-core.is-awakened .ascension-core__chromatic-shell {
+  filter: saturate(1.35) brightness(1.2)
+    drop-shadow(0 0 20px color-mix(in srgb, var(--system-state-accent) 42%, transparent))
+    drop-shadow(0 0 24px color-mix(in srgb, var(--realm-secondary) 44%, transparent));
+}
+
+.ascension-core.is-awakened .ascension-core__chromatic-shell span:nth-child(1) {
+  animation-duration: 6.2s;
+}
+
+.ascension-core.is-awakened .ascension-core__chromatic-shell span:nth-child(2) {
+  animation-duration: 4.5s;
+}
+
+.ascension-core.is-awakened .ascension-core__plasma-arcs span {
+  border-width: 2px;
+  filter: saturate(1.45) brightness(1.35);
+  opacity: 0.86;
+  animation-duration: 3.1s;
+}
+
+.ascension-core.is-awakened .ascension-core__dual-reactor {
+  filter: saturate(1.4) brightness(1.25);
+}
+
+.ascension-core.is-awakened .ascension-core__energy-wings {
+  filter: saturate(1.42) brightness(1.24)
+    drop-shadow(-23px 0 27px color-mix(in srgb, var(--system-state-accent) 36%, transparent))
+    drop-shadow(23px 0 29px color-mix(in srgb, var(--realm-secondary) 39%, transparent));
+}
+
+.ascension-core.is-awakened .ascension-core__energy-wings span {
+  opacity: 0.58;
+  animation-duration: 3.4s;
+}
+
+.ascension-core.is-awakened .ascension-core__reactor-facets span {
+  filter: saturate(1.5) brightness(1.35);
+  opacity: 0.72;
+  animation-duration: 2.8s;
+}
+
+.ascension-core.is-awakened .ascension-core__power-spine {
+  filter: saturate(1.45) brightness(1.32)
+    drop-shadow(0 -17px 20px color-mix(in srgb, var(--system-state-accent) 43%, transparent))
+    drop-shadow(0 17px 22px color-mix(in srgb, var(--realm-secondary) 46%, transparent));
+  opacity: 0.86;
+}
+
+@keyframes dualEnergyWingBreath {
+  0%,
+  100% {
+    filter: brightness(0.82);
+    opacity: 0.25;
+    scale: 0.91 0.86;
+  }
+  48% {
+    filter: brightness(1.32);
+    opacity: 0.48;
+    scale: 1.08 1.04;
+  }
+}
+
+@keyframes dualFacetRespiration {
+  0%,
+  100% {
+    filter: brightness(0.78);
+    opacity: 0.31;
+    transform: translate(-50%, -50%) rotate(var(--facet-angle)) translateY(-86px) rotateX(42deg)
+      scaleY(0.76);
+  }
+  50% {
+    filter: brightness(1.36);
+    opacity: 0.66;
+    transform: translate(-50%, -50%) rotate(calc(var(--facet-angle) + 7deg)) translateY(-102px)
+      rotateX(25deg) scaleY(1.06);
+  }
+}
+
+@keyframes dualPowerSpinePulse {
+  0%,
+  100% {
+    filter: brightness(0.8);
+    opacity: 0.46;
+    scale: 0.92 0.96;
+  }
+  50% {
+    filter: brightness(1.42);
+    opacity: 0.78;
+    scale: 1.12 1.03;
+  }
+}
+
+@keyframes dualSpineNode {
+  0%,
+  100% {
+    opacity: 0.28;
+    scale: 0.68;
+  }
+  42% {
+    opacity: 1;
+    scale: 1.32;
+  }
+}
+
+@keyframes dualResonanceShellOne {
+  from {
+    transform: rotateX(67deg) rotateY(7deg) rotateZ(0deg);
+  }
+  to {
+    transform: rotateX(67deg) rotateY(7deg) rotateZ(360deg);
+  }
+}
+
+@keyframes dualResonanceShellTwo {
+  from {
+    transform: rotateY(68deg) rotateX(8deg) rotateZ(0deg);
+  }
+  to {
+    transform: rotateY(68deg) rotateX(8deg) rotateZ(360deg);
+  }
+}
+
+@keyframes dualResonancePlasmaArc {
+  0%,
+  100% {
+    filter: brightness(0.88);
+    opacity: 0.34;
+    transform: rotateZ(var(--plasma-angle)) rotateX(69deg) scale(0.91);
+  }
+  50% {
+    filter: brightness(1.38);
+    opacity: 0.72;
+    transform: rotateZ(calc(var(--plasma-angle) + 18deg)) rotateX(73deg) scale(1.03);
+  }
+}
+
+@keyframes dualReactorPrimary {
+  0%,
+  100% {
+    opacity: 0.54;
+    scale: 0.88;
+  }
+  42% {
+    opacity: 1;
+    scale: 1.16;
+  }
+}
+
+@keyframes dualReactorSecondary {
+  0%,
+  100% {
+    opacity: 1;
+    scale: 1.16;
+  }
+  58% {
+    opacity: 0.54;
+    scale: 0.88;
+  }
+}
+
+@keyframes dualReactorBridge {
+  0%,
+  100% {
+    opacity: 0.38;
+    scale: 0.91 1;
+  }
+  50% {
+    opacity: 1;
+    scale: 1.06 1.8;
+  }
+}
+
+@keyframes dualReactorNucleus {
+  from {
+    rotate: 0deg;
+    scale: 0.9;
+  }
+  50% {
+    scale: 1.16;
+  }
+  to {
+    rotate: 360deg;
+    scale: 0.9;
+  }
+}
+
+html[data-interface='clean']
+  :is(
+    .ascension-core__energy-wings,
+    .ascension-core__chromatic-shell,
+    .ascension-core__plasma-arcs
+  ) {
+  display: none;
+}
+
+html[data-intensity='subtle']
+  :is(
+    .ascension-core__energy-wings,
+    .ascension-core__chromatic-shell,
+    .ascension-core__plasma-arcs,
+    .ascension-core__dual-reactor,
+    .ascension-core__reactor-facets,
+    .ascension-core__power-spine
+  ) {
+  opacity: 0.48;
+}
+
+html[data-motion='reduced']
+  :is(
+    .ascension-core__energy-wings span,
+    .ascension-core__chromatic-shell span,
+    .ascension-core__plasma-arcs span,
+    .ascension-core__dual-reactor span,
+    .ascension-core__dual-reactor i,
+    .ascension-core__dual-reactor b,
+    .ascension-core__reactor-facets span,
+    .ascension-core__power-spine,
+    .ascension-core__power-spine i
+  ) {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ascension-core__energy-wings span,
+  .ascension-core__chromatic-shell span,
+  .ascension-core__plasma-arcs span,
+  .ascension-core__dual-reactor span,
+  .ascension-core__dual-reactor i,
+  .ascension-core__dual-reactor b,
+  .ascension-core__reactor-facets span,
+  .ascension-core__power-spine,
+  .ascension-core__power-spine i {
+    animation: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .ascension-core__energy-wings {
+    width: 310px;
+    height: 190px;
+  }
+
+  .ascension-core__chromatic-shell {
+    width: 294px;
+    height: 294px;
+  }
+
+  .ascension-core__plasma-arcs {
+    width: 272px;
+    height: 272px;
+  }
+
+  .ascension-core__dual-reactor {
+    width: 218px;
+  }
+
+  .ascension-core__reactor-facets {
+    width: 224px;
+    height: 224px;
+  }
+
+  .ascension-core__reactor-facets span {
+    width: 36px;
+    height: 75px;
+  }
+
+  .ascension-core__power-spine {
+    height: 252px;
+  }
+}
+
+@media (max-width: 390px) {
+  .ascension-core__energy-wings {
+    width: 292px;
+  }
+
+  .ascension-core__chromatic-shell {
+    width: 276px;
+    height: 276px;
+  }
+
+  .ascension-core__plasma-arcs {
+    width: 256px;
+    height: 256px;
+  }
+}
+
 .core-attunement-config {
   padding-top: 3px;
   border-top: 1px solid color-mix(in srgb, var(--mint) 12%, var(--border-soft));

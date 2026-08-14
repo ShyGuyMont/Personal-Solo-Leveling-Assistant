@@ -135,7 +135,7 @@ export function DashboardPage() {
         </div>
         <div className="hero-panel__version" aria-hidden="true">
           <span>V{APP_VERSION}</span>
-          <b>CORE ATTUNEMENT</b>
+          <b>DUAL RESONANCE</b>
         </div>
         <div className="hero-panel__top headquarters-stage__header">
           <div>
@@ -227,6 +227,54 @@ export function DashboardPage() {
                     } as CSSProperties
                   }
                 />
+              ))}
+            </div>
+            <div className="ascension-core__energy-wings" aria-hidden="true">
+              <span />
+              <span />
+              <span />
+              <span />
+            </div>
+            <div className="ascension-core__chromatic-shell" aria-hidden="true">
+              <span />
+              <span />
+              <span />
+            </div>
+            <div className="ascension-core__plasma-arcs" aria-hidden="true">
+              {Array.from({ length: 6 }, (_, arcIndex) => (
+                <span
+                  key={arcIndex}
+                  style={
+                    {
+                      '--plasma-angle': `${arcIndex * 60}deg`,
+                      '--plasma-delay': `${-(arcIndex * 0.72)}s`,
+                    } as CSSProperties
+                  }
+                />
+              ))}
+            </div>
+            <div className="ascension-core__dual-reactor" aria-hidden="true">
+              <span />
+              <span />
+              <i />
+              <b />
+            </div>
+            <div className="ascension-core__reactor-facets" aria-hidden="true">
+              {Array.from({ length: 8 }, (_, facetIndex) => (
+                <span
+                  key={facetIndex}
+                  style={
+                    {
+                      '--facet-angle': `${facetIndex * 45}deg`,
+                      '--facet-delay': `${-(facetIndex * 0.23)}s`,
+                    } as CSSProperties
+                  }
+                />
+              ))}
+            </div>
+            <div className="ascension-core__power-spine" aria-hidden="true">
+              {Array.from({ length: 5 }, (_, nodeIndex) => (
+                <i key={nodeIndex} />
               ))}
             </div>
             <div className="ascension-core__bio-aura" aria-hidden="true">

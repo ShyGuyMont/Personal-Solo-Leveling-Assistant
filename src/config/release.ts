@@ -1,4 +1,4 @@
-export const APP_VERSION = '10.2.0';
+export const APP_VERSION = '10.3.0';
 export const DATABASE_SCHEMA_VERSION = 29;
 export const SAVE_FORMAT_VERSION = 29;
 
@@ -9,6 +9,20 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 10.3.0 · Dual Resonance',
+    detail:
+      'Every Ascension Core now behaves like two living energies locked into one artifact, giving the secondary attunement color equal presence across motion, light, structure, and awakening.',
+    points: [
+      'The Core is no longer defined by stacked rings: a crystalline reactor body, expanding faceted armor, asymmetric energy wings, and a five-node power spine give it a living three-dimensional silhouette.',
+      'A new dual reactor exposes distinct primary and secondary energy lobes around the central Class emblem, joined by a pulsing white-hot resonance bridge and bi-color nucleus.',
+      'Three counter-rotating chromatic shells and six crossing plasma arcs now support the artifact as orbital machinery while both energies visibly circulate through its physical structure.',
+      'Orbital particles, rising sparks, neural currents, field nodes, cage rings, satellite telemetry, the pedestal, and the readout now alternate between primary and secondary energy instead of favoring one color.',
+      'Awakening accelerates the counter-current and forces a brighter dual-energy collision while the dormant, stirring, surging, and synchronized vitality phases still control overall intensity.',
+      'Mobile sizing, Clean interface behavior, reduced-motion preferences, real charge progression, and every existing Core Attunement remain preserved.',
+      'Dual Resonance is visual only and cannot alter XP, missions, Class gates, rewards, companion intelligence, or saved campaign history.',
+    ],
+  },
   {
     title: 'Version 10.2.0 · Core Attunement',
     detail:
