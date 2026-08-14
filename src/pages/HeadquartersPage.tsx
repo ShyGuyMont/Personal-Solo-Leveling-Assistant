@@ -348,7 +348,7 @@ export function HeadquartersPage() {
         <div className="headquarters-section-title">
           <div>
             <p className="eyebrow">PARTY ROSTER</p>
-            <h2>Nine different kinds of support</h2>
+            <h2>Twelve different kinds of support</h2>
           </div>
           <Users size={23} />
         </div>
