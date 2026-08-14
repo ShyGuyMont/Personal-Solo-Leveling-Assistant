@@ -213,14 +213,6 @@ export interface AiProgressContext {
         outcome?: string;
       }>;
       privateWritingExcluded: true;
-      integrityShield?: {
-        trackingEnabled: boolean;
-        enforcement: string;
-        adultWebLimitEnabled: boolean;
-        restrictedSitesConfigured: boolean;
-        settingsPasscodeProtected: boolean;
-        lastVerifiedAt?: string;
-      };
     };
     training: {
       bodyDiagnostic: {

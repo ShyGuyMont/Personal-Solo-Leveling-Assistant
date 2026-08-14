@@ -1519,22 +1519,6 @@ export interface CalendarEventOccurrence {
   recurring: boolean;
 }
 
-export type IntegrityShieldEnforcement = 'not-configured' | 'screen-time' | 'managed-filter';
-
-export interface IntegrityShieldProfile {
-  id: 'primary';
-  enabled: boolean;
-  enforcement: IntegrityShieldEnforcement;
-  adultWebLimitEnabled: boolean;
-  restrictedSitesConfigured: boolean;
-  settingsPasscodeProtected: boolean;
-  accountabilityEnabled: boolean;
-  lastVerifiedAt?: string;
-  interruptionPlan: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
 export interface AppMetadata {
   id: string;
   value: string | number | boolean | Record<string, unknown>;

@@ -222,7 +222,6 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
     arcKnowledge,
     calendarEvents,
     agentMissions,
-    integrityShield,
   ] = await Promise.all([
     db.dailyReviews.where('date').aboveOrEqual(recentStart).toArray(),
     db.dailyMissions.where('date').aboveOrEqual(recentStart).toArray(),
@@ -261,9 +260,6 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
       : Promise.resolve(emptyArcKnowledgeContext()),
     shouldShareCalendar(source) ? db.calendarEvents.toArray() : Promise.resolve([]),
     db.agentMissions.toArray(),
-    ['snow', 'selah', 'amara', 'cipher', 'party'].includes(source.audience)
-      ? db.integrityShields.get('primary')
-      : Promise.resolve(undefined),
   ]);
 
   const available = source.missions.filter((mission) => mission.enabled && !mission.archived);
@@ -627,16 +623,6 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
             outcome: session.outcome,
           })),
         privateWritingExcluded: true,
-        integrityShield: integrityShield
-          ? {
-              trackingEnabled: integrityShield.enabled,
-              enforcement: integrityShield.enforcement,
-              adultWebLimitEnabled: integrityShield.adultWebLimitEnabled,
-              restrictedSitesConfigured: integrityShield.restrictedSitesConfigured,
-              settingsPasscodeProtected: integrityShield.settingsPasscodeProtected,
-              lastVerifiedAt: integrityShield.lastVerifiedAt,
-            }
-          : undefined,
       },
       training: {
         bodyDiagnostic: {

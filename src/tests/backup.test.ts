@@ -485,7 +485,6 @@ describe('save validation and recovery', () => {
       'arcCharacters',
       'arcCanonSources',
       'calendarEvents',
-      'integrityShields',
     ]) {
       expect(save.data[table]).toHaveLength(1);
     }

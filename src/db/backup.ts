@@ -174,24 +174,6 @@ function migrateData(
   if (version <= 27) {
     data.agentMissions ??= [];
     data.treasuryAccounts ??= [];
-    if (!data.integrityShields?.some((row) => isObject(row) && row.id === 'primary')) {
-      const now = new Date().toISOString();
-      data.integrityShields = [
-        {
-          id: 'primary',
-          enabled: false,
-          enforcement: 'not-configured',
-          adultWebLimitEnabled: false,
-          restrictedSitesConfigured: false,
-          settingsPasscodeProtected: false,
-          accountabilityEnabled: true,
-          interruptionPlan:
-            'Close the current screen, move to a shared space, take ten slow breaths, and contact a trusted person if the pull remains strong.',
-          createdAt: now,
-          updatedAt: now,
-        },
-      ];
-    }
   }
   data.dailyOperations = data.dailyOperations.map((row) => {
     if (!isObject(row) || !isObject(row.pendingProposal)) return row;
@@ -1191,27 +1173,6 @@ function validateData(data: Record<string, unknown[]>) {
     ) {
       throw new Error('A Treasury challenge contains an impossible value.');
     }
-  }
-  const shield = requiredSingleton<Record<string, unknown>>(data, 'integrityShields');
-  if (
-    typeof shield.enabled !== 'boolean' ||
-    !['not-configured', 'screen-time', 'managed-filter'].includes(String(shield.enforcement)) ||
-    typeof shield.adultWebLimitEnabled !== 'boolean' ||
-    typeof shield.restrictedSitesConfigured !== 'boolean' ||
-    typeof shield.settingsPasscodeProtected !== 'boolean' ||
-    typeof shield.accountabilityEnabled !== 'boolean' ||
-    typeof shield.interruptionPlan !== 'string' ||
-    !shield.interruptionPlan.trim() ||
-    shield.interruptionPlan.length > 1_000 ||
-    typeof shield.createdAt !== 'string' ||
-    !Number.isFinite(Date.parse(shield.createdAt)) ||
-    typeof shield.updatedAt !== 'string' ||
-    !Number.isFinite(Date.parse(shield.updatedAt)) ||
-    (shield.lastVerifiedAt !== undefined &&
-      (typeof shield.lastVerifiedAt !== 'string' ||
-        !Number.isFinite(Date.parse(shield.lastVerifiedAt))))
-  ) {
-    throw new Error('The Explicit Content Shield contains an impossible value.');
   }
   const trainingLocations = new Set(['home', 'gym', 'conditioning', 'recovery']);
   const trainingStatuses = new Set(['assigned', 'active', 'paused', 'completed', 'abandoned']);

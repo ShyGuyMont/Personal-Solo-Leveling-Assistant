@@ -12,14 +12,13 @@ export const RELEASE_SECTIONS: ReleaseSection[] = [
   {
     title: 'Version 9.0.0 · Sovereign Agent Engine',
     detail:
-      'The twelve companions gain a protected mission-authoring layer around the unchanged Daily Mission foundation, Cassian receives a real balance and forecasting cockpit, and Sanctuary adds an honest on-device bridge to Apple’s actual website restrictions.',
+      'The twelve companions gain a protected mission-authoring layer around the unchanged Daily Mission foundation, while Cassian receives a real balance and forecasting cockpit for private financial planning.',
     points: [
       'Companion Orders are persistent optional missions with a specialist owner, realm, threat tier, due date, recurrence, checklist, completion history, and same-day reward reversal; the original Daily Missions, rolls, Class gates, and configured rewards remain locked and authoritative.',
       'The Mission Forge assigns fixed reward tiers and a 150 XP daily Agent Mission ceiling, preventing an unlimited custom-mission loop while allowing meaningful companion-created side work to advance the campaign.',
       'Every Companion Order change is written to the local audit trail, retirement preserves history instead of deleting it, and unfinished checklist steps block an accidental reward claim.',
       'Cassian’s Treasury adds private manual account snapshots, known-net-worth calculation, editable balances, recurring-bill estimates, debt minimums, and a visible monthly obligation floor without connecting to a bank or pretending money moved.',
-      'The Explicit Content Shield guides the real iPhone Screen Time path, distinguishes device enforcement from self-reported setup, records optional Never Allow and passcode layers, and keeps an editable interruption plan plus one-tap Stronghold entry inside Sanctuary.',
-      'The installed PWA never claims to inspect Safari, YouTube, or other apps; custom system-wide filtering remains a future native iPhone capability, while the complete mission, Ledger, and Shield records stay offline-first and travel through Archive Shield Version 28.',
+      'Companion-created missions and Treasury account records remain offline-first, private to the device, and included in Archive Shield Version 28 exports.',
     ],
   },
   {

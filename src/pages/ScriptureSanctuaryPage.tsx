@@ -13,7 +13,6 @@ import {
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { getCompanion, getCompanionImage } from '@/config/companions';
-import { IntegrityShieldPanel } from '@/components/IntegrityShieldPanel';
 import { SANCTUARY_CONCERNS, getSanctuaryConcern } from '@/config/scripture';
 import {
   abandonSanctuarySession,
@@ -678,18 +677,6 @@ export function ScriptureSanctuaryPage() {
             <small>You can choose up to two. Notes are optional; honesty is enough to begin.</small>
           </div>
         </section>
-      )}
-
-      {!mode && (
-        <IntegrityShieldPanel
-          onActivateStronghold={() => {
-            setMode('stronghold');
-            setPrimaryConcern('sexual-integrity');
-            setSecondaryConcern(undefined);
-            setError('');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
-        />
       )}
 
       <Link to="/missions" className="sanctuary-back-link">
