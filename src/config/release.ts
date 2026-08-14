@@ -1,4 +1,4 @@
-export const APP_VERSION = '10.3.0';
+export const APP_VERSION = '10.4.0';
 export const DATABASE_SCHEMA_VERSION = 29;
 export const SAVE_FORMAT_VERSION = 29;
 
@@ -9,6 +9,19 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 10.4.0 · Adaptive Pulse',
+    detail:
+      'The living System now senses the device beneath it, protecting phone temperature and battery life while preserving the Ascension Core, companion presence, and complete cinematic identity.',
+    points: [
+      'A new automatic performance engine distinguishes full-power computers, ordinary phones, and constrained devices without adding another setting or changing the Hunter’s selected interface style.',
+      'The full-screen atmosphere now renders at a phone-appropriate frame rate, resolution, particle count, and glow budget instead of redrawing its most expensive effects at the display’s maximum refresh rate.',
+      'Leaving the app immediately suspends every cinematic timeline and the atmosphere renderer; returning restores the living System without disturbing navigation, conversations, timers, or saved campaign state.',
+      'Mobile transparency, background haze, and moving-filter work are reduced at the rendering layer while the Core keeps its dual reactor, chromatic shells, plasma arcs, energy wings, power spine, and visible secondary attunement color.',
+      'The Core’s orbital particles now travel as synchronized fields on phones instead of maintaining dozens of separate twinkle timelines, and its membrane breathes as one organism rather than continuously reshaping every layer.',
+      'Reduced Motion, Subtle intensity, Clean interface, desktop cinematics, AI voice, progression, XP, missions, and every private local record remain fully authoritative and unchanged.',
+    ],
+  },
   {
     title: 'Version 10.3.0 · Dual Resonance',
     detail:

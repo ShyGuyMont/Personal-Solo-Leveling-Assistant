@@ -19,6 +19,7 @@ import { SystemParticleField } from '@/components/SystemParticleField';
 import { APP_VERSION } from '@/config/release';
 import { calculateRankQualification } from '@/game/rank';
 import { getLiveSystemState, getSystemCycle, getSystemRealm } from '@/game/systemExperience';
+import { useAdaptivePerformance } from '@/hooks/useAdaptivePerformance';
 import { useSystemDepth } from '@/hooks/useSystemDepth';
 import { Link, NavLink } from '@/router';
 import { useRoutePath } from '@/routeState';
@@ -54,6 +55,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const documentTheme = getDocumentTheme(colorTheme);
   const realm = getSystemRealm(path);
   const shellRef = useRef<HTMLDivElement>(null);
+  const performanceProfile = useAdaptivePerformance(settings?.reducedMotion ?? false);
   const [privacyActive, setPrivacyActive] = useState(false);
   const [online, setOnline] = useState(navigator.onLine);
   const qualification =
@@ -135,6 +137,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       data-interface={settings?.interfaceStyle ?? 'system'}
       data-intensity={settings?.themeIntensity ?? 'standard'}
       data-motion={settings?.reducedMotion ? 'reduced' : 'full'}
+      data-performance={performanceProfile}
       data-realm={realm}
       data-system-state={systemState}
       data-cycle={cycle}
@@ -145,6 +148,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         theme={colorTheme}
         intensity={settings?.themeIntensity ?? 'standard'}
         enabled={settings?.interfaceStyle === 'system' && !settings.reducedMotion}
+        performanceProfile={performanceProfile}
       />
       <div className="ambient-orb ambient-orb--mint" />
       <div className="ambient-orb ambient-orb--purple" />
@@ -166,7 +170,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <SystemMark small />
           <span>
             <span className="brand__name">THE SYSTEM</span>
-            <span className="brand__tag">V{APP_VERSION} · DUAL RESONANCE</span>
+            <span className="brand__tag">V{APP_VERSION} · ADAPTIVE PULSE</span>
           </span>
         </NavLink>
         <div className="app-header__actions">

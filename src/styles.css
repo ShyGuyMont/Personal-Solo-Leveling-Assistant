@@ -3536,7 +3536,7 @@ html[data-motion='reduced'] .ascension-core__neural-web i {
   opacity: 0.56;
   animation: dualResonancePlasmaArc 5.8s ease-in-out infinite;
   animation-delay: var(--plasma-delay);
-  will-change: transform, opacity, filter;
+  will-change: transform, opacity;
 }
 
 .ascension-core__plasma-arcs span:nth-child(even) {
@@ -3658,7 +3658,7 @@ html[data-motion='reduced'] .ascension-core__neural-web i {
   transform-origin: 50% 100%;
   animation: dualFacetRespiration 4.6s ease-in-out infinite;
   animation-delay: var(--facet-delay);
-  will-change: transform, opacity, filter;
+  will-change: transform, opacity;
 }
 
 .ascension-core__reactor-facets span:nth-child(even) {
@@ -4198,12 +4198,10 @@ html[data-motion='reduced'] .ascension-core__neural-web i {
 @keyframes dualEnergyWingBreath {
   0%,
   100% {
-    filter: brightness(0.82);
     opacity: 0.25;
     scale: 0.91 0.86;
   }
   48% {
-    filter: brightness(1.32);
     opacity: 0.48;
     scale: 1.08 1.04;
   }
@@ -4212,13 +4210,11 @@ html[data-motion='reduced'] .ascension-core__neural-web i {
 @keyframes dualFacetRespiration {
   0%,
   100% {
-    filter: brightness(0.78);
     opacity: 0.31;
     transform: translate(-50%, -50%) rotate(var(--facet-angle)) translateY(-86px) rotateX(42deg)
       scaleY(0.76);
   }
   50% {
-    filter: brightness(1.36);
     opacity: 0.66;
     transform: translate(-50%, -50%) rotate(calc(var(--facet-angle) + 7deg)) translateY(-102px)
       rotateX(25deg) scaleY(1.06);
@@ -4228,12 +4224,10 @@ html[data-motion='reduced'] .ascension-core__neural-web i {
 @keyframes dualPowerSpinePulse {
   0%,
   100% {
-    filter: brightness(0.8);
     opacity: 0.46;
     scale: 0.92 0.96;
   }
   50% {
-    filter: brightness(1.42);
     opacity: 0.78;
     scale: 1.12 1.03;
   }
@@ -4272,12 +4266,10 @@ html[data-motion='reduced'] .ascension-core__neural-web i {
 @keyframes dualResonancePlasmaArc {
   0%,
   100% {
-    filter: brightness(0.88);
     opacity: 0.34;
     transform: rotateZ(var(--plasma-angle)) rotateX(69deg) scale(0.91);
   }
   50% {
-    filter: brightness(1.38);
     opacity: 0.72;
     transform: rotateZ(calc(var(--plasma-angle) + 18deg)) rotateX(73deg) scale(1.03);
   }
@@ -25185,6 +25177,7 @@ html[data-motion='reduced'] .ascension-core__cage span:nth-child(3) {
   height: 100%;
   opacity: 0.72;
   pointer-events: none;
+  contain: strict;
 }
 
 html[data-intensity='intense'] .system-particle-field {
@@ -28495,4 +28488,92 @@ html[data-motion='reduced'] .daily-operations__signal {
   .system-command-center__realms summary small {
     display: none;
   }
+}
+
+/* Version 10.4.0 · Adaptive Pulse
+   Phones retain the living System while expensive background layers render on a smaller budget. */
+html[data-app-activity='suspended'] .app-shell,
+html[data-app-activity='suspended'] .app-shell *,
+html[data-app-activity='suspended'] .app-shell *::before,
+html[data-app-activity='suspended'] .app-shell *::after {
+  animation-play-state: paused !important;
+}
+
+html[data-performance='balanced'] :is(
+    .app-header,
+    .system-hud,
+    .bottom-nav,
+    .companion-presence__anchor,
+    .companion-presence__transmission,
+    .quick-link__panel > header
+  ) {
+  backdrop-filter: blur(8px) saturate(1.04);
+}
+
+html[data-performance='balanced'] .panel {
+  backdrop-filter: none;
+}
+
+html[data-performance='balanced'] .ambient-orb {
+  filter: blur(58px);
+}
+
+html[data-performance='balanced'] .ascension-atmosphere__plane--far {
+  display: none;
+}
+
+/* Parent orbits keep moving; the individual points no longer create dozens of extra timelines. */
+html[data-performance='balanced'] .ascension-core__particle-orbit i {
+  animation: none;
+  opacity: 0.7;
+}
+
+html[data-performance='balanced'] .ascension-core__life-sparks i:nth-child(n + 13) {
+  display: none;
+}
+
+/* The membrane still breathes as one organism without reshaping every layer on every frame. */
+html[data-performance='balanced'] .ascension-core__bio-aura span {
+  animation: none;
+}
+
+html[data-performance='efficient'] :is(
+    .app-header,
+    .system-hud,
+    .bottom-nav,
+    .companion-presence__anchor,
+    .companion-presence__transmission,
+    .quick-link__panel > header,
+    .panel
+  ) {
+  backdrop-filter: none;
+}
+
+html[data-performance='efficient'] .ambient-orb {
+  filter: blur(42px);
+  opacity: 0.032;
+}
+
+html[data-performance='efficient'] :is(
+    .ascension-atmosphere__plane--far,
+    .ascension-atmosphere__shard--two,
+    .ascension-atmosphere__shard--three
+  ) {
+  display: none;
+}
+
+html[data-performance='efficient'] .ascension-core__particle-orbit i,
+html[data-performance='efficient'] .ascension-core__bio-aura span {
+  animation: none;
+}
+
+html[data-performance='efficient'] .ascension-core__particle-orbit--three,
+html[data-performance='efficient'] .ascension-core__plasma-arcs span:nth-child(even),
+html[data-performance='efficient'] .ascension-core__reactor-facets span:nth-child(even),
+html[data-performance='efficient'] .ascension-core__power-spine i:nth-child(even) {
+  animation-play-state: paused;
+}
+
+html[data-performance='efficient'] .ascension-core__life-sparks i:nth-child(n + 7) {
+  display: none;
 }

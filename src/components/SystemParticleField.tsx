@@ -1,11 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
 import { getAtmosphereProfile } from '@/game/systemAtmosphere';
 import type { ColorTheme, Settings } from '@/types/game';
+import {
+  getParticleRenderBudget,
+  type AdaptivePerformanceProfile,
+} from '@/utils/adaptivePerformance';
 
 interface SystemParticleFieldProps {
   theme: ColorTheme;
   intensity: Settings['themeIntensity'];
   enabled: boolean;
+  performanceProfile: AdaptivePerformanceProfile;
 }
 
 interface Particle {
@@ -39,7 +44,12 @@ function createParticle(
   };
 }
 
-export function SystemParticleField({ theme, intensity, enabled }: SystemParticleFieldProps) {
+export function SystemParticleField({
+  theme,
+  intensity,
+  enabled,
+  performanceProfile,
+}: SystemParticleFieldProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [deviceReducedMotion, setDeviceReducedMotion] = useState(false);
 
@@ -63,19 +73,29 @@ export function SystemParticleField({ theme, intensity, enabled }: SystemParticl
     let particles: Particle[] = [];
     let animationFrame = 0;
     let previousTime = performance.now();
+    let lastRenderedTime = previousTime;
+    let renderBudget = getParticleRenderBudget({
+      profile: performanceProfile,
+      intensity,
+      mobile: window.innerWidth <= 720,
+    });
 
     const resize = () => {
       width = window.innerWidth;
       height = window.innerHeight;
-      const pixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
+      const mobile = width <= 720;
+      renderBudget = getParticleRenderBudget({
+        profile: performanceProfile,
+        intensity,
+        mobile,
+      });
+      const pixelRatio = Math.min(window.devicePixelRatio || 1, renderBudget.maxPixelRatio);
       canvas.width = Math.round(width * pixelRatio);
       canvas.height = Math.round(height * pixelRatio);
       canvas.style.width = `${width}px`;
       canvas.style.height = `${height}px`;
       context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
-      const mobile = width <= 720;
-      const count = intensity === 'intense' ? (mobile ? 34 : 66) : mobile ? 20 : 40;
-      particles = Array.from({ length: count }, (_, index) =>
+      particles = Array.from({ length: renderBudget.particleCount }, (_, index) =>
         createParticle(
           width,
           height,
@@ -122,6 +142,13 @@ export function SystemParticleField({ theme, intensity, enabled }: SystemParticl
     };
 
     const animate = (time: number) => {
+      const frameInterval = 1_000 / renderBudget.maxFps;
+      const timeSinceRender = time - lastRenderedTime;
+      if (timeSinceRender < frameInterval) {
+        animationFrame = requestAnimationFrame(animate);
+        return;
+      }
+      lastRenderedTime = time - (timeSinceRender % frameInterval);
       const delta = Math.min((time - previousTime) / 1000, 0.05);
       previousTime = time;
       context.clearRect(0, 0, width, height);
@@ -139,7 +166,7 @@ export function SystemParticleField({ theme, intensity, enabled }: SystemParticl
         context.globalAlpha = particle.alpha * (0.78 + Math.sin(particle.phase * 1.4) * 0.22);
         context.fillStyle = particle.color;
         context.shadowColor = profile.glow;
-        context.shadowBlur = intensity === 'intense' ? 9 : 5;
+        context.shadowBlur = renderBudget.shadowBlur;
 
         if (profile.kind === 'snow') drawSnow(particle);
         else if (profile.kind === 'crystal') drawCrystal(particle, time);
@@ -159,6 +186,7 @@ export function SystemParticleField({ theme, intensity, enabled }: SystemParticl
       cancelAnimationFrame(animationFrame);
       if (document.visibilityState === 'visible') {
         previousTime = performance.now();
+        lastRenderedTime = previousTime;
         animationFrame = requestAnimationFrame(animate);
       }
     };
@@ -174,7 +202,7 @@ export function SystemParticleField({ theme, intensity, enabled }: SystemParticl
       document.removeEventListener('visibilitychange', handleVisibility);
       context.clearRect(0, 0, width, height);
     };
-  }, [deviceReducedMotion, enabled, intensity, theme]);
+  }, [deviceReducedMotion, enabled, intensity, performanceProfile, theme]);
 
   return <canvas ref={canvasRef} className="system-particle-field" aria-hidden="true" />;
 }
