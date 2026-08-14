@@ -64,6 +64,10 @@ export type AiPendingProposal =
 
 const PENDING_PREFIX = 'ai-pending-proposal:';
 
+function emitProposalChanged() {
+  if (typeof window !== 'undefined') window.dispatchEvent(new Event('system:ai-proposal-changed'));
+}
+
 function metadataId(conversationId: string) {
   return `${PENDING_PREFIX}${conversationId}`;
 }
@@ -164,6 +168,7 @@ export async function savePendingAiProposal(conversationId: string, proposal: Ai
     value: proposal as unknown as Record<string, unknown>,
     updatedAt: new Date().toISOString(),
   });
+  emitProposalChanged();
 }
 
 export async function getPendingAiProposal(conversationId: string) {
@@ -171,6 +176,22 @@ export async function getPendingAiProposal(conversationId: string) {
   return isPendingProposal(record?.value) ? record.value : undefined;
 }
 
+export async function listPendingAiProposals() {
+  const records = await db.appMetadata
+    .filter((record) => record.id.startsWith(PENDING_PREFIX))
+    .toArray();
+  return records
+    .map((record) => ({
+      conversationId: record.id.slice(PENDING_PREFIX.length),
+      proposal: isPendingProposal(record.value) ? record.value : undefined,
+    }))
+    .filter((record): record is { conversationId: string; proposal: AiPendingProposal } =>
+      Boolean(record.proposal),
+    )
+    .sort((a, b) => Date.parse(b.proposal.createdAt) - Date.parse(a.proposal.createdAt));
+}
+
 export async function clearPendingAiProposal(conversationId: string) {
   await db.appMetadata.delete(metadataId(conversationId));
+  emitProposalChanged();
 }

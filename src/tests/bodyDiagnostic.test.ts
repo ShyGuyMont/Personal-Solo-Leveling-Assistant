@@ -70,7 +70,7 @@ describe('weekly Body Diagnostic', () => {
     await db.settings.update('primary', { weekStartsOn: 1 });
   });
 
-  it('awards the optional 150 XP account reward exactly once per System week', async () => {
+  it('awards the optional weekly account reward exactly once per System week', async () => {
     const before = await getBodyDiagnosticData('2026-08-12');
     expect(before.weekStart).toBe('2026-08-10');
     expect(before.current).toBeUndefined();
@@ -94,13 +94,15 @@ describe('weekly Body Diagnostic', () => {
       usage,
     });
 
-    expect(first.awardedXp).toBe(150);
+    expect(first.awardedXp).toBe(BALANCE.bodyDiagnostic.weeklyAccountXp);
     expect(first.alreadyCompleted).toBe(false);
     expect(duplicate.awardedXp).toBe(0);
     expect(duplicate.alreadyCompleted).toBe(true);
     expect(await db.bodyDiagnostics.count()).toBe(1);
     expect(await db.xpTransactions.where('kind').equals('body-diagnostic').count()).toBe(1);
-    expect((await db.progression.get('primary'))?.totalXp).toBe(150);
+    expect((await db.progression.get('primary'))?.totalXp).toBe(
+      BALANCE.bodyDiagnostic.weeklyAccountXp,
+    );
 
     const after = await getBodyDiagnosticData('2026-08-12');
     expect(after.current?.rewardApplied).toBe(true);

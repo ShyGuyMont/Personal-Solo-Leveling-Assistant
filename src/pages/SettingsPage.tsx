@@ -30,6 +30,7 @@ import { APP_VERSION } from '@/config/release';
 import { Modal } from '@/components/Modal';
 import { Link } from '@/router';
 import { useGameStore } from '@/store/useGameStore';
+import { missionAccountXp } from '@/game/rewards';
 import { formatClassName } from '@/utils/format';
 import { getDocumentTheme } from '@/utils/theme';
 import { getMissionDisplayName, sanitizeSensitiveDisplayText } from '@/utils/privacy';
@@ -432,20 +433,6 @@ export function SettingsPage() {
               />
               <span className="switch" />
             </label>
-            <label className="switch-row">
-              <span>
-                <strong>Snow’s Daily Command Briefing</strong>
-                <small>
-                  Low 1× · Steady 65% for 1.5× · High 80% for 2× · larger Full Clear rewards
-                </small>
-              </span>
-              <input
-                type="checkbox"
-                checked={draft.dailyBriefingEnabled}
-                onChange={(event) => patchSetting('dailyBriefingEnabled', event.target.checked)}
-              />
-              <span className="switch" />
-            </label>
             <label className="field">
               <span>Companion frequency</span>
               <select
@@ -826,7 +813,7 @@ export function SettingsPage() {
                 {draft.advancedBalanceUnlocked && (
                   <div className="form-grid">
                     <label className="field">
-                      <span>Account XP reward</span>
+                      <span>Configured account XP</span>
                       <input
                         type="number"
                         min="0"
@@ -842,6 +829,7 @@ export function SettingsPage() {
                           )
                         }
                       />
+                      <small>Current System baseline awards {missionAccountXp(mission)} XP.</small>
                     </label>
                     <label className="field">
                       <span>Primary stat mapping</span>

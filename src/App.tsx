@@ -5,7 +5,6 @@ import { DailyEventOverlay } from '@/components/DailyEventOverlay';
 import { CompanionToast } from '@/components/CompanionToast';
 import { PartyBanterToast } from '@/components/PartyBanterToast';
 import { CampfireRecapOverlay } from '@/components/CampfireRecapOverlay';
-import { DailyBriefingOverlay } from '@/components/DailyBriefingOverlay';
 import { MonthlyCouncilOverlay } from '@/components/MonthlyCouncilOverlay';
 import { TreasuryChallengeOverlay } from '@/components/TreasuryChallengeOverlay';
 import { FirstDayGuide } from '@/components/FirstDayGuide';
@@ -100,7 +99,6 @@ export function App() {
       <DailyReviewModal />
       <FirstDayGuide />
       <DailyEventOverlay />
-      <DailyBriefingOverlay />
       <TreasuryChallengeOverlay />
       <ProgressionOverlay />
       <CampfireRecapOverlay />

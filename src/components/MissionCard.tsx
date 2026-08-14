@@ -19,6 +19,7 @@ import { playSystemTone, vibrate } from '@/utils/feedback';
 import { STAT_LABELS } from '@/utils/format';
 import { getMissionDisplayName } from '@/utils/privacy';
 import { useGameStore } from '@/store/useGameStore';
+import { missionAccountXp } from '@/game/rewards';
 import type {
   DailyMissionRecord,
   LocalDateKey,
@@ -119,7 +120,7 @@ export function MissionCard({
           {!compact && <p>{mission.customDescription ?? mission.description}</p>}
           <div className="reward-line">
             <Sparkles size={13} />
-            <span>+{mission.customAccountXp ?? mission.accountXp} account XP</span>
+            <span>+{missionAccountXp(mission)} account XP</span>
             <span>·</span>
             <span>{mission.statRewards.map((reward) => STAT_LABELS[reward.stat]).join(' · ')}</span>
             <span>· {streak} day streak</span>
@@ -190,7 +191,7 @@ export function MissionCard({
             <div>
               <p className="eyebrow">MISSION CONFIRMATION</p>
               <strong>{displayName}</strong>
-              <small>+{mission.customAccountXp ?? mission.accountXp} account XP</small>
+              <small>+{missionAccountXp(mission)} account XP</small>
             </div>
             <button className="icon-button" onClick={() => setExpanded(false)} aria-label="Close">
               <X size={19} />

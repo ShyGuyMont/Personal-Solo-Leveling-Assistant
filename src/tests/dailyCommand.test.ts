@@ -12,7 +12,7 @@ import {
 import type { DailyMissionRecord } from '@/types/game';
 import { addDays, getSystemDateKey } from '@/utils/date';
 
-describe("Snow's rewarded Daily Command", () => {
+describe("Snow's retired Daily Command compatibility", () => {
   beforeEach(async () => {
     await db.transaction('rw', db.tables, async () => {
       for (const table of db.tables) await table.clear();
@@ -61,7 +61,7 @@ describe("Snow's rewarded Daily Command", () => {
     expect(highClear.multiplier).toBe(2);
   });
 
-  it('awards a 2.5× Full Clear to account and mission stat XP exactly once', async () => {
+  it('closes a legacy High command without stacking rewards over the amplified baseline', async () => {
     const settings = (await db.settings.get('primary'))!;
     const systemDate = getSystemDateKey(new Date(), settings.resetTime, settings.timeZone);
     const commandDate = addDays(systemDate, -1);
@@ -77,22 +77,20 @@ describe("Snow's rewarded Daily Command", () => {
     }
 
     const beforeReview = (await db.progression.get('primary'))!;
-    expect(beforeReview.totalXp).toBe(215);
+    expect(beforeReview.totalXp).toBe(430);
     const review = await finalizeDailyReview(commandDate, systemDate);
-    expect(review.dailyCommandOutcome).toBe('full-clear');
-    expect(review.dailyCommandMultiplier).toBe(2.5);
-    expect(review.dailyCommandBonusXp).toBe(323);
-    expect(review.accountXpAwarded).toBe(373);
-    expect((await db.progression.get('primary'))?.totalXp).toBe(588);
-    expect((await db.stats.get('strength'))?.totalXp).toBe(45);
-    expect(await db.xpTransactions.where('kind').equals('daily-command').count()).toBe(1);
-    expect(await db.statTransactions.where('kind').equals('daily-command').count()).toBeGreaterThan(
-      0,
-    );
+    expect(review.dailyCommandOutcome).toBeUndefined();
+    expect(review.dailyCommandMultiplier).toBe(1);
+    expect(review.dailyCommandBonusXp).toBe(0);
+    expect(review.accountXpAwarded).toBe(125);
+    expect((await db.progression.get('primary'))?.totalXp).toBe(555);
+    expect((await db.stats.get('strength'))?.totalXp).toBe(27);
+    expect(await db.xpTransactions.where('kind').equals('daily-command').count()).toBe(0);
+    expect(await db.statTransactions.where('kind').equals('daily-command').count()).toBe(0);
 
     const repeated = await finalizeDailyReview(commandDate, systemDate);
     expect(repeated).toEqual(review);
-    expect((await db.progression.get('primary'))?.totalXp).toBe(588);
+    expect((await db.progression.get('primary'))?.totalXp).toBe(555);
   });
 
   it('keeps Low Capacity penalty-free and gives it no command multiplier', async () => {
@@ -138,7 +136,7 @@ describe("Snow's rewarded Daily Command", () => {
     }
     const earnedBeforeReview = (await db.progression.get('primary'))!.totalXp;
     const review = await finalizeDailyReview(commandDate, systemDate);
-    expect(review.dailyCommandOutcome).toBe('missed');
+    expect(review.dailyCommandOutcome).toBeUndefined();
     expect(review.dailyCommandMultiplier).toBe(1);
     expect(review.dailyCommandBonusXp).toBe(0);
     expect(review.accountXpAwarded).toBe(0);

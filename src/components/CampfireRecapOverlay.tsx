@@ -1,4 +1,4 @@
-import { ArrowRight, Flame } from 'lucide-react';
+import { ArrowRight, ChartNoAxesCombined } from 'lucide-react';
 import { CampfireRecapView } from '@/components/CampfireRecapView';
 import { Link } from '@/router';
 import { useGameStore } from '@/store/useGameStore';
@@ -13,12 +13,12 @@ export function CampfireRecapOverlay() {
       className="campfire-overlay"
       role="dialog"
       aria-modal="true"
-      aria-label="Weekly Campfire Recap"
+      aria-label="Weekly Strategy Room"
     >
       <div className="campfire-overlay__embers" />
       <div className="campfire-overlay__panel">
         <div className="campfire-overlay__arrival">
-          <Flame size={20} /> CAMPFIRE SIGNAL READY
+          <ChartNoAxesCombined size={20} /> WEEKLY STRATEGY READY
         </div>
         <CampfireRecapView recap={recap} />
         <div className="campfire-overlay__actions">

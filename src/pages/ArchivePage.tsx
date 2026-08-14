@@ -411,8 +411,8 @@ export function ArchivePage() {
           <section className="panel archive-list-panel campfire-archive">
             <header className="section-header">
               <div>
-                <p className="eyebrow">WEEKLY CAMPFIRES</p>
-                <h2>The party remembers each week</h2>
+                <p className="eyebrow">WEEKLY STRATEGY ROOMS</p>
+                <h2>The party remembers each week and its direction</h2>
               </div>
               <Link to="/headquarters" className="text-link">
                 Headquarters <Flame size={16} />
@@ -440,7 +440,7 @@ export function ArchivePage() {
               ))}
               {!campfireRecaps.length && (
                 <div className="empty-state">
-                  The first completed weekly Campfire will be archived here.
+                  The first completed Weekly Strategy Room will be archived here.
                 </div>
               )}
             </div>
@@ -672,7 +672,7 @@ export function ArchivePage() {
                 <div key={briefing.id} className="archive-row">
                   <BatteryMedium size={17} />
                   <div>
-                    <strong>Snow’s Daily Command · {briefing.capacity}</strong>
+                    <strong>Legacy Daily Command · {briefing.capacity}</strong>
                     <small>
                       {briefing.date} · {briefing.outcome ?? briefing.status}
                       {briefing.awardedMultiplier && briefing.awardedMultiplier > 1
@@ -685,7 +685,8 @@ export function ArchivePage() {
               ))}
               {!campaignArcs.length && !questProgress.length && !dailyBriefings.length && (
                 <div className="empty-state">
-                  Campaign Arcs, companion chapters, and command briefings will be preserved here.
+                  Campaign Arcs, companion chapters, and legacy command records will be preserved
+                  here.
                 </div>
               )}
             </div>
@@ -1066,7 +1067,7 @@ export function ArchivePage() {
               </div>
               {selectedReview.dailyCommandCapacity && (
                 <div>
-                  <span>Daily Command</span>
+                  <span>Legacy Command</span>
                   <strong>
                     {selectedReview.dailyCommandOutcome === 'full-clear'
                       ? `Full Clear · ${selectedReview.dailyCommandMultiplier}×`

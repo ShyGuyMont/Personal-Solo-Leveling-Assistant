@@ -7,7 +7,6 @@ export function TreasuryChallengeOverlay() {
   const {
     settings,
     dailyEvent,
-    dailyBriefing,
     campfireRecap,
     monthlyCouncil,
     treasuryChallenge,
@@ -29,7 +28,6 @@ export function TreasuryChallengeOverlay() {
   if (
     !settings?.firstDayGuideCompleted ||
     dailyEvent?.status === 'unrevealed' ||
-    (settings.dailyBriefingEnabled && !dailyBriefing) ||
     campfireRecap ||
     monthlyCouncil ||
     !treasuryChallenge ||

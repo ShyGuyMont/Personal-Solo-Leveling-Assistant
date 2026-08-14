@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { db } from '@/db/database';
+import { BALANCE } from '@/config/balance';
 import { initializeProfile, seedReferenceData } from '@/db/seed';
 import {
   activateBossExtension,
@@ -181,10 +182,14 @@ describe('Training Hall', () => {
       finisherCompleted: false,
     });
 
-    expect((await db.progression.get('primary'))?.totalXp).toBe(150);
+    expect((await db.progression.get('primary'))?.totalXp).toBe(
+      BALANCE.training.multiPathTiers[2].accountXp,
+    );
     expect(await db.trainingSessions.where('date').equals(DATE).toArray()).toHaveLength(2);
     expect((await awardDoubleDeploymentReward(DATE)).alreadyAwarded).toBe(true);
-    expect((await db.progression.get('primary'))?.totalXp).toBe(150);
+    expect((await db.progression.get('primary'))?.totalXp).toBe(
+      BALANCE.training.multiPathTiers[2].accountXp,
+    );
 
     const recovery = await selectTrainingLocation(DATE, 'recovery');
     await completeLoggedTraining({
@@ -195,11 +200,15 @@ describe('Training Hall', () => {
       difficulty: 2,
       mobilityCompletedMovementIds: recovery.mobilityMovements?.map((movement) => movement.id),
     });
-    expect((await db.progression.get('primary'))?.totalXp).toBe(350);
+    expect((await db.progression.get('primary'))?.totalXp).toBe(
+      BALANCE.training.multiPathTiers[2].accountXp + BALANCE.training.multiPathTiers[3].accountXp,
+    );
     const ladder = await awardMultiPathRewards(DATE);
     expect(ladder.earnedTiers).toEqual([2, 3]);
     expect(ladder.newlyAwardedTiers).toEqual([]);
-    expect((await db.progression.get('primary'))?.totalXp).toBe(350);
+    expect((await db.progression.get('primary'))?.totalXp).toBe(
+      BALANCE.training.multiPathTiers[2].accountXp + BALANCE.training.multiPathTiers[3].accountXp,
+    );
 
     const conditioning = await selectTrainingLocation(DATE, 'conditioning');
     await completeLoggedTraining({
@@ -210,7 +219,11 @@ describe('Training Hall', () => {
       difficulty: 3,
       conditioningType: 'walk-run',
     });
-    expect((await db.progression.get('primary'))?.totalXp).toBe(600);
+    expect((await db.progression.get('primary'))?.totalXp).toBe(
+      BALANCE.training.multiPathTiers[2].accountXp +
+        BALANCE.training.multiPathTiers[3].accountXp +
+        BALANCE.training.multiPathTiers[4].accountXp,
+    );
     expect((await awardMultiPathRewards(DATE)).earnedTiers).toEqual([2, 3, 4]);
   });
 

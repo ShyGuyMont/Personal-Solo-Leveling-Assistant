@@ -142,7 +142,6 @@ async function readSnapshot(): Promise<GameSnapshot> {
     companionReaction,
     partyBanter,
     campfireRecap,
-    dailyBriefing,
     monthlyCouncil,
     treasuryChallenge,
     treasuryWeek,
@@ -161,7 +160,6 @@ async function readSnapshot(): Promise<GameSnapshot> {
     getNextCompanionReaction(),
     getNextPartyBanter(),
     getNextCampfireRecap(),
-    db.dailyBriefings.get(systemDate),
     getNextMonthlyCouncil(),
     db.treasuryChallenges.get(systemDate),
     settings ? ensureTreasuryWeek(systemDate, settings.weekStartsOn) : undefined,
@@ -182,7 +180,6 @@ async function readSnapshot(): Promise<GameSnapshot> {
     companionReaction,
     partyBanter,
     campfireRecap,
-    dailyBriefing,
     monthlyCouncil,
     treasuryChallenge,
     treasuryWeek,
@@ -200,13 +197,6 @@ async function prepareDailySystems(settings: Settings) {
     ensureTreasuryChallenge(date),
     queueLockInIfNeeded(date),
   ]);
-  if (settings.firstDayGuideCompleted && !settings.dailyBriefingEnabled) {
-    await queueCompanionReaction({
-      trigger: 'daily-briefing',
-      sourceId: `daily-briefing:${date}`,
-      companionId: 'snow',
-    });
-  }
 }
 
 async function synchronizeSystemSnapshot() {

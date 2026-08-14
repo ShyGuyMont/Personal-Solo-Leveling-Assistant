@@ -1022,7 +1022,7 @@ export function CompanionQuickLink() {
           party: pendingOperation.kind === 'assemble-day',
           title:
             pendingOperation.kind === 'assemble-day'
-              ? `Daily Command Assembly · ${systemDate}`
+              ? `Party Operation · ${systemDate}`
               : undefined,
         });
       }
@@ -1479,7 +1479,7 @@ export function CompanionQuickLink() {
   const activeCompanion = getCompanion(activeCompanionId);
   const pendingOperationTitle = pendingOperation
     ? pendingOperation.kind === 'assemble-day'
-      ? 'Daily Command Assembly'
+      ? 'Party Operation'
       : pendingOperation.kind === 'prepare-training'
         ? 'Training Hall Deployment'
         : pendingOperation.kind === 'prepare-kitchen'

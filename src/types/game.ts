@@ -770,6 +770,7 @@ export interface XpTransaction {
     | 'treasury'
     | 'daily-event'
     | 'daily-command'
+    | 'weekly-strategy'
     | 'training'
     | 'body-diagnostic'
     | 'kitchen'
@@ -793,6 +794,7 @@ export interface StatTransaction {
     | 'treasury'
     | 'daily-event'
     | 'daily-command'
+    | 'weekly-strategy'
     | 'training'
     | 'kitchen'
     | 'recovery'
@@ -1173,6 +1175,9 @@ export interface CampfireRecap {
   weekEnd: LocalDateKey;
   createdAt: string;
   acknowledged: boolean;
+  strategyConfirmedAt?: string;
+  strategyRewardXp?: number;
+  strategyRewardTransactionId?: string;
   metrics: CampfireMetrics;
   messages: PartyChatMessage[];
 }
@@ -1541,7 +1546,6 @@ export interface GameSnapshot {
   companionReaction?: CompanionReaction;
   partyBanter?: PartyBanter;
   campfireRecap?: CampfireRecap;
-  dailyBriefing?: DailyCommandBriefing;
   monthlyCouncil?: MonthlyCouncil;
   treasuryChallenge?: TreasuryDailyChallenge;
   treasuryWeek?: TreasuryWeek;

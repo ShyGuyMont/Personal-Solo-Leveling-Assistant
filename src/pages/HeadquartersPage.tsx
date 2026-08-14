@@ -96,12 +96,11 @@ export function HeadquartersPage() {
           ))}
         </div>
         <div>
-          <p className="eyebrow">FULL PARTY HEADQUARTERS · TEN LINKS ONLINE</p>
+          <p className="eyebrow">FULL PARTY HEADQUARTERS · TWELVE LINKS ONLINE</p>
           <h1>Your people are here, {firstName}.</h1>
           <p>
             Check in, request support, revisit words worth carrying, or gather around the weekly
-            campfire. Headquarters changes no score by itself—it gives the journey a place to feel
-            shared.
+            Strategy Room. Headquarters gives the journey a place to feel shared.
           </p>
         </div>
       </section>
@@ -263,15 +262,15 @@ export function HeadquartersPage() {
         <section className="headquarters-campfire panel">
           <div className="headquarters-section-title">
             <div>
-              <p className="eyebrow">LATEST CAMPFIRE</p>
-              <h2>The week, in the party’s words</h2>
+              <p className="eyebrow">LATEST WEEKLY STRATEGY</p>
+              <h2>The week becomes a direction</h2>
             </div>
             <Flame size={23} />
           </div>
           <CampfireRecapView recap={recaps[0]} />
           {recaps.length > 1 && (
             <div className="campfire-history">
-              <p className="eyebrow">PAST CAMPFIRES</p>
+              <p className="eyebrow">PAST STRATEGY ROOMS</p>
               {recaps.slice(1).map((recap) => (
                 <details key={recap.id}>
                   <summary>
@@ -298,8 +297,8 @@ export function HeadquartersPage() {
             <Flame size={28} />
           </span>
           <div>
-            <p className="eyebrow">WEEKLY CAMPFIRE</p>
-            <h2>The first recap is still gathering.</h2>
+            <p className="eyebrow">WEEKLY STRATEGY ROOM</p>
+            <h2>The first strategy review is still gathering.</h2>
             <p>
               After a completed week with at least one finalized Daily Review, all twelve companions
               will meet here with comments based on the real record.

@@ -17,13 +17,11 @@ describe('development progression simulator', () => {
     expect(simulateProgression(1825, 1).accountLevel).toBeLessThan(200);
   });
 
-  it('models Daily Command XP separately and targets World Class in roughly 18–24 months', () => {
-    const low = simulateProgression(365, 0.9, 'low');
-    const steady = simulateProgression(365, 0.9, 'steady');
-    const high = simulateProgression(365, 0.9, 'high');
-    expect(steady.accountXpBreakdown.dailyCommand).toBeGreaterThan(0);
-    expect(high.accountLevel).toBeGreaterThan(steady.accountLevel);
-    expect(steady.accountLevel).toBeGreaterThan(low.accountLevel);
+  it('models the amplified baseline and targets World Class in roughly 18–24 months', () => {
+    const steady = simulateProgression(365, 0.9);
+    expect(steady.rewardModel).toBe('amplified-baseline');
+    expect(steady.accountXpBreakdown.missions).toBeGreaterThan(0);
+    expect(steady.accountXpBreakdown.weeklyStrategy).toBeGreaterThan(0);
     expect(simulateProgression(720, 0.75).estimatedRank).not.toBe('WORLD CLASS');
     expect(simulateProgression(725, 0.75).estimatedRank).toBe('WORLD CLASS');
     expect(simulateProgression(610, 0.9).estimatedRank).not.toBe('WORLD CLASS');

@@ -141,7 +141,7 @@ describe('Companion Quick Link', () => {
       'mission:prayer:skip',
       'mission:prayer:fail',
     ]);
-    expect(actions[0].impact).toContain('20 base XP');
+    expect(actions[0].impact).toContain('40 account XP');
     expect(actions[0].confirmation).toContain('honestly complete');
   });
 });

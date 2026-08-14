@@ -1,6 +1,11 @@
 import { CATEGORY_LABELS } from '@/config/missions';
+import { BALANCE } from '@/config/balance';
 import { db } from '@/db/database';
+import { putLevelHistory } from '@/game/engine';
+import { applyStatChange } from '@/game/stats';
+import { applyAccountXp } from '@/game/xp';
 import { addDays, startOfWeek } from '@/utils/date';
+import { stableId } from '@/utils/id';
 import type {
   CampfireMetrics,
   CampfireRecap,
@@ -8,6 +13,7 @@ import type {
   LocalDateKey,
   MissionCategory,
   PartyChatMessage,
+  StatName,
 } from '@/types/game';
 
 const CATEGORIES: MissionCategory[] = ['faith', 'discipline', 'physical', 'creator', 'character'];
@@ -402,4 +408,81 @@ export function getNextCampfireRecap() {
 
 export async function acknowledgeCampfireRecap(id: string) {
   await db.campfireRecaps.update(id, { acknowledged: true });
+}
+
+export async function confirmWeeklyStrategy(recapId: string, systemDate: LocalDateKey) {
+  const now = new Date().toISOString();
+  const rewardId = stableId('weekly-strategy', recapId, 'account');
+  let awardedXp = 0;
+  let levelsGained = 0;
+
+  await db.transaction(
+    'rw',
+    [
+      db.campfireRecaps,
+      db.progression,
+      db.stats,
+      db.xpTransactions,
+      db.statTransactions,
+      db.levelHistory,
+      db.progressionEvents,
+    ],
+    async () => {
+      const recap = await db.campfireRecaps.get(recapId);
+      if (!recap) throw new Error('Weekly Strategy Room record not found.');
+      if (recap.strategyConfirmedAt || (await db.xpTransactions.get(rewardId))) return;
+      const progression = await db.progression.get('primary');
+      if (!progression) throw new Error('Account progression is unavailable.');
+
+      awardedXp = BALANCE.weeklyStrategy.accountXp;
+      const applied = applyAccountXp(progression.totalXp, awardedXp);
+      levelsGained = applied.levelsGained;
+      const nextProgression = {
+        ...progression,
+        ...applied,
+        lastLevelUpAt: levelsGained ? now : progression.lastLevelUpAt,
+        recentLevelUp: progression.recentLevelUp || levelsGained > 0,
+      };
+      await db.xpTransactions.add({
+        id: rewardId,
+        kind: 'weekly-strategy',
+        amount: awardedXp,
+        date: systemDate,
+        timestamp: now,
+        sourceId: recapId,
+        note: 'Weekly Strategy confirmed',
+      });
+      await db.progression.put(nextProgression);
+      await putLevelHistory(nextProgression, progression.level, systemDate, rewardId, now);
+
+      for (const [statName, amount] of Object.entries(BALANCE.weeklyStrategy.statXp) as [
+        StatName,
+        number,
+      ][]) {
+        const stat = await db.stats.get(statName);
+        const transactionId = stableId(rewardId, statName);
+        if (!stat || (await db.statTransactions.get(transactionId))) continue;
+        await db.stats.put(applyStatChange(stat, amount, 0, now));
+        await db.statTransactions.add({
+          id: transactionId,
+          stat: statName,
+          kind: 'weekly-strategy',
+          amount,
+          momentumDelta: 0,
+          date: systemDate,
+          timestamp: now,
+          sourceId: recapId,
+          note: 'Weekly Strategy focus reward',
+        });
+      }
+
+      await db.campfireRecaps.update(recapId, {
+        strategyConfirmedAt: now,
+        strategyRewardXp: awardedXp,
+        strategyRewardTransactionId: rewardId,
+      });
+    },
+  );
+
+  return { awardedXp, levelsGained };
 }

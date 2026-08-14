@@ -4,6 +4,7 @@ import type {
   DailyMissionRecord,
   MissionDefinition,
 } from '@/types/game';
+import { missionAccountXp } from '@/game/rewards';
 import type { AppRoutePath } from '@/routeModules';
 
 const PARTY_NAMES = new Set(['everyone', 'everybody', 'party', 'council', 'all']);
@@ -236,7 +237,7 @@ export function buildQuickLinkActionCatalog(
           missionName: mission.name,
           label: `Complete ${mission.name}`,
           description: `Record ${mission.name} as completed today.`,
-          impact: `Awards ${mission.customAccountXp ?? mission.accountXp} base XP plus its configured stat rewards.`,
+          impact: `Awards ${missionAccountXp(mission)} account XP plus its amplified stat rewards.`,
           confirmation: `Confirm that ${mission.name} is honestly complete.`,
         });
       }

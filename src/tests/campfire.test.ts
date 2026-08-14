@@ -1,10 +1,14 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { db } from '@/db/database';
 import { initializeProfile, seedReferenceData } from '@/db/seed';
-import { buildCampfireMessages, ensureWeeklyCampfireRecap } from '@/game/campfire';
+import {
+  buildCampfireMessages,
+  confirmWeeklyStrategy,
+  ensureWeeklyCampfireRecap,
+} from '@/game/campfire';
 import type { CampfireMetrics } from '@/types/game';
 
-describe('Weekly Campfire Recaps', () => {
+describe('Weekly Strategy Rooms', () => {
   beforeEach(async () => {
     await db.transaction('rw', db.tables, async () => {
       for (const table of db.tables) await table.clear();
@@ -87,5 +91,35 @@ describe('Weekly Campfire Recaps', () => {
     expect(await db.campfireRecaps.count()).toBe(1);
     expect(first?.metrics.completedMissions).toBe(1);
     expect(await db.progression.get('primary')).toEqual(before);
+  });
+
+  it('locks the strategy reward exactly once', async () => {
+    const now = new Date().toISOString();
+    const recapId = 'campfire:2026-07-27';
+    await db.campfireRecaps.put({
+      id: recapId,
+      weekStart: '2026-07-27',
+      weekEnd: '2026-08-02',
+      createdAt: now,
+      acknowledged: false,
+      metrics: {
+        recordedDays: 5,
+        completedMissions: 20,
+        availableMissions: 30,
+        completionRate: 2 / 3,
+        perfectDays: 1,
+        categoryCompleted: {},
+        categoryAvailable: {},
+        strongestCategory: 'faith',
+        focusCategory: 'creator',
+      },
+      messages: [],
+    });
+    const before = (await db.progression.get('primary'))!.totalXp;
+    await confirmWeeklyStrategy(recapId, '2026-08-03');
+    await confirmWeeklyStrategy(recapId, '2026-08-03');
+    expect((await db.progression.get('primary'))!.totalXp - before).toBe(250);
+    expect(await db.xpTransactions.where('kind').equals('weekly-strategy').count()).toBe(1);
+    expect((await db.campfireRecaps.get(recapId))?.strategyRewardXp).toBe(250);
   });
 });

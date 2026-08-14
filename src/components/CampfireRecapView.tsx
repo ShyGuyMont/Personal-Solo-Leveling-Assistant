@@ -1,12 +1,15 @@
-import { Flame, Target, Trophy } from 'lucide-react';
+import { ChartNoAxesCombined, CircleCheckBig, Sparkles, Target, Trophy } from 'lucide-react';
 import { useEffect, useState, type CSSProperties } from 'react';
 import { FavoriteMessageButton } from '@/components/FavoriteMessageButton';
 import { CATEGORY_LABELS } from '@/config/missions';
 import { getCompanion, getCompanionImage } from '@/config/companions';
+import { BALANCE } from '@/config/balance';
+import { confirmWeeklyStrategy } from '@/game/campfire';
 import { getFavoriteId, getFavoriteMessages, toggleFavoriteMessage } from '@/game/favorites';
 import { formatPercent } from '@/utils/format';
 import { formatShortDate } from '@/utils/date';
 import type { CampfireRecap } from '@/types/game';
+import { useGameStore } from '@/store/useGameStore';
 
 export function CampfireRecapView({
   recap,
@@ -16,6 +19,10 @@ export function CampfireRecapView({
   compact?: boolean;
 }) {
   const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
+  const [strategyConfirmed, setStrategyConfirmed] = useState(Boolean(recap.strategyConfirmedAt));
+  const [strategyBusy, setStrategyBusy] = useState(false);
+  const systemDate = useGameStore((state) => state.systemDate);
+  const refresh = useGameStore((state) => state.refresh);
 
   useEffect(() => {
     void getFavoriteMessages().then((favorites) =>
@@ -23,20 +30,26 @@ export function CampfireRecapView({
     );
   }, [recap.id]);
 
+  useEffect(() => setStrategyConfirmed(Boolean(recap.strategyConfirmedAt)), [recap]);
+
   const focus = recap.metrics.focusCategory
     ? CATEGORY_LABELS[recap.metrics.focusCategory]
     : 'One meaningful path';
+  const strongest = recap.metrics.strongestCategory
+    ? CATEGORY_LABELS[recap.metrics.strongestCategory]
+    : 'No single path yet';
   return (
     <section className={`campfire-recap ${compact ? 'campfire-recap--compact' : ''}`}>
       <header className="campfire-recap__header">
         <span className="campfire-recap__flame">
-          <Flame size={24} />
+          <ChartNoAxesCombined size={24} />
         </span>
         <div>
           <p className="eyebrow">
-            WEEKLY CAMPFIRE · {formatShortDate(recap.weekStart)}—{formatShortDate(recap.weekEnd)}
+            WEEKLY STRATEGY ROOM · {formatShortDate(recap.weekStart)}—
+            {formatShortDate(recap.weekEnd)}
           </p>
-          <h2>The party reviews the week</h2>
+          <h2>The party turns last week into a clear next move.</h2>
           <p>
             Built only from finalized mission records. No hidden scoring and no invented personal
             conclusions.
@@ -53,7 +66,7 @@ export function CampfireRecapView({
           </strong>
         </div>
         <div>
-          <Flame size={17} />
+          <ChartNoAxesCombined size={17} />
           <span>Completion</span>
           <strong>{formatPercent(recap.metrics.completionRate)}</strong>
         </div>
@@ -67,6 +80,50 @@ export function CampfireRecapView({
           <strong>{focus}</strong>
         </div>
       </div>
+
+      <div className="weekly-strategy-brief">
+        <div>
+          <span>PROTECT</span>
+          <strong>{strongest}</strong>
+          <small>Keep the rhythm that already proved it can survive real life.</small>
+        </div>
+        <div>
+          <span>PRIORITIZE</span>
+          <strong>{focus}</strong>
+          <small>Give this path one deliberately small early win.</small>
+        </div>
+        {strategyConfirmed && (
+          <div className="is-confirmed">
+            <CircleCheckBig size={19} />
+            <span>STRATEGY LOCKED</span>
+            <strong>+{recap.strategyRewardXp ?? BALANCE.weeklyStrategy.accountXp} XP</strong>
+            <small>The week has a direction. Its assignments remain yours to complete.</small>
+          </div>
+        )}
+      </div>
+
+      {!compact && !strategyConfirmed && (
+        <button
+          type="button"
+          className="button button--primary weekly-strategy-confirm"
+          disabled={strategyBusy}
+          onClick={async () => {
+            setStrategyBusy(true);
+            try {
+              await confirmWeeklyStrategy(recap.id, systemDate);
+              setStrategyConfirmed(true);
+              await refresh();
+            } finally {
+              setStrategyBusy(false);
+            }
+          }}
+        >
+          <Sparkles size={17} />
+          {strategyBusy
+            ? 'Locking strategy…'
+            : `Confirm weekly strategy · +${BALANCE.weeklyStrategy.accountXp} XP`}
+        </button>
+      )}
 
       <div className="campfire-message-list">
         {recap.messages

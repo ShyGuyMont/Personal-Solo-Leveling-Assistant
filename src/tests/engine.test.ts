@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { db } from '@/db/database';
+import { BALANCE } from '@/config/balance';
 import { initializeProfile, seedReferenceData } from '@/db/seed';
 import {
   completeMission,
@@ -33,7 +34,9 @@ describe('mission transaction engine', () => {
     await completeMission({ date: today, missionId: 'prayer', systemDate: today });
     const rewards = await db.xpTransactions.where('sourceId').equals('prayer').toArray();
     expect(rewards).toHaveLength(1);
-    expect((await db.progression.get('primary'))?.totalXp).toBe(20);
+    expect((await db.progression.get('primary'))?.totalXp).toBe(
+      20 * BALANCE.account.missionBaselineMultiplier,
+    );
   });
 
   it('reverses mission rewards once', async () => {

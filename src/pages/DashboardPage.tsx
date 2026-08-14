@@ -1,34 +1,23 @@
 import {
   ArrowRight,
-  Archive,
-  BookHeart,
-  BookOpenCheck,
   CalendarDays,
-  Castle,
-  ChefHat,
   ChevronRight,
-  Crown,
-  Dumbbell,
-  Map as MapIcon,
-  Radio,
   Flame,
   Settings as SettingsIcon,
   Shield,
   Sparkles,
   TrendingUp,
-  WalletCards,
 } from 'lucide-react';
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { ChallengeCard } from '@/components/ChallengeCard';
 import { ClassEmblem } from '@/components/ClassEmblem';
 import { CompanionRoster } from '@/components/CompanionRoster';
 import { DailyEventCard } from '@/components/DailyEventCard';
-import { DailyBriefingCard } from '@/components/DailyBriefingCard';
-import { DailyOperationsPanel } from '@/components/DailyOperationsPanel';
 import { InstallCard } from '@/components/InstallCard';
 import { MissionCard } from '@/components/MissionCard';
 import { PartyPulsePanel } from '@/components/PartyPulsePanel';
 import { ProgressBar } from '@/components/ProgressBar';
+import { SystemCommandCenter } from '@/components/SystemCommandCenter';
 import { chooseSystemMessage } from '@/config/messages';
 import { getChallengeTemplate } from '@/config/challenges';
 import { getCompanion, getCompanionImage } from '@/config/companions';
@@ -41,28 +30,9 @@ import { STAT_LABELS, formatClassName, formatNumber } from '@/utils/format';
 import { useGameStore } from '@/store/useGameStore';
 import type { DailyReview, StatTransaction, SystemState } from '@/types/game';
 
-function RealmVista() {
-  return (
-    <span className="realm-portal__vista" aria-hidden="true">
-      <i />
-      <i />
-      <i />
-    </span>
-  );
-}
-
 export function DashboardPage() {
-  const {
-    profile,
-    progression,
-    stats,
-    settings,
-    missions,
-    todayRecords,
-    challenges,
-    systemDate,
-    treasuryChallenge,
-  } = useGameStore();
+  const { profile, progression, stats, settings, missions, todayRecords, challenges, systemDate } =
+    useGameStore();
   const [lastReview, setLastReview] = useState<DailyReview>();
   const [recentStats, setRecentStats] = useState<StatTransaction[]>([]);
 
@@ -80,8 +50,6 @@ export function DashboardPage() {
   const completeCount = todayRecords.filter((record) => record.status === 'completed').length;
   const pending = todayRecords.filter((record) => record.status === 'pending');
   const percentage = todayRecords.length ? completeCount / todayRecords.length : 0;
-  const workoutRecord = todayRecords.find((record) => record.missionId === 'workout');
-  const bibleRecord = todayRecords.find((record) => record.missionId === 'bible');
   const activeWeekly = challenges.find(
     (challenge) => challenge.kind === 'weekly' && challenge.status === 'active',
   );
@@ -261,160 +229,8 @@ export function DashboardPage() {
 
       <InstallCard />
       <DailyEventCard />
-      <DailyBriefingCard />
-      <DailyOperationsPanel date={systemDate} />
+      <SystemCommandCenter />
       <PartyPulsePanel />
-
-      <section className="panel realm-command-map" data-depth-surface="panel">
-        <header className="section-header realm-command-map__header">
-          <div>
-            <p className="eyebrow">DIMENSIONAL ROUTE MAP</p>
-            <h2>Choose where the System opens next.</h2>
-            <p>Each realm carries its own companion link, atmosphere, and purpose.</p>
-          </div>
-          <span className="realm-command-map__live">
-            <i /> 9 LINKS ONLINE
-          </span>
-        </header>
-        <div className="realm-command-map__grid">
-          <Link to="/training-hall" className="realm-portal" data-portal="training">
-            <span className="realm-portal__icon">
-              <Dumbbell size={23} />
-            </span>
-            <span>
-              <small>ROOK & EMBER</small>
-              <strong>Training Hall</strong>
-            </span>
-            <em>
-              {workoutRecord?.status === 'completed' ? 'Deployment complete' : 'Assignment ready'}
-            </em>
-            <ChevronRight size={17} />
-            <RealmVista />
-          </Link>
-          <Link to="/sanctuary" className="realm-portal" data-portal="sanctuary">
-            <span className="realm-portal__icon">
-              <BookHeart size={23} />
-            </span>
-            <span>
-              <small>SNOW & SELAH</small>
-              <strong>Scripture Sanctuary</strong>
-            </span>
-            <em>
-              {bibleRecord?.status === 'completed'
-                ? 'Study complete · doors open'
-                : 'Stronghold available'}
-            </em>
-            <ChevronRight size={17} />
-            <RealmVista />
-          </Link>
-          <Link to="/kitchen" className="realm-portal" data-portal="kitchen">
-            <span className="realm-portal__icon">
-              <ChefHat size={23} />
-            </span>
-            <span>
-              <small>SAFFRON</small>
-              <strong>Provision Command</strong>
-            </span>
-            <em>Kitchen channel ready</em>
-            <ChevronRight size={17} />
-            <RealmVista />
-          </Link>
-          <Link to="/treasury" className="realm-portal" data-portal="treasury">
-            <span className="realm-portal__icon">
-              <WalletCards size={23} />
-            </span>
-            <span>
-              <small>CASSIAN</small>
-              <strong>Treasury Command</strong>
-            </span>
-            <em>
-              {treasuryChallenge?.status === 'active'
-                ? `Directive · +${treasuryChallenge.rewardXp} XP`
-                : 'Ledger secured'}
-            </em>
-            <ChevronRight size={17} />
-            <RealmVista />
-          </Link>
-          <Link to="/creator-forge" className="realm-portal" data-portal="creator">
-            <span className="realm-portal__icon">
-              <Radio size={23} />
-            </span>
-            <span>
-              <small>VESPER & CIPHER</small>
-              <strong>Creator Forge</strong>
-            </span>
-            <em>Greenroom signal ready</em>
-            <ChevronRight size={17} />
-            <RealmVista />
-          </Link>
-          <Link to="/arc-archives" className="realm-portal" data-portal="arc">
-            <span className="realm-portal__icon">
-              <BookOpenCheck size={23} />
-            </span>
-            <span>
-              <small>QUILL & SNOW</small>
-              <strong>A.R.C. Archives</strong>
-            </span>
-            <em>Canon library synchronized</em>
-            <ChevronRight size={17} />
-            <RealmVista />
-          </Link>
-          <Link to="/headquarters" className="realm-portal" data-portal="party">
-            <span className="realm-portal__icon">
-              <Castle size={23} />
-            </span>
-            <span>
-              <small>FULL PARTY</small>
-              <strong>Party Headquarters</strong>
-            </span>
-            <em>Eleven companion links</em>
-            <ChevronRight size={17} />
-            <RealmVista />
-          </Link>
-          <Link to="/campaigns" className="realm-portal" data-portal="campaign">
-            <span className="realm-portal__icon">
-              <MapIcon size={23} />
-            </span>
-            <span>
-              <small>CIPHER</small>
-              <strong>Campaign Command</strong>
-            </span>
-            <em>{activeWeekly ? 'Active challenge signal' : 'Long-range objectives'}</em>
-            <ChevronRight size={17} />
-            <RealmVista />
-          </Link>
-          <Link to="/status" className="realm-portal" data-portal="progression">
-            <span className="realm-portal__icon">
-              <Crown size={23} />
-            </span>
-            <span>
-              <small>ASCENSION CORE</small>
-              <strong>Class Path</strong>
-            </span>
-            <em>
-              {qualification?.qualified
-                ? 'Advancement ready'
-                : qualification?.targetRank
-                  ? `${formatClassName(qualification.targetRank)} signal`
-                  : 'World Class achieved'}
-            </em>
-            <ChevronRight size={17} />
-            <RealmVista />
-          </Link>
-          <Link to="/archive" className="realm-portal" data-portal="archive">
-            <span className="realm-portal__icon">
-              <Archive size={23} />
-            </span>
-            <span>
-              <small>SNOW</small>
-              <strong>Memory Archive</strong>
-            </span>
-            <em>Campaign record intact</em>
-            <ChevronRight size={17} />
-            <RealmVista />
-          </Link>
-        </div>
-      </section>
 
       {recovery && (
         <section className="recovery-banner">

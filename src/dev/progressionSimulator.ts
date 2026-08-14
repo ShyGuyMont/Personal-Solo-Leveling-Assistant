@@ -3,7 +3,7 @@ import { RANK_TRIALS } from '@/config/challenges';
 import { DEFAULT_MISSIONS } from '@/config/missions';
 import { resolveLevelFromTotalXp, statXpForLevel } from '@/game/xp';
 import { ALL_STATS } from '@/game/stats';
-import type { DailyCapacity, Rank, RankRequirement, StatName } from '@/types/game';
+import type { Rank, RankRequirement, StatName } from '@/types/game';
 
 export interface SimulationResult {
   days: number;
@@ -15,11 +15,11 @@ export interface SimulationResult {
   disciplineLevel: number;
   balancedStatsAtLevel: number;
   averageStatLevel: number;
-  commandCapacity: DailyCapacity;
+  rewardModel: 'amplified-baseline';
   accountXpBreakdown: {
     missions: number;
-    dailyCommand: number;
     perfectDays: number;
+    weeklyStrategy: number;
     challenges: number;
     total: number;
   };
@@ -36,23 +36,17 @@ interface ProgressionProjection {
   accountXpBreakdown: SimulationResult['accountXpBreakdown'];
 }
 
-function commandMultiplierFor(rate: number, capacity: DailyCapacity) {
-  if (capacity === 'low') return 1;
-  if (capacity === 'steady') return rate >= 1 ? 1.75 : rate >= 0.65 ? 1.5 : 1;
-  return rate >= 1 ? 2.5 : rate >= 0.8 ? 2 : 1;
-}
-
 function projectProgression(
   days: number,
   completionRate: number,
-  commandCapacity: DailyCapacity,
   completedTrialIds: string[] = [],
 ): ProgressionProjection {
   const dailyMissionXp = DEFAULT_MISSIONS.reduce(
-    (sum, mission) => sum + (mission.customAccountXp ?? mission.accountXp),
+    (sum, mission) =>
+      sum +
+      (mission.customAccountXp ?? mission.accountXp) * BALANCE.account.missionBaselineMultiplier,
     0,
   );
-  const commandMultiplier = commandMultiplierFor(completionRate, commandCapacity);
   const perfectRate = Math.max(0, (completionRate - 0.82) / 0.18);
   const perfectDays = Math.round(days * perfectRate);
   const challengeXp =
@@ -60,11 +54,11 @@ function projectProgression(
     completionRate *
     (BALANCE.weeklyChallengeAccountXp[1] / 7 + BALANCE.monthlyChallengeAccountXp[1] / 30);
   const missionXp = days * dailyMissionXp * completionRate;
-  const dailyCommandXp = missionXp * (commandMultiplier - 1);
   const perfectDayXp = perfectDays * BALANCE.account.perfectDayBonus;
+  const weeklyStrategyXp = (days / 7) * completionRate * BALANCE.weeklyStrategy.accountXp;
   const completedTrials = RANK_TRIALS.filter((trial) => completedTrialIds.includes(trial.id));
   const trialXp = completedTrials.reduce((sum, trial) => sum + trial.accountXp, 0);
-  const accountXp = missionXp + dailyCommandXp + perfectDayXp + challengeXp + trialXp;
+  const accountXp = missionXp + perfectDayXp + weeklyStrategyXp + challengeXp + trialXp;
 
   const statTotals = Object.fromEntries([...ALL_STATS].map((stat) => [stat, 0])) as Record<
     StatName,
@@ -72,7 +66,8 @@ function projectProgression(
   >;
   for (const mission of DEFAULT_MISSIONS) {
     for (const reward of mission.statRewards) {
-      statTotals[reward.stat] += days * completionRate * commandMultiplier * reward.xp;
+      statTotals[reward.stat] +=
+        days * completionRate * BALANCE.stats.missionBaselineMultiplier * reward.xp;
     }
   }
   for (const [stat, reward] of Object.entries(PERFECT_DAY_STAT_REWARDS) as [StatName, number][]) {
@@ -99,8 +94,8 @@ function projectProgression(
       Math.floor((days / 7 + days / 30) * completionRate) + completedTrials.length,
     accountXpBreakdown: {
       missions: Math.round(missionXp),
-      dailyCommand: Math.round(dailyCommandXp),
       perfectDays: Math.round(perfectDayXp),
+      weeklyStrategy: Math.round(weeklyStrategyXp),
       challenges: Math.round(challengeXp + trialXp),
       total: Math.round(accountXp),
     },
@@ -121,11 +116,7 @@ function meetsRankRequirement(projection: ProgressionProjection, requirement: Ra
   );
 }
 
-export function simulateProgression(
-  days: number,
-  completionRate: number,
-  commandCapacity: DailyCapacity = 'steady',
-): SimulationResult {
+export function simulateProgression(days: number, completionRate: number): SimulationResult {
   const safeDays = Math.max(0, Math.floor(days));
   const safeRate = Math.max(0, Math.min(1, completionRate));
   let estimatedRank: Rank = 'F';
@@ -140,10 +131,7 @@ export function simulateProgression(
     while (low <= high) {
       const middle = Math.floor((low + high) / 2);
       if (
-        meetsRankRequirement(
-          projectProgression(middle, safeRate, commandCapacity, completedTrialIds),
-          requirement,
-        )
+        meetsRankRequirement(projectProgression(middle, safeRate, completedTrialIds), requirement)
       ) {
         qualificationDay = middle;
         high = middle - 1;
@@ -158,7 +146,7 @@ export function simulateProgression(
     previousTrialCompletedAt = trialCompletedAt;
     estimatedRank = requirement.rank;
   }
-  const projection = projectProgression(safeDays, safeRate, commandCapacity, completedTrialIds);
+  const projection = projectProgression(safeDays, safeRate, completedTrialIds);
   const levels = Object.values(projection.statLevels);
   return {
     days: safeDays,
@@ -170,7 +158,7 @@ export function simulateProgression(
     disciplineLevel: projection.disciplineLevel,
     balancedStatsAtLevel: levels.filter((level) => level >= 10).length,
     averageStatLevel: Math.round(levels.reduce((sum, level) => sum + level, 0) / levels.length),
-    commandCapacity,
+    rewardModel: 'amplified-baseline',
     accountXpBreakdown: projection.accountXpBreakdown,
   };
 }

@@ -25,23 +25,16 @@ import { getCompanion, getCompanionImage } from '@/config/companions';
 import { DEFAULT_MISSIONS } from '@/config/missions';
 import { TITLE_LIBRARY } from '@/config/titles';
 import { accountXpForLevel, totalXpAtLevel } from '@/game/xp';
+import { missionAccountXp } from '@/game/rewards';
 import { Link } from '@/router';
 import { useGameStore } from '@/store/useGameStore';
 import { formatClassName } from '@/utils/format';
 
 const DEFAULT_DAILY_MISSION_XP = DEFAULT_MISSIONS.reduce(
-  (sum, mission) => sum + (mission.customAccountXp ?? mission.accountXp),
+  (sum, mission) => sum + missionAccountXp(mission),
   0,
 );
 const DEFAULT_PERFECT_DAY_XP = DEFAULT_DAILY_MISSION_XP + BALANCE.account.perfectDayBonus;
-const DEFAULT_STEADY_FULL_CLEAR_XP =
-  DEFAULT_DAILY_MISSION_XP +
-  Math.round(DEFAULT_DAILY_MISSION_XP * 0.75) +
-  BALANCE.account.perfectDayBonus;
-const DEFAULT_HIGH_FULL_CLEAR_XP =
-  DEFAULT_DAILY_MISSION_XP +
-  Math.round(DEFAULT_DAILY_MISSION_XP * 1.5) +
-  BALANCE.account.perfectDayBonus;
 const WORLD_CLASS_REQUIREMENT = RANK_REQUIREMENTS.find(
   (requirement) => requirement.rank === 'WORLD CLASS',
 )!;
@@ -100,7 +93,7 @@ const DESTINATIONS = [
     to: '/headquarters',
     icon: Users,
     title: 'Party Headquarters',
-    text: 'Meet the full roster, open support channels, and review weekly Campfires.',
+    text: 'Meet the full roster, open support channels, and review each Weekly Strategy Room.',
   },
   {
     to: '/party-chat',
@@ -381,12 +374,14 @@ export function AboutPage() {
           </p>
           <p>
             Each of the four Training Hall paths can be cleared once per day. A second distinct path
-            awards a <strong>+150 XP</strong> Double Deployment surge, a third adds a{' '}
-            <strong>+200 XP</strong> Triple Deployment surge, and all four add a final{' '}
-            <strong>+250 XP</strong> Full Spectrum surge, each with displayed stat rewards. Daily
-            Workout itself still pays once, and the surges are never multiplied by Daily Command.
-            Every additional session is optional; recovery and sustainable progress remain more
-            important than chasing a bonus.
+            awards a <strong>+{BALANCE.training.multiPathTiers[2].accountXp} XP</strong> Double
+            Deployment surge, a third adds a{' '}
+            <strong>+{BALANCE.training.multiPathTiers[3].accountXp} XP</strong> Triple Deployment
+            surge, and all four add a final{' '}
+            <strong>+{BALANCE.training.multiPathTiers[4].accountXp} XP</strong> Full Spectrum surge,
+            each with displayed stat rewards. Daily Workout itself still pays once. Every additional
+            session is optional; recovery and sustainable progress remain more important than
+            chasing a bonus.
           </p>
           <p>
             There is no readiness quiz and no separate warm-up gate. Choose loads and exercise
@@ -409,9 +404,9 @@ export function AboutPage() {
             The first {BALANCE.kitchen.rewardedOrdersPerWeek} completed orders each week award{' '}
             <strong>{BALANCE.kitchen.completedOrderAccountXp} account XP</strong> plus Stewardship,
             Vitality, and Discipline XP. Additional meals are still recorded but award no XP. These
-            are fixed special rewards and Daily Command never multiplies them. The recipes provide
-            general meal-planning support rather than calorie targets or medical nutrition therapy;
-            allergies, health conditions, and clinician guidance always override the app.
+            are fixed special rewards. The recipes provide general meal-planning support rather than
+            calorie targets or medical nutrition therapy; allergies, health conditions, and
+            clinician guidance always override the app.
           </p>
         </details>
         <details>
@@ -433,10 +428,10 @@ export function AboutPage() {
             supports recovery from shame, sadness, and emotional overload.
           </p>
           <p>
-            The first completed Full Daily Study can clear that day’s Bible mission for its printed
-            25 account XP. Additional studies remain available but create no repeat reward.
-            Stronghold sessions are unlimited, never award XP, and never automatically mark the
-            Bible mission complete. Optional reflections, prayer notes, and next actions stay on
+            The first completed Full Daily Study can clear that day’s Bible mission for its
+            displayed 50 account XP. Additional studies remain available but create no repeat
+            reward. Stronghold sessions are unlimited, never award XP, and never automatically mark
+            the Bible mission complete. Optional reflections, prayer notes, and next actions stay on
             this device and are included in Archive Shield exports.
           </p>
           <p>
@@ -447,65 +442,54 @@ export function AboutPage() {
           </p>
         </details>
         <details>
-          <summary>Where does XP come from, and what can multiply it?</summary>
+          <summary>Where does XP come from?</summary>
           <p>
-            Daily missions award the account and stat XP printed on their cards. Daily Workout is
-            worth 75 account XP and can be cleared once through any Training Hall path. Perfect
-            Days, completed challenges, Class Trials, Companion Quest chapters, Treasury reviews,
-            rewarded Kitchen Orders, multi-path Training surges, and accepted rare events award
-            their own displayed one-time XP. Campaign Arc milestones, emotional check-ins, support
-            conversations, Campfires, Councils, repeat Sanctuary studies, Stronghold sessions, and
+            Daily missions award the account and stat XP printed on their cards. The permanent
+            progression baseline doubles configured account XP and increases configured mission stat
+            XP by 50%, so there is no daily mode or capacity gate to unlock your full reward. Daily
+            Workout is worth 150 account XP and can be cleared once through any Training Hall path.
+            Perfect Days, completed challenges, Class Trials, Companion Quest chapters, Treasury
+            reviews, rewarded Kitchen Orders, multi-path Training surges, and accepted rare events
+            award their own displayed one-time XP. Campaign Arc milestones, emotional check-ins,
+            support conversations, Councils, repeat Sanctuary studies, Stronghold sessions, and
             ordinary Training Hall overtime are records or guidance only and do not create hidden
             XP.
           </p>
           <p>
-            <strong>Current default daily account XP:</strong> Prayer 20, Bible 25, Integrity 40,
-            Kindness 20, Daily Workout 75, and Creator Work 35—for{' '}
-            <strong>{DEFAULT_DAILY_MISSION_XP} base XP</strong>. In a Stable System state, clearing
-            all six produces <strong>{DEFAULT_PERFECT_DAY_XP} XP</strong> with the 50-XP Perfect Day
-            reward, <strong>{DEFAULT_STEADY_FULL_CLEAR_XP} XP</strong> with a Steady Full Clear, or{' '}
-            <strong>{DEFAULT_HIGH_FULL_CLEAR_XP} XP</strong> with a High Full Clear. Optional or
-            customized missions change the total, and their cards remain the authoritative values.
+            <strong>Current default daily account XP:</strong> Prayer 40, Bible 50, Integrity 80,
+            Kindness 40, Daily Workout 150, and Creator Work 70—for{' '}
+            <strong>{DEFAULT_DAILY_MISSION_XP} baseline XP</strong>. In a Stable System state,
+            clearing all six produces <strong>{DEFAULT_PERFECT_DAY_XP} XP</strong> with the
+            {BALANCE.account.perfectDayBonus}-XP Perfect Day reward. Optional or customized missions
+            change the total, and their cards remain the authoritative values.
           </p>
           <p>
-            Snow’s Daily Command is the only broad daily multiplier. It multiplies account and stat
-            XP from that day’s scheduled missions after the next Daily Review: Low stays at 1×;
-            Steady earns 1.5× at its target or 1.75× for every scheduled mission; High earns 2× at
-            its target or 2.5× for every scheduled mission. Special rewards are never multiplied,
-            and every reward uses a stable transaction key so repeated taps, refreshes, imports, or
-            reopening the Training Hall cannot duplicate it.
+            The Weekly Strategy Room awards +{BALANCE.weeklyStrategy.accountXp} account XP plus a
+            fixed Discipline, Focus, and Wisdom reward when you confirm one direction for the coming
+            week. It never checks a mission box or changes a specialist assignment. Every reward
+            uses a stable transaction key so repeated taps, refreshes, imports, or reopening a realm
+            cannot duplicate it.
           </p>
           <p>
             Those examples assume a Stable System state. Warning temporarily awards 90% of printed
             account mission XP and Stagnant awards 75% until completed days restore stability; stat
-            mission XP remains as printed. Snow’s command bonus is calculated from the account XP
-            actually recorded, so the app does not secretly stack or duplicate rewards.
+            mission XP remains as displayed.
           </p>
         </details>
         <details>
-          <summary>What is Snow’s Daily Command Briefing?</summary>
+          <summary>What are the Command Center and Weekly Strategy Room?</summary>
           <p>
-            Once per System day, Snow asks whether your real capacity is Low, Steady, or High. Main
-            is the first priority, Support is the second, and Bonus is High Capacity’s third
-            priority. These are existing scheduled missions—not extra tasks—and completing only the
-            priority slots does not automatically clear a Steady or High command.
+            The Command Center is the compact System-page control surface. It shows the next useful
+            action, prepared Party Operations, confirmations waiting in Quick Link, active
+            intelligence transmissions, genuine Party Signals, and a collapsible directory for every
+            realm. It does not replace the original mission, workout, recipe, study, or creator
+            flows.
           </p>
           <p>
-            <strong>Low</strong> has no completion quota and keeps normal 1× mission XP.{' '}
-            <strong>Steady</strong> requires Main, Support, and at least 65% of the full scheduled
-            list for 1.5× mission XP; clearing the entire list raises it to 1.75×.{' '}
-            <strong>High</strong> requires Main, Support, Bonus, and at least 80% for 2×; clearing
-            the entire list raises it to 2.5×.
-          </p>
-          <p>
-            Snow locks the scheduled count and chosen command when you confirm it. The multiplier is
-            verified and awarded during the next Daily Review to account and stat XP earned from
-            completed scheduled missions. Perfect Day rewards still apply separately. Rare events,
-            companion quests, Treasury rewards, and other special XP are never multiplied. Missing a
-            target removes nothing: you keep every normal reward and simply do not receive the
-            command bonus. A protected exception counts as resolved for the command, but creates no
-            mission XP to multiply. You can skip the briefing before confirming it or disable future
-            briefings in Settings.
+            The Weekly Strategy Room replaces the passive weekly Campfire. The same evidence-based
+            twelve-companion review remains, but the board now identifies the strongest path to
+            protect and the path that most needs one small early win. Confirming the strategy locks
+            the weekly reward once; the actual work still belongs to its authoritative realm.
           </p>
         </details>
         <details>
@@ -541,14 +525,16 @@ export function AboutPage() {
           </p>
         </details>
         <details>
-          <summary>How do Weekly Campfires and Monthly Councils work?</summary>
+          <summary>How do Weekly Strategy Rooms and Monthly Councils work?</summary>
           <p>
-            Campfires summarize a completed week with at least one finalized Daily Review. Monthly
-            Councils assemble all twelve companions after a completed calendar month and review
-            mission balance, Perfect Days, levels, classes, titles, Campaign milestones, quest
-            chapters, and relationship actions that were actually recorded. Their commentary is
-            saved in Headquarters and the Archive, and never changes scoring. The Council also gives
-            you an optional place to write one next-month intention.
+            Weekly Strategy Rooms summarize a completed week with at least one finalized Daily
+            Review, identify one path to protect and one path to prioritize, and award their
+            one-time strategy reward only when you confirm the direction. Monthly Councils assemble
+            all twelve companions after a completed calendar month and review mission balance,
+            Perfect Days, levels, classes, titles, Campaign milestones, quest chapters, and
+            relationship actions that were actually recorded. Their commentary is saved in
+            Headquarters and the Archive. The Council also gives you an optional place to write one
+            next-month intention.
           </p>
         </details>
         <details>
@@ -562,15 +548,15 @@ export function AboutPage() {
         <details>
           <summary>What do the companions change?</summary>
           <p>
-            Snow, Rook, Selah, Cipher, Vesper, Ember, Mira, Amara, Cassian, and Saffron provide
-            context, encouragement, check-ins, direct support, banter, milestone celebrations,
-            accountability, weekly Campfires, Monthly Councils, and personal questlines. Amara
-            specializes in empathy, relationships, belonging, communication, repair, and healthy
-            boundaries; she never requires unsafe contact. Vesper specializes in YouTube, creator
-            identity, audience strategy, hooks, camera confidence, packaging, and publishing
-            momentum; Creator Forge gives that journey an offline-first pipeline and channel signal.
-            Cassian specializes in budgeting, saving, debt reduction, spending awareness, and
-            shame-free financial recovery. Saffron specializes in practical cooking,
+            Snow, Rook, Selah, Cipher, Vesper, Ember, Mira, Amara, Cassian, Saffron, Quill, and
+            Kairo provide context, encouragement, check-ins, direct support, banter, milestone
+            celebrations, accountability, Weekly Strategy Rooms, Monthly Councils, and personal
+            questlines. Amara specializes in empathy, relationships, belonging, communication,
+            repair, and healthy boundaries; she never requires unsafe contact. Vesper specializes in
+            YouTube, creator identity, audience strategy, hooks, camera confidence, packaging, and
+            publishing momentum; Creator Forge gives that journey an offline-first pipeline and
+            channel signal. Cassian specializes in budgeting, saving, debt reduction, spending
+            awareness, and shame-free financial recovery. Saffron specializes in practical cooking,
             training-supportive meals, leftovers, and lowering the friction that makes eating out
             feel automatic. Companion words never secretly change XP, streaks, mission results, or
             class requirements.

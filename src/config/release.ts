@@ -1,4 +1,4 @@
-export const APP_VERSION = '9.1.0';
+export const APP_VERSION = '9.2.0';
 export const DATABASE_SCHEMA_VERSION = 28;
 export const SAVE_FORMAT_VERSION = 28;
 
@@ -9,6 +9,18 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 9.2.0 · Sovereign Command Center',
+    detail:
+      'The System home becomes a focused command surface, the passive weekly recap becomes an actionable Strategy Room, and every normal mission receives a stronger permanent reward without a daily capacity gate.',
+    points: [
+      'The Ascension Core remains the visual heart of the System while one compact Command Center now surfaces the next useful action, prepared Party Operations, protected confirmations, active intelligence links, genuine companion signals, and every realm directory.',
+      'The oversized Dimensional Route Map is replaced by a collapsible realm index, Party Pulse appears only when a specialist has a real signal, and Snow’s retired pre-AI Daily Command no longer interrupts the day or controls mission rewards.',
+      'All normal missions permanently award double their configured account XP and 50% more configured stat XP; Perfect Day, Kitchen, Body Diagnostic, and multi-path Training rewards rise with them while Class gates preserve the designed World Class journey.',
+      'The Weekly Strategy Room keeps the full twelve-companion evidence review, identifies the path to protect and the path to prioritize, and grants one protected weekly strategy reward only after the Hunter confirms the direction.',
+      'Legacy Daily Command records remain readable in Archive Shield and finalize safely without stacking an obsolete multiplier over the new baseline.',
+    ],
+  },
   {
     title: 'Version 9.1.0 Â· Living Command Intelligence',
     detail:

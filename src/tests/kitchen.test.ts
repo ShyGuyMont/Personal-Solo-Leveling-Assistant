@@ -89,7 +89,9 @@ describe("Saffron's Kitchen", () => {
         rating: 5,
       }),
     ).rejects.toThrow(/No active Kitchen Order/i);
-    expect((await db.progression.get('primary'))?.totalXp).toBe(120);
+    expect((await db.progression.get('primary'))?.totalXp).toBe(
+      BALANCE.kitchen.completedOrderAccountXp * BALANCE.kitchen.rewardedOrdersPerWeek,
+    );
   });
 
   it('can turn a personal Grimoire recipe into the guided order with saved checklist progress', async () => {

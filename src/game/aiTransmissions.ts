@@ -14,6 +14,10 @@ export interface PendingAiTransmission {
 
 const TRANSMISSION_PREFIX = 'ai-pending-transmission:';
 
+function emitTransmissionChanged() {
+  if (typeof window !== 'undefined') window.dispatchEvent(new Event('system:ai-proposal-changed'));
+}
+
 function metadataId(surface: AiTransmissionSurface) {
   return `${TRANSMISSION_PREFIX}${surface}`;
 }
@@ -41,6 +45,7 @@ export async function savePendingAiTransmission(record: PendingAiTransmission) {
     value: record as unknown as Record<string, unknown>,
     updatedAt: new Date().toISOString(),
   });
+  emitTransmissionChanged();
 }
 
 export async function getPendingAiTransmission(surface: AiTransmissionSurface) {
@@ -53,6 +58,14 @@ export async function getPendingAiTransmission(surface: AiTransmissionSurface) {
   return metadata.value;
 }
 
+export async function listPendingAiTransmissions() {
+  const transmissions = await Promise.all([
+    getPendingAiTransmission('quick-link'),
+    getPendingAiTransmission('headquarters'),
+  ]);
+  return transmissions.filter(Boolean) as PendingAiTransmission[];
+}
+
 export async function clearPendingAiTransmission(
   surface: AiTransmissionSurface,
   transmissionId?: string,
@@ -62,4 +75,5 @@ export async function clearPendingAiTransmission(
     if (current && current.transmissionId !== transmissionId) return;
   }
   await db.appMetadata.delete(metadataId(surface));
+  emitTransmissionChanged();
 }
