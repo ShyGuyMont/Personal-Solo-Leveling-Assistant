@@ -1,4 +1,4 @@
-export const APP_VERSION = '10.0.0';
+export const APP_VERSION = '10.0.1';
 export const DATABASE_SCHEMA_VERSION = 28;
 export const SAVE_FORMAT_VERSION = 28;
 
@@ -9,6 +9,18 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 10.0.1 · Living Core',
+    detail:
+      'The Ascension Core no longer merely displays power—it behaves like a living System artifact whose orbit, pulse, and atmosphere respond to the Hunter’s real daily synchronization.',
+    points: [
+      'Three intersecting particle planes now orbit the suspended Class artifact at distinct angles and speeds, giving the Core a constant sense of dimensional motion rather than a single flat rotation.',
+      'Energy motes rise through the chamber while a two-beat luminosity cycle gives the inner field a heartbeat-like rhythm, preserving visible life even before the first directive is complete.',
+      'Particle and mote density now scale safely with real daily charge, so a synchronized day feels visibly more energized without changing rewards, XP, progression, or Class rules.',
+      'Awakening the Core brightens and accelerates its living field, making the existing analysis interaction feel like an intentional surge rather than a simple panel toggle.',
+      'Mobile layouts receive balanced orbit radii and controlled particle counts, while Clean Interface, subtle intensity, reduced-motion settings, and system-level motion preferences remain fully respected.',
+    ],
+  },
   {
     title: 'Version 10.0.0 · Sovereign Evolution',
     detail:

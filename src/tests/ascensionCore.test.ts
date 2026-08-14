@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildAscensionCoreProjection } from '@/game/ascensionCore';
+import { buildAscensionCoreProjection, buildAscensionCoreVitality } from '@/game/ascensionCore';
 
 const baseline = {
   dailyCompleted: 2,
@@ -68,5 +68,34 @@ describe('Sovereign Ascension Core', () => {
         currentLevelXp: -20,
       }),
     ).toMatchObject({ dailyCharge: 100, levelCharge: 0 });
+  });
+
+  it('keeps the Core visibly alive before the first directive is complete', () => {
+    expect(buildAscensionCoreVitality(0)).toEqual({
+      particlesPerOrbit: 5,
+      sparkParticles: 10,
+    });
+  });
+
+  it('intensifies the living field as daily synchronization rises', () => {
+    expect(buildAscensionCoreVitality(100)).toEqual({
+      particlesPerOrbit: 10,
+      sparkParticles: 20,
+    });
+  });
+
+  it('clamps malformed vitality without creating runaway particle fields', () => {
+    expect(buildAscensionCoreVitality(-50)).toEqual({
+      particlesPerOrbit: 5,
+      sparkParticles: 10,
+    });
+    expect(buildAscensionCoreVitality(900)).toEqual({
+      particlesPerOrbit: 10,
+      sparkParticles: 20,
+    });
+    expect(buildAscensionCoreVitality(Number.NaN)).toEqual({
+      particlesPerOrbit: 5,
+      sparkParticles: 10,
+    });
   });
 });

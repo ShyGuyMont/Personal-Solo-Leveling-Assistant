@@ -27,7 +27,7 @@ import { getChallengeTemplate } from '@/config/challenges';
 import { getCompanion, getCompanionImage } from '@/config/companions';
 import { APP_VERSION } from '@/config/release';
 import { getDashboardHistory } from '@/db/repositories';
-import { buildAscensionCoreProjection } from '@/game/ascensionCore';
+import { buildAscensionCoreProjection, buildAscensionCoreVitality } from '@/game/ascensionCore';
 import { calculateRankQualification } from '@/game/rank';
 import { Link } from '@/router';
 import { daySeed, formatLongDate, getCurrentHour } from '@/utils/date';
@@ -116,6 +116,9 @@ export function DashboardPage() {
     clearedClassGates,
     totalClassGates,
   });
+  const coreVitality = buildAscensionCoreVitality(coreProjection.dailyCharge);
+  const orbitParticles = Array.from({ length: coreVitality.particlesPerOrbit });
+  const sparkParticles = Array.from({ length: coreVitality.sparkParticles });
 
   return (
     <div className="page dashboard-page">
@@ -184,6 +187,45 @@ export function DashboardPage() {
               <span />
               <span />
               <span />
+            </div>
+            <div className="ascension-core__life-field" aria-hidden="true">
+              {(['one', 'two', 'three'] as const).map((orbit, orbitIndex) => (
+                <span
+                  className={`ascension-core__particle-orbit ascension-core__particle-orbit--${orbit}`}
+                  key={orbit}
+                >
+                  {orbitParticles.map((_, particleIndex) => (
+                    <i
+                      key={particleIndex}
+                      style={
+                        {
+                          '--particle-angle': `${
+                            (360 / coreVitality.particlesPerOrbit) * particleIndex + orbitIndex * 17
+                          }deg`,
+                          '--particle-delay': `${-(particleIndex * 0.43 + orbitIndex * 0.7)}s`,
+                          '--particle-size': `${2 + ((particleIndex + orbitIndex) % 3)}px`,
+                        } as CSSProperties
+                      }
+                    />
+                  ))}
+                </span>
+              ))}
+            </div>
+            <div className="ascension-core__life-sparks" aria-hidden="true">
+              {sparkParticles.map((_, sparkIndex) => (
+                <i
+                  key={sparkIndex}
+                  style={
+                    {
+                      '--spark-delay': `${-(sparkIndex * 0.31)}s`,
+                      '--spark-drift': `${((sparkIndex * 19) % 31) - 15}px`,
+                      '--spark-duration': `${2.8 + (sparkIndex % 5) * 0.42}s`,
+                      '--spark-size': `${1 + (sparkIndex % 3)}px`,
+                      '--spark-x': `${10 + ((sparkIndex * 37) % 80)}%`,
+                    } as CSSProperties
+                  }
+                />
+              ))}
             </div>
             <div className="ascension-core__field" aria-hidden="true">
               <i />

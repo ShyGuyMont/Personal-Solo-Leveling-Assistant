@@ -24,9 +24,25 @@ export interface AscensionCoreProjection {
   gateDisplay: string;
 }
 
+export interface AscensionCoreVitality {
+  particlesPerOrbit: number;
+  sparkParticles: number;
+}
+
 function percent(value: number, target: number) {
   if (target <= 0) return 0;
   return Math.min(100, Math.max(0, Math.round((value / target) * 100)));
+}
+
+export function buildAscensionCoreVitality(dailyCharge: number): AscensionCoreVitality {
+  const normalizedCharge = Number.isFinite(dailyCharge)
+    ? Math.min(100, Math.max(0, dailyCharge))
+    : 0;
+
+  return {
+    particlesPerOrbit: 5 + Math.round(normalizedCharge / 20),
+    sparkParticles: 10 + Math.round(normalizedCharge / 10),
+  };
 }
 
 export function buildAscensionCoreProjection(input: AscensionCoreInput): AscensionCoreProjection {

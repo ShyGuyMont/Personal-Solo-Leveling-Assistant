@@ -2304,6 +2304,362 @@ html[data-motion='reduced'] .calendar-hero__portrait i {
   }
 }
 
+/* Version 10.0.1 · Living Core */
+.ascension-core__life-field,
+.ascension-core__life-sparks {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  pointer-events: none;
+  translate: -50% -58%;
+  transform-style: preserve-3d;
+}
+
+.ascension-core__life-field {
+  z-index: 3;
+  width: 320px;
+  height: 320px;
+  perspective: 720px;
+  transition:
+    filter 360ms ease,
+    opacity 360ms ease;
+}
+
+.ascension-core__life-field::before,
+.ascension-core__life-field::after {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border-radius: 50%;
+  pointer-events: none;
+  content: '';
+  translate: -50% -50%;
+}
+
+.ascension-core__life-field::before {
+  width: 132px;
+  height: 132px;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, white 28%, var(--system-state-accent)) 0 2%,
+    color-mix(in srgb, var(--system-state-accent) 31%, transparent) 12%,
+    color-mix(in srgb, var(--system-state-accent) 9%, transparent) 37%,
+    transparent 70%
+  );
+  filter: blur(2px) drop-shadow(0 0 24px var(--system-state-accent));
+  opacity: 0.48;
+  animation: livingCoreHeartbeat 4.8s ease-in-out infinite;
+}
+
+.ascension-core__life-field::after {
+  width: 54px;
+  height: 54px;
+  border: 1px solid color-mix(in srgb, white 36%, var(--system-state-accent));
+  box-shadow:
+    0 0 20px color-mix(in srgb, var(--system-state-accent) 38%, transparent),
+    inset 0 0 18px color-mix(in srgb, var(--system-state-accent) 26%, transparent);
+  opacity: 0.32;
+  animation: livingCoreHeartbeatRing 4.8s ease-out infinite;
+}
+
+.ascension-core__particle-orbit {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.ascension-core__particle-orbit i {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--particle-size);
+  height: var(--particle-size);
+  background: color-mix(in srgb, white 78%, var(--system-state-accent));
+  border-radius: 50%;
+  box-shadow:
+    0 0 7px 2px color-mix(in srgb, var(--system-state-accent) 68%, transparent),
+    0 0 16px color-mix(in srgb, var(--system-state-accent) 34%, transparent);
+  opacity: 0.76;
+  transform: rotate(var(--particle-angle)) translateX(var(--orbit-radius))
+    rotate(calc(-1 * var(--particle-angle))) translateZ(5px);
+  animation: livingCoreParticleTwinkle 2.25s ease-in-out infinite;
+  animation-delay: var(--particle-delay);
+  backface-visibility: hidden;
+}
+
+.ascension-core__particle-orbit--one {
+  --orbit-radius: 145px;
+
+  animation: livingCoreOrbitOne 12s linear infinite;
+}
+
+.ascension-core__particle-orbit--two {
+  --orbit-radius: 116px;
+
+  animation: livingCoreOrbitTwo 16s linear infinite reverse;
+}
+
+.ascension-core__particle-orbit--three {
+  --orbit-radius: 91px;
+
+  animation: livingCoreOrbitThree 21s linear infinite;
+}
+
+.ascension-core__life-sparks {
+  z-index: 3;
+  width: 248px;
+  height: 270px;
+  overflow: visible;
+  transition:
+    filter 360ms ease,
+    opacity 360ms ease;
+}
+
+.ascension-core__life-sparks i {
+  position: absolute;
+  bottom: 19%;
+  left: var(--spark-x);
+  width: var(--spark-size);
+  height: var(--spark-size);
+  background: color-mix(in srgb, white 74%, var(--system-state-accent));
+  border-radius: 50%;
+  box-shadow: 0 0 9px 2px color-mix(in srgb, var(--system-state-accent) 62%, transparent);
+  opacity: 0;
+  animation: livingCoreSparkRise var(--spark-duration) ease-out infinite;
+  animation-delay: var(--spark-delay);
+  will-change: transform, opacity;
+}
+
+.ascension-core.is-awakened .ascension-core__life-field,
+.ascension-core.is-awakened .ascension-core__life-sparks {
+  filter: saturate(1.32) brightness(1.24)
+    drop-shadow(0 0 13px color-mix(in srgb, var(--system-state-accent) 27%, transparent));
+}
+
+.ascension-core.is-awakened .ascension-core__life-field::before,
+.ascension-core.is-awakened .ascension-core__life-field::after {
+  animation-duration: 3.15s;
+}
+
+.ascension-core.is-awakened .ascension-core__particle-orbit--one {
+  animation-duration: 6.8s;
+}
+
+.ascension-core.is-awakened .ascension-core__particle-orbit--two {
+  animation-duration: 8.7s;
+}
+
+.ascension-core.is-awakened .ascension-core__particle-orbit--three {
+  animation-duration: 11.4s;
+}
+
+.ascension-core.is-awakened .ascension-core__life-sparks i {
+  box-shadow:
+    0 0 11px 3px color-mix(in srgb, var(--system-state-accent) 76%, transparent),
+    0 0 22px color-mix(in srgb, var(--system-state-accent) 34%, transparent);
+}
+
+.ascension-core--advancement-ready .ascension-core__life-field,
+.ascension-core--world-class .ascension-core__life-field {
+  filter: saturate(1.2) brightness(1.14);
+}
+
+@keyframes livingCoreOrbitOne {
+  from {
+    transform: rotateX(68deg) rotateY(8deg) rotateZ(0deg);
+  }
+  to {
+    transform: rotateX(68deg) rotateY(8deg) rotateZ(360deg);
+  }
+}
+
+@keyframes livingCoreOrbitTwo {
+  from {
+    transform: rotateX(10deg) rotateY(67deg) rotateZ(18deg);
+  }
+  to {
+    transform: rotateX(10deg) rotateY(67deg) rotateZ(378deg);
+  }
+}
+
+@keyframes livingCoreOrbitThree {
+  from {
+    transform: rotateX(54deg) rotateY(42deg) rotateZ(40deg);
+  }
+  to {
+    transform: rotateX(54deg) rotateY(42deg) rotateZ(400deg);
+  }
+}
+
+@keyframes livingCoreParticleTwinkle {
+  0%,
+  100% {
+    opacity: 0.32;
+    scale: 0.72;
+  }
+  42% {
+    opacity: 1;
+    scale: 1.35;
+  }
+  68% {
+    opacity: 0.62;
+    scale: 0.9;
+  }
+}
+
+@keyframes livingCoreSparkRise {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 58px, -24px) scale(0.48);
+  }
+  18% {
+    opacity: 0.92;
+  }
+  72% {
+    opacity: 0.55;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--spark-drift), -132px, 48px) scale(1.45);
+  }
+}
+
+@keyframes livingCoreHeartbeat {
+  0%,
+  34%,
+  100% {
+    opacity: 0.34;
+    scale: 0.88;
+  }
+  41% {
+    opacity: 0.78;
+    scale: 1.09;
+  }
+  47% {
+    opacity: 0.46;
+    scale: 0.95;
+  }
+  54% {
+    opacity: 0.92;
+    scale: 1.18;
+  }
+  67% {
+    opacity: 0.4;
+    scale: 0.9;
+  }
+}
+
+@keyframes livingCoreHeartbeatRing {
+  0%,
+  36%,
+  100% {
+    opacity: 0;
+    scale: 0.72;
+  }
+  48% {
+    opacity: 0.48;
+    scale: 1.18;
+  }
+  62% {
+    opacity: 0;
+    scale: 1.72;
+  }
+}
+
+html[data-interface='clean'] :is(.ascension-core__life-field, .ascension-core__life-sparks) {
+  display: none;
+}
+
+html[data-intensity='subtle'] .ascension-core__particle-orbit i:nth-child(n + 7),
+html[data-intensity='subtle'] .ascension-core__life-sparks i:nth-child(n + 12) {
+  display: none;
+}
+
+html[data-motion='reduced'] .ascension-core__particle-orbit,
+html[data-motion='reduced'] .ascension-core__particle-orbit i,
+html[data-motion='reduced'] .ascension-core__life-field::before,
+html[data-motion='reduced'] .ascension-core__life-field::after {
+  animation: none;
+}
+
+html[data-motion='reduced'] .ascension-core__life-sparks {
+  display: none;
+}
+
+html[data-motion='reduced'] .ascension-core__particle-orbit--one {
+  transform: rotateX(68deg) rotateY(8deg) rotateZ(26deg);
+}
+
+html[data-motion='reduced'] .ascension-core__particle-orbit--two {
+  transform: rotateX(10deg) rotateY(67deg) rotateZ(42deg);
+}
+
+html[data-motion='reduced'] .ascension-core__particle-orbit--three {
+  transform: rotateX(54deg) rotateY(42deg) rotateZ(64deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ascension-core__particle-orbit,
+  .ascension-core__particle-orbit i,
+  .ascension-core__life-field::before,
+  .ascension-core__life-field::after {
+    animation: none;
+  }
+
+  .ascension-core__life-sparks {
+    display: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .ascension-core__life-field {
+    width: 276px;
+    height: 276px;
+  }
+
+  .ascension-core__particle-orbit--one {
+    --orbit-radius: 124px;
+  }
+
+  .ascension-core__particle-orbit--two {
+    --orbit-radius: 99px;
+  }
+
+  .ascension-core__particle-orbit--three {
+    --orbit-radius: 78px;
+  }
+
+  .ascension-core__life-sparks {
+    width: 206px;
+    height: 224px;
+  }
+
+  .ascension-core__life-sparks i:nth-child(n + 17) {
+    display: none;
+  }
+}
+
+@media (max-width: 390px) {
+  .ascension-core__life-field {
+    width: 258px;
+    height: 258px;
+  }
+
+  .ascension-core__particle-orbit--one {
+    --orbit-radius: 115px;
+  }
+
+  .ascension-core__particle-orbit--two {
+    --orbit-radius: 91px;
+  }
+
+  .ascension-core__particle-orbit--three {
+    --orbit-radius: 72px;
+  }
+}
+
 /* Version 10.0.0 · Sovereign Evolution */
 .hero-panel.headquarters-stage {
   border-radius: 28px;
