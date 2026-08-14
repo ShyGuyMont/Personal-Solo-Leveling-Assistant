@@ -1506,11 +1506,14 @@ export function CompanionQuickLink() {
           : pendingCalendar.action === 'update'
             ? `${event.title} is updated for ${localDateTime}.`
             : `${event.title} is canceled. The record remains visible instead of disappearing.`;
+      const rewardLine = event.rewardMissionId
+        ? ` A linked Companion Order is waiting in Missions for +${event.rewardXp ?? 0} XP after verified completion; scheduling it awarded nothing.`
+        : '';
       await appendLocalAcknowledgement(
         pendingCalendarOwner,
         pendingCalendarOwner === 'snow'
-          ? `${actionLine} Kairo has the same confirmed record now.`
-          : `${actionLine} Snow's schedule view is synchronized too.`,
+          ? `${actionLine} Kairo has the same confirmed record now.${rewardLine}`
+          : `${actionLine} Snow's schedule view is synchronized too.${rewardLine}`,
       );
       setNotice('Calendar command confirmed · local schedule synchronized.');
     } catch (error) {
@@ -2589,8 +2592,7 @@ export function CompanionQuickLink() {
                 >
                   <header>
                     <span>
-                      <CalendarCheck2 size={15} />{' '}
-                      CALENDAR COUNCIL
+                      <CalendarCheck2 size={15} /> CALENDAR COUNCIL
                     </span>
                     <small>PREVIEW · CONFIRMATION REQUIRED</small>
                   </header>
@@ -2624,6 +2626,9 @@ export function CompanionQuickLink() {
                           : ''}
                         {pendingCalendar.recurrence.replace('ly', '')}
                       </span>
+                    )}
+                    {pendingCalendar.rewardEligible && (
+                      <span>+{pendingCalendar.rewardXp} XP on completion</span>
                     )}
                   </div>
                   <dl>
@@ -2661,6 +2666,22 @@ export function CompanionQuickLink() {
                         <dd>{pendingCalendar.location}</dd>
                       </div>
                     )}
+                    <div>
+                      <dt>XP VERDICT</dt>
+                      <dd>
+                        {pendingCalendar.rewardEligible
+                          ? `Approved by rule · +${pendingCalendar.rewardXp} XP · ${pendingCalendar.rewardDifficulty} Companion Order · paid only after completion`
+                          : pendingCalendar.rewardRationale ||
+                            'Schedule only · no separate XP attached'}
+                      </dd>
+                    </div>
+                    {pendingCalendar.rewardEligible &&
+                      (pendingCalendar.completionCriteria?.length ?? 0) > 0 && (
+                        <div>
+                          <dt>COMPLETION PROOF</dt>
+                          <dd>{pendingCalendar.completionCriteria?.join(' · ')}</dd>
+                        </div>
+                      )}
                     <div>
                       <dt>COMPANION CHECK</dt>
                       <dd>{pendingCalendar.confirmation}</dd>

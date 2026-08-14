@@ -640,7 +640,9 @@ export function AiHeadquartersPanel() {
       const initiatingCompanion =
         (partyEvent?.kind === 'handoff' && partyEvent.initiatedBy !== 'hunter'
           ? partyEvent.initiatedBy
-          : leadCompanionId) ?? beforeCouncil[0] ?? 'snow';
+          : leadCompanionId) ??
+        beforeCouncil[0] ??
+        'snow';
       const councilIds = [...new Set([initiatingCompanion, 'kairo', 'snow'] as CompanionId[])];
       const joining = councilIds.filter((id) => !beforeCouncil.includes(id));
       conversation = addAiConversationParticipants(conversation, councilIds, 'commons', enabledIds);
@@ -955,7 +957,7 @@ export function AiHeadquartersPanel() {
       } else {
         const event = await applyCalendarProposal(pendingProposal.payload, pendingProposal.ownerId);
         const linked = event.linkedCompanionId ? getCompanion(event.linkedCompanionId) : undefined;
-        acknowledgement = `${event.title} is now ${event.status === 'canceled' ? 'canceled' : 'secured'} in Calendar Command.${linked ? ` ${linked.name} is linked to the time block; the actual ${event.linkedRealm ?? 'realm'} assignment still begins in its own section.` : ''}`;
+        acknowledgement = `${event.title} is now ${event.status === 'canceled' ? 'canceled' : 'secured'} in Calendar Command.${linked ? ` ${linked.name} is linked to the time block; the actual ${event.linkedRealm ?? 'realm'} assignment still begins in its own section.` : ''}${event.rewardMissionId ? ` A linked Companion Order will pay +${event.rewardXp ?? 0} XP only after verified completion; this scheduling confirmation paid nothing.` : ''}`;
       }
       applied = true;
       await clearPendingAiProposal(conversation.id);
@@ -1069,11 +1071,16 @@ export function AiHeadquartersPanel() {
     return {
       eyebrow: 'CALENDAR COUNCIL',
       title: proposal.payload.title,
-      summary: `${proposal.payload.linkedCompanionId ? `${getCompanion(proposal.payload.linkedCompanionId as CompanionId).name} → ` : ''}Kairo → Snow → You · ${proposal.payload.action} · ${new Intl.DateTimeFormat('en-US', {
-        dateStyle: 'medium',
-        timeStyle: proposal.payload.allDay ? undefined : 'short',
-        timeZone: currentSettings.timeZone,
-      }).format(new Date(proposal.payload.startAt))}`,
+      summary: `${proposal.payload.linkedCompanionId ? `${getCompanion(proposal.payload.linkedCompanionId as CompanionId).name} → ` : ''}Kairo → Snow → You · ${proposal.payload.action} · ${new Intl.DateTimeFormat(
+        'en-US',
+        {
+          dateStyle: 'medium',
+          timeStyle: proposal.payload.allDay ? undefined : 'short',
+          timeZone: currentSettings.timeZone,
+        },
+      ).format(
+        new Date(proposal.payload.startAt),
+      )}${proposal.payload.rewardEligible ? ` · +${proposal.payload.rewardXp} XP after completion` : ' · schedule only'}`,
       confirmation: proposal.payload.confirmation,
     };
   }

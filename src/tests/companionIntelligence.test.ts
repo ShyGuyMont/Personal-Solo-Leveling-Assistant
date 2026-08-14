@@ -442,6 +442,9 @@ describe('Companion Soulprint intelligence', () => {
     expect(instructions).toContain('Hunter must confirm');
     expect(instructions).toContain('Cooking and meal-prep blocks link to Saffron');
     expect(instructions).toContain('never rolls a meal or workout');
+    expect(instructions).toContain('XP-backed Companion Order');
+    expect(instructions).toContain('no-duplicate-reward rule');
+    expect(instructions).toContain('15–29 minutes minor');
     expect(
       intelligence.selectIntelligenceRoute({
         audience: 'saffron',
@@ -833,6 +836,23 @@ describe('Companion Soulprint intelligence', () => {
         },
       ],
       bonusExercises: [],
+      weeklyAdjustment: {
+        recommended: true,
+        summary: 'Add one short consistency block this week.',
+        reason: 'The Hunter asked for a steadier weekly baseline.',
+        reportedSignals: ['Morning scale reading'],
+        sessions: [
+          {
+            title: 'Consistency walk',
+            companionId: 'rook',
+            focus: 'Easy repeatable movement.',
+            rationale: 'Supports consistency without replacing the normal assignment.',
+            durationMinutes: 20,
+            sessionsThisWeek: 1,
+            intensity: 'light',
+          },
+        ],
+      },
       companionMessages: [
         { companionId: 'rook', message: 'Baseline logged. Be here next week.' },
         { companionId: 'ember', message: 'No hiding from the next check-in.' },
@@ -901,6 +921,7 @@ describe('Companion Soulprint intelligence', () => {
     });
     const input = openAiBody?.input as Array<{ role: string; content: unknown }>;
     expect(String(input[0].content)).toContain('Never infer an exact body-fat percentage');
+    expect(String(input[0].content)).toContain('Photo appearance alone never justifies extra work');
     const image = (input[1].content as Array<Record<string, unknown>>).find(
       (item) => item.type === 'input_image',
     );

@@ -1,5 +1,7 @@
 import { db } from '@/db/database';
+import { createAgentMission, retireAgentMission, updateAgentMission } from '@/game/agentMissions';
 import type {
+  AgentMissionDifficulty,
   CalendarEvent,
   CalendarEventCategory,
   CalendarEventOccurrence,
@@ -27,6 +29,10 @@ export interface CalendarEventDraft {
   status?: CalendarEventStatus;
   linkedCompanionId?: CompanionId;
   linkedRealm?: CalendarRealm;
+  rewardMissionId?: string;
+  rewardDifficulty?: AgentMissionDifficulty;
+  rewardXp?: number;
+  rewardRationale?: string;
 }
 
 export interface CalendarMutationProposal {
@@ -44,6 +50,11 @@ export interface CalendarMutationProposal {
   location: string;
   linkedCompanionId?: CompanionId | '';
   linkedRealm?: CalendarRealm | '';
+  rewardEligible?: boolean;
+  rewardDifficulty?: '' | AgentMissionDifficulty;
+  rewardXp?: number;
+  rewardRationale?: string;
+  completionCriteria?: string[];
 }
 
 export interface CalendarConflict {
@@ -78,6 +89,12 @@ const CATEGORY_SET = new Set<CalendarEventCategory>([
 const RECURRENCE_SET = new Set<CalendarRecurrence>(['none', 'daily', 'weekly', 'monthly']);
 const STATUS_SET = new Set<CalendarEventStatus>(['scheduled', 'completed', 'canceled']);
 const SOURCE_SET = new Set<CalendarEventSource>(['hunter', 'kairo', 'snow']);
+const REWARD_DIFFICULTY_SET = new Set<AgentMissionDifficulty>([
+  'minor',
+  'standard',
+  'major',
+  'boss',
+]);
 
 function uniqueId() {
   return crypto.randomUUID?.() ?? `calendar-${Date.now()}-${Math.random().toString(16).slice(2)}`;
@@ -140,6 +157,10 @@ function normalizeDraft(input: CalendarEventDraft, existing?: CalendarEvent): Ca
     source,
     linkedCompanionId,
     linkedRealm,
+    rewardMissionId: input.rewardMissionId ?? existing?.rewardMissionId,
+    rewardDifficulty: input.rewardDifficulty ?? existing?.rewardDifficulty,
+    rewardXp: input.rewardXp ?? existing?.rewardXp,
+    rewardRationale: clean(input.rewardRationale ?? existing?.rewardRationale, 600) || undefined,
     status,
     createdAt: existing?.createdAt ?? now,
     updatedAt: now,
@@ -170,15 +191,18 @@ export async function applyCalendarProposal(
     const existing = await db.calendarEvents.get(proposal.eventId);
     if (!existing) throw new Error('That commitment changed or no longer exists. Ask Kairo again.');
     await setCalendarEventStatus(existing.id, 'canceled');
+    if (existing.rewardMissionId) await retireAgentMission(existing.rewardMissionId);
     return { ...existing, status: 'canceled' as const, updatedAt: new Date().toISOString() };
   }
-  if (proposal.action === 'update' && !(await db.calendarEvents.get(proposal.eventId))) {
+  const existing =
+    proposal.action === 'update' ? await db.calendarEvents.get(proposal.eventId) : undefined;
+  if (proposal.action === 'update' && !existing) {
     throw new Error('That commitment changed or no longer exists. Ask Kairo again.');
   }
   if (proposal.action === 'create' && proposal.eventId) {
     throw new Error('That new commitment contains an unexpected existing ID. Ask Kairo again.');
   }
-  return saveCalendarEvent({
+  const event = await saveCalendarEvent({
     id: proposal.action === 'update' ? proposal.eventId : undefined,
     title: proposal.title,
     description: proposal.description,
@@ -197,9 +221,75 @@ export async function applyCalendarProposal(
     source,
     status: 'scheduled',
   });
+  if (proposal.action === 'update' && existing?.rewardMissionId) {
+    try {
+      await updateAgentMission(existing.rewardMissionId, {
+        title: proposal.title,
+        description: proposal.description || proposal.rewardRationale || undefined,
+        dueDate: localDateKeyForDate(new Date(proposal.startAt)),
+        recurrence: proposal.recurrence,
+        recurrenceInterval: proposal.recurrenceInterval,
+      });
+      return event;
+    } catch (error) {
+      await db.calendarEvents.put(existing);
+      window.dispatchEvent(
+        new CustomEvent('system:calendar-changed', { detail: { id: existing.id } }),
+      );
+      throw error;
+    }
+  }
+  if (
+    proposal.action !== 'create' ||
+    !proposal.rewardEligible ||
+    !proposal.rewardDifficulty ||
+    !REWARD_DIFFICULTY_SET.has(proposal.rewardDifficulty) ||
+    !proposal.linkedCompanionId ||
+    !proposal.linkedRealm
+  ) {
+    return event;
+  }
+  try {
+    const mission = await createAgentMission({
+      title: proposal.title,
+      description: proposal.description || proposal.rewardRationale,
+      category:
+        proposal.linkedRealm === 'training'
+          ? 'physical'
+          : proposal.linkedRealm === 'sanctuary'
+            ? 'faith'
+            : proposal.linkedRealm === 'creator' || proposal.linkedRealm === 'arc'
+              ? 'creator'
+              : proposal.linkedRealm === 'treasury'
+                ? 'discipline'
+                : 'character',
+      companionId: proposal.linkedCompanionId,
+      createdBy: proposal.linkedCompanionId,
+      source: 'party',
+      difficulty: proposal.rewardDifficulty,
+      dueDate: localDateKeyForDate(new Date(proposal.startAt)),
+      recurrence: proposal.recurrence,
+      recurrenceInterval: proposal.recurrenceInterval,
+      checklistItems: proposal.completionCriteria ?? [],
+    });
+    await db.calendarEvents.update(event.id, {
+      rewardMissionId: mission.id,
+      rewardDifficulty: mission.difficulty,
+      rewardXp: mission.accountXp,
+      rewardRationale: proposal.rewardRationale?.slice(0, 600),
+      updatedAt: new Date().toISOString(),
+    });
+    return (await db.calendarEvents.get(event.id)) ?? event;
+  } catch (error) {
+    await db.calendarEvents.delete(event.id);
+    window.dispatchEvent(new CustomEvent('system:calendar-changed', { detail: { id: event.id } }));
+    throw error;
+  }
 }
 
 export async function deleteCalendarEvent(id: string) {
+  const existing = await db.calendarEvents.get(id);
+  if (existing?.rewardMissionId) await retireAgentMission(existing.rewardMissionId);
   await db.calendarEvents.delete(id);
   window.dispatchEvent(new CustomEvent('system:calendar-changed', { detail: { id } }));
 }
@@ -247,6 +337,10 @@ function occurrenceFrom(
     source: event.source,
     linkedCompanionId: event.linkedCompanionId,
     linkedRealm: event.linkedRealm,
+    rewardMissionId: event.rewardMissionId,
+    rewardDifficulty: event.rewardDifficulty,
+    rewardXp: event.rewardXp,
+    rewardRationale: event.rewardRationale,
     status: event.status,
     recurring: event.recurrence !== 'none',
   };

@@ -187,6 +187,10 @@ export interface AiProgressContext {
       location: string;
       status: string;
       source: string;
+      linkedCompanionId?: CompanionId;
+      linkedRealm?: string;
+      rewardDifficulty?: string;
+      rewardXp?: number;
     }>;
     conflicts: Array<{
       firstEventId: string;
@@ -228,6 +232,21 @@ export interface AiProgressContext {
           summary: string;
           priorities: string[];
           sourceKinds: string[];
+          weeklyAdjustment?: {
+            recommended: boolean;
+            summary: string;
+            reason: string;
+            reportedSignals: string[];
+            sessions: Array<{
+              title: string;
+              companionId: 'rook' | 'ember' | 'mira';
+              focus: string;
+              rationale: string;
+              durationMinutes: number;
+              sessionsThisWeek: number;
+              intensity: 'recovery' | 'light' | 'moderate';
+            }>;
+          };
         };
         photosExcluded: true;
       };
@@ -526,6 +545,11 @@ export interface AiHeadquartersReply {
     linkedCompanionId: CompanionId | '';
     linkedRealm:
       '' | 'missions' | 'training' | 'kitchen' | 'sanctuary' | 'creator' | 'arc' | 'treasury';
+    rewardEligible?: boolean;
+    rewardDifficulty?: '' | 'minor' | 'standard' | 'major' | 'boss';
+    rewardXp?: number;
+    rewardRationale?: string;
+    completionCriteria?: string[];
     confirmation: string;
   };
   handoffProposal?: {

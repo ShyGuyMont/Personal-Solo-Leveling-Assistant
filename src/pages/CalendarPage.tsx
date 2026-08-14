@@ -1,6 +1,7 @@
 import {
   AlertTriangle,
   Archive,
+  Award,
   CalendarCheck2,
   CalendarClock,
   Check,
@@ -33,6 +34,7 @@ import {
   setCalendarEventStatus,
   type CalendarEventDraft,
 } from '@/game/calendar';
+import { listAgentMissions } from '@/game/agentMissions';
 import { Link } from '@/router';
 import { useGameStore } from '@/store/useGameStore';
 import type {
@@ -41,6 +43,7 @@ import type {
   CalendarEventOccurrence,
   CalendarRecurrence,
   CalendarRealm,
+  AgentMission,
   LocalDateKey,
 } from '@/types/game';
 import {
@@ -150,6 +153,7 @@ export function CalendarPage() {
   const timeZone = settings?.timeZone;
   const kairo = getCompanion('kairo');
   const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [agentOrders, setAgentOrders] = useState<AgentMission[]>([]);
   const [month, setMonth] = useState(startOfMonth(systemDate));
   const [selectedDate, setSelectedDate] = useState<LocalDateKey>(systemDate);
   const [form, setForm] = useState<CalendarFormState>(() => newForm(systemDate));
@@ -160,7 +164,11 @@ export function CalendarPage() {
     () => window.localStorage.getItem(MISSION_LAYER_KEY) !== 'hidden',
   );
 
-  const refresh = useCallback(async () => setEvents(await getCalendarEvents()), []);
+  const refresh = useCallback(async () => {
+    const [calendarEvents, orders] = await Promise.all([getCalendarEvents(), listAgentMissions()]);
+    setEvents(calendarEvents);
+    setAgentOrders(orders);
+  }, []);
 
   useEffect(() => {
     void refresh();
@@ -247,6 +255,16 @@ export function CalendarPage() {
   function startEdit(id: string) {
     const event = events.find((item) => item.id === id);
     if (!event) return;
+    if (event.rewardMissionId) {
+      openQuickLink(
+        'kairo',
+        `Kairo, I want to change the time slot for “${event.title}.” Keep its Council XP tier protected, check conflicts with me, and prepare only the schedule update after Snow reviews it. `,
+      );
+      setNotice(
+        'Council-backed commitments are rescheduled through Kairo so their order stays synchronized.',
+      );
+      return;
+    }
     setForm(formFromEvent(event));
     setEditing(true);
     setNotice('Editing the full event. Recurring changes apply to the complete series.');
@@ -551,76 +569,96 @@ export function CalendarPage() {
                 <p>No commitments are scheduled for this day.</p>
               </div>
             )}
-            {selectedOccurrences.map((event) => (
-              <article
-                key={event.occurrenceId}
-                data-category={event.category}
-                data-status={event.status}
-              >
-                <div className="calendar-agenda__time">
-                  <strong>{eventTimeLabel(event, timeZone)}</strong>
-                  <small>{CATEGORY_LABELS[event.category]}</small>
-                </div>
-                <div className="calendar-agenda__copy">
-                  <h3>{event.title}</h3>
-                  {event.description && <p>{event.description}</p>}
-                  <div>
-                    {event.location && (
+            {selectedOccurrences.map((event) => {
+              const rewardMission = event.rewardMissionId
+                ? agentOrders.find((mission) => mission.id === event.rewardMissionId)
+                : undefined;
+              const rewardClearedToday = rewardMission?.lastCompletedOn === selectedDate;
+              return (
+                <article
+                  key={event.occurrenceId}
+                  data-category={event.category}
+                  data-status={event.status}
+                >
+                  <div className="calendar-agenda__time">
+                    <strong>{eventTimeLabel(event, timeZone)}</strong>
+                    <small>{CATEGORY_LABELS[event.category]}</small>
+                  </div>
+                  <div className="calendar-agenda__copy">
+                    <h3>{event.title}</h3>
+                    {event.description && <p>{event.description}</p>}
+                    <div>
+                      {event.location && (
+                        <span>
+                          <MapPin size={13} /> {event.location}
+                        </span>
+                      )}
+                      {event.recurring && (
+                        <span>
+                          <Repeat2 size={13} /> Series
+                        </span>
+                      )}
                       <span>
-                        <MapPin size={13} /> {event.location}
+                        {event.source === 'hunter'
+                          ? 'You'
+                          : event.source === 'snow'
+                            ? 'Snow'
+                            : 'Kairo'}
                       </span>
+                      {event.linkedCompanionId && (
+                        <span className="calendar-agenda__companion">
+                          <img
+                            src={getCompanionImage(getCompanion(event.linkedCompanionId).image)}
+                            alt=""
+                          />
+                          {getCompanion(event.linkedCompanionId).name}
+                        </span>
+                      )}
+                    </div>
+                    {event.rewardMissionId && (
+                      <div className="calendar-agenda__reward">
+                        <Award size={14} />
+                        <span>
+                          <strong>
+                            {rewardClearedToday
+                              ? `Cleared · +${event.rewardXp ?? rewardMission?.accountXp ?? 0} XP`
+                              : `Companion Order · +${event.rewardXp ?? rewardMission?.accountXp ?? 0} XP after completion`}
+                          </strong>
+                          <small>{event.rewardRationale}</small>
+                        </span>
+                        <Link to="/missions">Open order</Link>
+                      </div>
                     )}
-                    {event.recurring && (
-                      <span>
-                        <Repeat2 size={13} /> Series
-                      </span>
-                    )}
-                    <span>
-                      {event.source === 'hunter'
-                        ? 'You'
-                        : event.source === 'snow'
-                          ? 'Snow'
-                          : 'Kairo'}
-                    </span>
-                    {event.linkedCompanionId && (
-                      <span className="calendar-agenda__companion">
-                        <img
-                          src={getCompanionImage(getCompanion(event.linkedCompanionId).image)}
-                          alt=""
-                        />
-                        {getCompanion(event.linkedCompanionId).name}
-                      </span>
+                    {event.linkedRealm && (
+                      <Link className="calendar-agenda__realm" to={REALM_ROUTES[event.linkedRealm]}>
+                        Open {event.linkedRealm}
+                      </Link>
                     )}
                   </div>
-                  {event.linkedRealm && (
-                    <Link className="calendar-agenda__realm" to={REALM_ROUTES[event.linkedRealm]}>
-                      Open {event.linkedRealm}
-                    </Link>
-                  )}
-                </div>
-                <div className="calendar-agenda__actions">
-                  {event.status === 'scheduled' && !event.recurring && (
+                  <div className="calendar-agenda__actions">
+                    {event.status === 'scheduled' && !event.recurring && !event.rewardMissionId && (
+                      <button
+                        type="button"
+                        title="Mark complete"
+                        onClick={() => void completeEvent(event)}
+                      >
+                        <Check size={16} />
+                      </button>
+                    )}
+                    <button type="button" title="Edit" onClick={() => startEdit(event.eventId)}>
+                      <Edit3 size={16} />
+                    </button>
                     <button
                       type="button"
-                      title="Mark complete"
-                      onClick={() => void completeEvent(event)}
+                      title="Delete"
+                      onClick={() => void removeEvent(event.eventId, event.title)}
                     >
-                      <Check size={16} />
+                      <Trash2 size={16} />
                     </button>
-                  )}
-                  <button type="button" title="Edit" onClick={() => startEdit(event.eventId)}>
-                    <Edit3 size={16} />
-                  </button>
-                  <button
-                    type="button"
-                    title="Delete"
-                    onClick={() => void removeEvent(event.eventId, event.title)}
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              </article>
-            ))}
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </aside>
       </section>

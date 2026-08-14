@@ -543,6 +543,83 @@
   color: var(--training-gold);
 }
 
+.body-diagnostic-adjustment {
+  display: grid;
+  gap: 11px;
+  padding: 14px;
+  background: linear-gradient(145deg, rgba(47, 161, 255, 0.08), rgba(67, 230, 194, 0.04));
+  border: 1px solid rgba(113, 182, 255, 0.24);
+  border-radius: 13px;
+}
+
+.body-diagnostic-adjustment > header {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--training-blue);
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+}
+
+.body-diagnostic-adjustment > header span {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.body-diagnostic-adjustment h4,
+.body-diagnostic-adjustment p {
+  margin: 0;
+}
+
+.body-diagnostic-adjustment > p,
+.body-diagnostic-adjustment__signals span,
+.body-diagnostic-adjustment__sessions p,
+.body-diagnostic-adjustment__sessions em {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.body-diagnostic-adjustment__signals {
+  display: grid;
+  gap: 3px;
+  padding: 10px;
+  border-left: 2px solid var(--training-gold);
+  background: rgba(242, 189, 87, 0.05);
+}
+
+.body-diagnostic-adjustment__sessions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.body-diagnostic-adjustment__sessions article {
+  display: grid;
+  gap: 5px;
+  padding: 11px;
+  background: rgba(3, 8, 12, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 10px;
+}
+
+.body-diagnostic-adjustment__sessions article > span,
+.body-diagnostic-adjustment__sessions article > small {
+  color: var(--training-blue);
+  font-size: 0.65rem;
+}
+
+.body-diagnostic-adjustment__sessions em {
+  font-size: 0.68rem;
+}
+
+.body-diagnostic-adjustment__boundary {
+  color: var(--muted-2);
+  line-height: 1.45;
+}
+
 .body-diagnostic-commanders {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -640,7 +717,8 @@
 
   .body-diagnostic-fields,
   .body-diagnostic-metrics,
-  .body-diagnostic-commanders {
+  .body-diagnostic-commanders,
+  .body-diagnostic-adjustment__sessions {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -1134,6 +1212,36 @@
   font-size: 0.68rem;
   font-weight: 700;
   text-transform: capitalize;
+}
+
+.calendar-agenda__reward {
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 8px !important;
+  align-items: center;
+  margin-top: 9px;
+  padding: 9px 10px;
+  color: var(--calendar-copper) !important;
+  background: rgb(215 144 85 / 7%);
+  border: 1px solid rgb(215 144 85 / 22%);
+  border-radius: 10px;
+}
+
+.calendar-agenda__reward > span {
+  display: grid !important;
+  gap: 2px !important;
+}
+
+.calendar-agenda__reward small {
+  color: var(--muted);
+  font-size: 0.62rem;
+}
+
+.calendar-agenda__reward a {
+  color: var(--calendar-teal);
+  font-size: 0.62rem;
+  font-weight: 800;
+  white-space: nowrap;
 }
 
 .calendar-mission-layer {

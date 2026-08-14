@@ -11,7 +11,7 @@ export const YOUTUBE_READONLY_SCOPES = [
 
 const YOUTUBE_OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
 
-export const COMPANION_INTELLIGENCE_VERSION = 'calendar-council-engine-8';
+export const COMPANION_INTELLIGENCE_VERSION = 'earned-calendar-council-9';
 
 function requestedPartyParticipants(payload) {
   if (payload.audience !== 'party') return [payload.audience];
@@ -625,6 +625,7 @@ Rules:
 - Selah may recommend Bible passages, explain themes, compare interpretations at a general level, and connect a situation to Scripture with warmth and practical discernment. Never invent a verse or present a paraphrase as an exact quotation. When exact wording matters and no translation text is supplied, give the reference, label any paraphrase, and note that wording varies by translation. Do not weaponize Scripture, declare God's private intent, replace a pastor or clinician, or turn uncertainty into spiritual failure. progressContext.specialists.sanctuary deliberately excludes the Hunter's written reflection and prayer.
 - Cassian may analyze only progressContext.specialists.treasury. If sharingEnabled is false, say that aggregate-only Ledger Counsel can be enabled in AI Headquarters; do not fish for or infer amounts. If enabled, distinguish facts from estimates, show the arithmetic behind important recommendations, preserve emergency and minimum-payment constraints, and frame guidance as general education rather than professional financial advice. Itemized labels, notes, merchants, and account credentials are never available.
 - Rook, Ember, and Mira may use progressContext.specialists.training to coach from real recent sessions and the locally approved summary of Body Diagnostics without inventing loads, injuries, measurements, or completions. When this week's diagnostic is due, they may call for the evidence directly and firmly, but never shame appearance or claim they can see an image that is not in the active request. Mira prioritizes controlled range, breath, and pain-free movement; Rook prioritizes executable next steps; Ember challenges avoidance without attacking the Hunter. Body Diagnostic photos are never included in conversation context.
+- When the latest Body Diagnostic contains a recommended weeklyAdjustment, Rook, Ember, and Mira may convene with Kairo and Snow to discuss it. Before proposing any schedule, they must ask how the Hunter feels now and respect the report's warnings. Supplemental sessions support rather than replace the normal Training Hall paths. If completed through Training Hall, they use Training Hall rewards and must not receive duplicate Calendar Council XP.
 - Cipher may use progressContext.specialists.campaigns to identify the next incomplete milestone, expose decorative planning, and construct concrete sequences without inventing completion. Snow may synthesize across the supplied specialist snapshots when the Hunter asks a cross-System question.
 - Quill may use only progressContext.specialists.arc for established A.R.C. facts. He must cite the supplied source label in natural language, label every inference or new idea, and say which dossier or canon source is missing when retrieval does not support the answer. He may brainstorm boldly after the grounded answer. When the Hunter explicitly asks Quill to file a new lore note, he may prepare one Canon Vault preview; it is never canon until the Hunter confirms the verified local save. Snow may join A.R.C. conversations as an enthusiastic fan and emotional-story reader, but must obey the same source boundary.
 - The A.R.C. Story Room is Quill's focused conversation workroom, not a folder, vault, library, or storage location. Character dossiers live in the Character Library and canon sources live in the Canon Vault. Never say a record is absent from, uploaded to, or stored in the Story Room.
@@ -634,6 +635,7 @@ Rules:
 - Saffron may use progressContext.kitchen to walk the Hunter through the exact current order one step at a time, answer cooking interruptions, and adapt with safe substitutions. A generated recipe is a draft until the Hunter confirms it into the Private Grimoire.
 - Kairo may use only progressContext.calendar for schedule facts. The supplied timeZone, now, today, upcoming records, conflict list, nextEvent, and focusWindows are authoritative. He must state exact dates and times when answering scheduling questions, name missing time details instead of guessing, and never claim access to a phone calendar, external calendar, alarm, push notification, or background process. Snow may consult the same calendar context and report Kairo's schedule truth in her own voice, but she may not contradict or invent it. A calendar mutation is only a preview until the Hunter confirms it in the app.
 - Domain companions may proactively recommend one useful calendar ritual when the supplied evidence makes its purpose concrete—for example Cassian's budget review, the Training crew's weekly Body Diagnostic, Saffron's meal-prep block, Selah's Sanctuary time, Vesper's production block, or Quill's story session. State the practical reason and ask whether the Hunter wants Kairo brought in. This is counsel only: do not fill a calendar preview, claim Kairo or Snow agreed, or imply anything was scheduled until the Hunter explicitly asks for the change.
+- Every domain companion may bring an in-scope request to Calendar Council. Kairo owns exact time and recurrence; Snow owns whole-system fit and the XP-worthiness recommendation; the responsible specialist owns the completion standard. Process one confirmation card at a time so the Hunter can accept or reject each commitment without accepting a hidden batch.
 - A visible Calendar Council follows one chain: the responsible specialist explains the purpose and cadence, Kairo verifies the exact date, time, recurrence, availability, and conflicts, Snow checks that the proposal fits the Hunter's stated intent, and the Hunter remains the only final approval. They may disagree or refine the request in the shared room, but they never hold an unseen meeting or approve for the Hunter.
 - Never shame, insult, manipulate, threaten abandonment, or treat struggle as a moral defect.
 - For medical, mental-health, legal, financial, or immediate-safety concerns, stay within general supportive guidance and recommend appropriate qualified or emergency help when the situation warrants it.
@@ -710,9 +712,13 @@ function buildFocusedWorkloadInstruction(workload, commandMode) {
 - Use recurrence none, daily, weekly, or monthly. recurrenceInterval must be 1 to 12. recurrenceEndsOn may be empty only when the series is intentionally open-ended.
 - Coordinate domain time without pretending the domain assignment exists. Cooking and meal-prep blocks link to Saffron and kitchen; training links to Rook and training unless recovery clearly calls for Mira; Scripture or prayer links to Selah and sanctuary; content links to Vesper (haven) and creator; A.R.C. work links to Quill and arc; finance work links to Cassian and treasury. General commitments have no linked specialist.
 - A linked event means Kairo reserved time and made the responsible companion visible. It never rolls a meal or workout, creates a Scripture session or content project, checks a mission, awards XP, or proves the specialist performed a separate verification.
+- Calendar Council may attach one XP-backed Companion Order only to a new, active, measurable commitment that is not already rewarded anywhere else in The System. The specialist argues why the work matters, Kairo verifies duration and recurrence, Snow applies the no-duplicate-reward rule, and the Hunter still approves the complete preview.
+- Set rewardRequested true only when completion can be honestly verified by the Hunter and the work is not merely attendance, rest, sleep, an appointment, a reminder, or an existing rewarded Daily Mission, Training Hall session, Body Diagnostic, Kitchen Order, Sanctuary assignment, challenge, or other System activity. Otherwise set it false and briefly explain why in rewardRationale. Never invent extra XP for work already paid by another feature.
+- The app—not the Hunter or the model—sets the immutable reward tier from the protected time: 15–29 minutes minor, 30–59 standard, 60–89 major, and 90–240 boss. Blocks under 15 minutes, over 240 minutes, all-day events, updates, cancellations, unlinked events, or events without concrete completionCriteria are never XP eligible. The Hunter may negotiate the schedule before approval, but nobody manually edits the reward amount.
+- When rewardRequested is true, give 1–6 short, observable completionCriteria. Calendar confirmation must state that XP arrives only after the linked Companion Order is completed, never when the time is scheduled.
 - When the Hunter asks a domain companion directly to schedule relevant time, that companion may hand the structured calendar preview to Kairo while replying in their own voice. Kairo remains the record owner; this is coordination, not proof of a second unseen AI conversation.
 - In a shared Calendar Council, the domain companion must briefly name what the time protects, Kairo must state the exact schedule and any conflict, and Snow must ask the single final consent question. If a material detail is missing, they should ask one grouped follow-up together and leave the calendar object empty.
-- If no complete mutation should be proposed, set action, eventId, title, description, category, startAt, endAt, recurrence, recurrenceEndsOn, location, linkedCompanionId, linkedRealm, and confirmation to empty strings; set allDay false and recurrenceInterval 0.`;
+- If no complete mutation should be proposed, set action, eventId, title, description, category, startAt, endAt, recurrence, recurrenceEndsOn, location, linkedCompanionId, linkedRealm, rewardRationale, and confirmation to empty strings; set allDay and rewardRequested false, recurrenceInterval 0, and completionCriteria empty.`;
   }
   if (workload === 'arc-forge') {
     return `Focused workroom: A.R.C. Story Room. Return only title, replies, memoryCandidates, handoff, and arcNote.
@@ -773,6 +779,7 @@ export function buildCommandInstruction(commandMode, workload = 'conversation') 
 - Distinguish complete, skipped, failed, reopened, and restored precisely. Do not turn "I might skip" into a command. Do not choose failure merely because completion is unavailable.
 - Prepare only one action per transmission. The reply must say it is ready for confirmation, not completed.
 - Unless this is the focused Calendar Command workroom, return calendar strings empty, calendar.allDay false, and calendar.recurrenceInterval 0. Calendar mutations are never disguised as mission commands.
+- Also set calendar.rewardRequested false, calendar.rewardRationale empty, and calendar.completionCriteria empty outside Calendar Command.
 - Set command.companionId to the companion who owns the confirmation voice. For a direct link, use that companion. For Party Council, use one enabled companion who appears in replies.
 - command.summary is a short in-world description of the prepared action. command.confirmation is a plain-language confirmation question that names the effect. Never hide reward reversal or loss of completion status.
 - Companion Operations may prepare the existing Training Hall, Kitchen, and Scripture Sanctuary without completing them. Never claim a checkbox, mission, reward, workout, meal, Scripture session, or XP has been completed.
@@ -1195,6 +1202,13 @@ const responseSchema = {
           type: 'string',
           enum: ['', 'missions', 'training', 'kitchen', 'sanctuary', 'creator', 'arc', 'treasury'],
         },
+        rewardRequested: { type: 'boolean' },
+        rewardRationale: { type: 'string', maxLength: 600 },
+        completionCriteria: {
+          type: 'array',
+          maxItems: 6,
+          items: { type: 'string', minLength: 1, maxLength: 160 },
+        },
         confirmation: { type: 'string', maxLength: 320 },
       },
       required: [
@@ -1212,6 +1226,9 @@ const responseSchema = {
         'location',
         'linkedCompanionId',
         'linkedRealm',
+        'rewardRequested',
+        'rewardRationale',
+        'completionCriteria',
         'confirmation',
       ],
       additionalProperties: false,
@@ -1335,6 +1352,47 @@ const bodyDiagnosticSchema = {
         additionalProperties: false,
       },
     },
+    weeklyAdjustment: {
+      type: 'object',
+      properties: {
+        recommended: { type: 'boolean' },
+        summary: { type: 'string', maxLength: 800 },
+        reason: { type: 'string', maxLength: 600 },
+        reportedSignals: {
+          type: 'array',
+          maxItems: 6,
+          items: { type: 'string', minLength: 1, maxLength: 180 },
+        },
+        sessions: {
+          type: 'array',
+          maxItems: 3,
+          items: {
+            type: 'object',
+            properties: {
+              title: { type: 'string', minLength: 1, maxLength: 120 },
+              companionId: { type: 'string', enum: ['rook', 'ember', 'mira'] },
+              focus: { type: 'string', minLength: 1, maxLength: 240 },
+              rationale: { type: 'string', minLength: 1, maxLength: 400 },
+              durationMinutes: { type: 'integer', minimum: 10, maximum: 60 },
+              sessionsThisWeek: { type: 'integer', minimum: 1, maximum: 3 },
+              intensity: { type: 'string', enum: ['recovery', 'light', 'moderate'] },
+            },
+            required: [
+              'title',
+              'companionId',
+              'focus',
+              'rationale',
+              'durationMinutes',
+              'sessionsThisWeek',
+              'intensity',
+            ],
+            additionalProperties: false,
+          },
+        },
+      },
+      required: ['recommended', 'summary', 'reason', 'reportedSignals', 'sessions'],
+      additionalProperties: false,
+    },
     companionMessages: {
       type: 'array',
       minItems: 3,
@@ -1367,6 +1425,7 @@ const bodyDiagnosticSchema = {
     'observations',
     'priorities',
     'bonusExercises',
+    'weeklyAdjustment',
     'companionMessages',
     'warnings',
     'disclaimer',
@@ -2376,6 +2435,10 @@ GROUNDING AND SAFETY:
 - If an image is cropped, inconsistent, unclear, altered, or insufficient for a claim, lower confidence or omit the claim. Never invent a measurement.
 - Compare with the prior locally saved report only when supplied, and separate an actual numeric trend from a visual impression. Weight, hydration, and impedance estimates can fluctuate.
 - Training priorities and bonus exercises are suggestions only. Do not replace the Hunter's current assignment, diagnose pain, prescribe treatment, or claim completion or XP.
+- Treat hunterContext as the Hunter's self-report. Copy only the relevant concerns into weeklyAdjustment.reportedSignals, clearly labeled as reported rather than visually observed. If the Hunter mentions pain, numbness, tingling, weakness, dizziness, trauma, or symptoms that are severe, worsening, or persistent, do not answer with punishment or added intensity; place an appropriate caution in warnings and favor professional evaluation when warranted.
+- weeklyAdjustment is a proposed support plan for the current week, not a schedule mutation. It must never replace, reduce, complete, or award the base Training Hall paths. Recommend at most three short supplemental sessions only when the evidence and stated goal support them. Photo appearance alone never justifies extra work as punishment.
+- Supplemental sessions may be recovery, light, or moderate only. Use Mira for mobility, breath, controlled range, and discomfort-aware support; Rook for practical strength or consistency support; Ember for honest conditioning or effort support when recovery signals do not contraindicate it.
+- Set weeklyAdjustment.recommended false and sessions empty when data quality is too limited, the only justification would be appearance-based shame, or the reported concern needs medical assessment before extra training. The follow-up Training Council must ask how the Hunter feels now before Kairo schedules anything, and Snow plus the Hunter must approve every resulting calendar preview.
 - Be candid and specific without humiliation, insults, sexualization, body-shaming, moral judgment, or fake reassurance.
 - Rook is direct, competitive, practical, and respects earned evidence. Ember is tough-skinned pressure aimed at avoidance, never hatred toward the Hunter. Mira is calm, precise, and protects mobility, controlled range, breath, and pain-free movement.
 - Return exactly one distinct message from Rook, Ember, and Mira. They may be firm, but each must remain constructive and grounded in the supplied evidence.
@@ -2498,7 +2561,7 @@ async function handleBodyDiagnostic(request, env, url) {
             content: [{ type: 'input_text', text: inputText }, ...imageContent],
           },
         ],
-        max_output_tokens: 2_600,
+        max_output_tokens: 3_200,
         reasoning: { effort: 'medium' },
         text: {
           verbosity: 'medium',
@@ -2544,12 +2607,40 @@ async function handleBodyDiagnostic(request, env, url) {
     const messages = Array.isArray(assessment?.companionMessages)
       ? assessment.companionMessages
       : [];
+    const weeklyAdjustment = isObject(assessment?.weeklyAdjustment)
+      ? assessment.weeklyAdjustment
+      : undefined;
+    const weeklySessions = Array.isArray(weeklyAdjustment?.sessions)
+      ? weeklyAdjustment.sessions
+      : [];
     if (
       !isObject(assessment) ||
       !Array.isArray(assessment.metrics) ||
       !Array.isArray(assessment.observations) ||
       !Array.isArray(assessment.priorities) ||
       !Array.isArray(assessment.bonusExercises) ||
+      !weeklyAdjustment ||
+      typeof weeklyAdjustment.recommended !== 'boolean' ||
+      typeof weeklyAdjustment.summary !== 'string' ||
+      typeof weeklyAdjustment.reason !== 'string' ||
+      !Array.isArray(weeklyAdjustment.reportedSignals) ||
+      weeklySessions.length > 3 ||
+      (!weeklyAdjustment.recommended && weeklySessions.length > 0) ||
+      weeklySessions.some(
+        (session) =>
+          !isObject(session) ||
+          !['rook', 'ember', 'mira'].includes(session.companionId) ||
+          typeof session.title !== 'string' ||
+          typeof session.focus !== 'string' ||
+          typeof session.rationale !== 'string' ||
+          !Number.isInteger(session.durationMinutes) ||
+          session.durationMinutes < 10 ||
+          session.durationMinutes > 60 ||
+          !Number.isInteger(session.sessionsThisWeek) ||
+          session.sessionsThisWeek < 1 ||
+          session.sessionsThisWeek > 3 ||
+          !['recovery', 'light', 'moderate'].includes(session.intensity),
+      ) ||
       messages.length !== 3 ||
       new Set(messages.map((message) => message?.companionId)).size !== 3 ||
       messages.some(
@@ -3395,6 +3486,43 @@ async function handleAiChat(request, env, url) {
     const calendarLinkValid =
       (!linkedCompanionId && !linkedRealm) ||
       (companionIds.includes(linkedCompanionId) && calendarRealms.has(linkedRealm));
+    const calendarDurationMinutes = calendarDatesValid
+      ? Math.round((calendarEnd.getTime() - calendarStart.getTime()) / 60_000)
+      : 0;
+    const completionCriteria = Array.isArray(calendar?.completionCriteria)
+      ? Array.from(
+          new Set(
+            calendar.completionCriteria
+              .filter((item) => typeof item === 'string' && item.trim())
+              .map((item) => item.trim().slice(0, 160)),
+          ),
+        ).slice(0, 6)
+      : [];
+    const rewardRationale = String(calendar?.rewardRationale ?? '')
+      .trim()
+      .slice(0, 600);
+    const rewardEligible = Boolean(
+      calendar?.rewardRequested === true &&
+      calendarAction === 'create' &&
+      calendar?.allDay === false &&
+      linkedCompanionId &&
+      linkedRealm &&
+      calendarDurationMinutes >= 15 &&
+      calendarDurationMinutes <= 240 &&
+      completionCriteria.length &&
+      rewardRationale &&
+      !['appointment', 'deadline'].includes(String(calendar?.category)),
+    );
+    const rewardDifficulty = !rewardEligible
+      ? ''
+      : calendarDurationMinutes < 30
+        ? 'minor'
+        : calendarDurationMinutes < 60
+          ? 'standard'
+          : calendarDurationMinutes < 90
+            ? 'major'
+            : 'boss';
+    const rewardXp = { minor: 20, standard: 40, major: 70, boss: 120 }[rewardDifficulty] ?? 0;
     const calendarProposal =
       payload.commandMode === 'propose' &&
       scheduleKeeperAllowed &&
@@ -3433,6 +3561,11 @@ async function handleAiChat(request, env, url) {
               .slice(0, 240),
             linkedCompanionId: linkedCompanionId || '',
             linkedRealm: linkedRealm || '',
+            rewardEligible,
+            rewardDifficulty,
+            rewardXp,
+            rewardRationale,
+            completionCriteria: rewardEligible ? completionCriteria : [],
             confirmation: calendar.confirmation.trim().slice(0, 320),
           }
         : undefined;

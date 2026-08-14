@@ -2,11 +2,13 @@ import {
   Activity,
   Award,
   Camera,
+  CalendarCheck2,
   Check,
   ChevronDown,
   ChevronUp,
   ImagePlus,
   LockKeyhole,
+  MessageCircleMore,
   RefreshCw,
   ScanLine,
   Scale,
@@ -66,6 +68,22 @@ function dueMessage(data: BodyDiagnosticData) {
 
 function DiagnosticReport({ record }: { record: BodyDiagnosticRecord }) {
   const [expanded, setExpanded] = useState(true);
+  const weeklyAdjustment = record.assessment.weeklyAdjustment;
+
+  const conveneTrainingCouncil = () => {
+    if (!weeklyAdjustment?.recommended || !weeklyAdjustment.sessions.length) return;
+    window.dispatchEvent(
+      new CustomEvent('system:open-quick-link', {
+        detail: {
+          companionId: 'rook',
+          participantIds: ['rook', 'ember', 'mira', 'kairo', 'snow'],
+          roomKind: 'commons',
+          initialDraft:
+            'Training Council, review my saved weekly Body Diagnostic adjustment together. Ask how I feel right now before proposing any change. If the support plan still fits, have Kairo check my schedule and Snow review each request with me one at a time. Preserve my normal workouts, respect every warning, and do not duplicate XP already earned through the Training Hall.',
+        },
+      }),
+    );
+  };
   return (
     <article className="body-diagnostic-report">
       <header>
@@ -153,6 +171,55 @@ function DiagnosticReport({ record }: { record: BodyDiagnosticRecord }) {
                   </article>
                 ))}
               </div>
+            </section>
+          )}
+          {weeklyAdjustment && (
+            <section className="body-diagnostic-adjustment">
+              <header>
+                <span>
+                  <CalendarCheck2 size={18} /> WEEKLY HALL DIRECTIVE
+                </span>
+                <small>
+                  {weeklyAdjustment.recommended ? 'COUNCIL REVIEW AVAILABLE' : 'NO EXTRA LOAD'}
+                </small>
+              </header>
+              <h4>{weeklyAdjustment.summary}</h4>
+              <p>{weeklyAdjustment.reason}</p>
+              {weeklyAdjustment.reportedSignals.length > 0 && (
+                <div className="body-diagnostic-adjustment__signals">
+                  <strong>Hunter-reported signals</strong>
+                  <span>{weeklyAdjustment.reportedSignals.join(' · ')}</span>
+                </div>
+              )}
+              {weeklyAdjustment.sessions.length > 0 && (
+                <div className="body-diagnostic-adjustment__sessions">
+                  {weeklyAdjustment.sessions.map((session, index) => (
+                    <article key={`${session.title}:${index}`}>
+                      <span>{getCompanion(session.companionId).name}</span>
+                      <strong>{session.title}</strong>
+                      <small>
+                        {session.durationMinutes} min · {session.sessionsThisWeek}× this week ·{' '}
+                        {session.intensity}
+                      </small>
+                      <p>{session.focus}</p>
+                      <em>{session.rationale}</em>
+                    </article>
+                  ))}
+                </div>
+              )}
+              {weeklyAdjustment.recommended && weeklyAdjustment.sessions.length > 0 && (
+                <button
+                  className="button button--secondary"
+                  type="button"
+                  onClick={conveneTrainingCouncil}
+                >
+                  <MessageCircleMore size={17} /> Convene Training Council
+                </button>
+              )}
+              <small className="body-diagnostic-adjustment__boundary">
+                Online council only · recommendations cannot replace normal Training Hall work ·
+                Kairo and Snow still require your confirmation before scheduling anything.
+              </small>
             </section>
           )}
           <section className="body-diagnostic-commanders">
@@ -443,12 +510,12 @@ export function BodyDiagnosticPanel({
               </select>
             </label>
             <label className="field field--wide">
-              <span>Context for the Hall · optional</span>
+              <span>Other comments for the Hall · optional</span>
               <textarea
                 rows={3}
                 maxLength={800}
                 value={hunterContext}
-                placeholder="Example: prioritizing shoulders and mobility; photos taken in the morning after weighing in."
+                placeholder="Example: I want better mobility; my neck has been bothering me; photos were taken this morning. Report pain or limitations plainly—the Hall treats them as self-reported, not as a diagnosis from a photo."
                 onChange={(event) => setHunterContext(event.target.value)}
               />
             </label>

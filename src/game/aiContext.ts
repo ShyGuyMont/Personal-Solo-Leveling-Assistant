@@ -589,6 +589,10 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
         location: event.location.slice(0, 240),
         status: event.status,
         source: event.source,
+        linkedCompanionId: event.linkedCompanionId,
+        linkedRealm: event.linkedRealm,
+        rewardDifficulty: event.rewardDifficulty,
+        rewardXp: event.rewardXp,
       })),
       conflicts: calendarBriefing.conflicts.slice(0, 12).map((conflict) => ({
         firstEventId: conflict.first.eventId,
@@ -641,6 +645,28 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
                   .slice(0, 4)
                   .map((priority) => priority.title.slice(0, 120)),
                 sourceKinds: latestBodyDiagnostic.sourceKinds,
+                weeklyAdjustment: latestBodyDiagnostic.assessment.weeklyAdjustment
+                  ? {
+                      ...latestBodyDiagnostic.assessment.weeklyAdjustment,
+                      summary: latestBodyDiagnostic.assessment.weeklyAdjustment.summary.slice(
+                        0,
+                        600,
+                      ),
+                      reason: latestBodyDiagnostic.assessment.weeklyAdjustment.reason.slice(0, 600),
+                      reportedSignals:
+                        latestBodyDiagnostic.assessment.weeklyAdjustment.reportedSignals
+                          .slice(0, 6)
+                          .map((signal) => signal.slice(0, 180)),
+                      sessions: latestBodyDiagnostic.assessment.weeklyAdjustment.sessions
+                        .slice(0, 3)
+                        .map((session) => ({
+                          ...session,
+                          title: session.title.slice(0, 120),
+                          focus: session.focus.slice(0, 240),
+                          rationale: session.rationale.slice(0, 400),
+                        })),
+                    }
+                  : undefined,
               }
             : undefined,
           photosExcluded: true,

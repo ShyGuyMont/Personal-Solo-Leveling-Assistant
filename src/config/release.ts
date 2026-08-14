@@ -1,4 +1,4 @@
-export const APP_VERSION = '9.4.0';
+export const APP_VERSION = '9.5.0';
 export const DATABASE_SCHEMA_VERSION = 28;
 export const SAVE_FORMAT_VERSION = 28;
 
@@ -9,6 +9,20 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 9.5.0 · Earned Commitments',
+    detail:
+      'Calendar Council can now turn worthy specialist requests into protected time plus an XP-backed Companion Order, while the Training Hall can carry a weekly Body Diagnostic adjustment into a visible five-member council without replacing the core program.',
+    points: [
+      'The responsible specialist argues the purpose, Kairo verifies timing and recurrence, Snow applies the no-duplicate-reward rule, and the Hunter approves the final schedule card; no companion can silently add time or XP.',
+      'Eligible commitments receive an immutable duration-based reward tier and observable completion checklist. Scheduling awards nothing—the linked Companion Order must be cleared before XP is applied, under the existing daily reward ceiling.',
+      'Existing rewarded work such as Daily Missions, Training Hall sessions, Body Diagnostics, Kitchen Orders, Sanctuary assignments, and challenges cannot receive duplicate Calendar Council XP.',
+      'Council-backed commitments display their reward and link directly to Mission Forge. Rescheduling returns to Kairo so the calendar and order stay synchronized, while cancellation retires the linked order without deleting its history.',
+      'New Body Diagnostic reports include a structured weekly adjustment with Hunter-reported signals and up to three conservative support-session recommendations from Rook, Ember, and Mira.',
+      'The Training Council asks how the Hunter feels now before bringing Kairo and Snow into scheduling. Pain or limitation reports trigger cautious support and appropriate warnings—not punishment, diagnosis, appearance-based shame, or forced intensity.',
+      'Every domain companion can bring an evidence-grounded request to Calendar Council one item at a time, preserving clear ownership, visible discussion, and individual Hunter approval.',
+    ],
+  },
   {
     title: 'Version 9.4.0 · Calendar Council',
     detail:

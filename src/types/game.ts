@@ -353,6 +353,24 @@ export interface BodyDiagnosticExercise {
   rationale: string;
 }
 
+export interface BodyDiagnosticWeeklySession {
+  title: string;
+  companionId: 'rook' | 'ember' | 'mira';
+  focus: string;
+  rationale: string;
+  durationMinutes: number;
+  sessionsThisWeek: number;
+  intensity: 'recovery' | 'light' | 'moderate';
+}
+
+export interface BodyDiagnosticWeeklyAdjustment {
+  recommended: boolean;
+  summary: string;
+  reason: string;
+  reportedSignals: string[];
+  sessions: BodyDiagnosticWeeklySession[];
+}
+
 export interface BodyDiagnosticAssessment {
   title: string;
   scanType: 'physique' | 'scale' | 'combined';
@@ -364,6 +382,7 @@ export interface BodyDiagnosticAssessment {
   observations: BodyDiagnosticObservation[];
   priorities: BodyDiagnosticPriority[];
   bonusExercises: BodyDiagnosticExercise[];
+  weeklyAdjustment?: BodyDiagnosticWeeklyAdjustment;
   companionMessages: Array<{
     companionId: 'rook' | 'ember' | 'mira';
     message: string;
@@ -1050,12 +1069,7 @@ export interface SupportConversation {
 
 export type AiConversationAudience = 'party' | CompanionId;
 export type AiConversationKind = 'direct' | 'party-council' | 'commons' | 'spoiler-room';
-export type AiPartyEventKind =
-  | 'join'
-  | 'leave'
-  | 'handoff'
-  | 'assemble'
-  | 'calendar-council';
+export type AiPartyEventKind = 'join' | 'leave' | 'handoff' | 'assemble' | 'calendar-council';
 
 export interface AiPartyEvent {
   kind: AiPartyEventKind;
@@ -1518,6 +1532,10 @@ export interface CalendarEvent {
   source: CalendarEventSource;
   linkedCompanionId?: CompanionId;
   linkedRealm?: CalendarRealm;
+  rewardMissionId?: string;
+  rewardDifficulty?: AgentMissionDifficulty;
+  rewardXp?: number;
+  rewardRationale?: string;
   status: CalendarEventStatus;
   createdAt: string;
   updatedAt: string;
@@ -1536,6 +1554,10 @@ export interface CalendarEventOccurrence {
   source: CalendarEventSource;
   linkedCompanionId?: CompanionId;
   linkedRealm?: CalendarRealm;
+  rewardMissionId?: string;
+  rewardDifficulty?: AgentMissionDifficulty;
+  rewardXp?: number;
+  rewardRationale?: string;
   status: CalendarEventStatus;
   recurring: boolean;
 }

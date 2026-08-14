@@ -30,6 +30,8 @@ const weeklyEvent: CalendarEvent = {
 describe('Calendar Command', () => {
   beforeEach(async () => {
     await db.calendarEvents.clear();
+    await db.agentMissions.clear();
+    await db.auditEntries.clear();
   });
 
   it('expands recurring commitments only through their recurrence boundary', () => {
@@ -119,6 +121,46 @@ describe('Calendar Command', () => {
     expect(saved.linkedCompanionId).toBe('selah');
     expect(saved.linkedRealm).toBe('sanctuary');
     expect(await db.calendarEvents.count()).toBe(1);
+  });
+
+  it('links an immutable XP Companion Order without paying XP for scheduling', async () => {
+    const saved = await applyCalendarProposal(
+      {
+        action: 'create',
+        eventId: '',
+        title: 'Weekly budget review',
+        description: 'Review the week and set the next spending boundary.',
+        category: 'work',
+        startAt: '2026-08-23T23:00:00.000Z',
+        endAt: '2026-08-23T23:30:00.000Z',
+        allDay: false,
+        recurrence: 'weekly',
+        recurrenceInterval: 1,
+        recurrenceEndsOn: '',
+        location: 'Treasury Command',
+        linkedCompanionId: 'cassian',
+        linkedRealm: 'treasury',
+        rewardEligible: true,
+        rewardDifficulty: 'standard',
+        rewardXp: 40,
+        rewardRationale: 'A measurable review that is not rewarded elsewhere.',
+        completionCriteria: ['Review the week', 'Set the next spending boundary'],
+      },
+      'kairo',
+    );
+
+    const order = saved.rewardMissionId
+      ? await db.agentMissions.get(saved.rewardMissionId)
+      : undefined;
+    expect(saved.rewardXp).toBe(40);
+    expect(order).toMatchObject({
+      companionId: 'cassian',
+      difficulty: 'standard',
+      accountXp: 40,
+      recurrence: 'weekly',
+    });
+    expect(order?.checklistItems).toEqual(['Review the week', 'Set the next spending boundary']);
+    expect(await db.xpTransactions.count()).toBe(0);
   });
 
   it('rejects impossible times and stale update proposals', async () => {

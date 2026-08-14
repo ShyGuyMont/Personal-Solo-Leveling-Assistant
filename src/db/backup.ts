@@ -641,6 +641,12 @@ function validateData(data: Record<string, unknown[]>) {
     const companionMessages = Array.isArray(assessment?.companionMessages)
       ? assessment.companionMessages
       : [];
+    const weeklyAdjustment = isObject(assessment?.weeklyAdjustment)
+      ? assessment.weeklyAdjustment
+      : undefined;
+    const weeklySessions = Array.isArray(weeklyAdjustment?.sessions)
+      ? weeklyAdjustment.sessions
+      : [];
     const stringListIsValid = (value: unknown, maximum: number) =>
       Array.isArray(value) &&
       value.length <= maximum &&
@@ -674,6 +680,32 @@ function validateData(data: Record<string, unknown[]>) {
       priorities.length < 1 ||
       priorities.length > 4 ||
       bonusExercises.length > 4 ||
+      (assessment.weeklyAdjustment !== undefined &&
+        (!weeklyAdjustment ||
+          typeof weeklyAdjustment.recommended !== 'boolean' ||
+          typeof weeklyAdjustment.summary !== 'string' ||
+          typeof weeklyAdjustment.reason !== 'string' ||
+          !stringListIsValid(weeklyAdjustment.reportedSignals, 6) ||
+          weeklySessions.length > 3 ||
+          (!weeklyAdjustment.recommended && weeklySessions.length > 0) ||
+          weeklySessions.some(
+            (session) =>
+              !isObject(session) ||
+              !diagnosticCompanions.has(String(session.companionId)) ||
+              typeof session.title !== 'string' ||
+              !session.title.trim() ||
+              typeof session.focus !== 'string' ||
+              !session.focus.trim() ||
+              typeof session.rationale !== 'string' ||
+              !session.rationale.trim() ||
+              !Number.isInteger(session.durationMinutes) ||
+              Number(session.durationMinutes) < 10 ||
+              Number(session.durationMinutes) > 60 ||
+              !Number.isInteger(session.sessionsThisWeek) ||
+              Number(session.sessionsThisWeek) < 1 ||
+              Number(session.sessionsThisWeek) > 3 ||
+              !['recovery', 'light', 'moderate'].includes(String(session.intensity)),
+          ))) ||
       companionMessages.length !== 3 ||
       new Set(companionMessages.map((message) => isObject(message) && message.companionId)).size !==
         3 ||
@@ -1428,6 +1460,7 @@ function validateData(data: Record<string, unknown[]>) {
   const calendarRecurrences = new Set(['none', 'daily', 'weekly', 'monthly']);
   const calendarStatuses = new Set(['scheduled', 'completed', 'canceled']);
   const calendarSources = new Set(['hunter', 'kairo', 'snow']);
+  const calendarRewardDifficulties = new Set(['minor', 'standard', 'major', 'boss']);
   const calendarRealms = new Set([
     'missions',
     'training',
@@ -1464,6 +1497,23 @@ function validateData(data: Record<string, unknown[]>) {
       (row.linkedCompanionId !== undefined && !companionIds.has(String(row.linkedCompanionId))) ||
       (row.linkedRealm !== undefined && !calendarRealms.has(String(row.linkedRealm))) ||
       (row.linkedCompanionId === undefined) !== (row.linkedRealm === undefined) ||
+      (row.rewardMissionId !== undefined &&
+        (typeof row.rewardMissionId !== 'string' ||
+          !row.rewardMissionId.trim() ||
+          row.rewardMissionId.length > 200)) ||
+      (row.rewardDifficulty !== undefined &&
+        !calendarRewardDifficulties.has(String(row.rewardDifficulty))) ||
+      (row.rewardXp !== undefined &&
+        (!Number.isInteger(row.rewardXp) ||
+          Number(row.rewardXp) < 0 ||
+          Number(row.rewardXp) > 500)) ||
+      (row.rewardRationale !== undefined &&
+        (typeof row.rewardRationale !== 'string' || row.rewardRationale.length > 600)) ||
+      (row.rewardMissionId !== undefined &&
+        (row.rewardDifficulty === undefined ||
+          row.rewardXp === undefined ||
+          row.linkedCompanionId === undefined ||
+          row.linkedRealm === undefined)) ||
       !calendarStatuses.has(String(row.status)) ||
       typeof row.createdAt !== 'string' ||
       !Number.isFinite(Date.parse(row.createdAt)) ||
