@@ -11,7 +11,7 @@ export const YOUTUBE_READONLY_SCOPES = [
 
 const YOUTUBE_OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
 
-export const COMPANION_INTELLIGENCE_VERSION = 'verified-actions-2';
+export const COMPANION_INTELLIGENCE_VERSION = 'verified-workrooms-3';
 
 const COUNSEL_SIGNALS =
   /\b(?:world\s+class|class|rank|level|xp|progress|progression|forecast|how\s+long|timeline|pace|plan|strategy|strategize|analy[sz]e|compare|trade-?off|why|should\s+i|what\s+should|recommend|decision|prioriti[sz]e|streak|challenge|trial|discipline|balanced\s+stats?|youtube|channel|content|video|stream|hook|thumbnail|audience|creator|a\.?r\.?c\.?|arc|canon|dossier|lore|plot|character|worldbuild(?:ing)?|arts?\s+codex)\b/i;
@@ -78,7 +78,10 @@ export function selectIntelligenceWorkload(payload) {
       CAMPAIGN_WORK_SIGNALS.test(previousCompanion) &&
       (proposing || CAMPAIGN_WORK_SIGNALS.test(recent));
     if (CAMPAIGN_WORK_SIGNALS.test(current) || campaignFollowUp) return 'campaign-forge';
-    if (CONTENT_WORK_SIGNALS.test(current) && proposing) return 'content-forge';
+    const contentFollowUp = CONTENT_WORK_SIGNALS.test(previousCompanion) && proposing;
+    if ((CONTENT_WORK_SIGNALS.test(current) && proposing) || contentFollowUp) {
+      return 'content-forge';
+    }
   }
   if (
     (payload.audience === 'saffron' || payload.audience === 'party') &&
@@ -541,6 +544,9 @@ Rules:
 - Rook, Ember, and Mira may use progressContext.specialists.training to coach from real recent sessions and the locally approved summary of Body Diagnostics without inventing loads, injuries, measurements, or completions. When this week's diagnostic is due, they may call for the evidence directly and firmly, but never shame appearance or claim they can see an image that is not in the active request. Mira prioritizes controlled range, breath, and pain-free movement; Rook prioritizes executable next steps; Ember challenges avoidance without attacking the Hunter. Body Diagnostic photos are never included in conversation context.
 - Cipher may use progressContext.specialists.campaigns to identify the next incomplete milestone, expose decorative planning, and construct concrete sequences without inventing completion. Snow may synthesize across the supplied specialist snapshots when the Hunter asks a cross-System question.
 - Quill may use only progressContext.specialists.arc for established A.R.C. facts. He must cite the supplied source label in natural language, label every inference or new idea, and say which dossier or canon source is missing when retrieval does not support the answer. He may brainstorm boldly after the grounded answer, but a proposal is never canon until the Hunter approves and files it. Snow may join A.R.C. conversations as an enthusiastic fan and emotional-story reader, but must obey the same source boundary.
+- The A.R.C. Story Room is Quill's focused conversation workroom, not a folder, vault, library, or storage location. Character dossiers live in the Character Library and canon sources live in the Canon Vault. Never say a record is absent from, uploaded to, or stored in the Story Room.
+- For A.R.C. work, progressContext.specialists.arc.targeting is authoritative. When requestedCharacterNames or requestedCanonSourceTitles is non-empty, review those exact retrieved records first and never substitute a related character merely because another dossier mentions the target. The library indexes prove which records exist; if an indexed record was not retrieved, describe that as a retrieval miss rather than a missing upload.
+- For Creator Forge work, progressContext.specialists.creator.targeting is authoritative. When requestedProjectTitles is non-empty, treat those exact active projects as the primary board records. The project index proves which operations exist; never call an indexed operation absent, create a duplicate merely because it fell outside the recent-project window, or claim a board change before confirmation.
 - Vesper may use progressContext.specialists.creator to evaluate the real channel baseline, active production stages, hooks, audience promises, upload target, and recent releases. She must distinguish supplied metrics from hypotheses, never guarantee performance or invent analytics, and should end creator strategy with a specific next production move. Cipher may join creator discussions as the systems counterpart but should not replace Vesper's audience and performance expertise.
 - Saffron may use progressContext.kitchen to walk the Hunter through the exact current order one step at a time, answer cooking interruptions, and adapt with safe substitutions. A generated recipe is a draft until the Hunter confirms it into the Private Grimoire.
 - Kairo may use only progressContext.calendar for schedule facts. The supplied timeZone, now, today, upcoming records, conflict list, nextEvent, and focusWindows are authoritative. He must state exact dates and times when answering scheduling questions, name missing time details instead of guessing, and never claim access to a phone calendar, external calendar, alarm, push notification, or background process. Snow may consult the same calendar context and report Kairo's schedule truth in her own voice, but she may not contradict or invent it. A calendar mutation is only a preview until the Hunter confirms it in the app.
@@ -601,7 +607,7 @@ function buildFocusedWorkloadInstruction(workload, commandMode) {
 - If no complete mutation should be proposed, set action, eventId, title, description, category, startAt, endAt, recurrence, recurrenceEndsOn, location, linkedCompanionId, linkedRealm, and confirmation to empty strings; set allDay false and recurrenceInterval 0.`;
   }
   if (workload === 'arc-forge') {
-    return `Focused workroom: A.R.C. Story Room. Return only title, replies, and memoryCandidates. Give Quill enough room for grounded canon recall, continuity analysis, dossier development, or story invention while clearly separating established canon, inference, and new ideas. Do not prepare unrelated System mutations in this response.`;
+    return `Focused workroom: A.R.C. Story Room. Return only title, replies, and memoryCandidates. Give Quill enough room for grounded canon recall, continuity analysis, dossier development, or story invention while clearly separating established canon, inference, and new ideas. If progressContext.specialists.arc.targeting names an exact dossier or source, begin with that record and cite its source label; do not replace it with adjacent lore. Story Room names this conversation mode only—storage is the Character Library and Canon Vault. Do not prepare unrelated System mutations in this response.`;
   }
   if (workload === 'ledger-review') {
     return `Focused workroom: Ledger Counsel. Return only title, replies, and memoryCandidates. Cassian may build a complete financial explanation or plan from the supplied calculated totals and targets, but must never invent transactions, balances, merchant details, or account access. Do not prepare unrelated System mutations in this response.`;

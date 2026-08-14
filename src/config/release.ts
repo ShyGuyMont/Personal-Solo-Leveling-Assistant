@@ -1,4 +1,4 @@
-export const APP_VERSION = '8.1.0';
+export const APP_VERSION = '8.1.1';
 export const DATABASE_SCHEMA_VERSION = 27;
 export const SAVE_FORMAT_VERSION = 27;
 
@@ -9,6 +9,17 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 8.1.1 · Verified Workrooms',
+    detail:
+      'Quill and Vesper now hold exact-record continuity across their major creative workrooms, so deep counsel begins from the dossier, canon source, or Creator Forge operation the Hunter actually named.',
+    points: [
+      'Quill now normalizes possessive names, pins exact character and source matches ahead of loose relevance, and carries the last named record into natural follow-up questions without allowing related dossiers to replace it.',
+      'The A.R.C. context includes a compact Character Library and Canon Vault index, while Quill clearly treats Story Room as a conversation mode rather than a storage location.',
+      'Every Character Library dossier gains a direct Review handoff and every Canon Vault record gains a direct Discuss handoff that names the exact primary source and forbids silent substitution.',
+      'Vesper now keeps short answers inside an active Creator Forge workroom, pins an explicitly named older board operation into her context, and exposes a Workshop handoff on every production card without duplicating or moving it.',
+    ],
+  },
   {
     title: 'Version 8.1.0 · Living Voice Economy',
     detail:

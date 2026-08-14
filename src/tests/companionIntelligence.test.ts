@@ -233,6 +233,28 @@ describe('Companion Soulprint intelligence', () => {
     });
   });
 
+  it('keeps a short Vesper answer inside the active Creator Forge workroom', () => {
+    expect(
+      intelligence.selectIntelligenceRoute({
+        audience: 'haven',
+        message: 'YouTube Shorts, definitely.',
+        commandMode: 'propose',
+        history: [
+          {
+            role: 'companion',
+            companionId: 'haven',
+            message:
+              'For this video idea, are we building a YouTube upload, a Short, a livestream, or a community post?',
+          },
+        ],
+      }),
+    ).toMatchObject({
+      route: 'counsel',
+      workload: 'content-forge',
+      maxOutputTokens: 4_800,
+    });
+  });
+
   it('gives Quill, Saffron, Cassian, and Party Council distinct workroom budgets', () => {
     expect(
       intelligence.selectIntelligenceRoute({

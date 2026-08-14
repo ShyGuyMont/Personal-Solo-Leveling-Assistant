@@ -374,6 +374,7 @@ export function AiHeadquartersPanel() {
           systemDate,
           enabledCompanionIds: enabledCompanions.map((companion) => companion.id),
           query: message,
+          history: currentConversation.messages,
         }),
         commandMode: 'propose',
       });
@@ -497,6 +498,7 @@ export function AiHeadquartersPanel() {
                 systemDate,
                 enabledCompanionIds: enabledCompanions.map((companion) => companion.id),
                 query: constraint,
+                history: conversation.messages,
               }),
               commandMode: 'propose',
             });

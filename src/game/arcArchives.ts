@@ -319,6 +319,52 @@ function searchableDossier(record: ArcCharacterRecord) {
     .toLowerCase();
 }
 
+function normalizeRetrievalText(value: string) {
+  return value
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[’']/g, "'")
+    .replace(/'s\b/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function includesPhrase(haystack: string, needle: string) {
+  if (!needle) return false;
+  return ` ${haystack} `.includes(` ${needle} `);
+}
+
+function exactCharacterMatches(records: ArcCharacterRecord[], value: string) {
+  const normalized = normalizeRetrievalText(value);
+  if (!normalized) return [];
+  return records.filter((record) =>
+    [record.name, record.alias]
+      .map(normalizeRetrievalText)
+      .filter(Boolean)
+      .some((identity) => includesPhrase(normalized, identity)),
+  );
+}
+
+function exactSourceMatches(records: ArcCanonSource[], value: string) {
+  const normalized = normalizeRetrievalText(value);
+  if (!normalized) return [];
+  return records.filter((record) => includesPhrase(normalized, normalizeRetrievalText(record.title)));
+}
+
+function latestExactMatches<T>(
+  history: ReadonlyArray<{ role?: string; message: string }>,
+  match: (message: string) => T[],
+) {
+  const hunterMessages = history.filter((item) => !item.role || item.role === 'hunter');
+  const candidates = (hunterMessages.length ? hunterMessages : history).slice(-8).reverse();
+  for (const item of candidates) {
+    const matches = match(item.message);
+    if (matches.length) return matches;
+  }
+  return [];
+}
+
 function queryTerms(query: string) {
   const stopWords = new Set([
     'about',
@@ -365,7 +411,7 @@ function queryTerms(query: string) {
   ]);
   return [
     ...new Set(
-      (query.toLowerCase().match(/[a-z0-9'-]{2,}/g) ?? []).filter(
+      (normalizeRetrievalText(query).match(/[a-z0-9-]{2,}/g) ?? []).filter(
         (term) => !stopWords.has(term),
       ),
     ),
@@ -398,7 +444,10 @@ function compactArcValue(value: unknown, depth = 0): unknown {
   return undefined;
 }
 
-export async function buildArcKnowledgeContext(query = '') {
+export async function buildArcKnowledgeContext(
+  query = '',
+  history: ReadonlyArray<{ role?: string; message: string }> = [],
+) {
   const [characters, sources] = await Promise.all([
     db.arcCharacters.orderBy('updatedAt').reverse().toArray(),
     db.arcCanonSources.orderBy('updatedAt').reverse().toArray(),
@@ -406,11 +455,40 @@ export async function buildArcKnowledgeContext(query = '') {
   const terms = queryTerms(query);
   const hasQuery = Boolean(query.trim());
   const minimumScore = terms.length > 1 ? 2 : 1;
+  const currentCharacterMatches = exactCharacterMatches(characters, query);
+  const carriedCharacterMatches = currentCharacterMatches.length
+    ? []
+    : latestExactMatches(history, (message) => exactCharacterMatches(characters, message));
+  const targetedCharacters = currentCharacterMatches.length
+    ? currentCharacterMatches
+    : carriedCharacterMatches;
+  const currentSourceMatches = exactSourceMatches(sources, query);
+  const carriedSourceMatches = currentSourceMatches.length
+    ? []
+    : latestExactMatches(history, (message) => exactSourceMatches(sources, message));
+  const targetedSources = currentSourceMatches.length ? currentSourceMatches : carriedSourceMatches;
+  const targetedCharacterIds = new Set(targetedCharacters.map((record) => record.id));
+  const targetedSourceIds = new Set(targetedSources.map((record) => record.id));
+  const targetNames = targetedCharacters.map((record) => normalizeRetrievalText(record.name));
+
   const rankedCharacters = characters
-    .map((record) => ({ record, score: relevance(searchableDossier(record), terms) }))
-    .filter((item) => !hasQuery || item.score >= minimumScore)
-    .sort((left, right) => right.score - left.score || right.record.updatedAt.localeCompare(left.record.updatedAt))
-    .slice(0, 4)
+    .map((record) => ({
+      record,
+      exact: targetedCharacterIds.has(record.id),
+      score: relevance(searchableDossier(record), terms),
+    }))
+    .filter((item) =>
+      targetedCharacterIds.size
+        ? item.exact
+        : !hasQuery || item.score >= minimumScore,
+    )
+    .sort(
+      (left, right) =>
+        Number(right.exact) - Number(left.exact) ||
+        right.score - left.score ||
+        right.record.updatedAt.localeCompare(left.record.updatedAt),
+    )
+    .slice(0, 6)
     .map(({ record }) => ({
       source: `Character dossier: ${record.name}`,
       name: record.name,
@@ -430,6 +508,13 @@ export async function buildArcKnowledgeContext(query = '') {
   const rankedSources = sources
     .map((source) => ({
       source,
+      exact: targetedSourceIds.has(source.id),
+      linkedCharacter: targetNames.some(
+        (name) =>
+          source.characterNames.some(
+            (characterName) => normalizeRetrievalText(characterName) === name,
+          ) || includesPhrase(normalizeRetrievalText(source.text), name),
+      ),
       score: relevance(
         [source.title, source.kind, source.tags.join(' '), source.characterNames.join(' '), source.text]
           .join(' ')
@@ -437,8 +522,18 @@ export async function buildArcKnowledgeContext(query = '') {
         terms,
       ),
     }))
-    .filter((item) => !hasQuery || item.score >= minimumScore)
-    .sort((left, right) => right.score - left.score || right.source.updatedAt.localeCompare(left.source.updatedAt))
+    .filter((item) =>
+      targetedSourceIds.size || targetedCharacterIds.size
+        ? item.exact || item.linkedCharacter || item.score >= minimumScore
+        : !hasQuery || item.score >= minimumScore,
+    )
+    .sort(
+      (left, right) =>
+        Number(right.exact) - Number(left.exact) ||
+        Number(right.linkedCharacter) - Number(left.linkedCharacter) ||
+        right.score - left.score ||
+        right.source.updatedAt.localeCompare(left.source.updatedAt),
+    )
     .slice(0, 5)
     .map(({ source }) => ({
       source: `Canon source: ${source.title}`,
@@ -447,13 +542,48 @@ export async function buildArcKnowledgeContext(query = '') {
       characterNames: source.characterNames,
       excerpt: excerpt(source.text, terms),
     }));
+  const targetingMode:
+    | 'exact-character'
+    | 'exact-source'
+    | 'conversation-carryover'
+    | 'relevance'
+    | 'browse' = currentCharacterMatches.length
+    ? 'exact-character'
+    : carriedCharacterMatches.length
+      ? 'conversation-carryover'
+      : currentSourceMatches.length
+        ? 'exact-source'
+        : carriedSourceMatches.length
+          ? 'conversation-carryover'
+          : hasQuery
+            ? 'relevance'
+            : 'browse';
   return {
-    library: { characterCount: characters.length, canonSourceCount: sources.length },
+    library: {
+      characterCount: characters.length,
+      canonSourceCount: sources.length,
+      characterIndex: characters.slice(0, 160).map((record) => ({
+        name: record.name,
+        alias: record.alias,
+      })),
+      canonSourceIndex: sources.slice(0, 160).map((source) => ({
+        title: source.title,
+        kind: source.kind,
+      })),
+    },
     retrievalQuery: query.slice(0, 1_000),
+    targeting: {
+      mode: targetingMode,
+      requestedCharacterNames: targetedCharacters.map((record) => record.name),
+      requestedCanonSourceTitles: targetedSources.map((source) => source.title),
+      usedConversationCarryover: Boolean(
+        carriedCharacterMatches.length || carriedSourceMatches.length,
+      ),
+    },
     relevantCharacters: rankedCharacters,
     relevantCanonSources: rankedSources,
     grounding:
-      'Treat only these retrieved records as established canon. Cite the source label when stating a fact. Label inference, speculation, and new ideas explicitly. If the needed record is absent, say what source is missing.',
+      'Treat only these retrieved records as established canon. Cite the source label when stating a fact. Label inference, speculation, and new ideas explicitly. The Story Room is a focused conversation workroom, never a storage location; dossiers live in the Character Library and lore lives in the Canon Vault. If a named record exists in the library index but was not retrieved, say the retrieval did not surface it for this request instead of claiming it is missing from the Story Room.',
   };
 }
 

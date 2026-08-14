@@ -73,6 +73,47 @@ describe('A.R.C. Archives', () => {
     expect(context.grounding).toMatch(/established canon/i);
   });
 
+  it('pins an exact possessive character name instead of substituting related dossiers', async () => {
+    await saveArcCharacter(
+      dossier('Yoshanai', {
+        alias: 'The Quiet Gravity',
+        backstory: 'Yoshanai survives the Akoura Incident and carries unresolved history with Soorin.',
+      }),
+    );
+    await saveArcCharacter(
+      dossier('Soorin Yun', {
+        backstory: 'Soorin remembers Yoshanai from before the Akoura Incident.',
+      }),
+    );
+    await saveArcCharacter(
+      dossier('Jinrui Xue', {
+        backstory: 'Jinrui reviews character dossiers for Brigade intelligence.',
+      }),
+    );
+
+    const context = await buildArcKnowledgeContext("Review Yoshanai's character dossier.");
+
+    expect(context.targeting.mode).toBe('exact-character');
+    expect(context.targeting.requestedCharacterNames).toEqual(['Yoshanai']);
+    expect(context.relevantCharacters.map((record) => record.name)).toEqual(['Yoshanai']);
+    expect(context.library.characterIndex.some((record) => record.name === 'Yoshanai')).toBe(true);
+    expect(context.grounding).toMatch(/Story Room is a focused conversation workroom/i);
+  });
+
+  it('carries the last exact dossier into a natural follow-up question', async () => {
+    await saveArcCharacter(dossier('Yoshanai', { alias: 'The Quiet Gravity' }));
+    await saveArcCharacter(dossier('Soorin Yun'));
+
+    const context = await buildArcKnowledgeContext('What are the biggest continuity gaps?', [
+      { role: 'hunter', message: 'Open Yoshanai’s dossier and review it with me.' },
+      { role: 'companion', message: 'I am opening the requested Character Library record.' },
+    ]);
+
+    expect(context.targeting.mode).toBe('conversation-carryover');
+    expect(context.targeting.usedConversationCarryover).toBe(true);
+    expect(context.relevantCharacters.map((record) => record.name)).toEqual(['Yoshanai']);
+  });
+
   it('does not dump recent records for a non-empty question with no meaningful match', async () => {
     await saveArcCharacter(dossier('Laz'));
 

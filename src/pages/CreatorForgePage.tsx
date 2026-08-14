@@ -870,8 +870,19 @@ export function CreatorForgePage() {
                         <option key={stage.id} value={stage.id}>
                           {stage.label}
                         </option>
-                      ))}
-                    </select>
+                        ))}
+                      </select>
+                    <button
+                      type="button"
+                      className="creator-project-card__vesper"
+                      onClick={() =>
+                        openVesperLink(
+                          `Vesper, workshop the exact active Creator Forge operation titled “${item.title}.” Treat that project as the primary board record, assess its current ${item.status} stage, hook, audience promise, and recorded next action, then help me choose the strongest honest move from here. Do not create a duplicate or claim its stage changed; this is a focused review.`,
+                        )
+                      }
+                    >
+                      <MessageCircle size={15} /> Workshop with Vesper
+                    </button>
                   </article>
                 ))}
                 {!column.projects.length && <p className="creator-pipeline__empty">No signal</p>}

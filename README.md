@@ -41,6 +41,16 @@ Headquarters channel uses the private Sites sign-in and a server-side OpenAI con
 only the message, limited recent chat context, and a compact progress signal when the user presses
 Send. There is no analytics, advertising, or tracking.
 
+## Version 8.1.1 · Verified Workrooms
+
+Quill now retrieves the exact Character Library dossier or Canon Vault source named by the Hunter,
+including possessive names and natural follow-up questions. Story Room is explicitly a focused
+conversation mode rather than a storage location, and direct Review or Discuss controls open Quill
+with the selected record pinned as the primary source. Vesper receives the same exact-record care:
+named Creator Forge operations remain in context even when they are older than the normal recent
+window, short answers remain inside the active workroom, and every production card can open a
+focused Workshop without duplicating or moving the operation.
+
 ## Version 8.1.0 · Living Voice Economy
 
 Long AI transmissions now retain their complete written answer while the companions speak a concise

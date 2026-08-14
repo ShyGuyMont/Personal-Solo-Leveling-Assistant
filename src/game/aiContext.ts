@@ -14,8 +14,10 @@ import type { AiProgressContext } from '@/services/aiHeadquarters';
 import type {
   AccountProgression,
   AiConversationAudience,
+  AiConversationMessage,
   ChallengeProgress,
   CompanionId,
+  CreatorProject,
   DailyMissionRecord,
   LocalDateKey,
   MissionDefinition,
@@ -37,6 +39,7 @@ export interface AiContextSource {
   systemDate: LocalDateKey;
   enabledCompanionIds: Settings['enabledCompanionIds'];
   query?: string;
+  history?: AiConversationMessage[];
 }
 
 function roundedAverage(total: number, divisor: number) {
@@ -56,6 +59,72 @@ function directorNote(value: string | undefined) {
   return (value ?? '').trim().slice(0, 420);
 }
 
+function normalizeContextReference(value: string) {
+  return value
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[’']/g, "'")
+    .replace(/'s\b/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function containsContextReference(value: string, reference: string) {
+  const normalizedValue = normalizeContextReference(value);
+  const normalizedReference = normalizeContextReference(reference);
+  return Boolean(
+    normalizedReference && ` ${normalizedValue} `.includes(` ${normalizedReference} `),
+  );
+}
+
+function exactCreatorProjectMatches(projects: CreatorProject[], value: string) {
+  return projects.filter((project) => containsContextReference(value, project.title));
+}
+
+export function selectCreatorProjectsForContext(
+  projects: CreatorProject[],
+  query = '',
+  history: ReadonlyArray<Pick<AiConversationMessage, 'role' | 'message'>> = [],
+) {
+  const active = projects.filter(
+    (project) => project.status !== 'published' && project.status !== 'paused',
+  );
+  const currentMatches = exactCreatorProjectMatches(active, query);
+  let carriedMatches: CreatorProject[] = [];
+  if (!currentMatches.length) {
+    const hunterMessages = history.filter((message) => message.role === 'hunter').slice(-8).reverse();
+    for (const message of hunterMessages) {
+      carriedMatches = exactCreatorProjectMatches(active, message.message);
+      if (carriedMatches.length) break;
+    }
+  }
+  const targeted = currentMatches.length ? currentMatches : carriedMatches;
+  const targetedIds = new Set(targeted.map((project) => project.id));
+  const selected = [
+    ...targeted,
+    ...active.filter((project) => !targetedIds.has(project.id)),
+  ].slice(0, 12);
+
+  return {
+    selected,
+    projectIndex: active.slice(0, 120).map((project) => ({
+      id: project.id,
+      title: project.title.slice(0, 180),
+      status: project.status,
+    })),
+    targeting: {
+      mode: currentMatches.length
+        ? ('exact-project' as const)
+        : carriedMatches.length
+          ? ('conversation-carryover' as const)
+          : ('recent-projects' as const),
+      requestedProjectTitles: targeted.map((project) => project.title.slice(0, 180)),
+      usedConversationCarryover: Boolean(carriedMatches.length),
+    },
+  };
+}
+
 const ARC_KNOWLEDGE_SIGNALS =
   /\b(?:a\.?r\.?c\.?|arc|art(?:s)?\s+codex|canon|character|continuity|dossier|faction|lore|plot|story|style|worldbuild(?:ing)?)\b/i;
 
@@ -67,8 +136,19 @@ function shouldShareArcKnowledge(source: AiContextSource) {
 
 function emptyArcKnowledgeContext() {
   return {
-    library: { characterCount: 0, canonSourceCount: 0 },
+    library: {
+      characterCount: 0,
+      canonSourceCount: 0,
+      characterIndex: [],
+      canonSourceIndex: [],
+    },
     retrievalQuery: '',
+    targeting: {
+      mode: 'browse' as const,
+      requestedCharacterNames: [],
+      requestedCanonSourceTitles: [],
+      usedConversationCarryover: false,
+    },
     relevantCharacters: [],
     relevantCanonSources: [],
     grounding:
@@ -132,12 +212,12 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
     treasurySharingAllowed ? db.treasurySavingsGoals.toArray() : Promise.resolve([]),
     db.creatorSettings.get('primary'),
     db.creatorSnapshots.orderBy('capturedAt').reverse().limit(30).toArray(),
-    db.creatorProjects.orderBy('updatedAt').reverse().limit(30).toArray(),
+    db.creatorProjects.orderBy('updatedAt').reverse().toArray(),
     db.creatorVideoInsights.orderBy('views').reverse().limit(10).toArray(),
     getDailyOperations(source.systemDate),
     getBodyDiagnosticData(source.systemDate),
     shouldShareArcKnowledge(source)
-      ? buildArcKnowledgeContext(source.query ?? '')
+      ? buildArcKnowledgeContext(source.query ?? '', source.history ?? [])
       : Promise.resolve(emptyArcKnowledgeContext()),
     shouldShareCalendar(source) ? db.calendarEvents.toArray() : Promise.resolve([]),
   ]);
@@ -145,6 +225,11 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
   const available = source.missions.filter((mission) => mission.enabled && !mission.archived);
   const latestCreatorSnapshot =
     creatorSnapshots.find((snapshot) => snapshot.periodDays === 28) ?? creatorSnapshots[0];
+  const creatorProjectContext = selectCreatorProjectsForContext(
+    creatorProjects,
+    source.query,
+    source.history,
+  );
   const latestBodyDiagnostic = bodyDiagnostic.current ?? bodyDiagnostic.previous;
   const commandCatalog = buildQuickLinkActionCatalog(source.missions, source.todayRecords);
   const todayKitchen = kitchen.find((session) => session.date === source.systemDate);
@@ -538,6 +623,8 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
       },
       arc: arcKnowledge,
       creator: {
+        projectIndex: creatorProjectContext.projectIndex,
+        targeting: creatorProjectContext.targeting,
         identity: {
           channelName: creatorSettings?.channelName.slice(0, 160) ?? '',
           channelHandle: creatorSettings?.channelHandle.slice(0, 100) ?? '',
@@ -580,10 +667,7 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
           likes: video.likes,
           comments: video.comments,
         })),
-        activeProjects: creatorProjects
-          .filter((project) => project.status !== 'published' && project.status !== 'paused')
-          .slice(0, 12)
-          .map((project) => ({
+        activeProjects: creatorProjectContext.selected.map((project) => ({
             id: project.id,
             title: project.title.slice(0, 180),
             platform: project.platform,

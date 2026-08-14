@@ -332,6 +332,16 @@ export function ArcArchivesPage() {
                     <div><dt>Faction</dt><dd>{record.faction || 'Unfiled'}</dd></div>
                   </dl>
                   <footer>
+                    <button
+                      onClick={() =>
+                        openQuickLink(
+                          'quill',
+                          `Quill, review the exact Character Library dossier named “${record.name}.” Treat “Character dossier: ${record.name}” as the primary record. Analyze its strongest material, incomplete or unclear fields, continuity pressure points, and the most promising development opportunities. Separate established dossier facts, inference, and new ideas, and do not substitute another character. `,
+                        )
+                      }
+                    >
+                      <MessageCircleMore size={15} /> Review
+                    </button>
                     <button onClick={() => loadInForge(record)}><FileJson size={15} /> Open</button>
                     <button onClick={() => downloadArcDossier(record)}><Download size={15} /> JSON</button>
                     <button className="is-danger" onClick={() => void removeCharacter(record)} aria-label={`Remove ${record.name}`}><Trash2 size={15} /></button>
@@ -416,6 +426,18 @@ export function ArcArchivesPage() {
                   <h3>{source.title}</h3>
                   <p>{source.text.slice(0, 260)}{source.text.length > 260 ? '…' : ''}</p>
                   <small>{[...source.tags, ...source.characterNames].slice(0, 8).join(' · ') || 'No index tags yet'}</small>
+                  <footer className="arc-source-actions">
+                    <button
+                      onClick={() =>
+                        openQuickLink(
+                          'quill',
+                          `Quill, open the exact Canon Vault record titled “${source.title}.” Treat “Canon source: ${source.title}” as the primary source. Explain what it establishes, what it implies, which dossiers it touches, and any continuity questions it raises without rewriting canon. `,
+                        )
+                      }
+                    >
+                      <MessageCircleMore size={15} /> Discuss with Quill
+                    </button>
+                  </footer>
                 </article>
               ))}
               {!filteredSources.length && <div className="arc-empty arc-empty--compact"><BookOpen size={28} /><h3>No canon sources filed yet.</h3><p>Modern Word (.docx), Text, Markdown, JSON, and single-file Quill Knowledge Packs are supported.</p></div>}

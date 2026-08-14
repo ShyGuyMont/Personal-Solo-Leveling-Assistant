@@ -372,6 +372,7 @@ export function CompanionQuickLink() {
             systemDate,
             enabledCompanionIds: enabledCompanions.map((companion) => companion.id),
             query: addressed.message || text,
+            history: conversation.messages,
           }),
           commandMode: 'propose',
         });
@@ -585,6 +586,7 @@ export function CompanionQuickLink() {
           challenges,
           systemDate,
           enabledCompanionIds: enabledCompanions.map((companion) => companion.id),
+          history: conversationRef.current?.messages,
         }),
         commandMode: 'propose',
       });
@@ -1017,6 +1019,7 @@ export function CompanionQuickLink() {
       challenges,
       systemDate,
       enabledCompanionIds: enabledCompanions.map((companion) => companion.id),
+      history: conversationRef.current?.messages,
     });
     const started = await realtimeLink.start({
       companionId: activeCompanionId,

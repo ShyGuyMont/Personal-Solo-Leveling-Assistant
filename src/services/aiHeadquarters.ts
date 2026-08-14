@@ -235,8 +235,24 @@ export interface AiProgressContext {
       milestoneNotesExcluded: true;
     };
     arc: {
-      library: { characterCount: number; canonSourceCount: number };
+      library: {
+        characterCount: number;
+        canonSourceCount: number;
+        characterIndex: Array<{ name: string; alias: string }>;
+        canonSourceIndex: Array<{ title: string; kind: string }>;
+      };
       retrievalQuery: string;
+      targeting: {
+        mode:
+          | 'exact-character'
+          | 'exact-source'
+          | 'conversation-carryover'
+          | 'relevance'
+          | 'browse';
+        requestedCharacterNames: string[];
+        requestedCanonSourceTitles: string[];
+        usedConversationCarryover: boolean;
+      };
       relevantCharacters: Array<{
         source: string;
         name: string;
@@ -258,6 +274,12 @@ export interface AiProgressContext {
       grounding: string;
     };
     creator: {
+      projectIndex: Array<{ id: string; title: string; status: string }>;
+      targeting: {
+        mode: 'exact-project' | 'conversation-carryover' | 'recent-projects';
+        requestedProjectTitles: string[];
+        usedConversationCarryover: boolean;
+      };
       identity: {
         channelName: string;
         channelHandle: string;
