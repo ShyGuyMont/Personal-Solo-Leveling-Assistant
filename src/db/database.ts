@@ -830,6 +830,19 @@ export class SystemDatabase extends Dexie {
         'id,status,companionId,category,dueDate,lastCompletedOn,updatedAt,[status+dueDate]',
       treasuryAccounts: 'id,kind,active,updatedAt',
     });
+    this.version(29).upgrade(async (transaction) => {
+      const settings = transaction.table<Settings, string>('settings');
+      const current = await settings.get('primary');
+      if (current) {
+        await settings.update('primary', {
+          coreAttunement: current.coreAttunement ?? 'protocol-linked',
+        });
+      }
+      const now = new Date().toISOString();
+      const metadata = transaction.table<AppMetadata, string>('appMetadata');
+      await metadata.put({ id: 'schema-seeded', value: 29, updatedAt: now });
+      await metadata.put({ id: 'app-version', value: '10.2.0', updatedAt: now });
+    });
   }
 }
 

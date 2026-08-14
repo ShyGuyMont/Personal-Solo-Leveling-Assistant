@@ -42,6 +42,7 @@ export function createDefaultSettings(): Settings {
     themeIntensity: 'standard',
     interfaceStyle: 'system',
     colorTheme: 'abyss',
+    coreAttunement: 'protocol-linked',
     dailyEventsEnabled: true,
     companionMode: 'balanced',
     enabledCompanionIds: [

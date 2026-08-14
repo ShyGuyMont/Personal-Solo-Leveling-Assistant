@@ -3299,6 +3299,291 @@ html[data-motion='reduced'] .ascension-core__neural-web i {
   }
 }
 
+/* Version 10.2.0 · Core Attunement */
+.ascension-core[data-core-attunement='sovereign-mint'] {
+  --core-primary: #63f5d2;
+  --core-secondary: #9f86ff;
+}
+
+.ascension-core[data-core-attunement='void-violet'] {
+  --core-primary: #ae82ff;
+  --core-secondary: #687dff;
+}
+
+.ascension-core[data-core-attunement='solar-gold'] {
+  --core-primary: #ffc857;
+  --core-secondary: #ff7b3f;
+}
+
+.ascension-core[data-core-attunement='bloodfire'] {
+  --core-primary: #ff4f5e;
+  --core-secondary: #ff9a47;
+}
+
+.ascension-core[data-core-attunement='frost-crystal'] {
+  --core-primary: #79ddff;
+  --core-secondary: #c2b3ff;
+}
+
+.ascension-core[data-core-attunement='verdant-life'] {
+  --core-primary: #55f29b;
+  --core-secondary: #d4ee62;
+}
+
+.ascension-core[data-core-attunement='neon-pulse'] {
+  --core-primary: #ff4fd8;
+  --core-secondary: #48e7ff;
+}
+
+.ascension-core[data-core-attunement='prismatic'] {
+  --core-primary: color-mix(in srgb, #4ef6ff var(--core-charge-percent, 0%), #ff5ddb);
+  --core-secondary: color-mix(in srgb, #f8d45c var(--core-charge-percent, 0%), #806cff);
+}
+
+.ascension-core:not([data-core-attunement='protocol-linked']) {
+  --system-state-accent: var(--core-primary);
+  --realm-secondary: var(--core-secondary);
+}
+
+.ascension-core:not([data-core-attunement='protocol-linked']) .class-emblem {
+  --class-accent: var(--core-primary);
+}
+
+.ascension-core:not([data-core-attunement='protocol-linked']) .ascension-core__field {
+  background:
+    radial-gradient(circle, white 0 1%, var(--core-primary) 2%, transparent 14%),
+    conic-gradient(
+      from -90deg,
+      color-mix(in srgb, var(--core-primary) 64%, white) 0deg var(--core-charge),
+      color-mix(in srgb, var(--core-primary) 7%, transparent) var(--core-charge) 360deg
+    ),
+    repeating-conic-gradient(
+      from 0deg,
+      transparent 0deg 13deg,
+      color-mix(in srgb, var(--core-secondary) 18%, transparent) 13deg 14deg
+    );
+}
+
+.ascension-core[data-core-attunement='prismatic'].is-awakened
+  :is(.ascension-core__life-field, .ascension-core__life-sparks, .ascension-core__neural-web) {
+  filter: saturate(1.5) brightness(1.3)
+    drop-shadow(0 0 16px color-mix(in srgb, var(--core-primary) 42%, transparent));
+}
+
+.core-attunement-config {
+  padding-top: 3px;
+  border-top: 1px solid color-mix(in srgb, var(--mint) 12%, var(--border-soft));
+}
+
+.core-attunement-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.core-attunement-grid button {
+  --preview-primary: var(--mint);
+  --preview-secondary: var(--purple);
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  align-items: center;
+  gap: 9px;
+  min-height: 78px;
+  padding: 10px;
+  color: var(--white);
+  text-align: left;
+  background: color-mix(in srgb, var(--panel-2) 72%, transparent);
+  border: 1px solid var(--border-soft);
+  border-radius: 9px 15px 9px 15px;
+  cursor: pointer;
+  transition:
+    border-color 180ms ease,
+    background 180ms ease,
+    box-shadow 220ms ease,
+    translate 180ms ease;
+}
+
+.core-attunement-grid button > span:last-child {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.core-attunement-grid button strong {
+  color: color-mix(in srgb, var(--preview-primary) 58%, var(--white));
+  font-size: 0.71rem;
+}
+
+.core-attunement-grid button small {
+  color: var(--muted);
+  font-size: 0.58rem;
+  line-height: 1.42;
+}
+
+.core-attunement-grid button.is-active {
+  background:
+    radial-gradient(
+      circle at 17% 50%,
+      color-mix(in srgb, var(--preview-primary) 14%, transparent),
+      transparent 43%
+    ),
+    color-mix(in srgb, var(--panel-2) 82%, transparent);
+  border-color: color-mix(in srgb, var(--preview-primary) 58%, var(--border));
+  box-shadow:
+    0 0 24px color-mix(in srgb, var(--preview-primary) 8%, transparent),
+    inset 0 0 24px color-mix(in srgb, var(--preview-primary) 5%, transparent);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .core-attunement-grid button:hover {
+    translate: 0 -2px;
+    border-color: color-mix(in srgb, var(--preview-primary) 48%, var(--border));
+  }
+}
+
+.core-attunement-grid__swatch {
+  position: relative;
+  display: grid;
+  width: 46px;
+  height: 46px;
+  place-items: center;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      circle,
+      color-mix(in srgb, white 68%, var(--preview-primary)) 0 5%,
+      var(--preview-primary) 6% 17%,
+      color-mix(in srgb, var(--preview-primary) 28%, transparent) 18% 33%,
+      transparent 34%
+    ),
+    conic-gradient(
+      from 20deg,
+      transparent,
+      var(--preview-primary),
+      transparent 29% 48%,
+      var(--preview-secondary),
+      transparent 76%
+    );
+  border: 1px solid color-mix(in srgb, var(--preview-primary) 52%, var(--border));
+  border-radius: 50%;
+  box-shadow:
+    0 0 17px color-mix(in srgb, var(--preview-primary) 22%, transparent),
+    inset 0 0 15px color-mix(in srgb, var(--preview-secondary) 18%, transparent);
+}
+
+.core-attunement-grid__swatch::before,
+.core-attunement-grid__swatch::after {
+  position: absolute;
+  border: 1px solid color-mix(in srgb, var(--preview-primary) 44%, transparent);
+  border-radius: 50%;
+  content: '';
+}
+
+.core-attunement-grid__swatch::before {
+  inset: 6px -3px;
+  transform: rotateX(68deg) rotateZ(18deg);
+}
+
+.core-attunement-grid__swatch::after {
+  inset: -3px 8px;
+  border-color: color-mix(in srgb, var(--preview-secondary) 46%, transparent);
+  transform: rotateY(66deg) rotateZ(-14deg);
+}
+
+.core-attunement-grid__swatch i {
+  width: 4px;
+  height: 4px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 0 8px 2px var(--preview-primary);
+  animation: coreAttunementPreviewPulse 2.4s ease-in-out infinite;
+}
+
+.core-attunement-grid button[data-core-preview='sovereign-mint'] {
+  --preview-primary: #63f5d2;
+  --preview-secondary: #9f86ff;
+}
+
+.core-attunement-grid button[data-core-preview='void-violet'] {
+  --preview-primary: #ae82ff;
+  --preview-secondary: #687dff;
+}
+
+.core-attunement-grid button[data-core-preview='solar-gold'] {
+  --preview-primary: #ffc857;
+  --preview-secondary: #ff7b3f;
+}
+
+.core-attunement-grid button[data-core-preview='bloodfire'] {
+  --preview-primary: #ff4f5e;
+  --preview-secondary: #ff9a47;
+}
+
+.core-attunement-grid button[data-core-preview='frost-crystal'] {
+  --preview-primary: #79ddff;
+  --preview-secondary: #c2b3ff;
+}
+
+.core-attunement-grid button[data-core-preview='verdant-life'] {
+  --preview-primary: #55f29b;
+  --preview-secondary: #d4ee62;
+}
+
+.core-attunement-grid button[data-core-preview='neon-pulse'] {
+  --preview-primary: #ff4fd8;
+  --preview-secondary: #48e7ff;
+}
+
+.core-attunement-grid button[data-core-preview='prismatic'] {
+  --preview-primary: #ff5ddb;
+  --preview-secondary: #4ef6ff;
+}
+
+.core-attunement-config__note {
+  margin: 10px 0 0;
+  color: var(--muted-2);
+  font-size: 0.59rem;
+  line-height: 1.5;
+}
+
+@keyframes coreAttunementPreviewPulse {
+  0%,
+  100% {
+    opacity: 0.58;
+    scale: 0.78;
+  }
+  50% {
+    opacity: 1;
+    scale: 1.42;
+  }
+}
+
+html[data-motion='reduced'] .core-attunement-grid__swatch i {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .core-attunement-grid__swatch i {
+    animation: none;
+  }
+}
+
+@media (max-width: 920px) {
+  .core-attunement-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .core-attunement-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .core-attunement-grid button {
+    min-height: 70px;
+  }
+}
+
 /* Version 10.0.0 · Sovereign Evolution */
 .hero-panel.headquarters-stage {
   border-radius: 28px;

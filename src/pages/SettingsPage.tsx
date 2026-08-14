@@ -27,6 +27,7 @@ import { equipTitle, saveConfiguration } from '@/db/repositories';
 import { DEFAULT_MISSIONS, OPTIONAL_MISSION_TEMPLATES } from '@/config/missions';
 import { COMPANIONS, getCompanionImage } from '@/config/companions';
 import { APP_VERSION } from '@/config/release';
+import { CORE_ATTUNEMENTS } from '@/config/coreAttunements';
 import { Modal } from '@/components/Modal';
 import { Link } from '@/router';
 import { useGameStore } from '@/store/useGameStore';
@@ -376,6 +377,42 @@ export function SettingsPage() {
                   </span>
                 </button>
               </div>
+            </div>
+            <div className="appearance-config core-attunement-config">
+              <div className="appearance-config__heading">
+                <Zap size={18} />
+                <span>
+                  <strong>Core Attunement</strong>
+                  <small>Color the Ascension Core independently from the world around it.</small>
+                </span>
+              </div>
+              <div className="core-attunement-grid">
+                {CORE_ATTUNEMENTS.map((attunement) => (
+                  <button
+                    type="button"
+                    className={
+                      (draft.coreAttunement ?? 'protocol-linked') === attunement.id
+                        ? 'is-active'
+                        : ''
+                    }
+                    data-core-preview={attunement.id}
+                    key={attunement.id}
+                    onClick={() => patchSetting('coreAttunement', attunement.id)}
+                  >
+                    <span className="core-attunement-grid__swatch" aria-hidden="true">
+                      <i />
+                    </span>
+                    <span>
+                      <strong>{attunement.name}</strong>
+                      <small>{attunement.detail}</small>
+                    </span>
+                  </button>
+                ))}
+              </div>
+              <p className="core-attunement-config__note">
+                Attunement changes are visual only. Your Class, charge, XP, and progression remain
+                untouched.
+              </p>
             </div>
             {(
               [

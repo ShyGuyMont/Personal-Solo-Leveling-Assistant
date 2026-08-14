@@ -45,6 +45,16 @@ export type ColorTheme =
   | 'solar-warden'
   | 'neon-revenant'
   | 'phantom-steel';
+export type CoreAttunement =
+  | 'protocol-linked'
+  | 'sovereign-mint'
+  | 'void-violet'
+  | 'solar-gold'
+  | 'bloodfire'
+  | 'frost-crystal'
+  | 'verdant-life'
+  | 'neon-pulse'
+  | 'prismatic';
 export type CompanionId =
   | 'snow'
   | 'rook'
@@ -187,6 +197,7 @@ export interface Settings {
   themeIntensity: 'subtle' | 'standard' | 'intense';
   interfaceStyle: InterfaceStyle;
   colorTheme: ColorTheme;
+  coreAttunement: CoreAttunement;
   dailyEventsEnabled: boolean;
   companionMode: CompanionMode;
   enabledCompanionIds: CompanionId[];

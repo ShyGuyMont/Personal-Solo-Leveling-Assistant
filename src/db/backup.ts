@@ -289,6 +289,7 @@ function migrateData(
         soundVolume: 0.55,
         interfaceStyle: 'system',
         colorTheme: 'abyss',
+        coreAttunement: 'protocol-linked',
         dailyEventsEnabled: true,
         companionMode: 'balanced',
         dailyBriefingEnabled: true,

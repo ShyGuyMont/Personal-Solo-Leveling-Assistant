@@ -135,7 +135,7 @@ export function DashboardPage() {
         </div>
         <div className="hero-panel__version" aria-hidden="true">
           <span>V{APP_VERSION}</span>
-          <b>LIVING SPECTRUM</b>
+          <b>CORE ATTUNEMENT</b>
         </div>
         <div className="hero-panel__top headquarters-stage__header">
           <div>
@@ -175,9 +175,11 @@ export function DashboardPage() {
             style={
               {
                 '--core-charge': `${coreProjection.dailyCharge * 3.6}deg`,
+                '--core-charge-percent': `${coreProjection.dailyCharge}%`,
                 '--level-charge': `${coreProjection.levelCharge * 3.6}deg`,
               } as CSSProperties
             }
+            data-core-attunement={settings.coreAttunement ?? 'protocol-linked'}
             aria-expanded={coreAwakened}
             aria-controls="ascension-core-analysis"
             aria-label={`${coreAwakened ? 'Close' : 'Open'} Ascension Core analysis. ${coreProjection.headline}.`}

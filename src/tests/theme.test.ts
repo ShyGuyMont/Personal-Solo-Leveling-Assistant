@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { getAtmosphereProfile } from '@/game/systemAtmosphere';
+import { CORE_ATTUNEMENTS } from '@/config/coreAttunements';
 import { getDocumentTheme } from '@/utils/theme';
 
 describe('color protocols', () => {
@@ -33,5 +34,14 @@ describe('color protocols', () => {
     expect(new Set(profiles.map((theme) => JSON.stringify(getAtmosphereProfile(theme)))).size).toBe(
       profiles.length,
     );
+  });
+
+  it('ships every Core Attunement as a unique saved choice', () => {
+    expect(CORE_ATTUNEMENTS).toHaveLength(9);
+    expect(new Set(CORE_ATTUNEMENTS.map((attunement) => attunement.id)).size).toBe(
+      CORE_ATTUNEMENTS.length,
+    );
+    expect(CORE_ATTUNEMENTS[0]?.id).toBe('protocol-linked');
+    expect(CORE_ATTUNEMENTS.at(-1)?.id).toBe('prismatic');
   });
 });

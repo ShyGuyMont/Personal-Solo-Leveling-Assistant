@@ -1,6 +1,6 @@
-export const APP_VERSION = '10.1.0';
-export const DATABASE_SCHEMA_VERSION = 28;
-export const SAVE_FORMAT_VERSION = 28;
+export const APP_VERSION = '10.2.0';
+export const DATABASE_SCHEMA_VERSION = 29;
+export const SAVE_FORMAT_VERSION = 29;
 
 export interface ReleaseSection {
   title: string;
@@ -9,6 +9,19 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 10.2.0 · Core Attunement',
+    detail:
+      'The Ascension Core becomes a truly personal artifact: its complete energy identity can now be chosen independently from the System’s surrounding color protocol and safely carried inside the Hunter’s local save.',
+    points: [
+      'A new Core Attunement control offers Protocol Linked, Sovereign Mint, Void Violet, Solar Gold, Bloodfire, Frost Crystal, Verdant Life, Neon Pulse, and Prismatic identities.',
+      'Each attunement recolors the complete artifact rather than one ring: heartbeat, particle orbits, rising motes, neural currents, organic membranes, cage geometry, readout, pedestal, telemetry, and awakening surge all inherit the chosen energy pair.',
+      'Protocol Linked preserves the existing state-aware behavior and is automatically assigned to every established campaign, so updating cannot unexpectedly alter the Hunter’s Core.',
+      'Prismatic is progression-reactive rather than a looping rainbow. Its primary and secondary energies blend across the spectrum according to real daily charge.',
+      'Core Attunement previews update immediately inside Settings and persist only when the Hunter saves, matching the established appearance workflow and remaining fully portable in campaign exports.',
+      'Attunements are presentation-only and never change Class, XP, synchronization, rewards, AI behavior, missions, or protected confirmation rules.',
+    ],
+  },
   {
     title: 'Version 10.1.0 · Living Spectrum',
     detail:
