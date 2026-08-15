@@ -5,10 +5,12 @@ const jsonHeaders = {
 };
 
 export const APP_PERMISSIONS_POLICY = 'camera=(), microphone=(self)';
+export const APP_LEGACY_FEATURE_POLICY = "camera 'none'; microphone 'self'";
 
 export function sealAppMediaPermissions(response) {
   const headers = new Headers(response.headers);
   headers.set('permissions-policy', APP_PERMISSIONS_POLICY);
+  headers.set('feature-policy', APP_LEGACY_FEATURE_POLICY);
   headers.set('x-content-type-options', 'nosniff');
   return new Response(response.body, {
     status: response.status,

@@ -16,6 +16,7 @@ const bodyDiagnostic = readFileSync(
 );
 const voiceLink = readFileSync(resolve(process.cwd(), 'src/hooks/useAiVoiceLink.ts'), 'utf8');
 const realtimeLink = readFileSync(resolve(process.cwd(), 'src/hooks/useAiRealtimeLink.ts'), 'utf8');
+const mediaSecurity = readFileSync(resolve(process.cwd(), 'src/utils/mediaSecurity.ts'), 'utf8');
 const worker = readFileSync(resolve(process.cwd(), 'worker/index.js'), 'utf8');
 
 describe('mobile keyboard viewport safety', () => {
@@ -58,12 +59,24 @@ describe('mobile keyboard viewport safety', () => {
 
   it('seals the hosted app against camera access while preserving deliberate audio links', () => {
     expect(worker).toContain("APP_PERMISSIONS_POLICY = 'camera=(), microphone=(self)'");
+    expect(worker).toContain(`APP_LEGACY_FEATURE_POLICY = "camera 'none'; microphone 'self'"`);
     expect(worker).toContain('sealAppMediaPermissions(response)');
-    expect(voiceLink).toContain('getUserMedia({ audio: true })');
+    expect(mediaSecurity).toContain("action: 'audio-requested' | 'audio-opened' | 'video-blocked'");
+    expect(mediaSecurity).toContain("video: false");
+    expect(mediaSecurity).toContain("'video-blocked'");
+    expect(voiceLink).toContain('getUserMedia({ audio: true, video: false })');
     expect(realtimeLink).toContain('audio: { echoCancellation: true');
-    expect(voiceLink).not.toMatch(/getUserMedia\s*\(\s*\{[^}]*video/s);
-    expect(realtimeLink).not.toMatch(/getUserMedia\s*\(\s*\{[^}]*video/s);
+    expect(realtimeLink).toContain('video: false');
+    expect(voiceLink).not.toMatch(/video\s*:\s*true/);
+    expect(realtimeLink).not.toMatch(/video\s*:\s*true/);
     expect(bodyDiagnostic).not.toMatch(/capture\s*=/i);
+  });
+
+  it('opens Quick Link without silently starting the microphone', () => {
+    expect(quickLink).toContain('async function openQuickLink()');
+    expect(quickLink).toContain('Quick Link ready. Tap the microphone when you want me to listen.');
+    expect(quickLink).toContain('onClick={openQuickLink}');
+    expect(quickLink).not.toContain('async function openAndListen()');
   });
 
   it('releases both voice pathways whenever iOS hides or exits the app', () => {

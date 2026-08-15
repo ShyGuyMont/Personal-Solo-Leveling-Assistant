@@ -1661,17 +1661,14 @@ export function CompanionQuickLink() {
     );
   }
 
-  async function openAndListen() {
-    if (voiceLink.recording) {
-      voiceLink.stopRecording();
-      return;
-    }
+  async function openQuickLink() {
+    if (voiceLink.recording) voiceLink.stopRecording();
     if (sending || voiceLink.transcribing) return;
     voiceLink.stopPlayback();
     realtimeLink.stop();
-    const listening = beginListening();
     setOpen(true);
     setLinkMode('command');
+    setNotice('Quick Link ready. Tap the microphone when you want me to listen.');
     const operations = await getDailyOperations(systemDate);
     const continuing = operations?.conversationId
       ? await getAiConversation(operations.conversationId)
@@ -1699,7 +1696,6 @@ export function CompanionQuickLink() {
     setPendingArcNote(undefined);
     restorePendingProposal(storedProposal);
     setContinuityTurns(continuing?.messages.length ?? 0);
-    await listening;
   }
 
   function close() {
@@ -1740,12 +1736,12 @@ export function CompanionQuickLink() {
     <>
       <button
         type="button"
-        className={`header-ai-link header-quick-link ${voiceLink.recording ? 'is-listening' : ''}`}
-        aria-label={voiceLink.recording ? 'Stop listening' : 'Open Companion Quick Link and listen'}
-        onClick={openAndListen}
+        className="header-ai-link header-quick-link"
+        aria-label="Open Companion Quick Link"
+        onClick={openQuickLink}
       >
-        {voiceLink.recording ? <Square size={13} /> : <Mic size={15} />}
-        <span>{voiceLink.recording ? 'LISTENING' : 'QUICK LINK'}</span>
+        <Mic size={15} />
+        <span>QUICK LINK</span>
         <i aria-hidden="true" />
       </button>
 

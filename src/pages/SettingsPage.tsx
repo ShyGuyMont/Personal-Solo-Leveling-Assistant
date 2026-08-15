@@ -35,6 +35,7 @@ import { missionAccountXp } from '@/game/rewards';
 import { formatClassName } from '@/utils/format';
 import { getDocumentTheme } from '@/utils/theme';
 import { getMissionDisplayName, sanitizeSensitiveDisplayText } from '@/utils/privacy';
+import { readMediaAudit } from '@/utils/mediaSecurity';
 import type {
   BackupSnapshot,
   CompanionId,
@@ -98,6 +99,17 @@ export function SettingsPage() {
 
   const unlockedTitleIds = useMemo(() => new Set(titles.map((title) => title.titleId)), [titles]);
   if (!profile || !draft) return null;
+
+  const mediaAudit = readMediaAudit();
+  const lastMediaAction = mediaAudit[mediaAudit.length - 1];
+  const mediaAuditLabel = lastMediaAction
+    ? {
+        'audio-requested': 'Microphone requested',
+        'audio-opened': 'Microphone opened',
+        'video-blocked': 'Camera request blocked',
+        'media-released': 'All app media released',
+      }[lastMediaAction.action]
+    : 'No media request this session';
 
   const patchSetting = <K extends keyof Settings>(key: K, value: Settings[K]) =>
     setDraft((current) => (current ? { ...current, [key]: value } : current));
@@ -665,6 +677,31 @@ export function SettingsPage() {
               </label>
             </div>
           )}
+        </section>
+
+        <section className="panel settings-section settings-section--wide">
+          <header>
+            <ShieldCheck size={21} />
+            <div>
+              <p className="eyebrow">MEDIA LOCK</p>
+              <h2>Camera sealed</h2>
+              <p>
+                The System does not need camera access. Photos remain normal library selections,
+                and voice starts only after a deliberate microphone press.
+              </p>
+            </div>
+          </header>
+          <div className="storage-summary">
+            <strong>Current session</strong>
+            <span>{mediaAuditLabel}</span>
+            {lastMediaAction && (
+              <small>{new Date(lastMediaAction.at).toLocaleString()}</small>
+            )}
+            <small>
+              This audit stores only the action and time on this device—never speech, images,
+              device names, or media content.
+            </small>
+          </div>
         </section>
 
         <section className="panel settings-section settings-section--wide">

@@ -281,6 +281,7 @@ export function useAiRealtimeLink(input: {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
           audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+          video: false,
         });
         if (
           document.visibilityState === 'hidden' ||

@@ -1,4 +1,4 @@
-export const APP_VERSION = '10.5.1';
+export const APP_VERSION = '10.5.2';
 export const DATABASE_SCHEMA_VERSION = 29;
 export const SAVE_FORMAT_VERSION = 29;
 
@@ -9,6 +9,19 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 10.5.2 · Media Lock',
+    detail:
+      'Voice access is now unmistakably deliberate and camera access is blocked inside the running client as well as at the server boundary, with a private on-device audit trail for every media transition.',
+    points: [
+      'Opening Quick Link no longer starts listening automatically; the microphone begins only after the Hunter presses the dedicated voice control inside the open panel.',
+      'A startup media guard intercepts every browser media request before it reaches iOS, rejects any request containing video, and forces every permitted voice stream to declare video false.',
+      'Every app-owned stream is tracked centrally and released when the page hides or exits, supplementing the existing Command Link and Live Link cleanup protections.',
+      'A minimal session-only audit records audio requested, audio opened, media released, or video blocked without storing speech, images, device identifiers, or media content.',
+      'Hosted responses now carry both the modern Permissions-Policy camera prohibition and the legacy Feature-Policy equivalent for older Safari implementations.',
+      'Regression coverage proves that a camera request never reaches the browser, Quick Link stays silent until deliberately activated, and photo-library evidence remains camera-free.',
+    ],
+  },
   {
     title: 'Version 10.5.1 · Camera Seal',
     detail:

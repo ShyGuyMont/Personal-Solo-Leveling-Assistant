@@ -9,7 +9,14 @@ import {
   markOfflineReady,
   markUpdateAvailable,
 } from '@/services/pwaUpdate';
+import { installSystemMediaGuard, releaseSystemMedia } from '@/utils/mediaSecurity';
 import '@/styles.css';
+
+installSystemMediaGuard();
+window.addEventListener('pagehide', () => releaseSystemMedia());
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') releaseSystemMedia();
+});
 
 const updateSW = registerSW({
   immediate: true,

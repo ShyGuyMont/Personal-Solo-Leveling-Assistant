@@ -486,7 +486,7 @@ export function useAiVoiceLink(input: {
     }
     try {
       discardRecordingRef.current = false;
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
       if (document.visibilityState === 'hidden' || discardRecordingRef.current) {
         stream.getTracks().forEach((track) => track.stop());
         discardRecordingRef.current = false;
