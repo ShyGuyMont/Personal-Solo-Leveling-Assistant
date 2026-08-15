@@ -28490,8 +28490,8 @@ html[data-motion='reduced'] .daily-operations__signal {
   }
 }
 
-/* Version 10.4.0 · Adaptive Pulse
-   Phones retain the living System while expensive background layers render on a smaller budget. */
+/* Version 10.5.3 · Energy Governor
+   Phones keep the living System where it matters and stop rendering invisible spectacle. */
 html[data-app-activity='suspended'] .app-shell,
 html[data-app-activity='suspended'] .app-shell *,
 html[data-app-activity='suspended'] .app-shell *::before,
@@ -28499,7 +28499,8 @@ html[data-app-activity='suspended'] .app-shell *::after {
   animation-play-state: paused !important;
 }
 
-html[data-performance='balanced'] :is(
+html[data-performance='balanced']
+  :is(
     .app-header,
     .system-hud,
     .bottom-nav,
@@ -28515,11 +28516,25 @@ html[data-performance='balanced'] .panel {
 }
 
 html[data-performance='balanced'] .ambient-orb {
-  filter: blur(58px);
+  display: none;
 }
 
-html[data-performance='balanced'] .ascension-atmosphere__plane--far {
+html[data-performance='balanced']
+  :is(
+    .ascension-atmosphere__plane--far,
+    .ascension-atmosphere__gate,
+    .ascension-atmosphere__signal,
+    .ascension-atmosphere__shard
+  ) {
   display: none;
+}
+
+/* Once the Core leaves the viewport, every nested timeline sleeps until it comes back. */
+.ascension-core.is-energy-suspended,
+.ascension-core.is-energy-suspended *,
+.ascension-core.is-energy-suspended *::before,
+.ascension-core.is-energy-suspended *::after {
+  animation-play-state: paused !important;
 }
 
 /* Parent orbits keep moving; the individual points no longer create dozens of extra timelines. */
@@ -28537,7 +28552,8 @@ html[data-performance='balanced'] .ascension-core__bio-aura span {
   animation: none;
 }
 
-html[data-performance='efficient'] :is(
+html[data-performance='efficient']
+  :is(
     .app-header,
     .system-hud,
     .bottom-nav,
@@ -28550,14 +28566,15 @@ html[data-performance='efficient'] :is(
 }
 
 html[data-performance='efficient'] .ambient-orb {
-  filter: blur(42px);
-  opacity: 0.032;
+  display: none;
 }
 
-html[data-performance='efficient'] :is(
+html[data-performance='efficient']
+  :is(
     .ascension-atmosphere__plane--far,
-    .ascension-atmosphere__shard--two,
-    .ascension-atmosphere__shard--three
+    .ascension-atmosphere__gate,
+    .ascension-atmosphere__signal,
+    .ascension-atmosphere__shard
   ) {
   display: none;
 }

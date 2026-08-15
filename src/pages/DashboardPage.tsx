@@ -12,7 +12,7 @@ import {
   TrendingUp,
   Zap,
 } from 'lucide-react';
-import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { ChallengeCard } from '@/components/ChallengeCard';
 import { ClassEmblem } from '@/components/ClassEmblem';
 import { CompanionRoster } from '@/components/CompanionRoster';
@@ -41,6 +41,8 @@ export function DashboardPage() {
   const [lastReview, setLastReview] = useState<DailyReview>();
   const [recentStats, setRecentStats] = useState<StatTransaction[]>([]);
   const [coreAwakened, setCoreAwakened] = useState(false);
+  const [coreVisible, setCoreVisible] = useState(true);
+  const coreRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     void getDashboardHistory().then(({ lastReview: review, recentStats: transactions }) => {
@@ -48,6 +50,18 @@ export function DashboardPage() {
       setRecentStats(transactions);
     });
   }, [todayRecords, progression?.totalXp]);
+
+  useEffect(() => {
+    const core = coreRef.current;
+    if (!core || typeof IntersectionObserver === 'undefined') return;
+
+    const observer = new IntersectionObserver(([entry]) => setCoreVisible(entry.isIntersecting), {
+      rootMargin: '120px 0px',
+      threshold: 0.01,
+    });
+    observer.observe(core);
+    return () => observer.disconnect();
+  }, []);
 
   const missionMap = useMemo(
     () => new Map(missions.map((mission) => [mission.id, mission])),
@@ -170,8 +184,9 @@ export function DashboardPage() {
           </div>
 
           <button
+            ref={coreRef}
             type="button"
-            className={`headquarters-stage__core ascension-core ascension-core--${coreProjection.state} ascension-core--vitality-${coreVitality.phase} ${coreAwakened ? 'is-awakened' : ''}`}
+            className={`headquarters-stage__core ascension-core ascension-core--${coreProjection.state} ascension-core--vitality-${coreVitality.phase} ${coreAwakened ? 'is-awakened' : ''} ${coreVisible ? '' : 'is-energy-suspended'}`}
             style={
               {
                 '--core-charge': `${coreProjection.dailyCharge * 3.6}deg`,
@@ -180,6 +195,7 @@ export function DashboardPage() {
               } as CSSProperties
             }
             data-core-attunement={settings.coreAttunement ?? 'protocol-linked'}
+            data-core-visibility={coreVisible ? 'visible' : 'suspended'}
             aria-expanded={coreAwakened}
             aria-controls="ascension-core-analysis"
             aria-label={`${coreAwakened ? 'Close' : 'Open'} Ascension Core analysis. ${coreProjection.headline}.`}

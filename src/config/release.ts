@@ -1,4 +1,4 @@
-export const APP_VERSION = '10.5.2';
+export const APP_VERSION = '10.5.3';
 export const DATABASE_SCHEMA_VERSION = 29;
 export const SAVE_FORMAT_VERSION = 29;
 
@@ -9,6 +9,18 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 10.5.3 · Energy Governor',
+    detail:
+      'The System now preserves its living Ascension Core while automatically removing continuous visual work that phones were rendering without the Hunter ever seeing it.',
+    points: [
+      'The Ascension Core retains its complete dual-energy animation, attunement colors, vitality phases, and awakening sequence whenever it is visible.',
+      'Scrolling the Core beyond the screen now suspends every nested Core timeline and restores them automatically when the artifact returns to view.',
+      'Phone profiles no longer run the full-screen canvas particle renderer, eliminating a permanent animation loop that continued across every section of the app.',
+      'Unnoticed ambient orbs, distant atmosphere geometry, drifting gates, signals, and shards are removed from ordinary phone profiles while the static realm identity remains intact.',
+      'Desktop cinematic mode, Clean Interface, Subtle intensity, Reduced Motion, AI, voice, navigation, progression, and saved campaign data remain unchanged.',
+    ],
+  },
   {
     title: 'Version 10.5.2 · Media Lock',
     detail:
@@ -53,11 +65,11 @@ export const RELEASE_SECTIONS: ReleaseSection[] = [
   {
     title: 'Version 10.4.3 · Chrono Lock',
     detail:
-      'Calendar intelligence now speaks from the Hunter\'s real local schedule instead of mistaking an internal UTC storage timestamp for the displayed appointment time.',
+      "Calendar intelligence now speaks from the Hunter's real local schedule instead of mistaking an internal UTC storage timestamp for the displayed appointment time.",
     points: [
       'Every shared calendar record now carries an explicit local date, start time, end time, and complete human-readable label in the saved System timezone.',
       'Kairo, Snow, and Calendar Council are forbidden from reading the clock digits inside raw ISO timestamps as local time; those values remain exact storage instants only.',
-      'Existing calendar records are not migrated or rewritten because their saved times were already correct—this patch fixes the council\'s interpretation and speech layer.',
+      "Existing calendar records are not migrated or rewritten because their saved times were already correct—this patch fixes the council's interpretation and speech layer.",
       'A regression case now proves that 1:00 PM UTC storage for a New York appointment is reported as 9:00 AM local during daylight time, including the correct ten-minute duration.',
     ],
   },

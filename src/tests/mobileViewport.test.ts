@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest';
 const styles = readFileSync(resolve(process.cwd(), 'src/styles.css'), 'utf8');
 const documentShell = readFileSync(resolve(process.cwd(), 'index.html'), 'utf8');
 const appShell = readFileSync(resolve(process.cwd(), 'src/components/AppShell.tsx'), 'utf8');
+const dashboard = readFileSync(resolve(process.cwd(), 'src/pages/DashboardPage.tsx'), 'utf8');
 const viteConfig = readFileSync(resolve(process.cwd(), 'vite.config.ts'), 'utf8');
 const quickLink = readFileSync(
   resolve(process.cwd(), 'src/components/CompanionQuickLink.tsx'),
@@ -62,7 +63,7 @@ describe('mobile keyboard viewport safety', () => {
     expect(worker).toContain(`APP_LEGACY_FEATURE_POLICY = "camera 'none'; microphone 'self'"`);
     expect(worker).toContain('sealAppMediaPermissions(response)');
     expect(mediaSecurity).toContain("action: 'audio-requested' | 'audio-opened' | 'video-blocked'");
-    expect(mediaSecurity).toContain("video: false");
+    expect(mediaSecurity).toContain('video: false');
     expect(mediaSecurity).toContain("'video-blocked'");
     expect(voiceLink).toContain('getUserMedia({ audio: true, video: false })');
     expect(realtimeLink).toContain('audio: { echoCancellation: true');
@@ -85,5 +86,18 @@ describe('mobile keyboard viewport safety', () => {
     expect(voiceLink).toContain("document.visibilityState === 'hidden'");
     expect(realtimeLink).toContain('installMediaReleaseGuard(stop)');
     expect(realtimeLink).toContain('startGeneration !== releaseGenerationRef.current');
+  });
+
+  it('stops continuous background rendering on phones while preserving the visible Core', () => {
+    expect(appShell).toContain("performanceProfile === 'full'");
+    expect(dashboard).toContain('new IntersectionObserver(');
+    expect(dashboard).toContain("'is-energy-suspended'");
+    expect(dashboard).toContain("data-core-visibility={coreVisible ? 'visible' : 'suspended'}");
+    expect(styles).toMatch(
+      /\.ascension-core\.is-energy-suspended[\s\S]*animation-play-state: paused !important;/,
+    );
+    expect(styles).toMatch(
+      /html\[data-performance='balanced'\][\s\S]*\.ambient-orb[\s\S]*display: none;/,
+    );
   });
 });
