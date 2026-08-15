@@ -1,3 +1,5 @@
+import { APP_VERSION } from '@/config/release';
+
 type UpdateHandler = (reloadPage?: boolean) => Promise<void>;
 type Listener = () => void;
 
@@ -6,6 +8,7 @@ let offlineReady = false;
 let checking = false;
 let lastCheckedAt: string | undefined;
 let checkMessage = '';
+let remoteVersion: string | undefined;
 let updateHandler: UpdateHandler | undefined;
 let serviceWorkerRegistration: ServiceWorkerRegistration | undefined;
 const listeners = new Set<Listener>();
@@ -20,6 +23,10 @@ export function configurePwaUpdate(handler: UpdateHandler) {
 
 export function configurePwaRegistration(registration: ServiceWorkerRegistration | undefined) {
   serviceWorkerRegistration = registration;
+  if (registration?.waiting && navigator.serviceWorker.controller) {
+    markUpdateAvailable();
+    return;
+  }
   emit();
 }
 
@@ -43,6 +50,7 @@ export function getPwaUpdateState() {
     checking,
     lastCheckedAt,
     checkMessage,
+    remoteVersion,
     serviceReady: Boolean(serviceWorkerRegistration),
   };
 }
@@ -74,9 +82,27 @@ export async function checkForPwaUpdate() {
   checkMessage = 'Checking the release channel…';
   emit();
   try {
+    try {
+      const releaseResponse = await fetch(`/api/system/version?check=${Date.now()}`, {
+        cache: 'no-store',
+        credentials: 'same-origin',
+        headers: { accept: 'application/json' },
+      });
+      if (releaseResponse.ok) {
+        const release = (await releaseResponse.json()) as { version?: unknown };
+        remoteVersion = typeof release.version === 'string' ? release.version : undefined;
+      }
+    } catch {
+      remoteVersion = undefined;
+    }
     await serviceWorkerRegistration.update();
     lastCheckedAt = new Date().toISOString();
-    if (!updateAvailable) checkMessage = 'The installed System release is current.';
+    if (!updateAvailable) {
+      checkMessage =
+        remoteVersion && remoteVersion !== APP_VERSION
+          ? `Version ${remoteVersion} is published and downloading. Check again in a moment.`
+          : 'The installed System release is current.';
+    }
     return updateAvailable;
   } catch {
     checkMessage = 'The release channel could not be reached. Your installed app is unaffected.';

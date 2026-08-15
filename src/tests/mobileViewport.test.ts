@@ -21,6 +21,8 @@ const realtimeLink = readFileSync(resolve(process.cwd(), 'src/hooks/useAiRealtim
 const mediaSecurity = readFileSync(resolve(process.cwd(), 'src/utils/mediaSecurity.ts'), 'utf8');
 const audio = readFileSync(resolve(process.cwd(), 'src/utils/audio.ts'), 'utf8');
 const worker = readFileSync(resolve(process.cwd(), 'worker/index.js'), 'utf8');
+const pwaUpdate = readFileSync(resolve(process.cwd(), 'src/services/pwaUpdate.ts'), 'utf8');
+const sitesBuild = readFileSync(resolve(process.cwd(), 'scripts/build-sites.mjs'), 'utf8');
 
 describe('mobile keyboard viewport safety', () => {
   it('keeps touch-device editors at the WebKit-safe 16px focus size', () => {
@@ -63,7 +65,7 @@ describe('mobile keyboard viewport safety', () => {
   it('seals the hosted app against camera access while preserving deliberate audio links', () => {
     expect(worker).toContain("APP_PERMISSIONS_POLICY = 'camera=(), microphone=(self)'");
     expect(worker).toContain(`APP_LEGACY_FEATURE_POLICY = "camera 'none'; microphone 'self'"`);
-    expect(worker).toContain('sealAppMediaPermissions(response)');
+    expect(worker).toContain("pathname === '/sw.js'");
     expect(mediaSecurity).toContain("action: 'audio-requested' | 'audio-opened' | 'video-blocked'");
     expect(mediaSecurity).toContain('video: false');
     expect(mediaSecurity).toContain("'video-blocked'");
@@ -73,6 +75,16 @@ describe('mobile keyboard viewport safety', () => {
     expect(voiceLink).not.toMatch(/video\s*:\s*true/);
     expect(realtimeLink).not.toMatch(/video\s*:\s*true/);
     expect(bodyDiagnostic).not.toMatch(/capture\s*=/i);
+  });
+
+  it('keeps private PWA releases discoverable instead of trapping an older offline shell', () => {
+    expect(worker).toContain("url.pathname === '/api/system/version'");
+    expect(worker).toContain("headers.set('cache-control', 'no-store, max-age=0')");
+    expect(worker).toContain("headers.set('service-worker-allowed', '/')");
+    expect(pwaUpdate).toContain("fetch(`/api/system/version?check=${Date.now()}`");
+    expect(pwaUpdate).toContain('registration?.waiting && navigator.serviceWorker.controller');
+    expect(sitesBuild).toContain("resolve(distributionDirectory, 'sw.js')");
+    expect(sitesBuild).toContain('production service-worker runtime is missing');
   });
 
   it('opens Quick Link without silently starting the microphone', () => {

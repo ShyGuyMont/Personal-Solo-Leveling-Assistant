@@ -6,12 +6,24 @@ const jsonHeaders = {
 
 export const APP_PERMISSIONS_POLICY = 'camera=(), microphone=(self)';
 export const APP_LEGACY_FEATURE_POLICY = "camera 'none'; microphone 'self'";
+export const APP_RELEASE_VERSION = '10.5.5';
 
-export function sealAppMediaPermissions(response) {
+export function sealAppMediaPermissions(response, requestUrl = '') {
   const headers = new Headers(response.headers);
+  const pathname = requestUrl ? new URL(requestUrl).pathname : '';
   headers.set('permissions-policy', APP_PERMISSIONS_POLICY);
   headers.set('feature-policy', APP_LEGACY_FEATURE_POLICY);
   headers.set('x-content-type-options', 'nosniff');
+  if (pathname === '/sw.js') {
+    headers.set('cache-control', 'no-store, max-age=0');
+    headers.set('service-worker-allowed', '/');
+  } else if (
+    pathname === '/' ||
+    pathname === '/index.html' ||
+    pathname === '/manifest.webmanifest'
+  ) {
+    headers.set('cache-control', 'no-cache, max-age=0, must-revalidate');
+  }
   return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,
@@ -4968,6 +4980,14 @@ export default {
       });
     }
 
+    if (url.pathname === '/api/system/version' && request.method === 'GET') {
+      return json({
+        ok: true,
+        version: APP_RELEASE_VERSION,
+        intelligenceVersion: COMPANION_INTELLIGENCE_VERSION,
+      });
+    }
+
     if (url.pathname === '/api/ai/status' && request.method === 'GET') {
       return json({
         ok: true,
@@ -5102,9 +5122,12 @@ export default {
       request.headers.get('accept')?.includes('text/html')
     ) {
       const fallbackUrl = new URL('/index.html', request.url);
-      return sealAppMediaPermissions(await env.ASSETS.fetch(new Request(fallbackUrl, request)));
+      return sealAppMediaPermissions(
+        await env.ASSETS.fetch(new Request(fallbackUrl, request)),
+        fallbackUrl,
+      );
     }
 
-    return sealAppMediaPermissions(response);
+    return sealAppMediaPermissions(response, request.url);
   },
 };

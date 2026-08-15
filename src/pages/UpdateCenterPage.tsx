@@ -162,6 +162,9 @@ export function UpdateCenterPage() {
                 : 'Checking contacts The System’s private Sites release channel. It does not upload your personal campaign data.'}
             </p>
             {pwa.lastCheckedAt && <small>Last checked {time(pwa.lastCheckedAt)}</small>}
+            {pwa.remoteVersion && pwa.remoteVersion !== APP_VERSION && (
+              <small>Published release: v{pwa.remoteVersion}</small>
+            )}
           </div>
         </div>
         <div className="update-status__actions">
