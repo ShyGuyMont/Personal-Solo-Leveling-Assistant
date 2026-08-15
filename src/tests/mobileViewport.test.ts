@@ -99,5 +99,11 @@ describe('mobile keyboard viewport safety', () => {
     expect(styles).toMatch(
       /html\[data-performance='balanced'\][\s\S]*\.ambient-orb[\s\S]*display: none;/,
     );
+    expect(styles).toContain(
+      "html[data-performance='balanced'] .ascension-core__plasma-arcs span:nth-child(even)",
+    );
+    expect(styles).toContain(
+      "html[data-performance='balanced'] .ascension-core__reactor-facets span:nth-child(even)",
+    );
   });
 });

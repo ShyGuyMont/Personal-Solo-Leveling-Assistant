@@ -18,6 +18,7 @@ export const RELEASE_SECTIONS: ReleaseSection[] = [
       'Scrolling the Core beyond the screen now suspends every nested Core timeline and restores them automatically when the artifact returns to view.',
       'Phone profiles no longer run the full-screen canvas particle renderer, eliminating a permanent animation loop that continued across every section of the app.',
       'Unnoticed ambient orbs, distant atmosphere geometry, drifting gates, signals, and shards are removed from ordinary phone profiles while the static realm identity remains intact.',
+      'Mobile Core density now favors its reactor, shells, wings, heartbeat, and awakening while trimming duplicate sparks, plasma arcs, armor facets, neural currents, and spine nodes that were visually overlapping one another.',
       'Desktop cinematic mode, Clean Interface, Subtle intensity, Reduced Motion, AI, voice, navigation, progression, and saved campaign data remain unchanged.',
     ],
   },

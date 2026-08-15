@@ -28543,7 +28543,11 @@ html[data-performance='balanced'] .ascension-core__particle-orbit i {
   opacity: 0.7;
 }
 
-html[data-performance='balanced'] .ascension-core__life-sparks i:nth-child(n + 13) {
+html[data-performance='balanced'] .ascension-core__life-sparks i:nth-child(n + 9),
+html[data-performance='balanced'] .ascension-core__plasma-arcs span:nth-child(even),
+html[data-performance='balanced'] .ascension-core__reactor-facets span:nth-child(even),
+html[data-performance='balanced'] .ascension-core__power-spine i:nth-child(even),
+html[data-performance='balanced'] .ascension-core__neural-web span:nth-child(n + 5) {
   display: none;
 }
 
@@ -28587,10 +28591,11 @@ html[data-performance='efficient'] .ascension-core__bio-aura span {
 html[data-performance='efficient'] .ascension-core__particle-orbit--three,
 html[data-performance='efficient'] .ascension-core__plasma-arcs span:nth-child(even),
 html[data-performance='efficient'] .ascension-core__reactor-facets span:nth-child(even),
-html[data-performance='efficient'] .ascension-core__power-spine i:nth-child(even) {
-  animation-play-state: paused;
+html[data-performance='efficient'] .ascension-core__power-spine i:nth-child(even),
+html[data-performance='efficient'] .ascension-core__neural-web span:nth-child(n + 4) {
+  display: none;
 }
 
-html[data-performance='efficient'] .ascension-core__life-sparks i:nth-child(n + 7) {
+html[data-performance='efficient'] .ascension-core__life-sparks i:nth-child(n + 5) {
   display: none;
 }
