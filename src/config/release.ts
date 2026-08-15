@@ -1,4 +1,4 @@
-export const APP_VERSION = '10.5.4';
+export const APP_VERSION = '10.5.5';
 export const DATABASE_SCHEMA_VERSION = 29;
 export const SAVE_FORMAT_VERSION = 29;
 
@@ -9,6 +9,19 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 10.5.5 · Family Bible',
+    detail:
+      'The complete twelve-companion cast now carries one permanent personality and relationship canon, selectively awakened for each scene without sending a wall of irrelevant character text.',
+    points: [
+      'Snow’s completed Family Bible replaces Soulprint Studio as the sole personality authority across Headquarters, Quick Link, Live Link, specialist rooms, pivots, councils, and Party Commons.',
+      'Every companion now has a permanent role, domain map, archetype, operating logic, behavioral boundaries, and runtime directive instead of depending on editable device notes.',
+      'Shared scenes load only the addressed, invited, recent, and domain-relevant expanded Soulprints—up to four—while the rest of the party remains available through a compact specialist roster.',
+      'Relationship chemistry is loaded only when both companions are involved, allowing Snow and Quill’s spoiler war, Snow and Saffron’s seniority friction, Vesper and Cipher’s creator-engineer dynamic, and the rest of the family bonds to appear naturally without token soup.',
+      'The former Soulprint editor and its unused styling are removed, while old saved notes remain harmlessly preserved for backup compatibility and are no longer sent to the intelligence service.',
+      'The proven phone voice playback engine and every saved OpenAI or Cartesia casting remain unchanged.',
+    ],
+  },
   {
     title: 'Version 10.5.4 · Deep Sleep',
     detail:

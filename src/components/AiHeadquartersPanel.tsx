@@ -25,7 +25,6 @@ import {
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { AiVoiceLinkPanel } from '@/components/AiVoiceLinkPanel';
-import { AiSoulprintStudio } from '@/components/AiSoulprintStudio';
 import { COMPANIONS, getCompanion, getCompanionImage } from '@/config/companions';
 import { db } from '@/db/database';
 import {
@@ -1131,10 +1130,11 @@ export function AiHeadquartersPanel() {
               <strong>Online mode is opt-in.</strong>
               <small>
                 When you press Send, only your first name, message, up to 16 recent chat messages, a
-                compact Class roadmap, recent progress counters, mission and stat signals, and the
-                Director's Notes for the companions you called go to OpenAI. Journals, Kitchen
-                notes, itemized Treasury records, and your save file stay local. Bond Memory and
-                Cassian Ledger Counsel remain off until you enable them separately.
+                compact Class roadmap, recent progress counters, and relevant mission and stat
+                signals go to OpenAI. The secure Family Bible supplies only the active companions'
+                personalities and relationships. Journals, Kitchen notes, itemized Treasury records,
+                and your save file stay local. Bond Memory and Cassian Ledger Counsel remain off
+                until you enable them separately.
               </small>
             </span>
           </div>
@@ -1266,8 +1266,6 @@ export function AiHeadquartersPanel() {
           </button>
         </section>
       )}
-
-      <AiSoulprintStudio settings={currentSettings} refresh={refresh} onNotice={setNotice} />
 
       {onlineMode && (
         <AiVoiceLinkPanel

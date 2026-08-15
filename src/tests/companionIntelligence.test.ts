@@ -19,6 +19,11 @@ interface CompanionIntelligenceModule {
   YOUTUBE_READONLY_SCOPES: string[];
   companionIds: string[];
   companionProfiles: Record<string, Soulprint>;
+  familyBible: {
+    rules: Record<string, unknown>;
+    companions: Record<string, Record<string, unknown>>;
+    relationships: Array<{ ids: string[]; dynamic: string }>;
+  };
   aiVoiceNames: string[];
   aiVoiceAccents: Record<string, string>;
   getRealtimeVoice: (voice: string) => string;
@@ -28,10 +33,12 @@ interface CompanionIntelligenceModule {
   ) => string;
   baseInstructions: string;
   formatCompanionProfiles: () => string;
-  formatDirectorSceneDirection: (
-    notes?: Array<Record<string, unknown>>,
-    activeIds?: string[],
-  ) => string;
+  formatFamilyBibleContext: (activeIds?: string[]) => string;
+  selectFamilyContextIds: (
+    audience: string,
+    availableIds?: string[],
+    room?: Record<string, unknown>,
+  ) => string[];
   buildAudienceInstruction: (
     audience: string,
     enabledIds?: string[],
@@ -44,7 +51,7 @@ interface CompanionIntelligenceModule {
     commandMode?: 'none' | 'propose',
     workload?: string,
     room?: Record<string, unknown>,
-    directorNotes?: Array<Record<string, unknown>>,
+    legacyDirectorNotes?: Array<Record<string, unknown>>,
   ) => string;
   selectIntelligenceRoute: (
     payload: {
@@ -164,7 +171,8 @@ describe('Companion Soulprint intelligence', () => {
     expect(intelligence.formatCompanionProfiles()).toContain('Relational signature:');
     expect(intelligence.baseInstructions).toContain('Approved Bond Memory');
     expect(intelligence.baseInstructions).toContain('memoryCandidates');
-    expect(intelligence.baseInstructions).toContain('Soulprint Studio Direction');
+    expect(intelligence.baseInstructions).toContain('hard-coded Family Bible');
+    expect(intelligence.baseInstructions).toContain('sole personality and relationship authority');
     expect(intelligence.baseInstructions).toContain('classification roadmap');
     expect(intelligence.baseInstructions).toContain('Selah may recommend Bible passages');
     expect(intelligence.baseInstructions).toContain('Cassian may analyze only');
@@ -233,46 +241,29 @@ describe('Companion Soulprint intelligence', () => {
     expect(instructions).not.toContain('cipher, haven');
   });
 
-  it('promotes active Soulprint relationships into shared-room scene direction', () => {
+  it('loads only active Family Bible relationships into a shared scene', () => {
     const instructions = intelligence.buildSystemInstructions(
       'party',
       ['snow', 'saffron', 'quill'],
       'none',
       'party-council',
-      { kind: 'commons', enabledIds: ['snow', 'saffron', 'quill', 'rook'] },
-      [
-        {
-          companionId: 'snow',
-          bonds: 'Uses her System administrator title to pry spoilers out of Quill.',
-          conflict: 'Saffron sometimes ignores her seniority and tests her patience.',
-        },
-        {
-          companionId: 'quill',
-          bonds: 'Hates giving Snow spoilers and protests before surrendering a safe hint.',
-        },
-        {
-          companionId: 'saffron',
-          conflict: 'Pushes Snow by treating seniority as optional when food is involved.',
-        },
-        {
-          companionId: 'rook',
-          bonds: 'This absent note must not enter the room.',
-        },
-      ],
+      {
+        kind: 'commons',
+        enabledIds: ['snow', 'saffron', 'quill', 'rook'],
+        leadCompanionId: 'snow',
+        partyEvent: { kind: 'join', companionIds: ['saffron', 'quill'] },
+        message: 'Snow, Quill and Saffron, talk this through together.',
+      },
     );
 
-    expect(instructions).toContain('Soulprint Studio Direction');
-    expect(instructions).toContain('active performance cues, not biography');
-    expect(instructions).toContain('must visibly embody at least one relevant authored cue');
-    expect(instructions).toContain('never field is a hard performance prohibition');
-    expect(instructions).toContain('System administrator title');
-    expect(instructions).toContain('Hates giving Snow spoilers');
-    expect(instructions).toContain('Pushes Snow');
-    expect(instructions).toContain('override built-in rhythm, relationship, and Party chemistry defaults');
-    expect(instructions.indexOf('Focused workroom:')).toBeLessThan(
-      instructions.indexOf('FINAL PERFORMANCE LOCK'),
-    );
-    expect(instructions).not.toContain('This absent note must not enter the room');
+    expect(instructions).toContain('THE SYSTEM FAMILY BIBLE');
+    expect(instructions).toContain('Only relationships active in this scene');
+    expect(instructions).toContain('[snow ↔ quill]');
+    expect(instructions).toContain('unofficial administrator seniority');
+    expect(instructions).toContain('[snow ↔ saffron]');
+    expect(instructions).toContain('seniority as no protection');
+    expect(instructions).not.toContain('[rook] Rook — The Vanguard');
+    expect(instructions).not.toContain('[rook ↔');
   });
 
   it('keeps Quill as the sole archive authority while Snow plays the spoiler-hungry fan', () => {
@@ -281,72 +272,92 @@ describe('Companion Soulprint intelligence', () => {
       ['snow', 'quill'],
       'none',
       'arc-forge',
-      { kind: 'spoiler-room', enabledIds: ['snow', 'quill'] },
-      [
-        {
-          companionId: 'snow',
-          bonds: 'Abuses her unofficial System-admin seniority to pressure Quill for spoilers.',
-        },
-        {
-          companionId: 'quill',
-          bonds: 'Protests before surrendering one spoiler-safe hint to Snow.',
-        },
-      ],
+      {
+        kind: 'spoiler-room',
+        enabledIds: ['snow', 'quill'],
+        leadCompanionId: 'quill',
+        message: 'Review this A.R.C. reveal while Snow tries to get spoilers.',
+      },
     );
 
     expect(instructions).toContain('Quill is the only canon authority');
     expect(instructions).toContain('Snow begins with no private archive knowledge');
     expect(instructions).toContain('never displays independent knowledge of raw dossiers');
     expect(instructions).toContain("Quill's grounding reply first");
-    expect(instructions).toContain('unofficial System-admin seniority');
-    expect(instructions).toContain('Protests before surrendering one spoiler-safe hint');
+    expect(instructions).toContain('unofficial administrator seniority');
+    expect(instructions).toContain('Quill protests theatrically');
   });
 
-  it('keeps absent companions from speaking through one-on-one Soulprint notes', () => {
+  it('keeps absent relationship entries out of one-on-one Family Bible context', () => {
     const instructions = intelligence.buildSystemInstructions(
       'quill',
       ['quill'],
       'none',
       'conversation',
       {},
-      [
-        {
-          companionId: 'quill',
-          bonds: 'He resists Snow when she asks for spoilers.',
-        },
-        {
-          companionId: 'snow',
-          bonds: 'This Snow-only direction is outside the room.',
-        },
-      ],
     );
 
-    expect(instructions).toContain('He resists Snow when she asks for spoilers.');
-    expect(instructions).toContain('Never make an absent companion speak');
-    expect(instructions).not.toContain('This Snow-only direction is outside the room.');
+    expect(instructions).toContain('[quill] Quill — The Storyspark');
+    expect(instructions).not.toContain('[snow] Snow — The Constant');
+    expect(instructions).not.toContain('[snow ↔ quill]');
   });
 
-  it('honors Soulprint Studio direction for all twelve companions', () => {
-    const notes = intelligence.companionIds.map((companionId, index) => ({
-      companionId,
-      casual: `Unique Studio cadence ${index + 1}`,
-      bonds: `Unique relationship direction ${index + 1}`,
-    }));
-    const direction = intelligence.formatDirectorSceneDirection(
-      notes,
-      intelligence.companionIds,
-    );
-
+  it('hard-codes one complete Family Bible entry for all twelve companions', () => {
     expect(intelligence.companionIds).toHaveLength(12);
-    for (let index = 0; index < intelligence.companionIds.length; index += 1) {
-      expect(direction).toContain(`[${intelligence.companionIds[index]}]`);
-      expect(direction).toContain(`Unique Studio cadence ${index + 1}`);
-      expect(direction).toContain(`Unique relationship direction ${index + 1}`);
+    expect(Object.keys(intelligence.familyBible.companions).sort()).toEqual(
+      [...intelligence.companionIds].sort(),
+    );
+    for (const companionId of intelligence.companionIds) {
+      const entry = intelligence.familyBible.companions[companionId];
+      expect(String(entry.systemRole).length).toBeGreaterThan(10);
+      expect(String(entry.archetype).length).toBeGreaterThan(35);
+      expect(Array.isArray(entry.logic)).toBe(true);
+      const behavior = entry.behavior as Record<string, string>;
+      expect(Object.keys(behavior).sort()).toEqual([
+        'care',
+        'disagreement',
+        'humor',
+        'never',
+        'offDuty',
+        'push',
+      ]);
+      for (const direction of Object.values(behavior)) {
+        expect(direction.length).toBeGreaterThan(60);
+      }
+      expect(String(entry.runtimeDirective).length).toBeGreaterThan(50);
     }
-    expect(direction).toContain('built-in descriptions only fill gaps');
+    expect(intelligence.familyBible.relationships.length).toBeGreaterThanOrEqual(24);
   });
 
-  it('keeps every companion\'s authored performance lock active inside their specialist route', () => {
+  it('keeps a full-party room deep without injecting all twelve expanded minds', () => {
+    const selected = intelligence.selectFamilyContextIds('party', intelligence.companionIds, {
+      kind: 'party-council',
+      leadCompanionId: 'haven',
+      message: 'Vesper and Cipher, help me plan my next YouTube video.',
+      recentCompanionIds: ['quill'],
+    });
+    expect(selected).toEqual(['haven', 'cipher', 'quill']);
+
+    const instructions = intelligence.buildSystemInstructions(
+      'party',
+      intelligence.companionIds,
+      'none',
+      'party-council',
+      {
+        kind: 'party-council',
+        leadCompanionId: 'haven',
+        message: 'Vesper and Cipher, help me plan my next YouTube video.',
+        recentCompanionIds: ['quill'],
+        enabledIds: intelligence.companionIds,
+      },
+    );
+    expect(instructions.match(/System role:/g)).toHaveLength(3);
+    expect(instructions).toContain('[haven ↔ cipher]');
+    expect(instructions).not.toContain('[snow ↔ quill]');
+    expect(instructions).toContain('Compact available roster');
+  });
+
+  it("loads every companion's expanded Family Bible mind inside their specialist route", () => {
     const workloads: Record<string, string> = {
       snow: 'system-plan',
       rook: 'system-command',
@@ -361,12 +372,6 @@ describe('Companion Soulprint intelligence', () => {
       quill: 'arc-forge',
       kairo: 'calendar-counsel',
     };
-    const notes = intelligence.companionIds.map((companionId) => ({
-      companionId,
-      casual: `AUTHORED-${companionId}-CASUAL`,
-      never: `AUTHORED-${companionId}-NEVER`,
-    }));
-
     for (const companionId of intelligence.companionIds) {
       const instructions = intelligence.buildSystemInstructions(
         companionId,
@@ -374,15 +379,17 @@ describe('Companion Soulprint intelligence', () => {
         'propose',
         workloads[companionId],
         {},
-        notes,
       );
-      expect(instructions).toContain(`AUTHORED-${companionId}-CASUAL`);
-      expect(instructions).toContain(`AUTHORED-${companionId}-NEVER`);
-      expect(instructions.indexOf('FINAL PERFORMANCE LOCK')).toBeGreaterThan(
-        instructions.indexOf('Focused workroom:'),
+      expect(instructions).toContain(
+        `[${companionId}] ${intelligence.companionProfiles[companionId].name}`,
+      );
+      expect(instructions).toContain(
+        String(intelligence.familyBible.companions[companionId].runtimeDirective),
       );
       for (const otherId of intelligence.companionIds.filter((id) => id !== companionId)) {
-        expect(instructions).not.toContain(`AUTHORED-${otherId}-CASUAL`);
+        expect(instructions).not.toContain(
+          `[${otherId}] ${intelligence.companionProfiles[otherId].name} —`,
+        );
       }
     }
   });
@@ -609,8 +616,10 @@ describe('Companion Soulprint intelligence', () => {
     expect(instructions).toContain('XP-backed Companion Order');
     expect(instructions).toContain('no-duplicate-reward rule');
     expect(instructions).toContain('15–29 minutes minor');
-    expect(instructions).toContain("localLabel and local date/time fields are authoritative");
-    expect(instructions).toContain('raw ISO timestamps are exact storage instants, not local clock labels');
+    expect(instructions).toContain('localLabel and local date/time fields are authoritative');
+    expect(instructions).toContain(
+      'raw ISO timestamps are exact storage instants, not local clock labels',
+    );
     expect(
       intelligence.selectIntelligenceRoute({
         audience: 'saffron',
@@ -1008,12 +1017,11 @@ describe('Companion Soulprint intelligence', () => {
     expect(String(session.instructions)).toContain('not a voice interface reading a report');
     expect(String(session.instructions)).toContain('timezone as silent local context');
     expect(String(session.instructions)).toContain('naturally suggest the right specialist');
-    expect(String(session.instructions)).toContain('FINAL LIVE PERFORMANCE LOCK');
-    expect(String(session.instructions)).toContain('charismatic streamer friend');
-    expect(String(session.instructions)).toContain('Never become stiff or corporate');
-    expect(String(session.instructions).lastIndexOf('FINAL LIVE PERFORMANCE LOCK')).toBeGreaterThan(
-      String(session.instructions).lastIndexOf('CURRENT SYSTEM CONTEXT'),
-    );
+    expect(String(session.instructions)).toContain('THE SYSTEM FAMILY BIBLE');
+    expect(String(session.instructions)).toContain('[haven] Vesper — The Spotlight');
+    expect(String(session.instructions)).toContain("Act as JDreamz's passionate channel manager");
+    expect(String(session.instructions)).not.toContain('Talk like a charismatic streamer friend');
+    expect(String(session.instructions)).not.toContain('Never become stiff or corporate');
     expect(JSON.stringify(session)).not.toContain('test-key');
   });
 
@@ -1272,12 +1280,14 @@ describe('Companion Soulprint intelligence', () => {
     );
     const input = openAiBody?.input as Array<{ role: string; content: string }>;
     expect(input[0].role).toBe('system');
-    expect(input[0].content).toContain('Companion soulprints:');
+    expect(input[0].content).toContain('THE SYSTEM FAMILY BIBLE');
     expect(input[0].content).toContain("follow only Rook's soulprint");
     expect(input[0].content).toContain('[rook] Rook — The Vanguard');
     expect(input[0].content).not.toContain('[snow] Snow — The Constant');
-    expect(input[0].content).toContain('Hunter-authored Rook cadence');
-    expect(input[0].content).not.toContain('This Snow direction must remain outside Rook solo chat');
+    expect(input[0].content).not.toContain('Hunter-authored Rook cadence');
+    expect(input[0].content).not.toContain(
+      'This Snow direction must remain outside Rook solo chat',
+    );
     expect(input[1].content).toContain('What is 5 + 5?');
     expect(input[1].content).not.toContain('Hunter-authored Rook cadence');
     expect(input[1].content).not.toContain('directorNotes');

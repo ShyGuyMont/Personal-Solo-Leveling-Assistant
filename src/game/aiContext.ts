@@ -92,10 +92,6 @@ function sumBy<T>(items: T[], value: (item: T) => number) {
   return items.reduce((total, item) => total + value(item), 0);
 }
 
-function directorNote(value: string | undefined) {
-  return (value ?? '').trim().slice(0, 420);
-}
-
 function normalizeContextReference(value: string) {
   return value
     .normalize('NFKD')
@@ -533,25 +529,6 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
     party: {
       enabledCompanionIds: source.enabledCompanionIds,
       participantIds: source.participantIds,
-      directorNotes: Object.entries(source.settings.aiSoulprintNotes)
-        .filter(([companionId]) =>
-          source.audience === 'party'
-            ? (source.participantIds?.length
-                ? source.participantIds
-                : source.enabledCompanionIds
-              ).includes(companionId as (typeof source.enabledCompanionIds)[number])
-            : companionId === source.audience,
-        )
-        .map(([companionId, notes]) => ({
-          companionId: companionId as CompanionId,
-          humor: directorNote(notes?.humor),
-          challenge: directorNote(notes?.challenge),
-          care: directorNote(notes?.care),
-          casual: directorNote(notes?.casual),
-          conflict: directorNote(notes?.conflict),
-          bonds: directorNote(notes?.bonds),
-          never: directorNote(notes?.never),
-        })),
     },
     state: {
       recoveryActive: source.settings.recoveryMode.active,
@@ -640,12 +617,7 @@ export async function buildAiProgressContext(source: AiContextSource): Promise<A
         category: event.category,
         startAt: event.startAt,
         endAt: event.endAt,
-        ...calendarLocalContext(
-          event.startAt,
-          event.endAt,
-          source.settings.timeZone,
-          event.allDay,
-        ),
+        ...calendarLocalContext(event.startAt, event.endAt, source.settings.timeZone, event.allDay),
         allDay: event.allDay,
         recurrence: event.recurring,
         location: event.location.slice(0, 240),

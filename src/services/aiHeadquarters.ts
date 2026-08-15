@@ -124,16 +124,6 @@ export interface AiProgressContext {
   party: {
     enabledCompanionIds: CompanionId[];
     participantIds?: CompanionId[];
-    directorNotes: Array<{
-      companionId: CompanionId;
-      humor: string;
-      challenge: string;
-      care: string;
-      casual: string;
-      conflict: string;
-      bonds: string;
-      never: string;
-    }>;
   };
   state: {
     recoveryActive: boolean;

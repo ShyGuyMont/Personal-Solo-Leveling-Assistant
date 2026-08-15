@@ -4,7 +4,6 @@ import { createDefaultProgression, createDefaultSettings } from '@/db/seed';
 import { buildAiProgressContext } from '@/game/aiContext';
 import { saveCreatorProject } from '@/game/creatorForge';
 import { ALL_STATS, createInitialStat } from '@/game/stats';
-import { COMPANIONS } from '@/config/companions';
 import { saveArcCanonSource } from '@/game/arcArchives';
 
 describe('Awakened Intelligence progress context', () => {
@@ -35,7 +34,7 @@ describe('Awakened Intelligence progress context', () => {
     ]);
   });
 
-  it('supplies Class gates, a World Class forecast, and only relevant Director Notes', async () => {
+  it('supplies Class gates and a World Class forecast without transmitting legacy Director Notes', async () => {
     const settings = createDefaultSettings();
     settings.timeZone = 'America/New_York';
     settings.aiSoulprintNotes = {
@@ -98,13 +97,11 @@ describe('Awakened Intelligence progress context', () => {
       clearedDayStreak: expect.stringContaining('every active core directive'),
       perfectDay: expect.stringContaining('without using a protected exception'),
     });
-    expect(context.party.directorNotes).toEqual([
-      expect.objectContaining({
-        companionId: 'snow',
-        humor: 'Use dry sisterly teasing.',
-        never: 'Never sound corporate.',
-      }),
-    ]);
+    expect(context.party).toEqual({
+      enabledCompanionIds: settings.enabledCompanionIds,
+      participantIds: undefined,
+    });
+    expect(JSON.stringify(context.party)).not.toContain('Use dry sisterly teasing.');
   });
 
   it('loads Snow calendar records only when the conversation actually needs the schedule', async () => {
@@ -226,22 +223,19 @@ describe('Awakened Intelligence progress context', () => {
     });
   });
 
-  it('delivers all twelve saved Director Notes to a full-party room without cross-room leakage', async () => {
+  it('keeps legacy Director Notes on-device for full-party and focused shared rooms', async () => {
     const settings = createDefaultSettings();
-    settings.aiSoulprintNotes = Object.fromEntries(
-      COMPANIONS.map((companion) => [
-        companion.id,
-        {
-          humor: `${companion.name} humor direction`,
-          challenge: `${companion.name} challenge direction`,
-          care: `${companion.name} care direction`,
-          casual: `${companion.name} casual direction`,
-          conflict: `${companion.name} conflict direction`,
-          bonds: `${companion.name} bond direction`,
-          never: `${companion.name} boundary direction`,
-        },
-      ]),
-    );
+    settings.aiSoulprintNotes = {
+      snow: {
+        humor: 'Legacy Snow note must remain local.',
+        challenge: '',
+        care: '',
+        casual: '',
+        conflict: '',
+        bonds: '',
+        never: '',
+      },
+    };
     const base = {
       profile: {
         id: 'primary' as const,
@@ -268,24 +262,24 @@ describe('Awakened Intelligence progress context', () => {
       audience: 'party',
       participantIds: settings.enabledCompanionIds,
     });
-    expect(party.party.directorNotes).toHaveLength(12);
-    expect(party.party.directorNotes.map((note) => note.companionId)).toEqual(
-      settings.enabledCompanionIds,
-    );
+    expect(party.party).toEqual({
+      enabledCompanionIds: settings.enabledCompanionIds,
+      participantIds: settings.enabledCompanionIds,
+    });
 
     const commons = await buildAiProgressContext({
       ...base,
       audience: 'party',
       participantIds: ['cassian', 'kairo', 'snow'],
     });
-    expect(commons.party.directorNotes.map((note) => note.companionId).sort()).toEqual([
-      'cassian',
-      'kairo',
-      'snow',
-    ]);
+    expect(commons.party).toEqual({
+      enabledCompanionIds: settings.enabledCompanionIds,
+      participantIds: ['cassian', 'kairo', 'snow'],
+    });
+    expect(JSON.stringify({ party, commons })).not.toContain('Legacy Snow note must remain local.');
   });
 
-  it('keeps Snow outside Quill\'s private archive knowledge while grounding a visible spoiler room', async () => {
+  it("keeps Snow outside Quill's private archive knowledge while grounding a visible spoiler room", async () => {
     await saveArcCanonSource({
       title: 'Akoura Incident Truth',
       kind: 'world-lore',
