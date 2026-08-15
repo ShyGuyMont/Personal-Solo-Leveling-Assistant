@@ -30,6 +30,7 @@ import type {
   Settings,
 } from '@/types/game';
 import { AppAudioPlayer, decodeAudioBlob, playSpeakerTest, primeAudioOutput } from '@/utils/audio';
+import { installMediaReleaseGuard } from '@/utils/mediaLifecycle';
 
 type NoticeHandler = (message: string) => void;
 const APP_AI_SESSION_ID = crypto.randomUUID();
@@ -80,6 +81,7 @@ export function useAiVoiceLink(input: {
   const playbackGenerationRef = useRef(0);
   const audioCacheRef = useRef(new Map<string, AudioBuffer>());
   const fallbackNoticeShownRef = useRef(false);
+  const discardRecordingRef = useRef(false);
 
   const refreshUsage = useCallback(async () => {
     setUsage(await getAiUsageSummary(sessionIdRef.current));
@@ -108,8 +110,10 @@ export function useAiVoiceLink(input: {
     setRoundtableActive(false);
   }, []);
 
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    const audioCache = audioCacheRef.current;
+    const releaseMedia = () => {
+      discardRecordingRef.current = true;
       if (recorderRef.current && recorderRef.current.state !== 'inactive') {
         recorderRef.current.stop();
       }
@@ -117,10 +121,17 @@ export function useAiVoiceLink(input: {
       if (recordingTimerRef.current) window.clearInterval(recordingTimerRef.current);
       if (recordingLimitRef.current) window.clearTimeout(recordingLimitRef.current);
       audioRef.current?.stop();
-      audioCacheRef.current.clear();
-    },
-    [],
-  );
+      playbackResolverRef.current?.();
+      playbackResolverRef.current = undefined;
+    };
+    const removeReleaseGuard = installMediaReleaseGuard(releaseMedia);
+
+    return () => {
+      removeReleaseGuard();
+      releaseMedia();
+      audioCache.clear();
+    };
+  }, []);
 
   const updateVoiceSettings = useCallback(
     async (changes: Partial<Settings>) => {
@@ -474,7 +485,13 @@ export function useAiVoiceLink(input: {
       return;
     }
     try {
+      discardRecordingRef.current = false;
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      if (document.visibilityState === 'hidden' || discardRecordingRef.current) {
+        stream.getTracks().forEach((track) => track.stop());
+        discardRecordingRef.current = false;
+        return;
+      }
       const mimeType = chooseRecorderType();
       const recorder = mimeType
         ? new MediaRecorder(stream, { mimeType })
@@ -491,13 +508,21 @@ export function useAiVoiceLink(input: {
         if (recordingTimerRef.current) window.clearInterval(recordingTimerRef.current);
         if (recordingLimitRef.current) window.clearTimeout(recordingLimitRef.current);
         stream.getTracks().forEach((track) => track.stop());
+        recorderRef.current = undefined;
+        streamRef.current = undefined;
+        recordingTimerRef.current = undefined;
+        recordingLimitRef.current = undefined;
         setRecording(false);
+        setRecordingSeconds(0);
+        const discardRecording = discardRecordingRef.current;
+        discardRecordingRef.current = false;
         const seconds = Math.min(
           60,
           Math.max(0.2, (Date.now() - recordingStartedAtRef.current) / 1_000),
         );
         const blob = new Blob(chunksRef.current, { type: recorder.mimeType || 'audio/webm' });
         chunksRef.current = [];
+        if (discardRecording) return;
         if (!blob.size) {
           input.onNotice('No microphone audio was captured.');
           return;

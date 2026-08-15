@@ -4,6 +4,19 @@ const jsonHeaders = {
   'x-content-type-options': 'nosniff',
 };
 
+export const APP_PERMISSIONS_POLICY = 'camera=(), microphone=(self)';
+
+export function sealAppMediaPermissions(response) {
+  const headers = new Headers(response.headers);
+  headers.set('permissions-policy', APP_PERMISSIONS_POLICY);
+  headers.set('x-content-type-options', 'nosniff');
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
+
 export const YOUTUBE_READONLY_SCOPES = [
   'https://www.googleapis.com/auth/youtube.readonly',
   'https://www.googleapis.com/auth/yt-analytics.readonly',
@@ -4538,9 +4551,9 @@ export default {
       request.headers.get('accept')?.includes('text/html')
     ) {
       const fallbackUrl = new URL('/index.html', request.url);
-      return env.ASSETS.fetch(new Request(fallbackUrl, request));
+      return sealAppMediaPermissions(await env.ASSETS.fetch(new Request(fallbackUrl, request)));
     }
 
-    return response;
+    return sealAppMediaPermissions(response);
   },
 };

@@ -6,6 +6,7 @@ import {
 } from '@/game/aiVoice';
 import type { AiProgressContext } from '@/services/aiHeadquarters';
 import type { AiVoiceProfile, CompanionId } from '@/types/game';
+import { installMediaReleaseGuard } from '@/utils/mediaLifecycle';
 
 export type AiRealtimeState =
   'idle' | 'connecting' | 'listening' | 'thinking' | 'speaking' | 'error';
@@ -72,8 +73,10 @@ export function useAiRealtimeLink(input: {
   const lastSpeechSecondsRef = useRef(0);
   const transcriptByItemRef = useRef(new Map<string, string>());
   const deliveredTranscriptIdsRef = useRef(new Set<string>());
+  const releaseGenerationRef = useRef(0);
 
   const stop = useCallback(() => {
+    releaseGenerationRef.current += 1;
     activeRef.current = false;
     if (timerRef.current) window.clearInterval(timerRef.current);
     if (warmupTimerRef.current) window.clearTimeout(warmupTimerRef.current);
@@ -99,7 +102,13 @@ export function useAiRealtimeLink(input: {
     setState('idle');
   }, []);
 
-  useEffect(() => stop, [stop]);
+  useEffect(() => {
+    const removeReleaseGuard = installMediaReleaseGuard(stop);
+    return () => {
+      removeReleaseGuard();
+      stop();
+    };
+  }, [stop]);
 
   const trackRealtimeUsage = useCallback(async (usage: RealtimeUsage, currentModel: string) => {
     const inputTokens = numberValue(usage.input_tokens);
@@ -261,6 +270,7 @@ export function useAiRealtimeLink(input: {
         return false;
       }
       stop();
+      const startGeneration = releaseGenerationRef.current;
       setState('connecting');
       setElapsedSeconds(0);
       setModel(undefined);
@@ -272,6 +282,14 @@ export function useAiRealtimeLink(input: {
         const stream = await navigator.mediaDevices.getUserMedia({
           audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
         });
+        if (
+          document.visibilityState === 'hidden' ||
+          startGeneration !== releaseGenerationRef.current
+        ) {
+          stream.getTracks().forEach((track) => track.stop());
+          setState('idle');
+          return false;
+        }
         stream.getAudioTracks().forEach((track) => {
           track.enabled = false;
         });

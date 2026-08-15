@@ -1,4 +1,4 @@
-export const APP_VERSION = '10.5.0';
+export const APP_VERSION = '10.5.1';
 export const DATABASE_SCHEMA_VERSION = 29;
 export const SAVE_FORMAT_VERSION = 29;
 
@@ -9,6 +9,19 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 10.5.1 · Camera Seal',
+    detail:
+      'The System now enforces its media boundaries at the browser and lifecycle layers: physique evidence remains a normal photo-library upload, camera access is categorically denied, and voice channels cannot survive after the app is hidden.',
+    points: [
+      'Every hosted app response now carries an explicit camera prohibition, so neither current code, a future interface mistake, nor a restored route can open a live camera channel from The System.',
+      'Microphone access remains available only to the same private System origin and still requires the Hunter to deliberately begin Command Link or Live Link.',
+      'Hiding the app, locking the screen, switching applications, or leaving the page immediately closes active microphone tracks, WebRTC channels, audio playback, recording timers, and retained media streams.',
+      'A recording interrupted by an app-background event is discarded locally instead of being silently transcribed or submitted after the Hunter leaves the screen.',
+      'Body Diagnostic keeps its existing JPG, PNG, and WEBP photo-library workflow; no camera capture attribute or video request is present anywhere in the shipped client.',
+      'Regression coverage now verifies the hosted camera seal, audio-only media requests, lifecycle release behavior, and the continued photo-library-only diagnostic intake.',
+    ],
+  },
   {
     title: 'Version 10.5.0 · True Signal',
     detail:

@@ -14,6 +14,9 @@ const bodyDiagnostic = readFileSync(
   resolve(process.cwd(), 'src/components/BodyDiagnosticPanel.tsx'),
   'utf8',
 );
+const voiceLink = readFileSync(resolve(process.cwd(), 'src/hooks/useAiVoiceLink.ts'), 'utf8');
+const realtimeLink = readFileSync(resolve(process.cwd(), 'src/hooks/useAiRealtimeLink.ts'), 'utf8');
+const worker = readFileSync(resolve(process.cwd(), 'worker/index.js'), 'utf8');
 
 describe('mobile keyboard viewport safety', () => {
   it('keeps touch-device editors at the WebKit-safe 16px focus size', () => {
@@ -51,5 +54,23 @@ describe('mobile keyboard viewport safety', () => {
     expect(bodyDiagnostic).toContain('Add from library');
     expect(bodyDiagnostic).not.toContain('capture="environment"');
     expect(documentShell).toContain("img-src 'self' data: blob:");
+  });
+
+  it('seals the hosted app against camera access while preserving deliberate audio links', () => {
+    expect(worker).toContain("APP_PERMISSIONS_POLICY = 'camera=(), microphone=(self)'");
+    expect(worker).toContain('sealAppMediaPermissions(response)');
+    expect(voiceLink).toContain('getUserMedia({ audio: true })');
+    expect(realtimeLink).toContain('audio: { echoCancellation: true');
+    expect(voiceLink).not.toMatch(/getUserMedia\s*\(\s*\{[^}]*video/s);
+    expect(realtimeLink).not.toMatch(/getUserMedia\s*\(\s*\{[^}]*video/s);
+    expect(bodyDiagnostic).not.toMatch(/capture\s*=/i);
+  });
+
+  it('releases both voice pathways whenever iOS hides or exits the app', () => {
+    expect(voiceLink).toContain('installMediaReleaseGuard(releaseMedia)');
+    expect(voiceLink).toContain('discardRecordingRef.current = true');
+    expect(voiceLink).toContain("document.visibilityState === 'hidden'");
+    expect(realtimeLink).toContain('installMediaReleaseGuard(stop)');
+    expect(realtimeLink).toContain('startGeneration !== releaseGenerationRef.current');
   });
 });
