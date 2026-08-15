@@ -62,6 +62,9 @@ export function App() {
       }
     ).connection;
     if (connection?.saveData || connection?.effectiveType === '2g') return;
+    if (window.innerWidth <= 900 && window.matchMedia('(hover: none), (pointer: coarse)').matches) {
+      return;
+    }
     const idleWindow = window as IdleWindow;
     if (!idleWindow.requestIdleCallback) return;
     let canceled = false;

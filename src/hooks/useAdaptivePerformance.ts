@@ -56,17 +56,52 @@ export function useAdaptivePerformance(reducedMotion: boolean) {
 
   useEffect(() => {
     const root = document.documentElement;
+    const conserveEnergy = profile !== 'full';
+    let idleTimer: number | undefined;
+
+    const clearIdleTimer = () => {
+      window.clearTimeout(idleTimer);
+      idleTimer = undefined;
+    };
+    const enterIdle = () => {
+      idleTimer = undefined;
+      if (document.visibilityState === 'visible') root.dataset.renderActivity = 'idle';
+    };
+    const markRenderActive = () => {
+      root.dataset.renderActivity = 'active';
+      clearIdleTimer();
+      if (conserveEnergy && document.visibilityState === 'visible') {
+        idleTimer = window.setTimeout(enterIdle, 3_500);
+      }
+    };
     const updateActivity = () => {
       root.dataset.appActivity = document.visibilityState === 'visible' ? 'active' : 'suspended';
+      if (document.visibilityState === 'visible') markRenderActive();
+      else {
+        clearIdleTimer();
+        root.dataset.renderActivity = 'idle';
+      }
     };
 
     root.dataset.performance = profile;
     updateActivity();
     document.addEventListener('visibilitychange', updateActivity);
+    if (conserveEnergy) {
+      window.addEventListener('pointerdown', markRenderActive, { passive: true });
+      window.addEventListener('touchstart', markRenderActive, { passive: true });
+      window.addEventListener('scroll', markRenderActive, { passive: true });
+      window.addEventListener('keydown', markRenderActive);
+    }
     return () => {
+      clearIdleTimer();
       document.removeEventListener('visibilitychange', updateActivity);
+      window.removeEventListener('pointerdown', markRenderActive);
+      window.removeEventListener('touchstart', markRenderActive);
+      window.removeEventListener('scroll', markRenderActive);
+      window.removeEventListener('keydown', markRenderActive);
       delete root.dataset.performance;
       delete root.dataset.appActivity;
+      delete root.dataset.renderActivity;
     };
   }, [profile]);
 

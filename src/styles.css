@@ -28499,6 +28499,39 @@ html[data-app-activity='suspended'] .app-shell *::after {
   animation-play-state: paused !important;
 }
 
+/* Phone Deep Sleep: after a few quiet seconds, decorative timelines stop while logic continues. */
+html[data-render-activity='idle'][data-performance='balanced'] .app-shell,
+html[data-render-activity='idle'][data-performance='balanced'] .app-shell *,
+html[data-render-activity='idle'][data-performance='balanced'] .app-shell *::before,
+html[data-render-activity='idle'][data-performance='balanced'] .app-shell *::after,
+html[data-render-activity='idle'][data-performance='efficient'] .app-shell,
+html[data-render-activity='idle'][data-performance='efficient'] .app-shell *,
+html[data-render-activity='idle'][data-performance='efficient'] .app-shell *::before,
+html[data-render-activity='idle'][data-performance='efficient'] .app-shell *::after {
+  animation-play-state: paused !important;
+}
+
+/* Functional progress signals remain honest even while decorative motion sleeps. */
+html[data-render-activity='idle'][data-performance] .app-shell .is-spinning,
+html[data-render-activity='idle'][data-performance] .app-shell .route-loading__signal::after {
+  animation-play-state: running !important;
+}
+
+/* A visible Core keeps one low-cost heartbeat instead of becoming a dead image. */
+html[data-render-activity='idle']:is([data-performance='balanced'], [data-performance='efficient'])
+  .ascension-core:not(.is-energy-suspended)::before,
+html[data-render-activity='idle']:is([data-performance='balanced'], [data-performance='efficient'])
+  .ascension-core:not(.is-energy-suspended)::after,
+html[data-render-activity='idle']:is([data-performance='balanced'], [data-performance='efficient'])
+  .ascension-core:not(.is-energy-suspended)
+  .ascension-core__dual-reactor
+  :is(span, i, b),
+html[data-render-activity='idle']:is([data-performance='balanced'], [data-performance='efficient'])
+  .ascension-core:not(.is-energy-suspended)
+  .ascension-core__emblem {
+  animation-play-state: running !important;
+}
+
 html[data-performance='balanced']
   :is(
     .app-header,
@@ -28508,7 +28541,7 @@ html[data-performance='balanced']
     .companion-presence__transmission,
     .quick-link__panel > header
   ) {
-  backdrop-filter: blur(8px) saturate(1.04);
+  backdrop-filter: none;
 }
 
 html[data-performance='balanced'] .panel {

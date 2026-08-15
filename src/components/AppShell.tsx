@@ -26,7 +26,6 @@ import { useRoutePath } from '@/routeState';
 import { useGameStore } from '@/store/useGameStore';
 import { getCurrentHour } from '@/utils/date';
 import { getDocumentTheme } from '@/utils/theme';
-import { primeAudioOutput } from '@/utils/audio';
 
 const NAV = [
   { to: '/', label: 'System', icon: CircleGauge },
@@ -100,16 +99,6 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    const prime = () => primeAudioOutput();
-    window.addEventListener('click', prime, { once: true });
-    window.addEventListener('keydown', prime, { once: true });
-    return () => {
-      window.removeEventListener('click', prime);
-      window.removeEventListener('keydown', prime);
-    };
-  }, []);
-
-  useEffect(() => {
     const root = document.documentElement;
     root.dataset.theme = documentTheme;
     root.dataset.colorProtocol = colorTheme;
@@ -174,7 +163,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <SystemMark small />
           <span>
             <span className="brand__name">THE SYSTEM</span>
-            <span className="brand__tag">V{APP_VERSION} · ENERGY GOVERNOR</span>
+            <span className="brand__tag">V{APP_VERSION} · DEEP SLEEP</span>
           </span>
         </NavLink>
         <div className="app-header__actions">

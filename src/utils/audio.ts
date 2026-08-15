@@ -3,6 +3,40 @@ type AudioContextWindow = typeof window & {
 };
 
 let sharedAudioContext: AudioContext | undefined;
+let audioSuspendTimer: number | undefined;
+let audioLifecycleGuardInstalled = false;
+
+function clearAudioSuspendTimer() {
+  if (audioSuspendTimer === undefined) return;
+  window.clearTimeout(audioSuspendTimer);
+  audioSuspendTimer = undefined;
+}
+
+export function suspendAudioOutput() {
+  clearAudioSuspendTimer();
+  const context = sharedAudioContext;
+  if (!context || context.state !== 'running') return;
+  void context.suspend().catch(() => undefined);
+}
+
+function scheduleAudioSuspend(delayMs = 900) {
+  if (typeof window === 'undefined') return;
+  clearAudioSuspendTimer();
+  audioSuspendTimer = window.setTimeout(() => {
+    audioSuspendTimer = undefined;
+    suspendAudioOutput();
+  }, delayMs);
+}
+
+function installAudioLifecycleGuard() {
+  if (audioLifecycleGuardInstalled || typeof window === 'undefined') return;
+  audioLifecycleGuardInstalled = true;
+  const suspendIfInactive = () => {
+    if (document.visibilityState !== 'visible') suspendAudioOutput();
+  };
+  document.addEventListener('visibilitychange', suspendIfInactive);
+  window.addEventListener('pagehide', suspendAudioOutput);
+}
 
 function getAudioContext() {
   if (typeof window === 'undefined') return undefined;
@@ -14,6 +48,7 @@ function getAudioContext() {
 
   try {
     sharedAudioContext = new AudioContextClass();
+    installAudioLifecycleGuard();
     return sharedAudioContext;
   } catch {
     return undefined;
@@ -41,6 +76,7 @@ export function primeAudioOutput() {
     // The resume attempt above is still useful on browsers that reject a
     // zero-length primer.
   }
+  scheduleAudioSuspend();
 
   return true;
 }
@@ -48,6 +84,7 @@ export function primeAudioOutput() {
 async function resumeAudioOutput() {
   const context = getAudioContext();
   if (!context) return undefined;
+  clearAudioSuspendTimer();
   if (context.state !== 'running') {
     try {
       await context.resume();
@@ -70,6 +107,10 @@ export async function decodeAudioBlob(blob: Blob) {
     throw new Error(
       'This browser could not decode the companion voice. Reload the update and try again.',
     );
+  } finally {
+    // Playback clears this timer as soon as it starts. If decoding fails or a
+    // caller never starts the returned buffer, the audio hardware still rests.
+    scheduleAudioSuspend();
   }
 }
 
@@ -107,6 +148,7 @@ export class AppAudioPlayer {
         this.offset = 0;
         this.finished = true;
         this.pausedState = true;
+        scheduleAudioSuspend();
         this.onEnded();
       },
       { once: true },
@@ -132,6 +174,7 @@ export class AppAudioPlayer {
     } catch {
       // It may have ended between the state check and stop request.
     }
+    scheduleAudioSuspend();
   }
 
   stop() {
@@ -145,6 +188,7 @@ export class AppAudioPlayer {
     } catch {
       // Stopping an already-ended source is harmless.
     }
+    scheduleAudioSuspend();
   }
 }
 
@@ -168,6 +212,7 @@ function scheduleTone(
   oscillator.connect(gain).connect(context.destination);
   oscillator.start(startAt);
   oscillator.stop(startAt + duration + 0.01);
+  scheduleAudioSuspend(Math.max(900, (startAt - context.currentTime + duration + 0.2) * 1_000));
 }
 
 export async function playSpeakerTest(volume = 0.7) {

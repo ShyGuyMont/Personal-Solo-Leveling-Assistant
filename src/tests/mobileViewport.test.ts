@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest';
 const styles = readFileSync(resolve(process.cwd(), 'src/styles.css'), 'utf8');
 const documentShell = readFileSync(resolve(process.cwd(), 'index.html'), 'utf8');
 const appShell = readFileSync(resolve(process.cwd(), 'src/components/AppShell.tsx'), 'utf8');
+const app = readFileSync(resolve(process.cwd(), 'src/App.tsx'), 'utf8');
 const dashboard = readFileSync(resolve(process.cwd(), 'src/pages/DashboardPage.tsx'), 'utf8');
 const viteConfig = readFileSync(resolve(process.cwd(), 'vite.config.ts'), 'utf8');
 const quickLink = readFileSync(
@@ -18,6 +19,7 @@ const bodyDiagnostic = readFileSync(
 const voiceLink = readFileSync(resolve(process.cwd(), 'src/hooks/useAiVoiceLink.ts'), 'utf8');
 const realtimeLink = readFileSync(resolve(process.cwd(), 'src/hooks/useAiRealtimeLink.ts'), 'utf8');
 const mediaSecurity = readFileSync(resolve(process.cwd(), 'src/utils/mediaSecurity.ts'), 'utf8');
+const audio = readFileSync(resolve(process.cwd(), 'src/utils/audio.ts'), 'utf8');
 const worker = readFileSync(resolve(process.cwd(), 'worker/index.js'), 'utf8');
 
 describe('mobile keyboard viewport safety', () => {
@@ -105,5 +107,14 @@ describe('mobile keyboard viewport safety', () => {
     expect(styles).toContain(
       "html[data-performance='balanced'] .ascension-core__reactor-facets span:nth-child(even)",
     );
+  });
+
+  it('lets an idle phone enter Deep Sleep without disabling functional progress', () => {
+    expect(appShell).not.toContain('primeAudioOutput');
+    expect(audio).toContain('context.suspend()');
+    expect(audio).toContain('scheduleAudioSuspend');
+    expect(styles).toContain("html[data-render-activity='idle'][data-performance='balanced']");
+    expect(styles).toMatch(/\.is-spinning[\s\S]*animation-play-state: running !important;/);
+    expect(app).toContain("window.matchMedia('(hover: none), (pointer: coarse)').matches");
   });
 });

@@ -1,4 +1,4 @@
-export const APP_VERSION = '10.5.3';
+export const APP_VERSION = '10.5.4';
 export const DATABASE_SCHEMA_VERSION = 29;
 export const SAVE_FORMAT_VERSION = 29;
 
@@ -9,6 +9,20 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 10.5.4 · Deep Sleep',
+    detail:
+      'The phone client now releases an unnecessarily persistent audio engine and automatically rests decorative rendering while the Hunter reads, eliminating two app-wide sources of idle power use.',
+    points: [
+      'Ordinary taps and navigation no longer open the Web Audio engine; only deliberate voice, speaker-test, or enabled System-sound actions may initialize it.',
+      'After companion playback, System tones, pauses, stops, or a short primer, the shared audio engine suspends itself instead of keeping the phone audio session awake indefinitely.',
+      'Backgrounding or closing the web app immediately suspends Web Audio in addition to the existing microphone, realtime, recording, and playback release protections.',
+      'Balanced and efficient phone profiles now enter visual Deep Sleep after 3.5 quiet seconds, waking instantly on touch, scrolling, keyboard input, or return to the app.',
+      'AI responses, mission timers, database work, navigation, saves, and visible busy indicators continue operating while decorative animation sleeps.',
+      'A visible Ascension Core retains a low-cost reactor heartbeat during Deep Sleep, while interaction restores its complete mobile animation suite.',
+      'Automatic route preloading is skipped on phones so startup no longer downloads and prepares every major section before the Hunter asks for it.',
+    ],
+  },
   {
     title: 'Version 10.5.3 · Energy Governor',
     detail:
