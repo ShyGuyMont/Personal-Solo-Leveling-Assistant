@@ -20,10 +20,19 @@ interface CompanionIntelligenceModule {
   companionIds: string[];
   companionProfiles: Record<string, Soulprint>;
   familyBible: {
+    schemaVersion: string;
+    generationVoice: {
+      ageBand: string;
+      naturalShape: string[];
+      antiPatterns: string[];
+      contrastExamples: string[];
+    };
     rules: Record<string, unknown>;
     companions: Record<string, Record<string, unknown>>;
     relationships: Array<{ ids: string[]; dynamic: string }>;
   };
+  companionCapabilityMap: Record<string, string>;
+  formatCapabilityMesh: () => string;
   aiVoiceNames: string[];
   aiVoiceAccents: Record<string, string>;
   getRealtimeVoice: (voice: string) => string;
@@ -303,6 +312,8 @@ describe('Companion Soulprint intelligence', () => {
   });
 
   it('hard-codes one complete Family Bible entry for all twelve companions', () => {
+    expect(intelligence.COMPANION_INTELLIGENCE_VERSION).toBe('living-minds-12');
+    expect(intelligence.familyBible.schemaVersion).toBe('2.0.0');
     expect(intelligence.companionIds).toHaveLength(12);
     expect(Object.keys(intelligence.familyBible.companions).sort()).toEqual(
       [...intelligence.companionIds].sort(),
@@ -311,6 +322,16 @@ describe('Companion Soulprint intelligence', () => {
       const entry = intelligence.familyBible.companions[companionId];
       expect(String(entry.systemRole).length).toBeGreaterThan(10);
       expect(String(entry.archetype).length).toBeGreaterThan(35);
+      const speech = entry.speech as Record<string, string>;
+      expect(speech).toMatchObject({
+        avoid: expect.any(String),
+        default: expect.any(String),
+        tells: expect.any(String),
+        texture: expect.any(String),
+      });
+      for (const direction of [speech.avoid, speech.default, speech.tells, speech.texture]) {
+        expect(direction.length).toBeGreaterThan(60);
+      }
       expect(Array.isArray(entry.logic)).toBe(true);
       const behavior = entry.behavior as Record<string, string>;
       expect(Object.keys(behavior).sort()).toEqual([
@@ -327,6 +348,73 @@ describe('Companion Soulprint intelligence', () => {
       expect(String(entry.runtimeDirective).length).toBeGreaterThan(50);
     }
     expect(intelligence.familyBible.relationships.length).toBeGreaterThanOrEqual(24);
+  });
+
+  it('locks every active mind to a contemporary peer voice instead of polished assistant prose', () => {
+    expect(intelligence.familyBible.generationVoice.ageBand).toContain('21 to 25');
+    expect(intelligence.familyBible.generationVoice.naturalShape.join(' ')).toContain(
+      'prepared speech',
+    );
+    expect(intelligence.familyBible.generationVoice.antiPatterns.join(' ')).toContain(
+      'It would be wise',
+    );
+    expect(intelligence.familyBible.generationVoice.contrastExamples.join(' ')).toContain(
+      "Yeah, that's annoying",
+    );
+
+    const snow = intelligence.formatFamilyBibleContext(['snow']);
+    expect(snow).toContain('Contemporary peer-voice contract');
+    expect(snow).toContain('Natural speech default:');
+    expect(snow).toContain('Conversational tells:');
+    expect(snow).toContain('Relaxed sister-on-the-couch energy');
+    expect(snow).not.toContain('Young engineer-friend energy');
+
+    const live = intelligence.buildRealtimeInstructions(
+      {
+        companionId: 'snow',
+        voice: 'marin',
+        accent: 'natural',
+        delivery: 'conversational',
+        cadence: 'natural',
+        texture: 'clean',
+        register: 'mid',
+        resonance: 'balanced',
+        performanceTake: 'balanced',
+        pace: 1,
+        warmth: 0.5,
+        energy: 0.5,
+        expressiveness: 0.5,
+        intonation: 0.5,
+        articulation: 0.5,
+        emotionalRange: 0.5,
+        naturalism: 0.5,
+        pauseDiscipline: 0.5,
+        scene: 'neutral',
+      },
+      {},
+    );
+    expect(live).toContain('21-to-25 range');
+    expect(live).toContain('React like a person before explaining like an expert');
+
+    const saffron = intelligence.formatFamilyBibleContext(['saffron']);
+    expect(saffron).toContain('Cultural language: She is Hispanic');
+    expect(saffron).toContain('mijo');
+    const amara = intelligence.formatFamilyBibleContext(['amara']);
+    expect(amara).toContain('por favor');
+    const quill = intelligence.formatFamilyBibleContext(['quill']);
+    expect(quill).toContain('brilliant fusion-warrior confidence');
+  });
+
+  it('gives the family one explicit capability mesh while keeping writes Hunter-owned', () => {
+    expect(Object.keys(intelligence.companionCapabilityMap).sort()).toEqual(
+      [...intelligence.companionIds].sort(),
+    );
+    const mesh = intelligence.formatCapabilityMesh();
+    expect(mesh.match(/^-/gm)).toHaveLength(17);
+    expect(mesh).toContain('[snow] Coordinates cross-System decisions');
+    expect(mesh).toContain('[quill] Retrieves and distinguishes A.R.C. canon');
+    expect(mesh).toContain('Do not hide behind "I can only advise"');
+    expect(mesh).toContain('Only the Hunter can apply, dismiss, or confirm a local mutation');
   });
 
   it('keeps a full-party room deep without injecting all twelve expanded minds', () => {
@@ -468,6 +556,12 @@ describe('Companion Soulprint intelligence', () => {
     });
     expect(
       intelligence.selectIntelligenceRoute({ audience: 'party', message: 'What do you think?' }),
+    ).toMatchObject({ route: 'counsel', model: 'gpt-5.6-terra' });
+    expect(
+      intelligence.selectIntelligenceRoute({
+        audience: 'snow',
+        message: 'I feel conflicted. Give me your honest opinion.',
+      }),
     ).toMatchObject({ route: 'counsel', model: 'gpt-5.6-terra' });
     expect(
       intelligence.selectIntelligenceRoute(
@@ -1271,16 +1365,20 @@ describe('Companion Soulprint intelligence', () => {
     expect(response.status).toBe(200);
     expect(openAiBody).toBeDefined();
     const responseFormat = openAiBody?.text as {
+      verbosity: string;
       format: {
         schema: { properties: { replies: { items: { required: string[] } } } };
       };
     };
+    expect(responseFormat.verbosity).toBe('low');
     expect(responseFormat.format.schema.properties.replies.items.required).toContain(
       'voiceSummary',
     );
     const input = openAiBody?.input as Array<{ role: string; content: string }>;
     expect(input[0].role).toBe('system');
     expect(input[0].content).toContain('THE SYSTEM FAMILY BIBLE');
+    expect(input[0].content).toContain('SYSTEM CAPABILITY MESH');
+    expect(input[0].content).toContain('contemporary young adults');
     expect(input[0].content).toContain("follow only Rook's soulprint");
     expect(input[0].content).toContain('[rook] Rook — The Vanguard');
     expect(input[0].content).not.toContain('[snow] Snow — The Constant');

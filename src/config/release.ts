@@ -1,4 +1,4 @@
-export const APP_VERSION = '10.5.5';
+export const APP_VERSION = '10.6.0';
 export const DATABASE_SCHEMA_VERSION = 29;
 export const SAVE_FORMAT_VERSION = 29;
 
@@ -9,6 +9,21 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 10.6.0 · Living Minds',
+    detail:
+      'The twelve-companion family now thinks, talks, collaborates, and takes initiative like a sharp group of young adults instead of drifting into polished assistant speeches.',
+    points: [
+      'A shared contemporary peer-voice contract anchors every text and Live Link conversation in the cast’s intended 21-to-25-year-old range without forcing slang, flattening intelligence, or making the family sound alike.',
+      'Every companion gains a distinct conversational fingerprint—Snow’s relaxed sisterly timing, Quill’s lore-friend velocity, Saffron’s kitchen pressure, Ember’s fiery Australian punch, Kairo’s sleepy precision, and equally specific speech boundaries for the full cast.',
+      'Formal validation scripts, elder diction, mini-lectures, symmetrical motivational speeches, and generic assistant closings are explicitly displaced by real reactions, direct answers, shorter conversational turns, interruptions, jokes, and earned emotional texture.',
+      'A new Capability Mesh teaches every companion what the entire family can reason about, draft, prepare, update, coordinate, and relay, reducing dead-end answers and command-syntax dependency without bloating each active Soulprint.',
+      'Companions may now notice patterns, challenge assumptions, form opinions, recommend concrete next moves, invite the right specialist, and prepare the highest supported next state instead of hiding behind “I can only advise.”',
+      'Emotionally nuanced questions, personal decisions, and honest-opinion requests automatically receive the stronger counsel route, while ordinary conversation uses a lower-verbosity generation profile to resist unnecessary essays.',
+      'The Hunter remains the sole authority over every local mutation: expanded initiative can prepare a visible preview or handoff, but nothing is saved, scheduled, completed, awarded, or changed without confirmation.',
+      'The complete Family Bible, relationship chemistry, specialist truth boundaries, offline campaign, saved voices, private data, and improved battery behavior remain intact.',
+    ],
+  },
   {
     title: 'Version 10.5.5 · Family Bible',
     detail:
