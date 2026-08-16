@@ -125,6 +125,7 @@ describe('Awakened Intelligence progress context', () => {
       updatedAt: now,
     });
     const settings = createDefaultSettings();
+    settings.timeZone = 'America/New_York';
     const shared = {
       audience: 'snow' as const,
       profile: {
