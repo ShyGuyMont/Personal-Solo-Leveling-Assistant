@@ -56,6 +56,8 @@ export const REALM_COMPANIONS: Record<SystemRealm, CompanionId> = {
 };
 
 export function getSystemRealm(path: string): SystemRealm {
+  if (path.startsWith('/cipher-library')) return 'campaign';
+  if (path.startsWith('/system-debrief')) return 'archive';
   if (path.startsWith('/training-hall')) return 'training';
   if (path.startsWith('/sanctuary')) return 'sanctuary';
   if (path.startsWith('/kitchen')) return 'kitchen';

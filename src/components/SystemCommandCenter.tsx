@@ -3,6 +3,7 @@ import {
   ArrowRight,
   BookHeart,
   BookOpenCheck,
+  BrainCircuit,
   CalendarClock,
   Castle,
   ChefHat,
@@ -12,6 +13,7 @@ import {
   Dumbbell,
   Map as MapIcon,
   MessageCircleMore,
+  LibraryBig,
   Radio,
   Send,
   ShieldAlert,
@@ -24,6 +26,7 @@ import { listPendingAiProposals, type AiPendingProposal } from '@/game/aiPending
 import { listPendingAiTransmissions } from '@/game/aiTransmissions';
 import { getDailyOperations } from '@/game/dailyOperations';
 import { getPartyPulseSignals } from '@/game/partyPulse';
+import { getLocalClockTime, getSystemDebrief, isSystemDebriefDue } from '@/game/systemDebrief';
 import { Link } from '@/router';
 import { useGameStore } from '@/store/useGameStore';
 import type {
@@ -79,6 +82,7 @@ export function SystemCommandCenter() {
   }>();
   const [proposalCount, setProposalCount] = useState(0);
   const [transmissionCount, setTransmissionCount] = useState(0);
+  const [debriefDue, setDebriefDue] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -95,14 +99,24 @@ export function SystemCommandCenter() {
       setTransmissionCount(transmissions.length);
     };
     void refresh().catch(() => undefined);
+    const refreshDebrief = async () => {
+      const report = await getSystemDebrief(systemDate);
+      const localTime = getLocalClockTime(new Date(), settings?.timeZone ?? 'America/New_York');
+      if (active) setDebriefDue(isSystemDebriefDue(localTime, report?.status === 'council-complete'));
+    };
+    void refreshDebrief().catch(() => undefined);
+    const debriefTimer = window.setInterval(() => void refreshDebrief(), 60_000);
     window.addEventListener('system:daily-operations-changed', refresh);
     window.addEventListener('system:ai-proposal-changed', refresh);
+    window.addEventListener('system:debrief-changed', refreshDebrief);
     return () => {
       active = false;
       window.removeEventListener('system:daily-operations-changed', refresh);
       window.removeEventListener('system:ai-proposal-changed', refresh);
+      window.removeEventListener('system:debrief-changed', refreshDebrief);
+      window.clearInterval(debriefTimer);
     };
-  }, [systemDate, todayRecords]);
+  }, [systemDate, todayRecords, settings?.timeZone]);
 
   const missionMap = useMemo(
     () => new Map(missions.map((mission) => [mission.id, mission])),
@@ -272,6 +286,17 @@ export function SystemCommandCenter() {
         </div>
       )}
 
+      {debriefDue && (
+        <Link className="system-command-center__debrief" to="/system-debrief">
+          <BrainCircuit size={20} />
+          <span>
+            <small>EVOLUTION COUNCIL READY</small>
+            <strong>Snow and Cipher are ready to review The System.</strong>
+          </span>
+          <ArrowRight size={17} />
+        </Link>
+      )}
+
       <details className="system-command-center__realms">
         <summary>
           <span>
@@ -321,6 +346,18 @@ export function SystemCommandCenter() {
             <CalendarClock size={18} />
             <span>
               Calendar Command<small>Kairo</small>
+            </span>
+          </Link>
+          <Link to="/cipher-library">
+            <LibraryBig size={18} />
+            <span>
+              Engineering Library<small>Cipher · RF · Code · Data</small>
+            </span>
+          </Link>
+          <Link to="/system-debrief">
+            <BrainCircuit size={18} />
+            <span>
+              Evolution Council<small>Snow · Cipher · Daily review</small>
             </span>
           </Link>
           <Link to="/headquarters">

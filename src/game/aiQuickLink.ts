@@ -81,6 +81,26 @@ export interface QuickLinkAction {
 
 const ROUTES: Array<QuickNavigationCommand & { patterns: RegExp[] }> = [
   {
+    route: '/cipher-library',
+    label: 'Cipher Engineering Library',
+    patterns: [
+      /\bcipher(?:'s)? library\b/i,
+      /\bengineering library\b/i,
+      /\btechnical library\b/i,
+      /\bengineering codex\b/i,
+    ],
+  },
+  {
+    route: '/system-debrief',
+    label: 'System Evolution Council',
+    patterns: [
+      /\bsystem debrief\b/i,
+      /\bevolution council\b/i,
+      /\bself improvement report\b/i,
+      /\bdevelopment report\b/i,
+    ],
+  },
+  {
     route: '/calendar',
     label: 'Calendar Command',
     patterns: [/\bcalendar\b/i, /\bschedule\b/i, /\bagenda\b/i],

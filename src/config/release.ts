@@ -1,4 +1,4 @@
-export const APP_VERSION = '10.6.0';
+export const APP_VERSION = '10.7.0';
 export const DATABASE_SCHEMA_VERSION = 29;
 export const SAVE_FORMAT_VERSION = 29;
 
@@ -9,6 +9,22 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 10.7.0 · Evolution Council',
+    detail:
+      'The System can now study its own real use each night, preserve a private development record, and give Cipher the expansive engineering realm his mind was built to lead.',
+    points: [
+      'A new Daily System Debrief creates an offline private scan of completion state and sanitized technical faults, then lets Snow convene only the companions relevant to that day for one detailed online council when the Hunter chooses.',
+      'The council names what worked, friction, intelligence and personality misses, broken flows, and capabilities each companion wishes existed before Snow establishes one priority and Cipher translates it into a copy-ready Codex development brief.',
+      'Debriefs are stored locally, included in Archive Shield backups, readable offline, downloadable as Markdown, and forbidden from changing code, missions, XP, schedules, progression, or campaign records.',
+      'The private experience ledger strips secrets and embedded media while excluding physique photos, audio, full A.R.C. documents, and itemized Treasury records from self-improvement reports.',
+      'Cipher gains a dedicated Engineering Library with fourteen searchable offline dossiers covering RF foundations, S-parameters, Smith charts, VNA calibration and time domain, spectrum analysis, phase noise, noise figure, measurement planning, Excel, automation, Python signal analysis, Git, and debugging.',
+      'Every technical dossier includes practical concepts, a bench checklist, common failure modes, and direct primary-source grounding from Keysight, Rohde & Schwarz, NI, Microsoft, NumPy, SciPy, and Git.',
+      'Cipher\'s deliberate Live Research desk counts the web-search calls actually used and includes their current tool fee alongside returned model-token usage in the local AI meter.',
+      'Ask Cipher launches a grounded conversation from any dossier while his permanent intelligence role now owns RF, instruments, code, Excel, automation, data, and technical troubleshooting without inventing measurements, calibration state, or equipment limits.',
+      'The Evolution Council and Engineering Library join Headquarters, System Command Center, Quick Link navigation, offline routing, and the existing twelve-companion Capability Mesh without crowding the bottom command bar.',
+    ],
+  },
   {
     title: 'Version 10.6.0 · Living Minds',
     detail:

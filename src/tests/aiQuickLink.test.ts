@@ -36,6 +36,15 @@ describe('Companion Quick Link', () => {
     });
   });
 
+  it('opens Cipher Library and Evolution Council from natural navigation commands', () => {
+    expect(parseQuickNavigationCommand('Cipher, open the engineering library')?.route).toBe(
+      '/cipher-library',
+    );
+    expect(parseQuickNavigationCommand('Snow, take me to the Evolution Council')?.route).toBe(
+      '/system-debrief',
+    );
+  });
+
   it('opens Party Council for everyone or multiple named companions', () => {
     expect(parseQuickLinkAddress('Everyone, how are you doing?').audience).toBe('party');
     expect(parseQuickLinkAddress('All I want is a simple answer').audience).toBe('snow');

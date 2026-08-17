@@ -1,6 +1,9 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { Download, RefreshCw, ShieldAlert } from 'lucide-react';
 import { downloadSave } from '@/db/backup';
+import { db } from '@/db/database';
+import { recordSystemExperienceSignal } from '@/game/systemDebrief';
+import { getSystemDateKey } from '@/utils/date';
 
 interface State {
   error?: Error;
@@ -15,6 +18,19 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, State> {
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     console.error('The System recovered from a render failure.', error, info);
+    void db.settings
+      .get('primary')
+      .then((settings) =>
+        recordSystemExperienceSignal({
+          date: settings
+            ? getSystemDateKey(new Date(), settings.resetTime, settings.timeZone)
+            : (new Date().toISOString().slice(0, 10) as `${number}-${number}-${number}`),
+          kind: 'interface-error',
+          surface: window.location.hash || 'recovery-interface',
+          summary: error.message,
+        }),
+      )
+      .catch(() => undefined);
   }
 
   render() {

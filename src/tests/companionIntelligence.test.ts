@@ -80,6 +80,7 @@ interface CompanionIntelligenceModule {
     maxOutputTokens: number;
   };
   sanitizeCompanionLanguage: (value: string, requestMessage?: string) => string;
+  countEngineeringWebSearchCalls: (response: Record<string, unknown>) => number;
   buildYouTubeAnalyticsWindow: (
     now?: Date,
     periodDays?: number,
@@ -189,6 +190,19 @@ describe('Companion Soulprint intelligence', () => {
     expect(intelligence.baseInstructions).toContain('handoff');
     expect(intelligence.baseInstructions).toContain('Use English throughout');
     expect(intelligence.baseInstructions).toContain("Snow is the System's command coordinator");
+  });
+
+  it('counts only web-search tool calls for transparent Cipher research usage', () => {
+    expect(
+      intelligence.countEngineeringWebSearchCalls({
+        output: [
+          { type: 'web_search_call', id: 'search_1' },
+          { type: 'message', content: [] },
+          { type: 'web_search_call', id: 'search_2' },
+        ],
+      }),
+    ).toBe(2);
+    expect(intelligence.countEngineeringWebSearchCalls({ output: [] })).toBe(0);
   });
 
   it('removes accidental foreign-script fragments without blocking requested translation', () => {
@@ -312,7 +326,7 @@ describe('Companion Soulprint intelligence', () => {
   });
 
   it('hard-codes one complete Family Bible entry for all twelve companions', () => {
-    expect(intelligence.COMPANION_INTELLIGENCE_VERSION).toBe('living-minds-12');
+    expect(intelligence.COMPANION_INTELLIGENCE_VERSION).toBe('evolution-council-13');
     expect(intelligence.familyBible.schemaVersion).toBe('2.0.0');
     expect(intelligence.companionIds).toHaveLength(12);
     expect(Object.keys(intelligence.familyBible.companions).sort()).toEqual(
@@ -556,6 +570,12 @@ describe('Companion Soulprint intelligence', () => {
     });
     expect(
       intelligence.selectIntelligenceRoute({ audience: 'party', message: 'What do you think?' }),
+    ).toMatchObject({ route: 'counsel', model: 'gpt-5.6-terra' });
+    expect(
+      intelligence.selectIntelligenceRoute({
+        audience: 'cipher',
+        message: 'Explain the phase noise tradeoff when I narrow RBW on the spectrum analyzer.',
+      }),
     ).toMatchObject({ route: 'counsel', model: 'gpt-5.6-terra' });
     expect(
       intelligence.selectIntelligenceRoute({

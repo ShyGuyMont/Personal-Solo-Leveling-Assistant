@@ -6,6 +6,316 @@
   font-display: swap;
 }
 
+/* Version 10.7 · Evolution Council */
+.cipher-library-page,
+.system-debrief-page {
+  --realm-accent: #9b7bff;
+  --realm-accent-soft: color-mix(in srgb, var(--realm-accent) 18%, transparent);
+}
+
+.cipher-library-hero,
+.system-debrief-hero {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: clamp(1rem, 4vw, 2.4rem);
+  padding: clamp(1.2rem, 4vw, 2.2rem);
+  overflow: hidden;
+  position: relative;
+}
+
+.cipher-library-hero::after,
+.system-debrief-hero::after {
+  content: '';
+  position: absolute;
+  inset: auto -12% -55% 32%;
+  height: 90%;
+  background: radial-gradient(circle, var(--realm-accent-soft), transparent 68%);
+  pointer-events: none;
+}
+
+.cipher-library-hero > img {
+  width: clamp(5.5rem, 16vw, 9rem);
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 28%;
+  border: 1px solid color-mix(in srgb, var(--realm-accent) 62%, transparent);
+  box-shadow: 0 0 42px var(--realm-accent-soft);
+}
+
+.cipher-library-hero h1,
+.system-debrief-hero h1 {
+  margin: .25rem 0 .65rem;
+}
+
+.cipher-library-hero p,
+.system-debrief-hero p {
+  max-width: 52rem;
+}
+
+.cipher-library-hero__actions,
+.system-debrief-controls > div:last-of-type {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .75rem;
+  margin-top: 1rem;
+}
+
+.cipher-library-hero__actions > span {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  color: var(--text-muted);
+  font-size: .82rem;
+}
+
+.cipher-library-search {
+  margin-top: 1rem;
+  padding: 1rem;
+}
+
+.cipher-library-search > label {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  border: 1px solid var(--line);
+  border-radius: .9rem;
+  padding: .2rem .9rem;
+  background: color-mix(in srgb, var(--surface-deep) 88%, transparent);
+}
+
+.cipher-library-search input {
+  min-width: 0;
+  width: 100%;
+  min-height: 3.1rem;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  outline: 0;
+}
+
+.cipher-library-filters {
+  display: flex;
+  gap: .5rem;
+  overflow-x: auto;
+  padding-top: .85rem;
+  scrollbar-width: none;
+}
+
+.cipher-library-filters button {
+  flex: 0 0 auto;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-muted);
+  padding: .55rem .8rem;
+}
+
+.cipher-library-filters button.is-active {
+  border-color: var(--realm-accent);
+  background: var(--realm-accent-soft);
+  color: var(--text);
+}
+
+.cipher-library-grid {
+  display: grid;
+  gap: .8rem;
+  margin-top: 1rem;
+}
+
+.cipher-research {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-color: color-mix(in srgb, var(--realm-accent) 42%, var(--line));
+}
+.cipher-research__heading { display: grid; grid-template-columns: auto 1fr; gap: .8rem; }
+.cipher-research__heading > span { display: grid; place-items: center; width: 2.7rem; aspect-ratio: 1; border-radius: .8rem; color: var(--realm-accent); background: var(--realm-accent-soft); }
+.cipher-research__heading h2 { margin: .15rem 0 .35rem; }
+.cipher-research__heading p:last-child { margin: 0; color: var(--text-muted); }
+.cipher-research__input { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: .7rem; margin-top: 1rem; }
+.cipher-research__input textarea { width: 100%; min-height: 6.5rem; resize: vertical; border: 1px solid var(--line); border-radius: .85rem; padding: .85rem; background: var(--surface-deep); color: var(--text); font: inherit; }
+.cipher-research > small { display: block; margin-top: .6rem; color: var(--text-muted); }
+.cipher-research__error { color: var(--danger); }
+.cipher-research-note { margin-top: .8rem; border: 1px solid var(--line); border-radius: .8rem; overflow: hidden; }
+.cipher-research-note > summary { padding: .85rem; cursor: pointer; }
+.cipher-research-note summary span,
+.cipher-research-note summary small { display: block; }
+.cipher-research-note summary small { margin-top: .2rem; color: var(--text-muted); }
+.cipher-research-note > div { padding: 0 .9rem .9rem; border-top: 1px solid var(--line); }
+.cipher-research-note > div > p { white-space: pre-wrap; }
+.cipher-research-note section { margin: .8rem 0; }
+.cipher-research-note section a { display: flex; align-items: center; justify-content: space-between; gap: .8rem; padding: .55rem 0; color: var(--accent); }
+
+.cipher-dossier {
+  overflow: hidden;
+}
+
+.cipher-dossier > summary {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: .85rem;
+  padding: 1.1rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.cipher-dossier > summary::-webkit-details-marker { display: none; }
+
+.cipher-dossier > summary > span,
+.system-debrief-hero__mark {
+  display: grid;
+  place-items: center;
+  width: 2.8rem;
+  aspect-ratio: 1;
+  border: 1px solid color-mix(in srgb, var(--realm-accent) 55%, transparent);
+  border-radius: .85rem;
+  color: var(--realm-accent);
+  background: var(--realm-accent-soft);
+}
+
+.cipher-dossier summary small,
+.cipher-dossier summary strong,
+.cipher-dossier summary p { display: block; }
+.cipher-dossier summary small { color: var(--realm-accent); text-transform: uppercase; letter-spacing: .1em; }
+.cipher-dossier summary strong { margin: .25rem 0; font-size: 1.08rem; }
+.cipher-dossier summary p { margin: 0; color: var(--text-muted); }
+
+.cipher-dossier__body {
+  padding: 0 1.1rem 1.2rem 4.75rem;
+  border-top: 1px solid var(--line);
+}
+
+.cipher-dossier__why {
+  margin: 1rem 0;
+  padding: .9rem 1rem;
+  border-left: 2px solid var(--realm-accent);
+  background: var(--realm-accent-soft);
+}
+.cipher-dossier__why span { color: var(--realm-accent); font-size: .7rem; letter-spacing: .14em; }
+.cipher-dossier__why p { margin: .35rem 0 0; }
+
+.cipher-dossier__columns {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+.cipher-dossier__columns h3,
+.cipher-dossier__sources h3 { font-size: .9rem; }
+.cipher-dossier__columns ul,
+.cipher-dossier__columns ol { padding-left: 1.15rem; color: var(--text-muted); }
+.cipher-dossier__columns li + li { margin-top: .35rem; }
+
+.cipher-dossier__sources { margin: 1rem 0; }
+.cipher-dossier__sources h3 { display: flex; align-items: center; gap: .45rem; }
+.cipher-dossier__sources a {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: .7rem .8rem;
+  border: 1px solid var(--line);
+  border-radius: .75rem;
+  color: var(--text);
+  text-decoration: none;
+}
+.cipher-dossier__sources a + a { margin-top: .45rem; }
+.cipher-dossier__sources a span,
+.cipher-dossier__sources a small { display: block; }
+.cipher-dossier__sources a small { color: var(--text-muted); }
+
+.cipher-library-boundary,
+.system-debrief-privacy {
+  display: flex;
+  gap: .9rem;
+  margin-top: 1rem;
+  padding: 1rem;
+}
+.cipher-library-boundary h2,
+.system-debrief-privacy h2 { margin: 0; font-size: 1rem; }
+.cipher-library-boundary p,
+.system-debrief-privacy p { margin: .3rem 0 0; color: var(--text-muted); }
+
+.system-debrief-controls {
+  margin-top: 1rem;
+  padding: 1rem;
+}
+.system-debrief-controls > small { display: block; margin-top: .8rem; color: var(--text-muted); }
+.system-debrief-roster { display: flex; flex-wrap: wrap; gap: .5rem; }
+.system-debrief-roster span {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  padding: .35rem .65rem .35rem .35rem;
+  border: 1px solid color-mix(in srgb, var(--debrief-accent) 48%, var(--line));
+  border-radius: 999px;
+  font-size: .8rem;
+}
+.system-debrief-roster img { width: 1.8rem; aspect-ratio: 1; object-fit: cover; border-radius: 50%; }
+
+.system-debrief-report { margin-top: 1rem; padding: clamp(1rem, 3vw, 1.5rem); }
+.system-debrief-report > header { display: flex; justify-content: space-between; gap: 1rem; }
+.system-debrief-report > header > div:last-child { display: flex; gap: .45rem; }
+.system-debrief-report__copied { color: var(--accent); font-size: .8rem; }
+.system-debrief-report__grid { display: grid; grid-template-columns: 1fr 1.25fr; gap: 1rem; margin-top: 1rem; }
+.system-debrief-report__grid > article { padding: 1rem; border: 1px solid var(--line); border-radius: .9rem; background: color-mix(in srgb, var(--surface-deep) 88%, transparent); }
+.system-debrief-report__grid h3 { margin-top: 0; }
+.system-debrief-report__grid ul { padding-left: 1.1rem; color: var(--text-muted); }
+.system-debrief-issue { padding: .8rem; border-left: 2px solid var(--warning); background: color-mix(in srgb, var(--warning) 7%, transparent); }
+.system-debrief-issue + .system-debrief-issue { margin-top: .65rem; }
+.system-debrief-issue > span { color: var(--warning); text-transform: uppercase; font-size: .66rem; letter-spacing: .12em; }
+.system-debrief-issue strong { display: block; margin: .25rem 0; }
+.system-debrief-issue p { margin: .25rem 0; }
+.system-debrief-issue small { color: var(--text-muted); }
+
+.system-debrief-council { margin-top: 1rem; }
+.system-debrief-council > h3 { display: flex; align-items: center; gap: .5rem; }
+.system-debrief-council article { display: grid; grid-template-columns: auto 1fr; gap: .8rem; padding: .85rem 0; border-top: 1px solid var(--line); }
+.system-debrief-council article img { width: 2.8rem; aspect-ratio: 1; border-radius: .8rem; object-fit: cover; border: 1px solid var(--debrief-accent); }
+.system-debrief-council article strong { color: var(--debrief-accent); text-transform: uppercase; letter-spacing: .08em; font-size: .75rem; }
+.system-debrief-council article p { margin: .3rem 0 0; white-space: pre-wrap; }
+.system-debrief-priority { margin-top: 1rem; padding: 1rem; border: 1px solid color-mix(in srgb, var(--accent) 55%, var(--line)); border-radius: .9rem; background: color-mix(in srgb, var(--accent) 8%, transparent); }
+.system-debrief-priority span { color: var(--accent); font-size: .7rem; letter-spacing: .14em; }
+.system-debrief-priority p { margin: .35rem 0 0; }
+.system-debrief-codex { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+.system-debrief-codex summary { cursor: pointer; font-weight: 700; }
+.system-debrief-codex pre { overflow-x: auto; white-space: pre-wrap; color: var(--text-muted); font: .8rem/1.6 ui-monospace, monospace; }
+.system-debrief-history { margin-top: 1rem; padding: 1rem; }
+.system-debrief-history button { width: 100%; display: grid; grid-template-columns: auto 1fr auto; gap: .8rem; text-align: left; padding: .8rem 0; border: 0; border-top: 1px solid var(--line); background: transparent; color: var(--text); }
+.system-debrief-history button span,
+.system-debrief-history button small { color: var(--text-muted); }
+
+.system-command-center__debrief {
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  margin-top: 1rem;
+  padding: .9rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 55%, var(--line));
+  border-radius: .9rem;
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface-deep));
+  color: var(--text);
+  text-decoration: none;
+}
+.system-command-center__debrief span { flex: 1; }
+.system-command-center__debrief small,
+.system-command-center__debrief strong { display: block; }
+.system-command-center__debrief small { color: var(--accent); letter-spacing: .1em; }
+
+@media (max-width: 720px) {
+  .cipher-library-hero,
+  .system-debrief-hero { grid-template-columns: 1fr; }
+  .cipher-library-hero > img { width: 5.5rem; }
+  .cipher-dossier__body { padding: 0 1rem 1rem; }
+  .cipher-dossier__columns,
+  .system-debrief-report__grid { grid-template-columns: 1fr; }
+  .system-debrief-report > header { align-items: flex-start; }
+  .system-debrief-history button { grid-template-columns: 1fr; gap: .15rem; }
+  .cipher-research__input { grid-template-columns: 1fr; }
+}
+
 /* Version 4.0 · Scripture Sanctuary */
 .training-hall-page {
   --training-gold: #f2bd57;

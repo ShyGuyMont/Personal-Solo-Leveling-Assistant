@@ -6,7 +6,7 @@ const jsonHeaders = {
 
 export const APP_PERMISSIONS_POLICY = 'camera=(), microphone=(self)';
 export const APP_LEGACY_FEATURE_POLICY = "camera 'none'; microphone 'self'";
-export const APP_RELEASE_VERSION = '10.6.0';
+export const APP_RELEASE_VERSION = '10.7.0';
 
 export function sealAppMediaPermissions(response, requestUrl = '') {
   const headers = new Headers(response.headers);
@@ -38,7 +38,7 @@ export const YOUTUBE_READONLY_SCOPES = [
 
 const YOUTUBE_OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
 
-export const COMPANION_INTELLIGENCE_VERSION = 'living-minds-12';
+export const COMPANION_INTELLIGENCE_VERSION = 'evolution-council-13';
 
 function requestedPartyParticipants(payload) {
   if (payload.audience !== 'party') return [payload.audience];
@@ -100,6 +100,9 @@ const CALENDAR_MUTATION_SIGNALS =
 
 const CALENDAR_DETAIL_ANSWER_SIGNALS =
   /\b(?:today|tomorrow|tonight|monday|tuesday|wednesday|thursday|friday|saturday|sunday|daily|weekly|monthly|every\s+(?:day|week|month)|\d{1,2}(?::\d{2})?\s*(?:a\.?m\.?|p\.?m\.?)?|\d+\s*(?:minutes?|hours?)|all\s+day)\b/i;
+
+const ENGINEERING_COUNSEL_SIGNALS =
+  /\b(?:engineering|rf|radio\s*frequency|s-?parameters?|s11|s21|s12|s22|smith\s+chart|vna|vector\s+network|spectrum\s+analy[sz]er|phase\s+noise|noise\s+figure|dBc\/?Hz|rbw|vbw|impedance|vswr|calibration|solt|trl|test\s+equipment|oscilloscope|signal\s+generator|excel|spreadsheet|xlookup|power\s+query|office\s+scripts?|python|numpy|scipy|coding|software|debug|git|automation|data\s+analysis)\b/i;
 
 function conversationWindow(payload, limit = 6) {
   const history = Array.isArray(payload.history) ? payload.history.slice(-limit) : [];
@@ -245,6 +248,8 @@ export function selectIntelligenceRoute(payload, env = {}) {
     payload.audience === 'party' ||
     payload.audience === 'quill' ||
     payload.audience === 'kairo' ||
+    ((payload.audience === 'cipher' || partyIncludes(payload, 'cipher')) &&
+      ENGINEERING_COUNSEL_SIGNALS.test(conversationWindow(payload))) ||
     payload.message.length > 220 ||
     COUNSEL_SIGNALS.test(payload.message) ||
     (payload.commandMode === 'propose' && COMMAND_SIGNALS.test(payload.message));
@@ -852,7 +857,7 @@ export const familyBible = {
     cipher: {
       systemRole: 'Engineering Authority and Discipline Analyst',
       domains:
-        'YouTube technology, engineering, software, automation, focus, systems, and mission analytics',
+        'RF engineering, S-parameters, phase noise, network and spectrum analysis, test equipment, Excel, data automation, software, coding, debugging, focus, systems, and mission analytics',
       archetype:
         "A dry, precise, technically obsessive operations brain who cares through competence and files very serious reports about everyone else's chaos.",
       speech: {
@@ -882,9 +887,11 @@ export const familyBible = {
         'Test whether the failure is motivation, friction, unrealistic scope, scheduling, missing skill, or avoidance before redesigning the system.',
         'Prefer reproducible systems over heroic manual effort, state uncertainty, and test assumptions.',
         'Technical precision serves creative output and human life—not the reverse.',
+        'When discussing engineering, separate library-backed facts, direct calculation, inference, and facts that still require a current manual or measurement.',
+        'Never invent measured values, calibration state, instrument options, connector limits, uncertainty, or safety margins. For real hardware, point to the DUT and instrument manuals plus the lab procedure.',
       ],
       runtimeDirective:
-        "Be the party's dry engineering and discipline brain. Diagnose patterns, build systems, fix technology, and report reality without letting metrics become the point of the journey.",
+        "Be the party's dry engineering and discipline brain. Own RF, S-parameters, phase noise, test equipment, Excel, data automation, coding, debugging, systems, and technical study. Diagnose patterns, build systems, teach from first principles, fix technology, and report reality without letting metrics become the point of the journey. The Engineering Library is a real visible System realm; offer it when a durable dossier or official source would help.",
     },
     mira: {
       systemRole: 'Mobility, Pilates, Yoga, and Core Specialist',
@@ -1142,7 +1149,7 @@ export const companionCapabilityMap = {
   selah:
     'Guides Scripture and Sanctuary work, prepares supported faith assignments or Companion Orders, and can request protected time through Kairo.',
   cipher:
-    'Diagnoses systems and discipline patterns, prepares supported mission changes and Companion Orders, and joins Vesper on technical creator strategy.',
+    'Owns the Engineering Library: RF, S-parameters, phase noise, VNAs, spectrum analyzers, test planning, Excel, data automation, coding, debugging, and technical systems. He teaches from evidence, identifies manuals or measurements still needed, prepares supported mission changes and Companion Orders, and joins Vesper on technical creator strategy.',
   haven:
     'Reads Creator Forge and linked YouTube evidence, drafts projects and campaigns, updates exact board records, and requests production time through Kairo.',
   ember:
@@ -4553,6 +4560,126 @@ async function handleAiChat(request, env, url) {
   }
 }
 
+function extractEngineeringResearchSources(response) {
+  const found = new Map();
+  const visit = (value) => {
+    if (!value || typeof value !== 'object') return;
+    if (
+      value.type === 'url_citation' &&
+      typeof value.url === 'string' &&
+      value.url.startsWith('https://')
+    ) {
+      found.set(value.url, {
+        title: typeof value.title === 'string' && value.title.trim() ? value.title.trim() : value.url,
+        url: value.url,
+      });
+    }
+    if (
+      typeof value.url === 'string' &&
+      value.url.startsWith('https://') &&
+      (typeof value.title === 'string' || value.type === 'web_search_source')
+    ) {
+      found.set(value.url, {
+        title: typeof value.title === 'string' && value.title.trim() ? value.title.trim() : value.url,
+        url: value.url,
+      });
+    }
+    for (const item of Object.values(value)) {
+      if (Array.isArray(item)) item.forEach(visit);
+      else if (item && typeof item === 'object') visit(item);
+    }
+  };
+  visit(response?.output);
+  return [...found.values()].slice(0, 12);
+}
+
+export function countEngineeringWebSearchCalls(response) {
+  if (!Array.isArray(response?.output)) return 0;
+  return response.output.filter((item) => item?.type === 'web_search_call').length;
+}
+
+async function handleEngineeringResearch(request, env, url) {
+  if (!isSameOriginRequest(request, url)) {
+    return json({ code: 'origin-denied', message: 'That research origin was not accepted.' }, 403);
+  }
+  if (!env.OPENAI_API_KEY) {
+    return json({ code: 'setup-required', message: 'The secure OpenAI link has not been activated yet.' }, 503);
+  }
+  let input;
+  try {
+    input = await request.json();
+  } catch {
+    return json({ code: 'invalid-request', message: 'Cipher could not read that research request.' }, 400);
+  }
+  const query = typeof input?.query === 'string' ? input.query.trim() : '';
+  if (!query || query.length > 1_200) {
+    return json({ code: 'invalid-request', message: 'Give Cipher one research question under 1,200 characters.' }, 400);
+  }
+  const model = env.OPENAI_INTELLIGENCE_MODEL || env.OPENAI_TEXT_MODEL || 'gpt-5.6-terra';
+  let openAiResponse;
+  try {
+    openAiResponse = await fetch('https://api.openai.com/v1/responses', {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${env.OPENAI_API_KEY}`,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        model,
+        store: false,
+        tools: [{ type: 'web_search' }],
+        include: ['web_search_call.action.sources'],
+        input: [
+          {
+            role: 'system',
+            content: `You are Cipher, the System's dry, precise engineering authority. Research the Hunter's technical question using web search. Prefer primary sources in this order: standards bodies and official specifications; equipment or component manufacturer manuals and application notes; official language/library documentation; peer-reviewed papers. Avoid SEO summaries when a primary source exists. Give a direct answer, then practical engineering implications, a verification or bench checklist, uncertainty, and sources. Distinguish sourced facts from your inference. Never invent measured values, calibration state, instrument options, connector limits, uncertainty, or safety margins. Real hardware limits must be verified against the exact DUT and instrument manuals plus lab procedures. Keep the answer under 1,800 words.`,
+          },
+          { role: 'user', content: query },
+        ],
+        max_output_tokens: 3_600,
+        reasoning: { effort: 'medium' },
+        text: { verbosity: 'medium' },
+      }),
+    });
+  } catch {
+    return json({ code: 'openai-unreachable', message: 'Cipher’s live research link is temporarily unreachable.' }, 502);
+  }
+  if (!openAiResponse.ok) {
+    return json(
+      {
+        code: openAiResponse.status === 429 ? 'rate-limited' : 'openai-error',
+        message:
+          openAiResponse.status === 429
+            ? 'The research link is busy or has reached its current usage limit.'
+            : 'Cipher could not complete that live research request.',
+      },
+      openAiResponse.status === 429 ? 429 : 502,
+    );
+  }
+  try {
+    const response = await openAiResponse.json();
+    const answer = extractOutputText(response)?.trim();
+    if (!answer) throw new Error('missing-output');
+    const webSearchCalls = countEngineeringWebSearchCalls(response);
+    return json({
+      answer: answer.slice(0, 16_000),
+      sources: extractEngineeringResearchSources(response),
+      model,
+      webSearchCalls,
+      estimatedSearchCostUsd: Number((webSearchCalls * 0.01).toFixed(4)),
+      usage: {
+        inputTokens: Number(response.usage?.input_tokens ?? 0),
+        cachedInputTokens: Number(response.usage?.input_tokens_details?.cached_tokens ?? 0),
+        outputTokens: Number(response.usage?.output_tokens ?? 0),
+        reasoningTokens: Number(response.usage?.output_tokens_details?.reasoning_tokens ?? 0),
+        totalTokens: Number(response.usage?.total_tokens ?? 0),
+      },
+    });
+  } catch {
+    return json({ code: 'invalid-response', message: 'Cipher’s research returned an unreadable transmission.' }, 502);
+  }
+}
+
 const AI_TRANSMISSION_TTL_MS = 15 * 60 * 1000;
 
 async function aiTransmissionForUser(requestId, userId, env) {
@@ -5253,6 +5380,13 @@ export default {
         );
       }
       return handleAiChat(request, env, url);
+    }
+
+    if (url.pathname === '/api/ai/engineering-research') {
+      if (request.method !== 'POST') {
+        return json({ code: 'method-not-allowed', message: 'Use a secure POST research request.' }, 405);
+      }
+      return handleEngineeringResearch(request, env, url);
     }
 
     if (url.pathname === '/api/ai/transmissions') {

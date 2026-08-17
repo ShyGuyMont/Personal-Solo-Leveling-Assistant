@@ -17,6 +17,8 @@ import { getRoutePage, preloadRoute, PRIMARY_ROUTE_PATHS } from '@/routeModules'
 import { useRoutePath } from '@/routeState';
 import { useGameStore } from '@/store/useGameStore';
 import { createAppResumeController } from '@/utils/appLifecycle';
+import { recordSystemExperienceSignal } from '@/game/systemDebrief';
+import { getSystemDateKey } from '@/utils/date';
 
 type IdleWindow = Window & {
   requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number;
@@ -34,6 +36,44 @@ export function App() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  useEffect(() => {
+    if (!profileReady) return;
+    const currentDate = () => {
+      const state = useGameStore.getState();
+      return getSystemDateKey(
+        new Date(),
+        state.settings?.resetTime ?? '04:00',
+        state.settings?.timeZone ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
+      );
+    };
+    const captureError = (event: ErrorEvent) => {
+      void recordSystemExperienceSignal({
+        date: currentDate(),
+        kind: 'interface-error',
+        surface: window.location.hash || 'app-shell',
+        summary: event.message || 'Unknown interface error',
+      }).catch(() => undefined);
+    };
+    const captureRejection = (event: PromiseRejectionEvent) => {
+      const reason =
+        event.reason instanceof Error
+          ? event.reason.message
+          : String(event.reason ?? 'Promise rejected');
+      void recordSystemExperienceSignal({
+        date: currentDate(),
+        kind: /network|fetch|transmission/i.test(reason) ? 'network-error' : 'interface-error',
+        surface: window.location.hash || 'app-shell',
+        summary: reason,
+      }).catch(() => undefined);
+    };
+    window.addEventListener('error', captureError);
+    window.addEventListener('unhandledrejection', captureRejection);
+    return () => {
+      window.removeEventListener('error', captureError);
+      window.removeEventListener('unhandledrejection', captureRejection);
+    };
+  }, [profileReady]);
 
   useEffect(() => {
     const controller = createAppResumeController(() => void resume());

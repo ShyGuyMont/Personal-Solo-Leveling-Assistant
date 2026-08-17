@@ -39,6 +39,10 @@ const routeLoaders = {
     import('@/pages/ArcArchivesPage').then((module) => ({ default: module.ArcArchivesPage })),
   '/calendar': () =>
     import('@/pages/CalendarPage').then((module) => ({ default: module.CalendarPage })),
+  '/cipher-library': () =>
+    import('@/pages/CipherLibraryPage').then((module) => ({ default: module.CipherLibraryPage })),
+  '/system-debrief': () =>
+    import('@/pages/SystemDebriefPage').then((module) => ({ default: module.SystemDebriefPage })),
 } satisfies Record<string, RouteLoader>;
 
 export type AppRoutePath = keyof typeof routeLoaders;
@@ -54,6 +58,7 @@ export const PRIMARY_ROUTE_PATHS: AppRoutePath[] = [
   '/creator-forge',
   '/arc-archives',
   '/calendar',
+  '/cipher-library',
 ];
 
 const routePages = Object.fromEntries(
