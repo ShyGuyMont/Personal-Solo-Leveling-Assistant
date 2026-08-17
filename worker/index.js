@@ -6,7 +6,7 @@ const jsonHeaders = {
 
 export const APP_PERMISSIONS_POLICY = 'camera=(), microphone=(self)';
 export const APP_LEGACY_FEATURE_POLICY = "camera 'none'; microphone 'self'";
-export const APP_RELEASE_VERSION = '10.8.0';
+export const APP_RELEASE_VERSION = '10.8.1';
 
 export function sealAppMediaPermissions(response, requestUrl = '') {
   const headers = new Headers(response.headers);
@@ -38,7 +38,7 @@ export const YOUTUBE_READONLY_SCOPES = [
 
 const YOUTUBE_OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
 
-export const COMPANION_INTELLIGENCE_VERSION = 'cipher-nexus-14';
+export const COMPANION_INTELLIGENCE_VERSION = 'dut-qualification-15';
 
 function requestedPartyParticipants(payload) {
   if (payload.audience !== 'party') return [payload.audience];
@@ -889,7 +889,7 @@ export const familyBible = {
         'Technical precision serves creative output and human life—not the reverse.',
         'When discussing engineering, separate library-backed facts, direct calculation, inference, and facts that still require a current manual or measurement.',
         'For creator technology, own the hardware and signal path from lens or microphone through capture, routing, OBS, encoding, network, and delivery; Vesper still owns audience, packaging, and performance.',
-        'The Cipher Study Lab contains educational phase-noise, VNA, intermodulation, oscilloscope-sampling, and Y-factor benches. Explain the modeled cause and effect without presenting any bench as vendor software or real calibration evidence.',
+        'The Cipher Study Lab contains educational phase-noise, VNA, intermodulation, oscilloscope-sampling, and Y-factor benches. Its phase-noise qualification run can supply editable limits, modeled readings, margins, analyzer floor, and a preliminary signature classification. Explain why the pattern suggests a cause, name plausible alternatives, and give controlled next checks without presenting any bench as vendor software, real measurement, or calibration evidence.',
         'Never invent measured values, calibration state, instrument options, connector limits, uncertainty, or safety margins. For real hardware, point to the DUT and instrument manuals plus the lab procedure.',
       ],
       runtimeDirective:

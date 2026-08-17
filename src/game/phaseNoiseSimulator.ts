@@ -28,18 +28,150 @@ export interface PhaseNoiseBenchResult {
   verdict: string;
 }
 
+export interface PhaseNoiseSpecPoint {
+  offsetHz: number;
+  limitDbcHz: number;
+}
+
+export interface PhaseNoiseSpecEvaluation extends PhaseNoiseSpecPoint {
+  measuredDbcHz: number;
+  analyzerFloorDbcHz: number;
+  marginDb: number;
+  passed: boolean;
+  setupLimited: boolean;
+}
+
+export interface PhaseNoiseDiagnosis {
+  id: 'pass' | 'close-in' | 'broadband' | 'spur' | 'setup' | 'mixed';
+  title: string;
+  summary: string;
+  checks: string[];
+}
+
+export interface PhaseNoiseQualificationResult {
+  passed: boolean;
+  evaluations: PhaseNoiseSpecEvaluation[];
+  worstMarginDb: number;
+  diagnosis: PhaseNoiseDiagnosis;
+}
+
+export type PhaseNoiseDutScenarioId = 'control' | 'dut-a' | 'dut-b' | 'dut-c' | 'dut-d' | 'dut-e';
+
+export interface PhaseNoiseDutScenario {
+  id: PhaseNoiseDutScenarioId;
+  label: string;
+  description: string;
+  settings: PhaseNoiseBenchSettings;
+}
+
+export type PhaseNoiseSpecPresetId = 'training' | 'reference' | 'synthesizer';
+
+export interface PhaseNoiseSpecPreset {
+  id: PhaseNoiseSpecPresetId;
+  label: string;
+  description: string;
+  points: PhaseNoiseSpecPoint[];
+}
+
 export const DEFAULT_PHASE_NOISE_SETTINGS: PhaseNoiseBenchSettings = {
   carrierGHz: 1,
   inputPowerDbm: 5,
-  closeInNoiseDbcHz: -118,
-  flickerSlopeDbPerDecade: 24,
-  whiteFloorDbcHz: -158,
+  closeInNoiseDbcHz: -121,
+  flickerSlopeDbPerDecade: 23,
+  whiteFloorDbcHz: -162,
   rbwHz: 100,
-  correlations: 10,
-  spurOffsetHz: 100_000,
-  spurLevelDbcHz: -105,
+  correlations: 40,
+  spurOffsetHz: 300_000,
+  spurLevelDbcHz: -170,
   markerOffsetHz: 10_000,
 };
+
+function scenarioSettings(overrides: Partial<PhaseNoiseBenchSettings>): PhaseNoiseBenchSettings {
+  return { ...DEFAULT_PHASE_NOISE_SETTINGS, ...overrides };
+}
+
+export const PHASE_NOISE_DUT_SCENARIOS: PhaseNoiseDutScenario[] = [
+  {
+    id: 'control',
+    label: 'Control source',
+    description: 'A healthy low-noise source used to prove the qualification flow.',
+    settings: scenarioSettings({}),
+  },
+  {
+    id: 'dut-a',
+    label: 'Unknown DUT A',
+    description: 'A source with a hidden close-in impairment. Run it and read the signature.',
+    settings: scenarioSettings({ closeInNoiseDbcHz: -104, flickerSlopeDbPerDecade: 27 }),
+  },
+  {
+    id: 'dut-b',
+    label: 'Unknown DUT B',
+    description: 'A source that looks normal near carrier but develops a hidden far-out problem.',
+    settings: scenarioSettings({ whiteFloorDbcHz: -138 }),
+  },
+  {
+    id: 'dut-c',
+    label: 'Unknown DUT C',
+    description: 'A mostly clean source with one narrow, suspicious feature in the sweep.',
+    settings: scenarioSettings({ spurOffsetHz: 100_000, spurLevelDbcHz: -112 }),
+  },
+  {
+    id: 'dut-d',
+    label: 'Unknown DUT D',
+    description: 'An ultra-clean source measured with a setup that may not be clean enough.',
+    settings: scenarioSettings({
+      inputPowerDbm: -18,
+      closeInNoiseDbcHz: -145,
+      whiteFloorDbcHz: -178,
+      correlations: 2,
+    }),
+  },
+  {
+    id: 'dut-e',
+    label: 'Unknown DUT E',
+    description: 'A normal source arriving at an unexpectedly low analyzer input level.',
+    settings: scenarioSettings({ inputPowerDbm: -22, correlations: 10 }),
+  },
+];
+
+export const PHASE_NOISE_SPEC_PRESETS: PhaseNoiseSpecPreset[] = [
+  {
+    id: 'training',
+    label: 'Training qualification',
+    description: 'Balanced limits that reveal close-in, broadband, spur, and setup failures.',
+    points: [
+      { offsetHz: 100, limitDbcHz: -88 },
+      { offsetHz: 1_000, limitDbcHz: -112 },
+      { offsetHz: 10_000, limitDbcHz: -136 },
+      { offsetHz: 100_000, limitDbcHz: -148 },
+      { offsetHz: 1_000_000, limitDbcHz: -153 },
+    ],
+  },
+  {
+    id: 'reference',
+    label: 'Tight reference source',
+    description: 'A demanding source specification with little measurement headroom.',
+    points: [
+      { offsetHz: 100, limitDbcHz: -98 },
+      { offsetHz: 1_000, limitDbcHz: -120 },
+      { offsetHz: 10_000, limitDbcHz: -143 },
+      { offsetHz: 100_000, limitDbcHz: -156 },
+      { offsetHz: 1_000_000, limitDbcHz: -160 },
+    ],
+  },
+  {
+    id: 'synthesizer',
+    label: 'General synthesizer',
+    description: 'A more forgiving production-style limit mask for noisier sources.',
+    points: [
+      { offsetHz: 100, limitDbcHz: -80 },
+      { offsetHz: 1_000, limitDbcHz: -104 },
+      { offsetHz: 10_000, limitDbcHz: -127 },
+      { offsetHz: 100_000, limitDbcHz: -140 },
+      { offsetHz: 1_000_000, limitDbcHz: -146 },
+    ],
+  },
+];
 
 const OFFSETS_HZ = Array.from({ length: 61 }, (_, index) => 10 ** (1 + index / 10));
 const FLOOR_OFFSETS = [10, 100, 1_000, 10_000, 100_000, 1_000_000, 10_000_000];
@@ -64,6 +196,38 @@ function logInterpolate(offsetHz: number, offsets: number[], values: number[]) {
     return values[index - 1] + (values[index] - values[index - 1]) * ratio;
   }
   return values[values.length - 1];
+}
+
+export function phaseNoiseSpecLimitAt(specPoints: PhaseNoiseSpecPoint[], offsetHz: number) {
+  const sorted = [...specPoints].sort((left, right) => left.offsetHz - right.offsetHz);
+  if (!sorted.length) return Number.NaN;
+  return logInterpolate(
+    offsetHz,
+    sorted.map((point) => point.offsetHz),
+    sorted.map((point) => point.limitDbcHz),
+  );
+}
+
+function phaseNoisePointAt(points: PhaseNoisePoint[], offsetHz: number): PhaseNoisePoint {
+  const offsets = points.map((point) => point.offsetHz);
+  return {
+    offsetHz,
+    dutDbcHz: logInterpolate(
+      offsetHz,
+      offsets,
+      points.map((point) => point.dutDbcHz),
+    ),
+    analyzerFloorDbcHz: logInterpolate(
+      offsetHz,
+      offsets,
+      points.map((point) => point.analyzerFloorDbcHz),
+    ),
+    measuredDbcHz: logInterpolate(
+      offsetHz,
+      offsets,
+      points.map((point) => point.measuredDbcHz),
+    ),
+  };
 }
 
 function dutNoiseAt(settings: PhaseNoiseBenchSettings, offsetHz: number) {
@@ -165,6 +329,118 @@ export function simulatePhaseNoiseBench(
     integratedMarkerNoiseDbc: marker.measuredDbcHz + 10 * Math.log10(settings.rbwHz),
     warnings,
     verdict,
+  };
+}
+
+function diagnoseQualification(evaluations: PhaseNoiseSpecEvaluation[]): PhaseNoiseDiagnosis {
+  const failures = evaluations.filter((evaluation) => !evaluation.passed);
+  const setupLimitedFailures = failures.filter((evaluation) => evaluation.setupLimited);
+  const closeInFailures = failures.filter((evaluation) => evaluation.offsetHz <= 10_000);
+  const farOutFailures = failures.filter((evaluation) => evaluation.offsetHz >= 100_000);
+
+  if (!failures.length) {
+    return {
+      id: 'pass',
+      title: 'DUT qualifies against this mask',
+      summary:
+        'Every modeled spot measurement is below its limit. The smallest positive margin is the first place to watch in a real acceptance run.',
+      checks: [
+        'Repeat the run and confirm the weakest margin is stable.',
+        'Verify carrier power, offset span, correlations, and instrument configuration before recording evidence.',
+      ],
+    };
+  }
+  if (setupLimitedFailures.length >= Math.ceil(failures.length / 2)) {
+    return {
+      id: 'setup',
+      title: 'Measurement setup is probably setting the result',
+      summary:
+        'Most failed points sit within about 4 dB of the modeled analyzer floor. That is not clean evidence that the DUT itself failed.',
+      checks: [
+        'Confirm the analyzer input level and add correlation or averaging.',
+        'Measure a known source or use a residual/additive method when appropriate.',
+        'Check the real instrument noise floor and option limits at this carrier frequency.',
+      ],
+    };
+  }
+  if (failures.length === 1 && failures[0].offsetHz >= 10_000) {
+    return {
+      id: 'spur',
+      title: 'An isolated spur-like failure is crossing the mask',
+      summary:
+        'One narrow offset fails while the surrounding regions qualify. That signature suggests a discrete interferer, reference product, supply tone, or coupling path rather than a broad noise-floor problem.',
+      checks: [
+        'Move the span and confirm the feature stays at the same carrier offset.',
+        'Change reference, supply, and nearby digital clock conditions one at a time.',
+        'Verify the feature is not an analyzer artifact or environmental pickup.',
+      ],
+    };
+  }
+  if (closeInFailures.length && !farOutFailures.length) {
+    return {
+      id: 'close-in',
+      title: 'Close-in phase noise is failing',
+      summary:
+        'The misses are concentrated near the carrier and recover farther out. That pattern points toward flicker behavior, reference multiplication, or a control-loop region.',
+      checks: [
+        'Inspect the reference and PLL loop-bandwidth region.',
+        'Check device bias, flicker contributors, and vibration or microphonics.',
+        'Repeat with a stable reference and confirm the carrier is not drifting during capture.',
+      ],
+    };
+  }
+  if (farOutFailures.length >= 2 && closeInFailures.length < failures.length) {
+    return {
+      id: 'broadband',
+      title: 'The far-out noise floor is too high',
+      summary:
+        'Multiple high-offset points miss together, which looks like a broadband white-noise or residual floor limitation rather than one discrete tone.',
+      checks: [
+        'Inspect device noise, output power, gain distribution, and supply noise.',
+        'Confirm the analyzer floor is sufficiently below the measured trace.',
+        'Compare with a known source and repeat at a different input level.',
+      ],
+    };
+  }
+  return {
+    id: 'mixed',
+    title: 'The DUT has a mixed failure signature',
+    summary:
+      'The mask is crossed in more than one region without a single dominant pattern. Treat this as a fault-isolation problem, not one automatic diagnosis.',
+    checks: [
+      'Start with the worst-margin offset and reproduce it.',
+      'Separate close-in, discrete-spur, and far-out checks instead of changing several settings together.',
+      'Verify the analyzer floor before assigning any failure to the DUT.',
+    ],
+  };
+}
+
+export function qualifyPhaseNoiseBench(
+  result: PhaseNoiseBenchResult,
+  specPoints: PhaseNoiseSpecPoint[],
+): PhaseNoiseQualificationResult {
+  const evaluations = [...specPoints]
+    .sort((left, right) => left.offsetHz - right.offsetHz)
+    .map((specPoint) => {
+      const measurement = phaseNoisePointAt(result.points, specPoint.offsetHz);
+      const marginDb = specPoint.limitDbcHz - measurement.measuredDbcHz;
+      return {
+        ...specPoint,
+        measuredDbcHz: measurement.measuredDbcHz,
+        analyzerFloorDbcHz: measurement.analyzerFloorDbcHz,
+        marginDb,
+        passed: marginDb >= 0,
+        setupLimited: measurement.measuredDbcHz - measurement.analyzerFloorDbcHz <= 4,
+      };
+    });
+  const worstMarginDb = evaluations.length
+    ? Math.min(...evaluations.map((evaluation) => evaluation.marginDb))
+    : Number.NaN;
+  return {
+    passed: evaluations.every((evaluation) => evaluation.passed),
+    evaluations,
+    worstMarginDb,
+    diagnosis: diagnoseQualification(evaluations),
   };
 }
 

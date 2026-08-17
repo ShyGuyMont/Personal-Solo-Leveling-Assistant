@@ -29678,6 +29678,435 @@ html[data-performance='efficient'] .ascension-core__life-sparks i:nth-child(n + 
   background: rgba(44, 164, 187, 0.08);
 }
 
+.cipher-qualification-guide {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 13px 15px;
+  color: #c4eaf1;
+  border: 1px solid rgba(103, 233, 255, 0.26);
+  border-radius: 13px;
+  background: linear-gradient(120deg, rgba(35, 151, 174, 0.12), rgba(83, 61, 151, 0.08));
+}
+
+.cipher-qualification-guide > svg {
+  flex: 0 0 auto;
+  color: #6af4e5;
+}
+
+.cipher-qualification-guide strong,
+.cipher-qualification-guide p {
+  display: block;
+  margin: 0;
+}
+
+.cipher-qualification-guide p {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+
+.cipher-qualification-guide b {
+  color: #ff8f9e;
+}
+
+.cipher-qualification-setup {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.cipher-qualification-setup label {
+  display: grid;
+  gap: 7px;
+  padding: 13px;
+  border: 1px solid rgba(129, 174, 205, 0.17);
+  border-radius: 12px;
+  background: rgba(4, 12, 20, 0.54);
+}
+
+.cipher-qualification-setup label > span,
+.cipher-spec-editor > div:first-child strong {
+  color: #a99cff;
+  font-family: Rajdhani, sans-serif;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.cipher-qualification-setup select,
+.cipher-spec-editor input {
+  width: 100%;
+  padding: 9px 10px;
+  color: var(--text);
+  border: 1px solid rgba(107, 227, 232, 0.24);
+  border-radius: 9px;
+  background: #09121c;
+}
+
+.cipher-qualification-setup small,
+.cipher-spec-editor small {
+  color: var(--muted-2);
+  line-height: 1.35;
+}
+
+.cipher-spec-editor {
+  display: grid;
+  grid-template-columns: minmax(150px, 0.28fr) minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  padding: 13px;
+  border: 1px solid rgba(255, 103, 125, 0.19);
+  border-radius: 13px;
+  background: rgba(74, 18, 34, 0.08);
+}
+
+.cipher-spec-editor > div:first-child {
+  display: grid;
+  gap: 3px;
+}
+
+.cipher-spec-editor__points {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(78px, 1fr));
+  gap: 7px;
+}
+
+.cipher-spec-editor__points label {
+  display: grid;
+  gap: 3px;
+}
+
+.cipher-spec-editor__points label > span {
+  color: #ff9aa8;
+  font-family: Rajdhani, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.cipher-spec-editor__points input {
+  padding: 8px 5px;
+  color: #ffd5da;
+  text-align: center;
+  border-color: rgba(255, 113, 133, 0.25);
+}
+
+.cipher-spec-editor__points small {
+  font-size: 0.6rem;
+  text-align: center;
+}
+
+.cipher-bench__control-drawer {
+  align-self: start;
+  border: 1px solid rgba(126, 164, 193, 0.17);
+  border-radius: 12px;
+  background: rgba(4, 11, 18, 0.46);
+}
+
+.cipher-bench__control-drawer summary {
+  display: grid;
+  gap: 2px;
+  padding: 12px;
+  color: #9ef5ff;
+  font-family: Rajdhani, sans-serif;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  cursor: pointer;
+  list-style-position: inside;
+  text-transform: uppercase;
+}
+
+.cipher-bench__control-drawer summary small {
+  padding-left: 16px;
+  color: var(--muted-2);
+  font-family: Inter, sans-serif;
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.cipher-bench__control-drawer .cipher-bench__controls {
+  padding: 0 12px 12px;
+}
+
+.cipher-acquisition-console {
+  display: grid;
+  grid-template-columns: minmax(160px, 1fr) minmax(210px, 1.25fr) auto;
+  gap: 10px 16px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid rgba(104, 235, 228, 0.2);
+  border-radius: 13px;
+  background: linear-gradient(110deg, rgba(8, 31, 39, 0.88), rgba(11, 15, 29, 0.88));
+}
+
+.cipher-acquisition-console.is-running {
+  border-color: rgba(106, 244, 229, 0.48);
+  box-shadow: inset 0 0 24px rgba(62, 215, 200, 0.07);
+}
+
+.cipher-acquisition-console.is-complete {
+  border-color: rgba(155, 136, 255, 0.35);
+}
+
+.cipher-acquisition-console__status,
+.cipher-acquisition-console__status span,
+.cipher-acquisition-console__live span {
+  display: grid;
+}
+
+.cipher-acquisition-console__status {
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 9px;
+  align-items: center;
+}
+
+.cipher-acquisition-console__status > svg {
+  color: #6af4e5;
+}
+
+.cipher-acquisition-console.is-running .cipher-acquisition-console__status > svg {
+  filter: drop-shadow(0 0 7px rgba(106, 244, 229, 0.75));
+  animation: cipher-scan-pulse 0.9s ease-in-out infinite alternate;
+}
+
+.cipher-acquisition-console small {
+  color: var(--muted-2);
+  font-family: Rajdhani, sans-serif;
+  font-size: 0.61rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+}
+
+.cipher-acquisition-console__status strong {
+  color: #aefcf2;
+  font-family: Rajdhani, sans-serif;
+  font-size: 0.9rem;
+  letter-spacing: 0.04em;
+}
+
+.cipher-acquisition-console__live {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.cipher-acquisition-console__live span {
+  padding: 7px;
+  border: 1px solid rgba(107, 210, 222, 0.12);
+  border-radius: 8px;
+  background: rgba(1, 8, 14, 0.42);
+}
+
+.cipher-acquisition-console__live strong {
+  color: #9ef5ff;
+  font-size: 0.78rem;
+}
+
+.cipher-acquisition-console__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  justify-content: flex-end;
+}
+
+.cipher-acquisition-console__progress {
+  grid-column: 1 / -1;
+  height: 3px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(102, 174, 192, 0.12);
+}
+
+.cipher-acquisition-console__progress i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #6af4e5, #a99cff);
+  box-shadow: 0 0 10px rgba(106, 244, 229, 0.7);
+  transition: width 78ms linear;
+}
+
+@keyframes cipher-scan-pulse {
+  from {
+    opacity: 0.55;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.cipher-bench__screen svg path.is-spec {
+  stroke: #ff7288;
+  stroke-dasharray: 7 4;
+  stroke-width: 2.4;
+  filter: drop-shadow(0 0 3px rgba(255, 91, 119, 0.34));
+}
+
+.cipher-bench__screen svg circle.is-pass,
+.cipher-bench__screen svg circle.is-fail {
+  stroke: #071018;
+  stroke-width: 2;
+}
+
+.cipher-bench__screen svg circle.is-pass {
+  fill: #6af4b7;
+}
+
+.cipher-bench__screen svg circle.is-fail {
+  fill: #ff5d77;
+  filter: drop-shadow(0 0 5px rgba(255, 77, 106, 0.8));
+}
+
+.cipher-bench__legend .is-spec {
+  color: #ff8093;
+}
+
+.cipher-qualification-result,
+.cipher-fault-diagnosis {
+  display: grid;
+  gap: 11px;
+  padding: 13px;
+  border: 1px solid rgba(133, 160, 195, 0.17);
+  border-radius: 13px;
+  background: rgba(4, 11, 18, 0.55);
+}
+
+.cipher-qualification-result > header {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.cipher-qualification-result > header > div {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0 9px;
+  align-items: baseline;
+}
+
+.cipher-qualification-result > header small {
+  grid-column: 1 / -1;
+  color: var(--muted-2);
+  font-family: Rajdhani, sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+}
+
+.cipher-qualification-result > header strong {
+  font-family: Rajdhani, sans-serif;
+  font-size: 1.25rem;
+}
+
+.cipher-qualification-result > header.is-pass,
+.cipher-qualification-result__points article.is-pass b {
+  color: #6af4b7;
+}
+
+.cipher-qualification-result > header.is-fail,
+.cipher-qualification-result__points article.is-fail b {
+  color: #ff7f92;
+}
+
+.cipher-qualification-result__points {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.cipher-qualification-result__points article {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid rgba(122, 166, 193, 0.13);
+  border-radius: 9px;
+  background: rgba(1, 8, 14, 0.5);
+}
+
+.cipher-qualification-result__points article.is-fail {
+  border-color: rgba(255, 92, 117, 0.35);
+  background: rgba(125, 21, 42, 0.09);
+}
+
+.cipher-qualification-result__points span,
+.cipher-qualification-result__points b {
+  font-family: Rajdhani, sans-serif;
+  font-size: 0.68rem;
+}
+
+.cipher-qualification-result__points strong {
+  color: #c9f8ff;
+}
+
+.cipher-qualification-result__points small {
+  color: var(--muted-2);
+  font-size: 0.6rem;
+}
+
+.cipher-fault-diagnosis {
+  border-color: rgba(167, 139, 255, 0.26);
+  background: linear-gradient(120deg, rgba(91, 61, 166, 0.11), rgba(11, 18, 28, 0.72));
+}
+
+.cipher-fault-diagnosis.is-pass {
+  border-color: rgba(79, 230, 182, 0.26);
+  background: linear-gradient(120deg, rgba(35, 153, 116, 0.1), rgba(11, 18, 28, 0.72));
+}
+
+.cipher-fault-diagnosis > div {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.cipher-fault-diagnosis > div > svg {
+  flex: 0 0 auto;
+  color: #aa9cff;
+}
+
+.cipher-fault-diagnosis > div span {
+  display: grid;
+}
+
+.cipher-fault-diagnosis > div small,
+.cipher-fault-diagnosis > div strong {
+  font-family: Rajdhani, sans-serif;
+}
+
+.cipher-fault-diagnosis > div small {
+  color: #a99cff;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+.cipher-fault-diagnosis p,
+.cipher-fault-diagnosis ol {
+  margin: 0;
+}
+
+.cipher-fault-diagnosis p,
+.cipher-fault-diagnosis li,
+.cipher-fault-diagnosis > small {
+  color: var(--muted);
+}
+
+.cipher-fault-diagnosis ol {
+  display: grid;
+  gap: 5px;
+  padding-left: 20px;
+}
+
+.cipher-fault-diagnosis > small {
+  padding-top: 8px;
+  border-top: 1px solid rgba(141, 143, 205, 0.13);
+  font-size: 0.68rem;
+}
+
 .cipher-smith {
   display: grid;
   grid-template-columns: minmax(0, 240px);
@@ -29783,6 +30212,26 @@ html[data-performance='efficient'] .ascension-core__life-sparks i:nth-child(n + 
   .cipher-measurement__controls {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .cipher-qualification-setup,
+  .cipher-spec-editor,
+  .cipher-acquisition-console {
+    grid-template-columns: 1fr;
+  }
+
+  .cipher-acquisition-console__actions {
+    justify-content: stretch;
+  }
+
+  .cipher-acquisition-console__actions .button {
+    flex: 1 1 auto;
+  }
+
+  .cipher-spec-editor__points {
+    grid-template-columns: repeat(5, minmax(88px, 1fr));
+    padding-bottom: 4px;
+    overflow-x: auto;
+  }
 }
 
 @media (max-width: 560px) {
@@ -29819,6 +30268,18 @@ html[data-performance='efficient'] .ascension-core__life-sparks i:nth-child(n + 
   .cipher-bench__readouts,
   .cipher-measurement__readouts {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cipher-acquisition-console__live {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .cipher-qualification-result__points {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cipher-qualification-result__points article:last-child {
+    grid-column: 1 / -1;
   }
 
   .cipher-yfactor {

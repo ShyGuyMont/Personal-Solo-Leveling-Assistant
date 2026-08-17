@@ -165,7 +165,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <SystemMark small />
           <span>
             <span className="brand__name">THE SYSTEM</span>
-            <span className="brand__tag">V{APP_VERSION} · CIPHER NEXUS</span>
+            <span className="brand__tag">V{APP_VERSION} · DUT QUALIFICATION</span>
           </span>
         </NavLink>
         <div className="app-header__actions">

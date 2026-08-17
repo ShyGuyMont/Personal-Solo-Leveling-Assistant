@@ -1,4 +1,4 @@
-export const APP_VERSION = '10.8.0';
+export const APP_VERSION = '10.8.1';
 export const DATABASE_SCHEMA_VERSION = 29;
 export const SAVE_FORMAT_VERSION = 29;
 
@@ -9,6 +9,21 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 10.8.1 · Live DUT Qualification',
+    detail:
+      'Cipher’s phase-noise bench becomes a guided qualification run: define the requirement, watch the measurement arrive, catch the failure, and learn how to isolate its likely cause.',
+    points: [
+      'A startable live acquisition reveals the modeled measured trace from 10 Hz through 10 MHz with current offset, live reading, progress, checked points, and failures updating throughout the sweep.',
+      'Three editable limit masks place a visible maximum-allowed line on the plot, while five required spot offsets can be customized into a personal DUT specification.',
+      'Six DUT scenarios include a healthy control and hidden close-in, broadband, discrete-spur, analyzer-limited, and underdrive problems for repeatable fault-isolation practice.',
+      'Each completed run produces an overall pass or fail, measured value, limit, margin, and result at every specification point instead of leaving the graph unexplained.',
+      'Cipher now separates likely close-in, far-out, spur, mixed, and measurement-system signatures, gives practical next checks, and explicitly warns that trace shape suggests rather than proves root cause.',
+      'The full DUT and analyzer controls remain available in a compact advanced drawer, while a plain-language guide explains offset frequency, dBc/Hz direction, and how to read the limit line.',
+      'Ask Cipher carries the completed limits, readings, margins, setup, and diagnosis into a deeper debrief without requiring the Hunter to transcribe the bench.',
+      'The simulator remains a deterministic educational model—not instrument control, vendor software, calibration evidence, or a substitute for the current instrument and DUT procedures.',
+    ],
+  },
   {
     title: 'Version 10.8.0 · Cipher Nexus',
     detail:
