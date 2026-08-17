@@ -86,17 +86,20 @@ export function CipherLibraryPage() {
           totalTokens: result.usage.totalTokens,
           characters: 0,
           audioSeconds: 0,
-          estimatedCostUsd: estimateTextCostUsd(
-            result.model,
-            result.usage.inputTokens,
-            result.usage.outputTokens,
-            result.usage.cachedInputTokens,
-          ) + result.estimatedSearchCostUsd,
+          estimatedCostUsd:
+            estimateTextCostUsd(
+              result.model,
+              result.usage.inputTokens,
+              result.usage.outputTokens,
+              result.usage.cachedInputTokens,
+            ) + result.estimatedSearchCostUsd,
           exactUsage: true,
         });
       }
     } catch (cause) {
-      setResearchError(cause instanceof Error ? cause.message : 'Cipher could not complete that research.');
+      setResearchError(
+        cause instanceof Error ? cause.message : 'Cipher could not complete that research.',
+      );
     } finally {
       setResearching(false);
     }
@@ -105,8 +108,8 @@ export function CipherLibraryPage() {
   return (
     <div className="page cipher-library-page">
       <div className="party-chat__topbar">
-        <Link className="text-link" to="/">
-          <ArrowLeft size={17} /> Back to System
+        <Link className="text-link" to="/cipher">
+          <ArrowLeft size={17} /> Cipher Nexus
         </Link>
         <span className="party-chat__saved">
           <ShieldCheck size={15} /> Core library available offline
@@ -123,10 +126,20 @@ export function CipherLibraryPage() {
             debugging—organized into practical dossiers grounded in official technical sources.
           </p>
           <div className="cipher-library-hero__actions">
-            <button className="button button--primary" type="button" onClick={() => askCipher('Cipher, open the Engineering Library. Help me identify what I should study next based on the engineering work I am doing right now. Ask me only the questions you actually need.') }>
+            <button
+              className="button button--primary"
+              type="button"
+              onClick={() =>
+                askCipher(
+                  'Cipher, open the Engineering Library. Help me identify what I should study next based on the engineering work I am doing right now. Ask me only the questions you actually need.',
+                )
+              }
+            >
               <MessageSquareCode size={17} /> Consult Cipher
             </button>
-            <span><LibraryBig size={16} /> {ENGINEERING_LIBRARY_TOPICS.length} field dossiers</span>
+            <span>
+              <LibraryBig size={16} /> {ENGINEERING_LIBRARY_TOPICS.length} field dossiers
+            </span>
           </div>
         </div>
       </section>
@@ -141,11 +154,20 @@ export function CipherLibraryPage() {
           />
         </label>
         <div className="cipher-library-filters" aria-label="Engineering library categories">
-          <button className={!category ? 'is-active' : ''} type="button" onClick={() => setCategory(undefined)}>
+          <button
+            className={!category ? 'is-active' : ''}
+            type="button"
+            onClick={() => setCategory(undefined)}
+          >
             All systems
           </button>
           {ENGINEERING_LIBRARY_CATEGORIES.map((item) => (
-            <button className={category === item ? 'is-active' : ''} type="button" key={item} onClick={() => setCategory(category === item ? undefined : item)}>
+            <button
+              className={category === item ? 'is-active' : ''}
+              type="button"
+              key={item}
+              onClick={() => setCategory(category === item ? undefined : item)}
+            >
               {item}
             </button>
           ))}
@@ -154,16 +176,32 @@ export function CipherLibraryPage() {
 
       <section className="cipher-research panel">
         <div className="cipher-research__heading">
-          <span><Sparkles size={20} /></span>
+          <span>
+            <Sparkles size={20} />
+          </span>
           <div>
             <p className="eyebrow">LIVE RESEARCH DESK</p>
             <h2>Send Cipher beyond the built-in shelves.</h2>
-            <p>One deliberate web-grounded AI request. Cipher prioritizes standards, manufacturer manuals, official documentation, and research papers, then saves the finished note locally for offline return.</p>
+            <p>
+              One deliberate web-grounded AI request. Cipher prioritizes standards, manufacturer
+              manuals, official documentation, and research papers, then saves the finished note
+              locally for offline return.
+            </p>
           </div>
         </div>
         <div className="cipher-research__input">
-          <textarea value={researchQuery} onChange={(event) => setResearchQuery(event.target.value)} maxLength={1200} placeholder="Example: Explain how to choose RBW and averaging for a phase-noise spot measurement, and tell me what I must verify in my analyzer manual." />
-          <button className="button button--primary" type="button" disabled={researching || !researchQuery.trim() || settings?.aiLinkMode !== 'online'} onClick={() => void researchLive()}>
+          <textarea
+            value={researchQuery}
+            onChange={(event) => setResearchQuery(event.target.value)}
+            maxLength={1200}
+            placeholder="Example: Explain how to choose RBW and averaging for a phase-noise spot measurement, and tell me what I must verify in my analyzer manual."
+          />
+          <button
+            className="button button--primary"
+            type="button"
+            disabled={researching || !researchQuery.trim() || settings?.aiLinkMode !== 'online'}
+            onClick={() => void researchLive()}
+          >
             <Sparkles size={17} /> {researching ? 'Cipher is researching…' : 'Research live'}
           </button>
         </div>
@@ -173,7 +211,11 @@ export function CipherLibraryPage() {
         </small>
         {researchError && <p className="cipher-research__error">{researchError}</p>}
         {researchNotes.map((note) => (
-          <details className="cipher-research-note" key={note.id} open={researchNotes[0]?.id === note.id}>
+          <details
+            className="cipher-research-note"
+            key={note.id}
+            open={researchNotes[0]?.id === note.id}
+          >
             <summary>
               <span>
                 <strong>{note.query}</strong>
@@ -186,8 +228,24 @@ export function CipherLibraryPage() {
             </summary>
             <div>
               <p>{note.answer}</p>
-              {note.sources.length > 0 && <section><h3>Sources</h3>{note.sources.map((source) => <a href={source.url} target="_blank" rel="noreferrer" key={source.url}>{source.title}<ExternalLink size={14} /></a>)}</section>}
-              <button className="button button--ghost" type="button" onClick={() => void deleteEngineeringResearch(note.id).then(refreshResearch)}><Trash2 size={16} /> Delete saved note</button>
+              {note.sources.length > 0 && (
+                <section>
+                  <h3>Sources</h3>
+                  {note.sources.map((source) => (
+                    <a href={source.url} target="_blank" rel="noreferrer" key={source.url}>
+                      {source.title}
+                      <ExternalLink size={14} />
+                    </a>
+                  ))}
+                </section>
+              )}
+              <button
+                className="button button--ghost"
+                type="button"
+                onClick={() => void deleteEngineeringResearch(note.id).then(refreshResearch)}
+              >
+                <Trash2 size={16} /> Delete saved note
+              </button>
             </div>
           </details>
         ))}
@@ -199,9 +257,13 @@ export function CipherLibraryPage() {
           return (
             <details className="panel cipher-dossier" key={topic.id}>
               <summary>
-                <span><Icon size={20} /></span>
+                <span>
+                  <Icon size={20} />
+                </span>
                 <div>
-                  <small>{topic.category} · {topic.level}</small>
+                  <small>
+                    {topic.category} · {topic.level}
+                  </small>
                   <strong>{topic.title}</strong>
                   <p>{topic.summary}</p>
                 </div>
@@ -214,27 +276,48 @@ export function CipherLibraryPage() {
                 <div className="cipher-dossier__columns">
                   <div>
                     <h3>Core concepts</h3>
-                    <ul>{topic.keyConcepts.map((item) => <li key={item}>{item}</li>)}</ul>
+                    <ul>
+                      {topic.keyConcepts.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
                   </div>
                   <div>
                     <h3>Bench checklist</h3>
-                    <ol>{topic.fieldChecklist.map((item) => <li key={item}>{item}</li>)}</ol>
+                    <ol>
+                      {topic.fieldChecklist.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ol>
                   </div>
                   <div>
                     <h3>Common traps</h3>
-                    <ul>{topic.commonTraps.map((item) => <li key={item}>{item}</li>)}</ul>
+                    <ul>
+                      {topic.commonTraps.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
                   </div>
                 </div>
                 <div className="cipher-dossier__sources">
-                  <h3><BookOpenCheck size={17} /> Official grounding</h3>
+                  <h3>
+                    <BookOpenCheck size={17} /> Official grounding
+                  </h3>
                   {topic.sources.map((source) => (
                     <a key={source.url} href={source.url} target="_blank" rel="noreferrer">
-                      <span><strong>{source.title}</strong><small>{source.organization}</small></span>
+                      <span>
+                        <strong>{source.title}</strong>
+                        <small>{source.organization}</small>
+                      </span>
                       <ExternalLink size={15} />
                     </a>
                   ))}
                 </div>
-                <button className="button button--secondary" type="button" onClick={() => askCipher(buildCipherTopicPrompt(topic))}>
+                <button
+                  className="button button--secondary"
+                  type="button"
+                  onClick={() => askCipher(buildCipherTopicPrompt(topic))}
+                >
                   <MessageSquareCode size={17} /> Ask Cipher about this dossier
                 </button>
               </div>
@@ -248,7 +331,15 @@ export function CipherLibraryPage() {
           <Search size={28} />
           <h2>No dossier matched that exact signal.</h2>
           <p>Cipher can still reason through it and tell you where the library needs to grow.</p>
-          <button className="button button--primary" type="button" onClick={() => askCipher(`Cipher, your Engineering Library does not yet have a dossier matching “${query}.” Teach me the reliable foundation, state what you are uncertain about, tell me which primary sources or equipment manuals we should verify, and propose a new library dossier.`)}>
+          <button
+            className="button button--primary"
+            type="button"
+            onClick={() =>
+              askCipher(
+                `Cipher, your Engineering Library does not yet have a dossier matching “${query}.” Teach me the reliable foundation, state what you are uncertain about, tell me which primary sources or equipment manuals we should verify, and propose a new library dossier.`,
+              )
+            }
+          >
             Ask Cipher and propose expansion
           </button>
         </section>

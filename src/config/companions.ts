@@ -179,9 +179,9 @@ export const COMPANIONS: CompanionDefinition[] = [
     id: 'cipher',
     name: 'Cipher',
     title: 'The Strategist',
-    shortRole: 'Engineering · Code · Data · Systems',
+    shortRole: 'Engineering · Studio Tech · Systems',
     description:
-      'Cipher is the System’s engineering mind: RF, test equipment, software, Excel, data automation, technical architecture, disciplined troubleshooting, and the sequence that turns ambitious plans into reliable evidence.',
+      'Cipher is the System’s engineering mind: RF, test equipment, creator hardware, studio signal chains, software, Excel, automation, technical architecture, and the sequence that turns ambitious plans into reliable evidence.',
     appearance:
       'A lean East Asian tactician in a navy high-collar tech jacket, surrounded by violet and cyan planning glyphs.',
     personality:

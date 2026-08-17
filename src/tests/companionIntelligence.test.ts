@@ -326,7 +326,7 @@ describe('Companion Soulprint intelligence', () => {
   });
 
   it('hard-codes one complete Family Bible entry for all twelve companions', () => {
-    expect(intelligence.COMPANION_INTELLIGENCE_VERSION).toBe('evolution-council-13');
+    expect(intelligence.COMPANION_INTELLIGENCE_VERSION).toBe('cipher-nexus-14');
     expect(intelligence.familyBible.schemaVersion).toBe('2.0.0');
     expect(intelligence.companionIds).toHaveLength(12);
     expect(Object.keys(intelligence.familyBible.companions).sort()).toEqual(

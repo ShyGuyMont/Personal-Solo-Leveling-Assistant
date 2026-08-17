@@ -111,19 +111,23 @@ export function HeadquartersPage() {
 
       <section className="headquarters-actions">
         <Link to="/system-debrief" className="panel">
-          <span><BrainCircuit size={22} /></span>
+          <span>
+            <BrainCircuit size={22} />
+          </span>
           <div>
             <strong>System Evolution Council</strong>
             <p>The family audits its work and drafts our next development brief.</p>
             <small>Private nightly debrief</small>
           </div>
         </Link>
-        <Link to="/cipher-library" className="panel">
-          <span><LibraryBig size={22} /></span>
+        <Link to="/cipher" className="panel">
+          <span>
+            <LibraryBig size={22} />
+          </span>
           <div>
-            <strong>Cipher Engineering Library</strong>
-            <p>RF, test, Excel, code, data, and troubleshooting dossiers.</p>
-            <small>Core library works offline</small>
+            <strong>Cipher Nexus</strong>
+            <p>Engineering, creator hardware, study trials, and measurement simulators.</p>
+            <small>Two libraries · five learning benches</small>
           </div>
         </Link>
         <Link to="/party-chat?tab=check-in" className="panel">

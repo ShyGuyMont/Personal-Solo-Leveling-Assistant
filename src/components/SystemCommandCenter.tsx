@@ -102,7 +102,8 @@ export function SystemCommandCenter() {
     const refreshDebrief = async () => {
       const report = await getSystemDebrief(systemDate);
       const localTime = getLocalClockTime(new Date(), settings?.timeZone ?? 'America/New_York');
-      if (active) setDebriefDue(isSystemDebriefDue(localTime, report?.status === 'council-complete'));
+      if (active)
+        setDebriefDue(isSystemDebriefDue(localTime, report?.status === 'council-complete'));
     };
     void refreshDebrief().catch(() => undefined);
     const debriefTimer = window.setInterval(() => void refreshDebrief(), 60_000);
@@ -348,10 +349,10 @@ export function SystemCommandCenter() {
               Calendar Command<small>Kairo</small>
             </span>
           </Link>
-          <Link to="/cipher-library">
+          <Link to="/cipher">
             <LibraryBig size={18} />
             <span>
-              Engineering Library<small>Cipher · RF · Code · Data</small>
+              Cipher Nexus<small>Engineering · Studio Tech · Study Labs</small>
             </span>
           </Link>
           <Link to="/system-debrief">

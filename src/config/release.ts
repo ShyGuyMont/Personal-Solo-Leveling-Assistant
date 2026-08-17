@@ -1,4 +1,4 @@
-export const APP_VERSION = '10.7.0';
+export const APP_VERSION = '10.8.0';
 export const DATABASE_SCHEMA_VERSION = 29;
 export const SAVE_FORMAT_VERSION = 29;
 
@@ -10,6 +10,21 @@ export interface ReleaseSection {
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
   {
+    title: 'Version 10.8.0 · Cipher Nexus',
+    detail:
+      'Cipher receives a full quick-access technical realm: two source-grounded libraries, an active study academy, and five interactive measurement benches that teach how believable results go wrong.',
+    points: [
+      'Cipher now occupies a dedicated bottom-command position leading to the Cipher Nexus, with direct routes to Creator Studio Technology, the Engineering Core, and the Study Lab.',
+      'The Studio Tech Vault adds thirteen searchable offline dossiers spanning cameras, capture compatibility, microphones, gain staging, audio routing, lighting, OBS, encoding, network headroom, sync, masters, YouTube delivery, and fault isolation.',
+      'Technical Trials challenge RF, phase-noise, instrument, and creator-hardware understanding, reveal the reasoning after each answer, and preserve best score and attempt history inside the local Archive Shield save.',
+      'A source-analyzer-style phase-noise bench makes DUT noise, analyzer floor, input drive, RBW, cross-correlation, spurs, sweep time, integrated noise, and jitter visibly interact.',
+      'Four additional benches teach VNA impedance and S-parameters, two-tone spectrum and IM3, oscilloscope sampling and aliasing, and Y-factor noise-figure measurement with loss correction.',
+      'Every simulator is a deterministic educational model—not vendor software, calibration evidence, safety guidance, or instrument control—and each result can be handed directly to Cipher for a grounded debrief.',
+      'Cipher keeps permanent ownership of engineering and creator hardware while Vesper remains the authority for audience, performance, packaging, publishing courage, and creator momentum.',
+      'All new libraries, quiz progress, and simulator state remain local-first; the broader campaign, companion intelligence, AI controls, and offline foundation remain intact.',
+    ],
+  },
+  {
     title: 'Version 10.7.0 · Evolution Council',
     detail:
       'The System can now study its own real use each night, preserve a private development record, and give Cipher the expansive engineering realm his mind was built to lead.',
@@ -20,7 +35,7 @@ export const RELEASE_SECTIONS: ReleaseSection[] = [
       'The private experience ledger strips secrets and embedded media while excluding physique photos, audio, full A.R.C. documents, and itemized Treasury records from self-improvement reports.',
       'Cipher gains a dedicated Engineering Library with fourteen searchable offline dossiers covering RF foundations, S-parameters, Smith charts, VNA calibration and time domain, spectrum analysis, phase noise, noise figure, measurement planning, Excel, automation, Python signal analysis, Git, and debugging.',
       'Every technical dossier includes practical concepts, a bench checklist, common failure modes, and direct primary-source grounding from Keysight, Rohde & Schwarz, NI, Microsoft, NumPy, SciPy, and Git.',
-      'Cipher\'s deliberate Live Research desk counts the web-search calls actually used and includes their current tool fee alongside returned model-token usage in the local AI meter.',
+      "Cipher's deliberate Live Research desk counts the web-search calls actually used and includes their current tool fee alongside returned model-token usage in the local AI meter.",
       'Ask Cipher launches a grounded conversation from any dossier while his permanent intelligence role now owns RF, instruments, code, Excel, automation, data, and technical troubleshooting without inventing measurements, calibration state, or equipment limits.',
       'The Evolution Council and Engineering Library join Headquarters, System Command Center, Quick Link navigation, offline routing, and the existing twelve-companion Capability Mesh without crowding the bottom command bar.',
     ],

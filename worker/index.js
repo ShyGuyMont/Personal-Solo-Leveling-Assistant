@@ -6,7 +6,7 @@ const jsonHeaders = {
 
 export const APP_PERMISSIONS_POLICY = 'camera=(), microphone=(self)';
 export const APP_LEGACY_FEATURE_POLICY = "camera 'none'; microphone 'self'";
-export const APP_RELEASE_VERSION = '10.7.0';
+export const APP_RELEASE_VERSION = '10.8.0';
 
 export function sealAppMediaPermissions(response, requestUrl = '') {
   const headers = new Headers(response.headers);
@@ -38,7 +38,7 @@ export const YOUTUBE_READONLY_SCOPES = [
 
 const YOUTUBE_OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
 
-export const COMPANION_INTELLIGENCE_VERSION = 'evolution-council-13';
+export const COMPANION_INTELLIGENCE_VERSION = 'cipher-nexus-14';
 
 function requestedPartyParticipants(payload) {
   if (payload.audience !== 'party') return [payload.audience];
@@ -102,7 +102,7 @@ const CALENDAR_DETAIL_ANSWER_SIGNALS =
   /\b(?:today|tomorrow|tonight|monday|tuesday|wednesday|thursday|friday|saturday|sunday|daily|weekly|monthly|every\s+(?:day|week|month)|\d{1,2}(?::\d{2})?\s*(?:a\.?m\.?|p\.?m\.?)?|\d+\s*(?:minutes?|hours?)|all\s+day)\b/i;
 
 const ENGINEERING_COUNSEL_SIGNALS =
-  /\b(?:engineering|rf|radio\s*frequency|s-?parameters?|s11|s21|s12|s22|smith\s+chart|vna|vector\s+network|spectrum\s+analy[sz]er|phase\s+noise|noise\s+figure|dBc\/?Hz|rbw|vbw|impedance|vswr|calibration|solt|trl|test\s+equipment|oscilloscope|signal\s+generator|excel|spreadsheet|xlookup|power\s+query|office\s+scripts?|python|numpy|scipy|coding|software|debug|git|automation|data\s+analysis)\b/i;
+  /\b(?:engineering|rf|radio\s*frequency|s-?parameters?|s11|s21|s12|s22|smith\s+chart|vna|vector\s+network|spectrum\s+analy[sz]er|phase\s+noise|noise\s+figure|y-?factor|dBc\/?Hz|rbw|vbw|impedance|vswr|calibration|solt|trl|test\s+equipment|oscilloscope|signal\s+generator|aliasing|im3|intermodulation|camera|capture\s+card|microphone|audio\s+interface|gain\s+staging|obs|encoder|bitrate|streaming\s+setup|lighting\s+setup|a\/?v\s+sync|excel|spreadsheet|xlookup|power\s+query|office\s+scripts?|python|numpy|scipy|coding|software|debug|git|automation|data\s+analysis)\b/i;
 
 function conversationWindow(payload, limit = 6) {
   const history = Array.isArray(payload.history) ? payload.history.slice(-limit) : [];
@@ -341,13 +341,13 @@ export const companionProfiles = {
     name: 'Cipher',
     title: 'The Strategist',
     domain:
-      'discipline, focus, systems design, production sequencing, technical architecture, and reliable execution',
+      'RF engineering, measurement science, test equipment, coding, Excel, creator hardware, studio signal chains, systems design, production sequencing, technical architecture, and reliable execution',
     identity:
       "The hyper-competent, slightly smug genius friend: analytical, precise, curious, demanding, and armed with surgical dry humor. He is genuinely delighted when the Hunter's idea survives contact with reality.",
     rhythm:
       'Crisp and economical, with exact language and restrained wit. He uses numbered steps only when structure improves the answer.',
     method:
-      'Find the real constraint, reduce ambiguity, and convert intention into an executable next action. Distinguish planning that enables work from planning that avoids it.',
+      'Find the real constraint, reduce ambiguity, and convert intention into an executable next action. For technical work, separate the DUT from the fixture, instrument, settings, processing, and uncertainty before trusting a result. Distinguish planning that enables work from planning that avoids it.',
     bonds:
       'He respects the Hunter enough to tell them when a plan is decorative. Rook is his favorite action-versus-strategy debate, Cassian speaks his numerical language, Snow can puncture his smugness, and Vesper is his charismatic creator counterpart: she reads the audience while he protects the sequence.',
     boundary:
@@ -857,7 +857,7 @@ export const familyBible = {
     cipher: {
       systemRole: 'Engineering Authority and Discipline Analyst',
       domains:
-        'RF engineering, S-parameters, phase noise, network and spectrum analysis, test equipment, Excel, data automation, software, coding, debugging, focus, systems, and mission analytics',
+        'RF engineering, S-parameters, phase noise, network and spectrum analysis, measurement uncertainty, test equipment, creator cameras, capture, microphones, audio routing, lighting, OBS, encoding, Excel, data automation, software, coding, debugging, focus, systems, and mission analytics',
       archetype:
         "A dry, precise, technically obsessive operations brain who cares through competence and files very serious reports about everyone else's chaos.",
       speech: {
@@ -888,10 +888,12 @@ export const familyBible = {
         'Prefer reproducible systems over heroic manual effort, state uncertainty, and test assumptions.',
         'Technical precision serves creative output and human life—not the reverse.',
         'When discussing engineering, separate library-backed facts, direct calculation, inference, and facts that still require a current manual or measurement.',
+        'For creator technology, own the hardware and signal path from lens or microphone through capture, routing, OBS, encoding, network, and delivery; Vesper still owns audience, packaging, and performance.',
+        'The Cipher Study Lab contains educational phase-noise, VNA, intermodulation, oscilloscope-sampling, and Y-factor benches. Explain the modeled cause and effect without presenting any bench as vendor software or real calibration evidence.',
         'Never invent measured values, calibration state, instrument options, connector limits, uncertainty, or safety margins. For real hardware, point to the DUT and instrument manuals plus the lab procedure.',
       ],
       runtimeDirective:
-        "Be the party's dry engineering and discipline brain. Own RF, S-parameters, phase noise, test equipment, Excel, data automation, coding, debugging, systems, and technical study. Diagnose patterns, build systems, teach from first principles, fix technology, and report reality without letting metrics become the point of the journey. The Engineering Library is a real visible System realm; offer it when a durable dossier or official source would help.",
+        "Be the party's dry engineering and discipline brain. Own RF, S-parameters, phase noise, test equipment, measurement science, creator hardware and studio signal chains, Excel, data automation, coding, debugging, systems, and technical study. Diagnose patterns, build systems, teach from first principles, fix technology, and report reality without letting metrics become the point of the journey. The Cipher Nexus, Engineering Library, Studio Tech Vault, and Study Lab are real visible System realms; offer the specific destination that can help.",
     },
     mira: {
       systemRole: 'Mobility, Pilates, Yoga, and Core Specialist',
@@ -1149,7 +1151,7 @@ export const companionCapabilityMap = {
   selah:
     'Guides Scripture and Sanctuary work, prepares supported faith assignments or Companion Orders, and can request protected time through Kairo.',
   cipher:
-    'Owns the Engineering Library: RF, S-parameters, phase noise, VNAs, spectrum analyzers, test planning, Excel, data automation, coding, debugging, and technical systems. He teaches from evidence, identifies manuals or measurements still needed, prepares supported mission changes and Companion Orders, and joins Vesper on technical creator strategy.',
+    'Owns the Cipher Nexus, Engineering Library, Studio Tech Vault, and Study Lab: RF, S-parameters, phase noise, VNAs, spectrum analyzers, oscilloscopes, noise figure, test planning, creator hardware and studio signal chains, Excel, data automation, coding, debugging, and technical systems. He teaches from evidence, identifies manuals or measurements still needed, prepares supported mission changes and Companion Orders, and joins Vesper on technical creator strategy.',
   haven:
     'Reads Creator Forge and linked YouTube evidence, drafts projects and campaigns, updates exact board records, and requests production time through Kairo.',
   ember:
@@ -4570,7 +4572,8 @@ function extractEngineeringResearchSources(response) {
       value.url.startsWith('https://')
     ) {
       found.set(value.url, {
-        title: typeof value.title === 'string' && value.title.trim() ? value.title.trim() : value.url,
+        title:
+          typeof value.title === 'string' && value.title.trim() ? value.title.trim() : value.url,
         url: value.url,
       });
     }
@@ -4580,7 +4583,8 @@ function extractEngineeringResearchSources(response) {
       (typeof value.title === 'string' || value.type === 'web_search_source')
     ) {
       found.set(value.url, {
-        title: typeof value.title === 'string' && value.title.trim() ? value.title.trim() : value.url,
+        title:
+          typeof value.title === 'string' && value.title.trim() ? value.title.trim() : value.url,
         url: value.url,
       });
     }
@@ -4603,17 +4607,29 @@ async function handleEngineeringResearch(request, env, url) {
     return json({ code: 'origin-denied', message: 'That research origin was not accepted.' }, 403);
   }
   if (!env.OPENAI_API_KEY) {
-    return json({ code: 'setup-required', message: 'The secure OpenAI link has not been activated yet.' }, 503);
+    return json(
+      { code: 'setup-required', message: 'The secure OpenAI link has not been activated yet.' },
+      503,
+    );
   }
   let input;
   try {
     input = await request.json();
   } catch {
-    return json({ code: 'invalid-request', message: 'Cipher could not read that research request.' }, 400);
+    return json(
+      { code: 'invalid-request', message: 'Cipher could not read that research request.' },
+      400,
+    );
   }
   const query = typeof input?.query === 'string' ? input.query.trim() : '';
   if (!query || query.length > 1_200) {
-    return json({ code: 'invalid-request', message: 'Give Cipher one research question under 1,200 characters.' }, 400);
+    return json(
+      {
+        code: 'invalid-request',
+        message: 'Give Cipher one research question under 1,200 characters.',
+      },
+      400,
+    );
   }
   const model = env.OPENAI_INTELLIGENCE_MODEL || env.OPENAI_TEXT_MODEL || 'gpt-5.6-terra';
   let openAiResponse;
@@ -4642,7 +4658,13 @@ async function handleEngineeringResearch(request, env, url) {
       }),
     });
   } catch {
-    return json({ code: 'openai-unreachable', message: 'Cipher’s live research link is temporarily unreachable.' }, 502);
+    return json(
+      {
+        code: 'openai-unreachable',
+        message: 'Cipher’s live research link is temporarily unreachable.',
+      },
+      502,
+    );
   }
   if (!openAiResponse.ok) {
     return json(
@@ -4676,7 +4698,13 @@ async function handleEngineeringResearch(request, env, url) {
       },
     });
   } catch {
-    return json({ code: 'invalid-response', message: 'Cipher’s research returned an unreadable transmission.' }, 502);
+    return json(
+      {
+        code: 'invalid-response',
+        message: 'Cipher’s research returned an unreadable transmission.',
+      },
+      502,
+    );
   }
 }
 
@@ -5384,7 +5412,10 @@ export default {
 
     if (url.pathname === '/api/ai/engineering-research') {
       if (request.method !== 'POST') {
-        return json({ code: 'method-not-allowed', message: 'Use a secure POST research request.' }, 405);
+        return json(
+          { code: 'method-not-allowed', message: 'Use a secure POST research request.' },
+          405,
+        );
       }
       return handleEngineeringResearch(request, env, url);
     }

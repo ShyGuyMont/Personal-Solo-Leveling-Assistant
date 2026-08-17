@@ -43,6 +43,12 @@ describe('Companion Quick Link', () => {
     expect(parseQuickNavigationCommand('Snow, take me to the Evolution Council')?.route).toBe(
       '/system-debrief',
     );
+    expect(parseQuickNavigationCommand('Cipher, open the phase noise simulator')?.route).toBe(
+      '/cipher-study-lab',
+    );
+    expect(parseQuickNavigationCommand('Cipher, take me to your studio tech vault')?.route).toBe(
+      '/cipher-studio-tech',
+    );
   });
 
   it('opens Party Council for everyone or multiple named companions', () => {

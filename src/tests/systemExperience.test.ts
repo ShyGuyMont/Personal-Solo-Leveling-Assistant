@@ -5,6 +5,7 @@ describe('living System experience', () => {
   it('maps destinations to their companion realms', () => {
     expect(getSystemRealm('/training-hall')).toBe('training');
     expect(getSystemRealm('/party-chat')).toBe('party');
+    expect(getSystemRealm('/cipher-study-lab')).toBe('cipher');
     expect(getSystemRealm('/status')).toBe('progression');
     expect(getSystemRealm('/missions')).toBe('system');
   });

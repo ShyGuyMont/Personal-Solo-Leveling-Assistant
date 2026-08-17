@@ -81,6 +81,26 @@ export interface QuickLinkAction {
 
 const ROUTES: Array<QuickNavigationCommand & { patterns: RegExp[] }> = [
   {
+    route: '/cipher-studio-tech',
+    label: 'Cipher Studio Tech Vault',
+    patterns: [
+      /\bstudio tech(?:nology)?(?: vault| library)?\b/i,
+      /\byoutube (?:hardware|tech|setup)\b/i,
+      /\bstreaming setup\b/i,
+      /\bcapture card library\b/i,
+    ],
+  },
+  {
+    route: '/cipher-study-lab',
+    label: 'Cipher Study Lab',
+    patterns: [
+      /\bcipher(?:'s)? study lab\b/i,
+      /\bengineering simulator\b/i,
+      /\bphase noise simulator\b/i,
+      /\btechnical (?:quiz|test)\b/i,
+    ],
+  },
+  {
     route: '/cipher-library',
     label: 'Cipher Engineering Library',
     patterns: [
@@ -88,6 +108,15 @@ const ROUTES: Array<QuickNavigationCommand & { patterns: RegExp[] }> = [
       /\bengineering library\b/i,
       /\btechnical library\b/i,
       /\bengineering codex\b/i,
+    ],
+  },
+  {
+    route: '/cipher',
+    label: 'Cipher Nexus',
+    patterns: [
+      /\bcipher nexus\b/i,
+      /\bcipher(?:'s)? (?:section|realm|hub)\b/i,
+      /\btechnical nexus\b/i,
     ],
   },
   {
