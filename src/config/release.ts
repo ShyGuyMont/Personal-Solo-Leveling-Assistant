@@ -1,4 +1,4 @@
-export const APP_VERSION = '10.8.1';
+export const APP_VERSION = '10.8.2';
 export const DATABASE_SCHEMA_VERSION = 29;
 export const SAVE_FORMAT_VERSION = 29;
 
@@ -9,6 +9,19 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 10.8.2 · Lean Core',
+    detail:
+      'The dedicated Cipher library experiment is retired so The System returns to a tighter, faster command surface without weakening Cipher himself.',
+    points: [
+      'The Cipher Nexus, Engineering Library, Studio Tech Vault, Study Lab, technical quizzes, measurement simulators, and live-research desk are removed from the app.',
+      'Cipher leaves the bottom command bar, Headquarters shortcuts, System Command Center destinations, Quick Link navigation, and realm-presence layer; Calendar returns to the simpler eight-command layout.',
+      'Unused library dossiers, simulator engines, study progress, research storage helpers, API route, page code, styles, and feature tests are removed instead of merely hidden.',
+      'Cipher remains one of the twelve companions with his complete Family Bible, engineering and creator-hardware expertise, higher-reasoning route, technical truth boundaries, voice, pivots, mission controls, and relationship dynamics intact.',
+      'The Evolution Council and its nightly self-improvement workflow remain fully available because they are independent from the retired library experiment.',
+      'Existing local research or study metadata may remain harmlessly preserved inside older backups, but the active app no longer loads, displays, or adds to it.',
+    ],
+  },
   {
     title: 'Version 10.8.1 · Live DUT Qualification',
     detail:

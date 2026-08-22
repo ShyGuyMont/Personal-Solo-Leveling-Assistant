@@ -1,7 +1,6 @@
 import {
   BookHeart,
   CalendarDays,
-  CircuitBoard,
   CircleGauge,
   CircleHelp,
   ChefHat,
@@ -32,7 +31,6 @@ const NAV = [
   { to: '/', label: 'System', icon: CircleGauge },
   { to: '/missions', label: 'Missions', icon: ListChecks },
   { to: '/creator-forge', label: 'Creator', icon: Video },
-  { to: '/cipher', label: 'Cipher', icon: CircuitBoard },
   { to: '/training-hall', label: 'Training', icon: Dumbbell },
   { to: '/sanctuary', label: 'Sanctuary', icon: BookHeart },
   { to: '/kitchen', label: 'Kitchen', icon: ChefHat },
@@ -165,7 +163,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <SystemMark small />
           <span>
             <span className="brand__name">THE SYSTEM</span>
-            <span className="brand__tag">V{APP_VERSION} · DUT QUALIFICATION</span>
+            <span className="brand__tag">V{APP_VERSION} · LEAN CORE</span>
           </span>
         </NavLink>
         <div className="app-header__actions">
@@ -224,9 +222,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             key={to}
             to={to}
             end={to === '/'}
-            className={({ isActive }) =>
-              `bottom-nav__item ${isActive || (to === '/cipher' && path.startsWith('/cipher-')) ? 'is-active' : ''}`
-            }
+            className={({ isActive }) => `bottom-nav__item ${isActive ? 'is-active' : ''}`}
           >
             <Icon size={20} strokeWidth={1.7} aria-hidden="true" />
             <span>{label}</span>

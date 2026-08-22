@@ -607,21 +607,6 @@ export interface AiHeadquartersReply {
   };
 }
 
-export interface EngineeringResearchResult {
-  answer: string;
-  sources: Array<{ title: string; url: string }>;
-  model: string;
-  webSearchCalls: number;
-  estimatedSearchCostUsd: number;
-  usage?: {
-    inputTokens: number;
-    outputTokens: number;
-    totalTokens: number;
-    cachedInputTokens: number;
-    reasoningTokens: number;
-  };
-}
-
 export interface AiTranscriptionResult {
   text: string;
   model: string;
@@ -970,52 +955,6 @@ export async function requestAiHeadquartersReply(input: {
   }
 
   return parseAiHeadquartersReply(response);
-}
-
-export async function requestEngineeringResearch(query: string): Promise<EngineeringResearchResult> {
-  let response: Response;
-  try {
-    response = await fetch('/api/ai/engineering-research', {
-      method: 'POST',
-      headers: { accept: 'application/json', 'content-type': 'application/json' },
-      body: JSON.stringify({ query: query.trim() }),
-    });
-  } catch {
-    throw new AiLinkError('Cipher’s live research link could not be reached.', 'network');
-  }
-  const payload = await readJson(response);
-  if (!response.ok) {
-    throw new AiLinkError(
-      typeof payload?.message === 'string' ? payload.message : 'Cipher could not finish that research.',
-      typeof payload?.code === 'string' ? payload.code : 'research-failed',
-    );
-  }
-  if (!payload || typeof payload.answer !== 'string' || typeof payload.model !== 'string') {
-    throw new AiLinkError('Cipher’s research returned an unreadable transmission.', 'invalid-response');
-  }
-  return {
-    answer: payload.answer,
-    model: payload.model,
-    webSearchCalls: Math.max(0, Math.round(Number(payload.webSearchCalls ?? 0) || 0)),
-    estimatedSearchCostUsd: Math.max(0, Number(payload.estimatedSearchCostUsd ?? 0) || 0),
-    sources: Array.isArray(payload.sources)
-      ? payload.sources
-          .filter(
-            (source): source is Record<string, unknown> =>
-              Boolean(source) &&
-              typeof source === 'object' &&
-              typeof (source as Record<string, unknown>).url === 'string',
-          )
-          .map((source) => ({
-            title: typeof source.title === 'string' ? source.title : String(source.url),
-            url: String(source.url),
-          }))
-      : [],
-    usage:
-      payload.usage && typeof payload.usage === 'object'
-        ? (payload.usage as EngineeringResearchResult['usage'])
-        : undefined,
-  };
 }
 
 export async function requestAiTranscription(input: {

@@ -13,7 +13,6 @@ import {
   Dumbbell,
   Map as MapIcon,
   MessageCircleMore,
-  LibraryBig,
   Radio,
   Send,
   ShieldAlert,
@@ -347,12 +346,6 @@ export function SystemCommandCenter() {
             <CalendarClock size={18} />
             <span>
               Calendar Command<small>Kairo</small>
-            </span>
-          </Link>
-          <Link to="/cipher">
-            <LibraryBig size={18} />
-            <span>
-              Cipher Nexus<small>Engineering · Studio Tech · Study Labs</small>
             </span>
           </Link>
           <Link to="/system-debrief">

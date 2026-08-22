@@ -7,7 +7,6 @@ import {
   Crown,
   Flame,
   Heart,
-  LibraryBig,
   MessageCircle,
   MessagesSquare,
   Map,
@@ -118,16 +117,6 @@ export function HeadquartersPage() {
             <strong>System Evolution Council</strong>
             <p>The family audits its work and drafts our next development brief.</p>
             <small>Private nightly debrief</small>
-          </div>
-        </Link>
-        <Link to="/cipher" className="panel">
-          <span>
-            <LibraryBig size={22} />
-          </span>
-          <div>
-            <strong>Cipher Nexus</strong>
-            <p>Engineering, creator hardware, study trials, and measurement simulators.</p>
-            <small>Two libraries · five learning benches</small>
           </div>
         </Link>
         <Link to="/party-chat?tab=check-in" className="panel">

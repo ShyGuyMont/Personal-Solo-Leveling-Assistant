@@ -6,7 +6,7 @@ const jsonHeaders = {
 
 export const APP_PERMISSIONS_POLICY = 'camera=(), microphone=(self)';
 export const APP_LEGACY_FEATURE_POLICY = "camera 'none'; microphone 'self'";
-export const APP_RELEASE_VERSION = '10.8.1';
+export const APP_RELEASE_VERSION = '10.8.2';
 
 export function sealAppMediaPermissions(response, requestUrl = '') {
   const headers = new Headers(response.headers);
@@ -38,7 +38,7 @@ export const YOUTUBE_READONLY_SCOPES = [
 
 const YOUTUBE_OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
 
-export const COMPANION_INTELLIGENCE_VERSION = 'dut-qualification-15';
+export const COMPANION_INTELLIGENCE_VERSION = 'lean-core-16';
 
 function requestedPartyParticipants(payload) {
   if (payload.audience !== 'party') return [payload.audience];
@@ -887,13 +887,12 @@ export const familyBible = {
         'Test whether the failure is motivation, friction, unrealistic scope, scheduling, missing skill, or avoidance before redesigning the system.',
         'Prefer reproducible systems over heroic manual effort, state uncertainty, and test assumptions.',
         'Technical precision serves creative output and human life—not the reverse.',
-        'When discussing engineering, separate library-backed facts, direct calculation, inference, and facts that still require a current manual or measurement.',
+        'When discussing engineering, separate established technical facts, direct calculation, inference, and facts that still require a current manual or measurement.',
         'For creator technology, own the hardware and signal path from lens or microphone through capture, routing, OBS, encoding, network, and delivery; Vesper still owns audience, packaging, and performance.',
-        'The Cipher Study Lab contains educational phase-noise, VNA, intermodulation, oscilloscope-sampling, and Y-factor benches. Its phase-noise qualification run can supply editable limits, modeled readings, margins, analyzer floor, and a preliminary signature classification. Explain why the pattern suggests a cause, name plausible alternatives, and give controlled next checks without presenting any bench as vendor software, real measurement, or calibration evidence.',
         'Never invent measured values, calibration state, instrument options, connector limits, uncertainty, or safety margins. For real hardware, point to the DUT and instrument manuals plus the lab procedure.',
       ],
       runtimeDirective:
-        "Be the party's dry engineering and discipline brain. Own RF, S-parameters, phase noise, test equipment, measurement science, creator hardware and studio signal chains, Excel, data automation, coding, debugging, systems, and technical study. Diagnose patterns, build systems, teach from first principles, fix technology, and report reality without letting metrics become the point of the journey. The Cipher Nexus, Engineering Library, Studio Tech Vault, and Study Lab are real visible System realms; offer the specific destination that can help.",
+        "Be the party's dry engineering and discipline brain. Own RF, S-parameters, phase noise, test equipment, measurement science, creator hardware and studio signal chains, Excel, data automation, coding, debugging, systems, and technical study. Diagnose patterns, build systems, teach from first principles, fix technology, and report reality without letting metrics become the point of the journey.",
     },
     mira: {
       systemRole: 'Mobility, Pilates, Yoga, and Core Specialist',
@@ -1151,7 +1150,7 @@ export const companionCapabilityMap = {
   selah:
     'Guides Scripture and Sanctuary work, prepares supported faith assignments or Companion Orders, and can request protected time through Kairo.',
   cipher:
-    'Owns the Cipher Nexus, Engineering Library, Studio Tech Vault, and Study Lab: RF, S-parameters, phase noise, VNAs, spectrum analyzers, oscilloscopes, noise figure, test planning, creator hardware and studio signal chains, Excel, data automation, coding, debugging, and technical systems. He teaches from evidence, identifies manuals or measurements still needed, prepares supported mission changes and Companion Orders, and joins Vesper on technical creator strategy.',
+    'Owns RF, S-parameters, phase noise, VNAs, spectrum analyzers, oscilloscopes, noise figure, test planning, creator hardware and studio signal chains, Excel, data automation, coding, debugging, and technical systems. He teaches through conversation, identifies manuals or measurements still needed, prepares supported mission changes and Companion Orders, and joins Vesper on technical creator strategy.',
   haven:
     'Reads Creator Forge and linked YouTube evidence, drafts projects and campaigns, updates exact board records, and requests production time through Kairo.',
   ember:
@@ -4562,152 +4561,6 @@ async function handleAiChat(request, env, url) {
   }
 }
 
-function extractEngineeringResearchSources(response) {
-  const found = new Map();
-  const visit = (value) => {
-    if (!value || typeof value !== 'object') return;
-    if (
-      value.type === 'url_citation' &&
-      typeof value.url === 'string' &&
-      value.url.startsWith('https://')
-    ) {
-      found.set(value.url, {
-        title:
-          typeof value.title === 'string' && value.title.trim() ? value.title.trim() : value.url,
-        url: value.url,
-      });
-    }
-    if (
-      typeof value.url === 'string' &&
-      value.url.startsWith('https://') &&
-      (typeof value.title === 'string' || value.type === 'web_search_source')
-    ) {
-      found.set(value.url, {
-        title:
-          typeof value.title === 'string' && value.title.trim() ? value.title.trim() : value.url,
-        url: value.url,
-      });
-    }
-    for (const item of Object.values(value)) {
-      if (Array.isArray(item)) item.forEach(visit);
-      else if (item && typeof item === 'object') visit(item);
-    }
-  };
-  visit(response?.output);
-  return [...found.values()].slice(0, 12);
-}
-
-export function countEngineeringWebSearchCalls(response) {
-  if (!Array.isArray(response?.output)) return 0;
-  return response.output.filter((item) => item?.type === 'web_search_call').length;
-}
-
-async function handleEngineeringResearch(request, env, url) {
-  if (!isSameOriginRequest(request, url)) {
-    return json({ code: 'origin-denied', message: 'That research origin was not accepted.' }, 403);
-  }
-  if (!env.OPENAI_API_KEY) {
-    return json(
-      { code: 'setup-required', message: 'The secure OpenAI link has not been activated yet.' },
-      503,
-    );
-  }
-  let input;
-  try {
-    input = await request.json();
-  } catch {
-    return json(
-      { code: 'invalid-request', message: 'Cipher could not read that research request.' },
-      400,
-    );
-  }
-  const query = typeof input?.query === 'string' ? input.query.trim() : '';
-  if (!query || query.length > 1_200) {
-    return json(
-      {
-        code: 'invalid-request',
-        message: 'Give Cipher one research question under 1,200 characters.',
-      },
-      400,
-    );
-  }
-  const model = env.OPENAI_INTELLIGENCE_MODEL || env.OPENAI_TEXT_MODEL || 'gpt-5.6-terra';
-  let openAiResponse;
-  try {
-    openAiResponse = await fetch('https://api.openai.com/v1/responses', {
-      method: 'POST',
-      headers: {
-        authorization: `Bearer ${env.OPENAI_API_KEY}`,
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify({
-        model,
-        store: false,
-        tools: [{ type: 'web_search' }],
-        include: ['web_search_call.action.sources'],
-        input: [
-          {
-            role: 'system',
-            content: `You are Cipher, the System's dry, precise engineering authority. Research the Hunter's technical question using web search. Prefer primary sources in this order: standards bodies and official specifications; equipment or component manufacturer manuals and application notes; official language/library documentation; peer-reviewed papers. Avoid SEO summaries when a primary source exists. Give a direct answer, then practical engineering implications, a verification or bench checklist, uncertainty, and sources. Distinguish sourced facts from your inference. Never invent measured values, calibration state, instrument options, connector limits, uncertainty, or safety margins. Real hardware limits must be verified against the exact DUT and instrument manuals plus lab procedures. Keep the answer under 1,800 words.`,
-          },
-          { role: 'user', content: query },
-        ],
-        max_output_tokens: 3_600,
-        reasoning: { effort: 'medium' },
-        text: { verbosity: 'medium' },
-      }),
-    });
-  } catch {
-    return json(
-      {
-        code: 'openai-unreachable',
-        message: 'Cipher’s live research link is temporarily unreachable.',
-      },
-      502,
-    );
-  }
-  if (!openAiResponse.ok) {
-    return json(
-      {
-        code: openAiResponse.status === 429 ? 'rate-limited' : 'openai-error',
-        message:
-          openAiResponse.status === 429
-            ? 'The research link is busy or has reached its current usage limit.'
-            : 'Cipher could not complete that live research request.',
-      },
-      openAiResponse.status === 429 ? 429 : 502,
-    );
-  }
-  try {
-    const response = await openAiResponse.json();
-    const answer = extractOutputText(response)?.trim();
-    if (!answer) throw new Error('missing-output');
-    const webSearchCalls = countEngineeringWebSearchCalls(response);
-    return json({
-      answer: answer.slice(0, 16_000),
-      sources: extractEngineeringResearchSources(response),
-      model,
-      webSearchCalls,
-      estimatedSearchCostUsd: Number((webSearchCalls * 0.01).toFixed(4)),
-      usage: {
-        inputTokens: Number(response.usage?.input_tokens ?? 0),
-        cachedInputTokens: Number(response.usage?.input_tokens_details?.cached_tokens ?? 0),
-        outputTokens: Number(response.usage?.output_tokens ?? 0),
-        reasoningTokens: Number(response.usage?.output_tokens_details?.reasoning_tokens ?? 0),
-        totalTokens: Number(response.usage?.total_tokens ?? 0),
-      },
-    });
-  } catch {
-    return json(
-      {
-        code: 'invalid-response',
-        message: 'Cipher’s research returned an unreadable transmission.',
-      },
-      502,
-    );
-  }
-}
-
 const AI_TRANSMISSION_TTL_MS = 15 * 60 * 1000;
 
 async function aiTransmissionForUser(requestId, userId, env) {
@@ -5408,16 +5261,6 @@ export default {
         );
       }
       return handleAiChat(request, env, url);
-    }
-
-    if (url.pathname === '/api/ai/engineering-research') {
-      if (request.method !== 'POST') {
-        return json(
-          { code: 'method-not-allowed', message: 'Use a secure POST research request.' },
-          405,
-        );
-      }
-      return handleEngineeringResearch(request, env, url);
     }
 
     if (url.pathname === '/api/ai/transmissions') {

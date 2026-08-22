@@ -39,16 +39,6 @@ const routeLoaders = {
     import('@/pages/ArcArchivesPage').then((module) => ({ default: module.ArcArchivesPage })),
   '/calendar': () =>
     import('@/pages/CalendarPage').then((module) => ({ default: module.CalendarPage })),
-  '/cipher': () =>
-    import('@/pages/CipherNexusPage').then((module) => ({ default: module.CipherNexusPage })),
-  '/cipher-library': () =>
-    import('@/pages/CipherLibraryPage').then((module) => ({ default: module.CipherLibraryPage })),
-  '/cipher-studio-tech': () =>
-    import('@/pages/CipherStudioTechPage').then((module) => ({
-      default: module.CipherStudioTechPage,
-    })),
-  '/cipher-study-lab': () =>
-    import('@/pages/CipherStudyLabPage').then((module) => ({ default: module.CipherStudyLabPage })),
   '/system-debrief': () =>
     import('@/pages/SystemDebriefPage').then((module) => ({ default: module.SystemDebriefPage })),
 } satisfies Record<string, RouteLoader>;
@@ -66,10 +56,6 @@ export const PRIMARY_ROUTE_PATHS: AppRoutePath[] = [
   '/creator-forge',
   '/arc-archives',
   '/calendar',
-  '/cipher',
-  '/cipher-library',
-  '/cipher-studio-tech',
-  '/cipher-study-lab',
 ];
 
 const routePages = Object.fromEntries(

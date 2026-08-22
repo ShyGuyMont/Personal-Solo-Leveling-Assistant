@@ -10,7 +10,6 @@ export type SystemRealm =
   | 'arc'
   | 'calendar'
   | 'party'
-  | 'cipher'
   | 'campaign'
   | 'archive'
   | 'progression';
@@ -36,7 +35,6 @@ export const REALM_LABELS: Record<SystemRealm, string> = {
   arc: 'A.R.C. Archives',
   calendar: 'Calendar Command',
   party: 'Party Headquarters',
-  cipher: 'Cipher Nexus',
   campaign: 'Campaign Command',
   archive: 'Memory Archive',
   progression: 'Ascension Chamber',
@@ -52,14 +50,12 @@ export const REALM_COMPANIONS: Record<SystemRealm, CompanionId> = {
   arc: 'quill',
   calendar: 'kairo',
   party: 'snow',
-  cipher: 'cipher',
   campaign: 'cipher',
   archive: 'snow',
   progression: 'snow',
 };
 
 export function getSystemRealm(path: string): SystemRealm {
-  if (path.startsWith('/cipher')) return 'cipher';
   if (path.startsWith('/system-debrief')) return 'archive';
   if (path.startsWith('/training-hall')) return 'training';
   if (path.startsWith('/sanctuary')) return 'sanctuary';

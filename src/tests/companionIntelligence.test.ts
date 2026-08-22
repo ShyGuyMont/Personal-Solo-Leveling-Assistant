@@ -80,7 +80,6 @@ interface CompanionIntelligenceModule {
     maxOutputTokens: number;
   };
   sanitizeCompanionLanguage: (value: string, requestMessage?: string) => string;
-  countEngineeringWebSearchCalls: (response: Record<string, unknown>) => number;
   buildYouTubeAnalyticsWindow: (
     now?: Date,
     periodDays?: number,
@@ -190,19 +189,6 @@ describe('Companion Soulprint intelligence', () => {
     expect(intelligence.baseInstructions).toContain('handoff');
     expect(intelligence.baseInstructions).toContain('Use English throughout');
     expect(intelligence.baseInstructions).toContain("Snow is the System's command coordinator");
-  });
-
-  it('counts only web-search tool calls for transparent Cipher research usage', () => {
-    expect(
-      intelligence.countEngineeringWebSearchCalls({
-        output: [
-          { type: 'web_search_call', id: 'search_1' },
-          { type: 'message', content: [] },
-          { type: 'web_search_call', id: 'search_2' },
-        ],
-      }),
-    ).toBe(2);
-    expect(intelligence.countEngineeringWebSearchCalls({ output: [] })).toBe(0);
   });
 
   it('removes accidental foreign-script fragments without blocking requested translation', () => {
@@ -326,7 +312,7 @@ describe('Companion Soulprint intelligence', () => {
   });
 
   it('hard-codes one complete Family Bible entry for all twelve companions', () => {
-    expect(intelligence.COMPANION_INTELLIGENCE_VERSION).toBe('dut-qualification-15');
+    expect(intelligence.COMPANION_INTELLIGENCE_VERSION).toBe('lean-core-16');
     expect(intelligence.familyBible.schemaVersion).toBe('2.0.0');
     expect(intelligence.companionIds).toHaveLength(12);
     expect(Object.keys(intelligence.familyBible.companions).sort()).toEqual(

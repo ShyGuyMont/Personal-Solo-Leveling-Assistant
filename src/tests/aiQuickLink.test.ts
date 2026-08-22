@@ -36,18 +36,9 @@ describe('Companion Quick Link', () => {
     });
   });
 
-  it('opens Cipher Library and Evolution Council from natural navigation commands', () => {
-    expect(parseQuickNavigationCommand('Cipher, open the engineering library')?.route).toBe(
-      '/cipher-library',
-    );
+  it('opens the Evolution Council from natural navigation commands', () => {
     expect(parseQuickNavigationCommand('Snow, take me to the Evolution Council')?.route).toBe(
       '/system-debrief',
-    );
-    expect(parseQuickNavigationCommand('Cipher, open the phase noise simulator')?.route).toBe(
-      '/cipher-study-lab',
-    );
-    expect(parseQuickNavigationCommand('Cipher, take me to your studio tech vault')?.route).toBe(
-      '/cipher-studio-tech',
     );
   });
 

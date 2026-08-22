@@ -71,13 +71,6 @@ export const REALM_PRESENCE: Record<SystemRealm, RealmPresence> = {
     actionLabel: 'Begin Check-In',
     actionPath: '/party-chat',
   },
-  cipher: {
-    signal: 'Technical intelligence wing synchronized',
-    message:
-      'Good. Pick the system, instrument, or signal path. We will isolate what is true before we optimize what merely looks convincing.',
-    actionLabel: 'Open Cipher Nexus',
-    actionPath: '/cipher',
-  },
   campaign: {
     signal: 'Strategist channel synchronized',
     message:
