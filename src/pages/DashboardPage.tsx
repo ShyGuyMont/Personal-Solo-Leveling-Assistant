@@ -16,7 +16,6 @@ import {
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { ChallengeCard } from '@/components/ChallengeCard';
 import { ClassEmblem } from '@/components/ClassEmblem';
-import { CompanionRoster } from '@/components/CompanionRoster';
 import { DailyEventCard } from '@/components/DailyEventCard';
 import { InstallCard } from '@/components/InstallCard';
 import { MissionCard } from '@/components/MissionCard';
@@ -469,7 +468,7 @@ export function DashboardPage() {
           </Link>
         </section>
 
-        <SystemCommandCenter />
+        <SystemCommandCenter compact />
       </section>
 
       {(recovery || activeWeekly) && (
@@ -521,22 +520,25 @@ export function DashboardPage() {
       )}
 
       {settings.companionMode !== 'off' && (
-        <section className="dashboard-zone dashboard-zone--party" aria-labelledby="party-network">
+        <section className="dashboard-party-brief" aria-labelledby="party-network">
           <header className="dashboard-zone__header">
             <div>
-              <p className="eyebrow">PARTY NETWORK</p>
-              <h2 id="party-network">The family behind The System.</h2>
-              <p>
-                Urgent companion signals surface first. The full roster stays compact and close.
-              </p>
+              <p className="eyebrow">PARTY LINK</p>
+              <h2 id="party-network">Twelve companions. One clear signal.</h2>
             </div>
             <Link to="/headquarters" className="text-link">
               Headquarters <ChevronRight size={16} />
             </Link>
           </header>
 
-          <PartyPulsePanel />
-          <CompanionRoster compact />
+          <PartyPulsePanel compact />
+          <Link to="/headquarters" className="dashboard-party-access">
+            <span>
+              <strong>12 companions linked</strong>
+              <small>Open Headquarters for the full family, bonds, and individual channels.</small>
+            </span>
+            <ArrowRight size={17} />
+          </Link>
         </section>
       )}
 

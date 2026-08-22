@@ -1,5 +1,5 @@
 import { Filter, ListChecks } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { MissionCard } from '@/components/MissionCard';
 import { AgentMissionBoard } from '@/components/AgentMissionBoard';
 import { ProgressBar } from '@/components/ProgressBar';
@@ -10,7 +10,10 @@ import type { MissionCategory, MissionStatus } from '@/types/game';
 
 export function MissionsPage() {
   const { missions, todayRecords, settings, systemDate, refresh } = useGameStore();
-  const [filter, setFilter] = useState<MissionStatus | 'all'>('all');
+  const focusedMissionId = new URLSearchParams(window.location.hash.split('?')[1] ?? '').get(
+    'focus',
+  );
+  const [filter, setFilter] = useState<MissionStatus | 'all'>(focusedMissionId ? 'pending' : 'all');
   const active = useMemo(
     () => (settings ? getActiveMissions(missions, settings, systemDate) : []),
     [missions, settings, systemDate],
@@ -21,6 +24,19 @@ export function MissionsPage() {
   );
   const completed = todayRecords.filter((record) => record.status === 'completed').length;
   const categories: MissionCategory[] = ['faith', 'discipline', 'physical', 'creator', 'character'];
+
+  useEffect(() => {
+    if (!focusedMissionId) return;
+    setFilter('pending');
+    const timer = window.setTimeout(() => {
+      document.getElementById(`mission-${focusedMissionId}`)?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      });
+      document.getElementById(`mission-${focusedMissionId}`)?.focus({ preventScroll: true });
+    }, 120);
+    return () => window.clearTimeout(timer);
+  }, [focusedMissionId]);
 
   return (
     <div className="page">
@@ -94,6 +110,7 @@ export function MissionsPage() {
                       mission={mission}
                       record={record}
                       date={systemDate}
+                      focused={mission.id === focusedMissionId}
                     />
                   );
                 })}

@@ -72,7 +72,7 @@ function openQuickLink(companionId: CompanionId, initialDraft?: string) {
   );
 }
 
-export function SystemCommandCenter() {
+export function SystemCommandCenter({ compact = false }: { compact?: boolean }) {
   const { missions, todayRecords, stats, settings, systemDate } = useGameStore();
   const [operations, setOperations] = useState<DailyOperationsRecord>();
   const [pendingProposal, setPendingProposal] = useState<{
@@ -138,6 +138,91 @@ export function SystemCommandCenter() {
   const proposalOwner = pendingProposal
     ? getCompanion(pendingProposal.proposal.ownerId)
     : undefined;
+
+  if (compact) {
+    const attentionCount = proposalCount + transmissionCount + (debriefDue ? 1 : 0);
+    return (
+      <section className="panel system-command-center system-command-center--compact">
+        <header className="system-command-center__compact-header">
+          <div>
+            <p className="eyebrow">COMMAND QUEUE</p>
+            <h2>
+              {attentionCount
+                ? `${attentionCount} ${attentionCount === 1 ? 'item needs' : 'items need'} review.`
+                : 'The board is synchronized.'}
+            </h2>
+          </div>
+          <button
+            className="button button--ghost button--small"
+            onClick={() => openQuickLink('snow')}
+          >
+            Talk to Snow
+          </button>
+        </header>
+
+        {(operations || pendingProposal || transmissionCount > 0) && (
+          <div className="system-command-center__live-board">
+            {operations && operations.status !== 'awaiting-confirmation' && (
+              <div className="system-command-center__operations">
+                <span>
+                  <Sparkles size={16} /> PARTY OPERATIONS
+                </span>
+                {operations.training && (
+                  <Link to="/training-hall">
+                    <Dumbbell size={16} /> {operations.training.label}
+                    <b>{realmStateLabel(operations.training.state)}</b>
+                  </Link>
+                )}
+                {operations.kitchen && (
+                  <Link to="/kitchen">
+                    <ChefHat size={16} /> {operations.kitchen.label}
+                    <b>{realmStateLabel(operations.kitchen.state)}</b>
+                  </Link>
+                )}
+                {operations.sanctuary && (
+                  <Link to="/sanctuary">
+                    <BookHeart size={16} /> {operations.sanctuary.label}
+                    <b>{realmStateLabel(operations.sanctuary.state)}</b>
+                  </Link>
+                )}
+              </div>
+            )}
+            {pendingProposal && proposalOwner && (
+              <button
+                type="button"
+                className="system-command-center__proposal"
+                onClick={() => openQuickLink(pendingProposal.proposal.ownerId)}
+              >
+                <ShieldAlert size={18} />
+                <span>
+                  <small>CONFIRMATION WAITING · {proposalOwner.name.toUpperCase()}</small>
+                  <strong>{PROPOSAL_LABELS[pendingProposal.proposal.kind]}</strong>
+                </span>
+                <ArrowRight size={16} />
+              </button>
+            )}
+            {transmissionCount > 0 && (
+              <div className="system-command-center__transmission">
+                <Radio size={17} /> {transmissionCount} intelligence link
+                {transmissionCount === 1 ? '' : 's'} synchronizing
+              </div>
+            )}
+          </div>
+        )}
+
+        {debriefDue && (
+          <Link className="system-command-center__debrief" to="/system-debrief">
+            <BrainCircuit size={20} />
+            <span>
+              <small>EVOLUTION COUNCIL READY</small>
+              <strong>Snow and Cipher are ready to review The System.</strong>
+            </span>
+            <ArrowRight size={17} />
+          </Link>
+        )}
+      </section>
+    );
+  }
 
   return (
     <section className="panel system-command-center" data-depth-surface="panel">

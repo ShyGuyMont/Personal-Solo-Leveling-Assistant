@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { getPartyPulseSignals } from '@/game/partyPulse';
+import { DEFAULT_MISSIONS } from '@/config/missions';
+import { getPartyPulseSignals, selectReentryMission } from '@/game/partyPulse';
 import { createInitialStat } from '@/game/stats';
 import type { CompanionId, StatName, StatProgress } from '@/types/game';
 
@@ -55,5 +56,27 @@ describe('Party Pulse', () => {
     expect(signals.find((signal) => signal.companionId === 'ember')?.message).toMatch(
       /easiest meaningful objective/i,
     );
+  });
+
+  it('turns broad re-entry into one concrete pending mission', () => {
+    const records = DEFAULT_MISSIONS.map((mission) => ({
+      id: `record:${mission.id}`,
+      date: '2026-08-22' as const,
+      missionId: mission.id,
+      status: 'pending' as const,
+      details: {},
+      updatedAt: '2026-08-22T12:00:00.000Z',
+      protectedException: false,
+    }));
+
+    expect(selectReentryMission(DEFAULT_MISSIONS, records)?.id).toBe('prayer');
+    expect(
+      selectReentryMission(
+        DEFAULT_MISSIONS,
+        records.map((record) =>
+          record.missionId === 'prayer' ? { ...record, status: 'completed' as const } : record,
+        ),
+      )?.id,
+    ).toBe('kind-message');
   });
 });

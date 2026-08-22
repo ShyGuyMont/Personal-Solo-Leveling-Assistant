@@ -1,5 +1,11 @@
 import { getCompanionForStat } from '@/config/companions';
-import type { CompanionId, StatName, StatProgress } from '@/types/game';
+import type {
+  CompanionId,
+  DailyMissionRecord,
+  MissionDefinition,
+  StatName,
+  StatProgress,
+} from '@/types/game';
 import { STAT_LABELS } from '@/utils/format';
 
 export type PartyPulseSeverity = 'watch' | 'warning' | 'critical';
@@ -33,6 +39,22 @@ const STAT_ACTIONS: Record<StatName, { path: string; label: string }> = {
   empathy: { path: '/missions', label: 'Choose one connection action' },
   stewardship: { path: '/treasury', label: 'Open Treasury Command' },
 };
+
+export function selectReentryMission(missions: MissionDefinition[], records: DailyMissionRecord[]) {
+  const missionMap = new Map(missions.map((mission) => [mission.id, mission]));
+  const methodWeight = (method: MissionDefinition['method']) => (method === 'toggle' ? 0 : 1);
+
+  return records
+    .filter((record) => record.status === 'pending')
+    .map((record) => missionMap.get(record.missionId))
+    .filter(
+      (mission): mission is MissionDefinition =>
+        Boolean(mission) && mission?.method !== 'day-boundary',
+    )
+    .sort(
+      (a, b) => methodWeight(a.method) - methodWeight(b.method) || a.accountXp - b.accountXp,
+    )[0];
+}
 
 function severityFor(stat: StatProgress): PartyPulseSeverity {
   if (stat.neglectedDays >= 5 || stat.momentum <= 20) return 'critical';

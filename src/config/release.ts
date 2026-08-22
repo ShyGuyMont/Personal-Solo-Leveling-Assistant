@@ -1,4 +1,4 @@
-export const APP_VERSION = '10.9.0';
+export const APP_VERSION = '10.9.1';
 export const DATABASE_SCHEMA_VERSION = 29;
 export const SAVE_FORMAT_VERSION = 29;
 
@@ -9,6 +9,19 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 10.9.1 · Lean Command Deck',
+    detail:
+      'The System screen sheds another layer of duplicate presentation, while Party Pulse becomes a concrete route back into action instead of a vague persistent warning.',
+    points: [
+      'Ember’s broad re-entry signal now selects the easiest eligible pending objective, names it on the action, opens the Missions interface in pending mode, and highlights that exact mission.',
+      'Party Pulse remains an accountability signal—not a penalty—and naturally clears only after supporting progress changes the neglected path.',
+      'The twelve-card companion wall leaves the System screen; Headquarters remains the dedicated home for the full family, bonds, and individual channels.',
+      'Party Link is reduced to one signal and one compact Headquarters entrance, eliminating the broken mobile portrait overflow and restoring a clean vertical reading order.',
+      'Snow’s dashboard Command Center becomes a lean command queue that preserves prepared operations, pending confirmations, intelligence transmissions, and Evolution Council alerts without repeating the mission board or realm directory.',
+      'Mission, AI, XP, companion, challenge, and Ascension Core logic remain intact.',
+    ],
+  },
   {
     title: 'Version 10.9.0 · Command Hierarchy',
     detail:

@@ -32,11 +32,13 @@ export function MissionCard({
   record,
   date,
   compact = false,
+  focused = false,
 }: {
   mission: MissionDefinition;
   record: DailyMissionRecord;
   date: LocalDateKey;
   compact?: boolean;
+  focused?: boolean;
 }) {
   const {
     complete,
@@ -105,7 +107,9 @@ export function MissionCard({
 
   return (
     <article
-      className={`mission-card mission-card--${record.status} ${compact ? 'mission-card--compact' : ''}`}
+      id={`mission-${mission.id}`}
+      className={`mission-card mission-card--${record.status} ${compact ? 'mission-card--compact' : ''} ${focused ? 'is-focused' : ''}`}
+      tabIndex={focused ? -1 : undefined}
     >
       <div className="mission-card__main">
         <span className="mission-card__sigil" aria-hidden="true">

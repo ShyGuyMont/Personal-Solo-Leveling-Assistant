@@ -7,6 +7,12 @@ const documentShell = readFileSync(resolve(process.cwd(), 'index.html'), 'utf8')
 const appShell = readFileSync(resolve(process.cwd(), 'src/components/AppShell.tsx'), 'utf8');
 const app = readFileSync(resolve(process.cwd(), 'src/App.tsx'), 'utf8');
 const dashboard = readFileSync(resolve(process.cwd(), 'src/pages/DashboardPage.tsx'), 'utf8');
+const missionsPage = readFileSync(resolve(process.cwd(), 'src/pages/MissionsPage.tsx'), 'utf8');
+const missionCard = readFileSync(resolve(process.cwd(), 'src/components/MissionCard.tsx'), 'utf8');
+const partyPulse = readFileSync(
+  resolve(process.cwd(), 'src/components/PartyPulsePanel.tsx'),
+  'utf8',
+);
 const viteConfig = readFileSync(resolve(process.cwd(), 'vite.config.ts'), 'utf8');
 const quickLink = readFileSync(
   resolve(process.cwd(), 'src/components/CompanionQuickLink.tsx'),
@@ -124,11 +130,19 @@ describe('mobile keyboard viewport safety', () => {
   it('keeps the home screen organized around one command hierarchy', () => {
     expect(dashboard).toContain("TODAY'S COMMAND DECK");
     expect(dashboard).toContain('ACTIVE OPERATIONS');
-    expect(dashboard).toContain('PARTY NETWORK');
+    expect(dashboard).toContain('PARTY LINK');
     expect(dashboard).toContain('className="dashboard-history"');
-    expect(dashboard).toContain('<CompanionRoster compact />');
+    expect(dashboard).toContain('<PartyPulsePanel compact />');
+    expect(dashboard).not.toContain('<CompanionRoster');
     expect(dashboard).not.toContain('className="hero-metrics"');
     expect(dashboard).not.toContain('className="headquarters-stage__companion"');
+  });
+
+  it('turns a broad re-entry signal into a focused mission instead of a dead-end link', () => {
+    expect(partyPulse).toContain('selectReentryMission');
+    expect(partyPulse).toContain('/missions?focus=');
+    expect(missionsPage).toContain('scrollIntoView');
+    expect(missionCard).toContain('is-focused');
   });
 
   it('lets an idle phone enter Deep Sleep without disabling functional progress', () => {
