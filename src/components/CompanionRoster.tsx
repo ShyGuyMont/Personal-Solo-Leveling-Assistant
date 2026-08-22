@@ -4,7 +4,13 @@ import { COMPANIONS, getCompanionImage } from '@/config/companions';
 import { Link } from '@/router';
 import { useGameStore } from '@/store/useGameStore';
 
-export function CompanionRoster({ detailed = false }: { detailed?: boolean }) {
+export function CompanionRoster({
+  detailed = false,
+  compact = false,
+}: {
+  detailed?: boolean;
+  compact?: boolean;
+}) {
   const settings = useGameStore((state) => state.settings);
   const enabled = new Set(settings?.enabledCompanionIds ?? []);
   const companions = COMPANIONS.filter((companion) => enabled.has(companion.id));
@@ -12,22 +18,24 @@ export function CompanionRoster({ detailed = false }: { detailed?: boolean }) {
 
   return (
     <section
-      className={`panel companion-roster ${detailed ? 'companion-roster--detailed' : ''}`}
+      className={`panel companion-roster ${detailed ? 'companion-roster--detailed' : ''} ${compact ? 'companion-roster--compact' : ''}`}
       data-depth-surface="panel"
     >
-      <header className="section-header">
-        <div>
-          <p className="eyebrow">PARTY HEADQUARTERS</p>
-          <h2>Snow & your eleven System companions</h2>
-        </div>
-        <Link
-          to="/headquarters"
-          className="button button--ghost button--small companion-roster__check-in"
-        >
-          <Castle size={16} /> Headquarters
-        </Link>
-      </header>
-      <div className="companion-roster__grid">
+      {!compact && (
+        <header className="section-header">
+          <div>
+            <p className="eyebrow">PARTY HEADQUARTERS</p>
+            <h2>Snow & your eleven System companions</h2>
+          </div>
+          <Link
+            to="/headquarters"
+            className="button button--ghost button--small companion-roster__check-in"
+          >
+            <Castle size={16} /> Headquarters
+          </Link>
+        </header>
+      )}
+      <div className={compact ? 'companion-roster__compact-grid' : 'companion-roster__grid'}>
         {companions.map((companion) => {
           const isPrimary = Boolean(companion.primary);
           return (
@@ -45,11 +53,11 @@ export function CompanionRoster({ detailed = false }: { detailed?: boolean }) {
                 <span style={{ background: companion.accent }} />
               </div>
               <div>
-                {isPrimary && <em>PRIMARY SUPPORT</em>}
+                {isPrimary && !compact && <em>PRIMARY SUPPORT</em>}
                 <strong>{companion.name}</strong>
-                <span>{companion.title}</span>
-                <small>{companion.shortRole}</small>
-                {isPrimary && !detailed && <p>{companion.description}</p>}
+                {!compact && <span>{companion.title}</span>}
+                {!compact && <small>{companion.shortRole}</small>}
+                {isPrimary && !detailed && !compact && <p>{companion.description}</p>}
                 {detailed && (
                   <>
                     <p>{companion.description}</p>

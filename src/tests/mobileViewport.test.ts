@@ -81,7 +81,7 @@ describe('mobile keyboard viewport safety', () => {
     expect(worker).toContain("url.pathname === '/api/system/version'");
     expect(worker).toContain("headers.set('cache-control', 'no-store, max-age=0')");
     expect(worker).toContain("headers.set('service-worker-allowed', '/')");
-    expect(pwaUpdate).toContain("fetch(`/api/system/version?check=${Date.now()}`");
+    expect(pwaUpdate).toContain('fetch(`/api/system/version?check=${Date.now()}`');
     expect(pwaUpdate).toContain('registration?.waiting && navigator.serviceWorker.controller');
     expect(sitesBuild).toContain("resolve(distributionDirectory, 'sw.js')");
     expect(sitesBuild).toContain('production service-worker runtime is missing');
@@ -119,6 +119,16 @@ describe('mobile keyboard viewport safety', () => {
     expect(styles).toContain(
       "html[data-performance='balanced'] .ascension-core__reactor-facets span:nth-child(even)",
     );
+  });
+
+  it('keeps the home screen organized around one command hierarchy', () => {
+    expect(dashboard).toContain("TODAY'S COMMAND DECK");
+    expect(dashboard).toContain('ACTIVE OPERATIONS');
+    expect(dashboard).toContain('PARTY NETWORK');
+    expect(dashboard).toContain('className="dashboard-history"');
+    expect(dashboard).toContain('<CompanionRoster compact />');
+    expect(dashboard).not.toContain('className="hero-metrics"');
+    expect(dashboard).not.toContain('className="headquarters-stage__companion"');
   });
 
   it('lets an idle phone enter Deep Sleep without disabling functional progress', () => {

@@ -28691,3 +28691,254 @@ html[data-performance='efficient'] .ascension-core__neural-web span:nth-child(n 
 html[data-performance='efficient'] .ascension-core__life-sparks i:nth-child(n + 5) {
   display: none;
 }
+
+/* Version 10.9.0 · Command Hierarchy
+   The home screen now reads from immediate action to supporting intelligence. */
+.dashboard-page .hero-panel.headquarters-stage {
+  min-height: 540px;
+}
+
+.dashboard-page .headquarters-stage__chamber {
+  max-width: 1120px;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 0.88fr);
+  gap: clamp(30px, 5vw, 72px);
+  margin: 0 auto;
+}
+
+.dashboard-zone {
+  display: grid;
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.dashboard-zone__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 0 4px 13px;
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 22%, var(--border-soft));
+}
+
+.dashboard-zone__header h2 {
+  margin: 4px 0 0;
+  font-size: clamp(1.2rem, 2.7vw, 1.75rem);
+}
+
+.dashboard-zone__header p:last-child {
+  max-width: 720px;
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 0.76rem;
+  line-height: 1.55;
+}
+
+.dashboard-zone__status {
+  display: grid;
+  min-width: 116px;
+  gap: 2px;
+  padding: 10px 13px;
+  color: var(--accent);
+  text-align: right;
+  background: color-mix(in srgb, var(--accent) 7%, var(--panel));
+  border: 1px solid color-mix(in srgb, var(--accent) 24%, var(--border-soft));
+  border-radius: 12px;
+}
+
+.dashboard-zone__status strong {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+}
+
+.dashboard-zone__status small {
+  color: var(--muted);
+  font-size: 0.61rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.dashboard-zone--today .mission-command,
+.dashboard-zone--today .system-command-center,
+.dashboard-zone--party .party-pulse,
+.dashboard-zone--party .companion-roster {
+  margin: 0;
+}
+
+.dashboard-operations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
+  gap: 14px;
+}
+
+.dashboard-operations-grid .recovery-banner,
+.dashboard-operations-grid .challenge-command {
+  min-height: 100%;
+  margin: 0;
+}
+
+.companion-roster--compact {
+  padding: clamp(14px, 2.4vw, 20px);
+}
+
+.companion-roster__compact-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.companion-roster--compact .companion-card {
+  display: grid;
+  min-height: 104px;
+  grid-template-columns: 1fr;
+  place-items: center;
+  gap: 7px;
+  padding: 10px 6px;
+  text-align: center;
+}
+
+.companion-roster--compact .companion-card--primary {
+  grid-column: auto;
+  grid-template-columns: 1fr;
+}
+
+.companion-roster--compact .companion-card__portrait,
+.companion-roster--compact .companion-card--primary .companion-card__portrait {
+  width: 54px;
+  height: 54px;
+}
+
+.companion-roster--compact .companion-card > div:last-child {
+  min-width: 0;
+}
+
+.companion-roster--compact .companion-card strong {
+  display: block;
+  overflow: hidden;
+  font-size: 0.72rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboard-history {
+  margin-top: 24px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--panel) 88%, transparent);
+  border: 1px solid var(--border-soft);
+  border-radius: 16px;
+}
+
+.dashboard-history > summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 18px;
+  padding: 16px 18px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.dashboard-history > summary::-webkit-details-marker {
+  display: none;
+}
+
+.dashboard-history > summary span {
+  display: grid;
+  gap: 4px;
+}
+
+.dashboard-history > summary strong {
+  font-family: var(--font-display);
+  font-size: 1rem;
+}
+
+.dashboard-history > summary small {
+  max-width: 420px;
+  color: var(--muted);
+  font-size: 0.68rem;
+  line-height: 1.5;
+}
+
+.dashboard-history > summary > svg {
+  color: var(--accent);
+  transition: transform 180ms ease;
+}
+
+.dashboard-history[open] > summary > svg {
+  transform: rotate(180deg);
+}
+
+.dashboard-history .recent-growth {
+  margin: 0 12px 12px;
+}
+
+@media (max-width: 720px) {
+  .dashboard-page .hero-panel.headquarters-stage {
+    min-height: 0;
+  }
+
+  .dashboard-page .headquarters-stage__chamber {
+    display: flex;
+    min-height: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+    padding-top: 18px;
+  }
+
+  .dashboard-zone {
+    margin-top: 20px;
+  }
+
+  .dashboard-zone__header {
+    display: grid;
+    align-items: start;
+    gap: 10px;
+    padding-inline: 2px;
+  }
+
+  .dashboard-zone__header > .text-link {
+    justify-self: start;
+  }
+
+  .dashboard-zone__status {
+    min-width: 0;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    justify-self: stretch;
+    text-align: left;
+  }
+
+  .dashboard-zone__status small {
+    text-align: right;
+  }
+
+  .companion-roster__compact-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .companion-roster--compact .companion-card {
+    min-height: 92px;
+  }
+
+  .companion-roster--compact .companion-card__portrait,
+  .companion-roster--compact .companion-card--primary .companion-card__portrait {
+    width: 46px;
+    height: 46px;
+  }
+
+  .dashboard-history > summary {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px 12px;
+    padding: 14px;
+  }
+
+  .dashboard-history > summary small {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .dashboard-history > summary > svg {
+    grid-column: 2;
+    grid-row: 1;
+  }
+}

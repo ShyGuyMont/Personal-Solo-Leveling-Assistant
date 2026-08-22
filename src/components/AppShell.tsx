@@ -163,7 +163,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <SystemMark small />
           <span>
             <span className="brand__name">THE SYSTEM</span>
-            <span className="brand__tag">V{APP_VERSION} · LEAN CORE</span>
+            <span className="brand__tag">V{APP_VERSION} · COMMAND HIERARCHY</span>
           </span>
         </NavLink>
         <div className="app-header__actions">

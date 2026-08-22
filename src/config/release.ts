@@ -1,4 +1,4 @@
-export const APP_VERSION = '10.8.2';
+export const APP_VERSION = '10.9.0';
 export const DATABASE_SCHEMA_VERSION = 29;
 export const SAVE_FORMAT_VERSION = 29;
 
@@ -9,6 +9,19 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 10.9.0 · Command Hierarchy',
+    detail:
+      'The System home screen is reorganized into a deliberate daily command flow so the Ascension Core can stay spectacular without every supporting feature competing for attention.',
+    points: [
+      'The Ascension Core and player identity now own the opening chamber without duplicate Snow presence or a second progress strip repeating information already shown by the live HUD and Core satellites.',
+      "A dedicated Today's Command Deck places actionable missions first, followed by Snow's System Command Center and its full coordination tools.",
+      'Recovery protocols and weekly dungeons now share one conditional Active Operations layer that disappears completely when neither is active.',
+      'Party Pulse signals and all twelve companions now live inside one Party Network layer, with a compact roster replacing the former wall of full companion cards.',
+      'Recent stat activity moves into a clearly labeled, collapsed System History drawer so the record remains available without interrupting the daily decision flow.',
+      'No mission logic, companion intelligence, XP, challenges, commands, or Ascension Core functionality was removed.',
+    ],
+  },
   {
     title: 'Version 10.8.2 · Lean Core',
     detail:

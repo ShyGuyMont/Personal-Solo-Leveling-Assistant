@@ -1,6 +1,7 @@
 import {
   ArrowRight,
   CalendarDays,
+  ChevronDown,
   ChevronRight,
   Flame,
   Gauge,
@@ -24,7 +25,6 @@ import { ProgressBar } from '@/components/ProgressBar';
 import { SystemCommandCenter } from '@/components/SystemCommandCenter';
 import { chooseSystemMessage } from '@/config/messages';
 import { getChallengeTemplate } from '@/config/challenges';
-import { getCompanion, getCompanionImage } from '@/config/companions';
 import { APP_VERSION } from '@/config/release';
 import { getDashboardHistory } from '@/db/repositories';
 import { buildAscensionCoreProjection, buildAscensionCoreVitality } from '@/game/ascensionCore';
@@ -113,10 +113,7 @@ export function DashboardPage() {
     },
     daySeed(systemDate),
   );
-  const systemStateLabel = systemState === 'rank-qualified' ? 'class ready' : systemState;
-
   if (!profile || !progression || !settings) return null;
-  const snow = getCompanion('snow');
   const clearedClassGates = qualification?.items.filter((item) => item.met).length ?? 0;
   const totalClassGates = qualification?.items.length ?? 0;
   const coreProjection = buildAscensionCoreProjection({
@@ -363,30 +360,6 @@ export function DashboardPage() {
               <ScanLine size={13} /> {coreAwakened ? 'CORE LINK OPEN' : 'TOUCH TO AWAKEN'}
             </span>
           </button>
-
-          <div
-            className="headquarters-stage__companion"
-            style={{ '--companion-accent': snow.accent } as CSSProperties}
-          >
-            <div className="headquarters-stage__portrait">
-              <img src={getCompanionImage(snow.image)} alt="Snow, The Constant" />
-              <span>
-                <i /> LIVE
-              </span>
-            </div>
-            <div>
-              <p className="eyebrow">PRIMARY COMPANION · SNOW</p>
-              <strong>The Constant is beside you.</strong>
-              <small>
-                {pending.length
-                  ? `${pending.length} objectives remain. We only need to choose the next one.`
-                  : 'Every available objective has been answered. Let yourself recognize that.'}
-              </small>
-              <Link to="/party-chat">
-                Open private channel <ArrowRight size={14} />
-              </Link>
-            </div>
-          </div>
         </div>
 
         {coreAwakened && (
@@ -430,48 +403,31 @@ export function DashboardPage() {
             </Link>
           </section>
         )}
-
-        <div className="hero-metrics">
-          <div>
-            <Sparkles size={17} />
-            <span>Today</span>
-            <strong>{Math.round(percentage * 100)}%</strong>
-          </div>
-          <div>
-            <Flame size={17} />
-            <span>Cleared-day streak</span>
-            <strong>{progression.currentDayStreak}</strong>
-          </div>
-          <div>
-            <Shield size={17} />
-            <span>System state</span>
-            <strong>{systemStateLabel}</strong>
-          </div>
-        </div>
       </section>
 
       <InstallCard />
       <DailyEventCard />
-      <SystemCommandCenter />
-      <PartyPulsePanel />
 
-      {recovery && (
-        <section className="recovery-banner">
-          <span className="recovery-banner__icon">
-            <TrendingUp size={19} />
-          </span>
+      <section className="dashboard-zone dashboard-zone--today" aria-labelledby="today-command">
+        <header className="dashboard-zone__header">
           <div>
-            <p className="eyebrow">RECOVERY PROTOCOL</p>
-            <strong>{getChallengeTemplate(recovery.templateId)?.name}</strong>
-            <p>{getChallengeTemplate(recovery.templateId)?.description}</p>
+            <p className="eyebrow">TODAY'S COMMAND DECK</p>
+            <h2 id="today-command">
+              {pending.length ? 'Move the day forward.' : 'Today’s available path is clear.'}
+            </h2>
+            <p>
+              Your next actions stay first. Coordination and deeper System controls remain directly
+              beneath them.
+            </p>
           </div>
-          <span>
-            {recovery.current}/{recovery.target}
+          <span className="dashboard-zone__status">
+            <strong>{Math.round(percentage * 100)}%</strong>
+            <small>
+              {completeCount}/{todayRecords.length} cleared
+            </small>
           </span>
-        </section>
-      )}
+        </header>
 
-      <div className="dashboard-grid">
         <section className="panel mission-command" data-depth-surface="panel">
           <header className="section-header">
             <div>
@@ -513,19 +469,86 @@ export function DashboardPage() {
           </Link>
         </section>
 
-        <section className="panel challenge-command" data-depth-surface="panel">
-          <header className="section-header">
+        <SystemCommandCenter />
+      </section>
+
+      {(recovery || activeWeekly) && (
+        <section
+          className="dashboard-zone dashboard-zone--operations"
+          aria-labelledby="active-operations"
+        >
+          <header className="dashboard-zone__header">
             <div>
-              <p className="eyebrow eyebrow--purple">ACTIVE CHALLENGE</p>
-              <h2>Weekly dungeon</h2>
+              <p className="eyebrow eyebrow--purple">ACTIVE OPERATIONS</p>
+              <h2 id="active-operations">Special protocols in motion.</h2>
+              <p>Temporary challenges and recovery work live together without crowding today.</p>
             </div>
-            <Link to="/challenges" className="text-link text-link--purple">
-              Challenges <ChevronRight size={16} />
+          </header>
+
+          <div className="dashboard-operations-grid">
+            {recovery && (
+              <section className="recovery-banner">
+                <span className="recovery-banner__icon">
+                  <TrendingUp size={19} />
+                </span>
+                <div>
+                  <p className="eyebrow">RECOVERY PROTOCOL</p>
+                  <strong>{getChallengeTemplate(recovery.templateId)?.name}</strong>
+                  <p>{getChallengeTemplate(recovery.templateId)?.description}</p>
+                </div>
+                <span>
+                  {recovery.current}/{recovery.target}
+                </span>
+              </section>
+            )}
+
+            {activeWeekly && (
+              <section className="panel challenge-command" data-depth-surface="panel">
+                <header className="section-header">
+                  <div>
+                    <p className="eyebrow eyebrow--purple">ACTIVE CHALLENGE</p>
+                    <h2>Weekly dungeon</h2>
+                  </div>
+                  <Link to="/challenges" className="text-link text-link--purple">
+                    Challenges <ChevronRight size={16} />
+                  </Link>
+                </header>
+                <ChallengeCard progress={activeWeekly} featured />
+              </section>
+            )}
+          </div>
+        </section>
+      )}
+
+      {settings.companionMode !== 'off' && (
+        <section className="dashboard-zone dashboard-zone--party" aria-labelledby="party-network">
+          <header className="dashboard-zone__header">
+            <div>
+              <p className="eyebrow">PARTY NETWORK</p>
+              <h2 id="party-network">The family behind The System.</h2>
+              <p>
+                Urgent companion signals surface first. The full roster stays compact and close.
+              </p>
+            </div>
+            <Link to="/headquarters" className="text-link">
+              Headquarters <ChevronRight size={16} />
             </Link>
           </header>
-          {activeWeekly ? <ChallengeCard progress={activeWeekly} featured /> : null}
-        </section>
 
+          <PartyPulsePanel />
+          <CompanionRoster compact />
+        </section>
+      )}
+
+      <details className="dashboard-history">
+        <summary>
+          <span>
+            <p className="eyebrow">SYSTEM HISTORY</p>
+            <strong>Recent growth and stat activity</strong>
+          </span>
+          <small>Open when you want the record—not while choosing the next move.</small>
+          <ChevronDown size={18} />
+        </summary>
         <section className="panel recent-growth" data-depth-surface="panel">
           <header className="section-header">
             <div>
@@ -564,8 +587,7 @@ export function DashboardPage() {
             )}
           </div>
         </section>
-        <CompanionRoster />
-      </div>
+      </details>
     </div>
   );
 }
