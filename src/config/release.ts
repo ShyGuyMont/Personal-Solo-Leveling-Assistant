@@ -1,4 +1,4 @@
-export const APP_VERSION = '10.10.0';
+export const APP_VERSION = '11.0.0';
 export const DATABASE_SCHEMA_VERSION = 29;
 export const SAVE_FORMAT_VERSION = 29;
 
@@ -9,6 +9,21 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 11.0.0 · Sovereign Minds',
+    detail:
+      'The twelve companions receive a new intelligence hierarchy that spends power where it changes the answer: ordinary moments stay quick, real conversation gains presence, specialist work reaches Sol, and the hardest whole-System requests can invoke Sovereign Pro reasoning.',
+    points: [
+      'A four-tier intelligence router now separates instant replies, relational companion presence, specialist counsel, and true Sovereign work instead of forcing every interaction through the same quality-versus-speed compromise.',
+      'All substantive specialist work—including A.R.C. canon, Creator strategy, Ledger analysis, Calendar coordination, Training decisions, Kitchen planning, mission operations, and Party Council—now routes through GPT-5.6 Sol with workload-matched reasoning depth.',
+      'Explicit deep dives, comprehensive strategies, and multi-domain System plans can invoke GPT-5.6 Sovereign Pro with xhigh reasoning, while ordinary Sol work remains in standard mode to protect response time and usage.',
+      'Meaningful ongoing conversation receives a dedicated Terra presence tier so the companions can preserve continuity and personality without charging Sol for every casual exchange; tiny questions and greetings remain on Luna.',
+      'The weekly Body Diagnostic moves to Sol with high reasoning for more careful synthesis of physique evidence, scale estimates, prior reports, Hunter comments, safety boundaries, and the Training Council response.',
+      'The intelligence contract now requires intent inference, evidence-first conclusions, precise uncertainty, non-redundant party collaboration, and decisive answers without turning extra reasoning into longer robotic speeches.',
+      'Stable prompt-cache routing reuses the family’s large instruction prefix more efficiently, and the local OpenAI usage meter now reflects Sol’s current lower $4 input, $0.40 cached-input, and $20 output rates per million tokens.',
+      'Every existing confirmation gate, specialist knowledge boundary, private local save, Family Bible personality, voice, command, and offline feature remains intact.',
+    ],
+  },
   {
     title: 'Version 10.10.0 · Adaptive Field Operations',
     detail:

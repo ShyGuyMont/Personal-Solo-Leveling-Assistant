@@ -879,10 +879,12 @@ export function CompanionQuickLink() {
             : result.handoffProposal
               ? `${getCompanion(result.handoffProposal.companionId).name} is ready to take the specialist relay.`
               : result.route === 'sovereign'
-                ? `${result.model} · Sovereign counsel route`
+                ? `${result.model} · ${result.reasoningMode === 'pro' ? 'Sovereign Pro' : 'Sovereign'} counsel route`
                 : result.route === 'counsel'
                   ? `${result.model} · deeper counsel route`
-                  : `${result.model} · quick response route`,
+                  : result.route === 'presence'
+                    ? `${result.model} · companion presence route`
+                    : `${result.model} · quick response route`,
         );
         window.dispatchEvent(
           new CustomEvent('system:ai-conversations-changed', {

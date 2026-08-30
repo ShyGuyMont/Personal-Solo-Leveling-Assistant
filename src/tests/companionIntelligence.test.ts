@@ -312,7 +312,7 @@ describe('Companion Soulprint intelligence', () => {
   });
 
   it('hard-codes one complete Family Bible entry for all twelve companions', () => {
-    expect(intelligence.COMPANION_INTELLIGENCE_VERSION).toBe('lean-core-16');
+    expect(intelligence.COMPANION_INTELLIGENCE_VERSION).toBe('sovereign-core-17');
     expect(intelligence.familyBible.schemaVersion).toBe('2.0.0');
     expect(intelligence.companionIds).toHaveLength(12);
     expect(Object.keys(intelligence.familyBible.companions).sort()).toEqual(
@@ -532,13 +532,22 @@ describe('Companion Soulprint intelligence', () => {
     expect(route(['snow'], 'Create a new chicken recipe for my grimoire')).not.toBe('recipe-forge');
   });
 
-  it('routes casual direct talk economically and deeper counsel to Terra', () => {
-    expect(
-      intelligence.selectIntelligenceRoute({ audience: 'snow', message: 'How are you today?' }),
-    ).toEqual({
+  it('routes quick replies, companion presence, Sol counsel, and Sovereign Pro deliberately', () => {
+    expect(intelligence.selectIntelligenceRoute({ audience: 'snow', message: 'Hey!' })).toEqual({
       route: 'quick',
       model: 'gpt-5.6-luna',
       reasoningEffort: 'low',
+      reasoningMode: 'standard',
+      workload: 'conversation',
+      maxOutputTokens: 1_600,
+    });
+    expect(
+      intelligence.selectIntelligenceRoute({ audience: 'snow', message: 'How are you today?' }),
+    ).toEqual({
+      route: 'presence',
+      model: 'gpt-5.6-terra',
+      reasoningEffort: 'medium',
+      reasoningMode: 'standard',
       workload: 'conversation',
       maxOutputTokens: 1_600,
     });
@@ -549,26 +558,27 @@ describe('Companion Soulprint intelligence', () => {
       }),
     ).toEqual({
       route: 'counsel',
-      model: 'gpt-5.6-terra',
+      model: 'gpt-5.6-sol',
       reasoningEffort: 'medium',
+      reasoningMode: 'standard',
       workload: 'conversation',
       maxOutputTokens: 3_200,
     });
     expect(
       intelligence.selectIntelligenceRoute({ audience: 'party', message: 'What do you think?' }),
-    ).toMatchObject({ route: 'counsel', model: 'gpt-5.6-terra' });
+    ).toMatchObject({ route: 'counsel', model: 'gpt-5.6-sol' });
     expect(
       intelligence.selectIntelligenceRoute({
         audience: 'cipher',
         message: 'Explain the phase noise tradeoff when I narrow RBW on the spectrum analyzer.',
       }),
-    ).toMatchObject({ route: 'counsel', model: 'gpt-5.6-terra' });
+    ).toMatchObject({ route: 'counsel', model: 'gpt-5.6-sol' });
     expect(
       intelligence.selectIntelligenceRoute({
         audience: 'snow',
         message: 'I feel conflicted. Give me your honest opinion.',
       }),
-    ).toMatchObject({ route: 'counsel', model: 'gpt-5.6-terra' });
+    ).toMatchObject({ route: 'counsel', model: 'gpt-5.6-sol' });
     expect(
       intelligence.selectIntelligenceRoute(
         { audience: 'party', message: 'Help me plan.' },
@@ -583,7 +593,8 @@ describe('Companion Soulprint intelligence', () => {
     ).toEqual({
       route: 'sovereign',
       model: 'gpt-5.6-sol',
-      reasoningEffort: 'high',
+      reasoningEffort: 'xhigh',
+      reasoningMode: 'pro',
       workload: 'conversation',
       maxOutputTokens: 6_000,
     });
@@ -1167,7 +1178,7 @@ describe('Companion Soulprint intelligence', () => {
     expect(payload.usage).toMatchObject({ totalTokens: 128, exact: true });
   });
 
-  it('analyzes bounded diagnostic images with Terra, structured safeguards, and no storage', async () => {
+  it('analyzes bounded diagnostic images with Sol, structured safeguards, and no storage', async () => {
     let openAiBody: Record<string, unknown> | undefined;
     const assessment = {
       title: 'Weekly evidence review',
@@ -1267,14 +1278,16 @@ describe('Companion Soulprint intelligence', () => {
 
     expect(response.status).toBe(200);
     expect(await response.json()).toMatchObject({
-      model: 'gpt-5.6-terra',
+      model: 'gpt-5.6-sol',
       assessment: { title: 'Weekly evidence review' },
       usage: { inputTokens: 900, cachedInputTokens: 100, reasoningTokens: 75 },
     });
     expect(openAiBody).toMatchObject({
-      model: 'gpt-5.6-terra',
+      model: 'gpt-5.6-sol',
       store: false,
-      reasoning: { effort: 'medium' },
+      reasoning: { effort: 'high' },
+      prompt_cache_key: 'sovereign-core-17:body-diagnostic',
+      safety_identifier: 'the-system-private-owner',
       text: { format: { type: 'json_schema', name: 'body_diagnostic_report', strict: true } },
     });
     const input = openAiBody?.input as Array<{ role: string; content: unknown }>;
@@ -1370,6 +1383,12 @@ describe('Companion Soulprint intelligence', () => {
 
     expect(response.status).toBe(200);
     expect(openAiBody).toBeDefined();
+    expect(openAiBody).toMatchObject({
+      model: 'test-model',
+      reasoning: { effort: 'low' },
+      prompt_cache_key: 'sovereign-core-17:rook:conversation',
+      safety_identifier: 'the-system-private-owner',
+    });
     const responseFormat = openAiBody?.text as {
       verbosity: string;
       format: {
@@ -1398,6 +1417,7 @@ describe('Companion Soulprint intelligence', () => {
     expect(await response.clone().json()).toMatchObject({
       route: 'quick',
       reasoningEffort: 'low',
+      reasoningMode: 'standard',
       replies: [
         {
           companionId: 'rook',

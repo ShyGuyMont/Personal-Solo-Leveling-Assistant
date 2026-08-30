@@ -6,7 +6,7 @@ const jsonHeaders = {
 
 export const APP_PERMISSIONS_POLICY = 'camera=(), microphone=(self)';
 export const APP_LEGACY_FEATURE_POLICY = "camera 'none'; microphone 'self'";
-export const APP_RELEASE_VERSION = '10.10.0';
+export const APP_RELEASE_VERSION = '11.0.0';
 
 export function sealAppMediaPermissions(response, requestUrl = '') {
   const headers = new Headers(response.headers);
@@ -38,7 +38,7 @@ export const YOUTUBE_READONLY_SCOPES = [
 
 const YOUTUBE_OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
 
-export const COMPANION_INTELLIGENCE_VERSION = 'lean-core-16';
+export const COMPANION_INTELLIGENCE_VERSION = 'sovereign-core-17';
 
 function requestedPartyParticipants(payload) {
   if (payload.audience !== 'party') return [payload.audience];
@@ -70,6 +70,9 @@ const COMPLETION_REPORT_SIGNALS =
 
 const SOVEREIGN_SIGNALS =
   /\b(?:sovereign\s+counsel|deep\s+(?:analysis|dive)|comprehensive\s+(?:strategy|plan)|full\s+(?:30|60|90)[-\s]day\s+plan|optimi[sz]e\s+(?:everything|my\s+whole|the\s+entire)|multi[-\s]domain\s+strategy)\b/i;
+
+const PRESENCE_SIGNALS =
+  /\b(?:talk\s+to\s+me|keep\s+me\s+company|how\s+are\s+you|how(?:'s|\s+is)\s+your\s+day|what(?:'s|\s+is)\s+on\s+your\s+mind|i\s+feel|i(?:'m|\s+am)\s+(?:bored|tired|lonely|excited|happy|sad|angry|stressed)|friend|family|remember\s+when|be\s+honest\s+with\s+me)\b/i;
 
 const CAMPAIGN_WORK_SIGNALS =
   /\b(?:reawakening|comeback|campaign|launch\s+plan|content\s+series|release\s+sequence|multi[-\s]release|publishing\s+arc|four[-\s]week|creator\s+return)\b/i;
@@ -237,12 +240,17 @@ const WORKLOAD_OUTPUT_BUDGETS = {
   'calendar-command': 4_800,
 };
 
+const HIGH_REASONING_WORKLOADS = new Set(['system-plan', 'arc-forge', 'ledger-review']);
+
+function supportsGpt56ReasoningMode(model) {
+  return /^gpt-5\.6(?:-|$)/i.test(String(model));
+}
+
 export function selectIntelligenceRoute(payload, env = {}) {
   const workload = selectIntelligenceWorkload(payload);
+  const explicitSovereign = SOVEREIGN_SIGNALS.test(payload.message);
   const sovereign =
-    workload === 'campaign-forge' ||
-    payload.message.length > 700 ||
-    SOVEREIGN_SIGNALS.test(payload.message);
+    workload === 'campaign-forge' || payload.message.length > 700 || explicitSovereign;
   const counsel =
     workload !== 'conversation' ||
     payload.audience === 'party' ||
@@ -253,16 +261,37 @@ export function selectIntelligenceRoute(payload, env = {}) {
     payload.message.length > 220 ||
     COUNSEL_SIGNALS.test(payload.message) ||
     (payload.commandMode === 'propose' && COMMAND_SIGNALS.test(payload.message));
+  const presence =
+    !counsel &&
+    !sovereign &&
+    (payload.message.length > 90 ||
+      PRESENCE_SIGNALS.test(payload.message) ||
+      (Array.isArray(payload.history) && payload.history.length >= 2));
+  const route = sovereign ? 'sovereign' : counsel ? 'counsel' : presence ? 'presence' : 'quick';
+  const model =
+    env.OPENAI_TEXT_MODEL ||
+    (sovereign || counsel
+      ? env.OPENAI_APEX_MODEL || 'gpt-5.6-sol'
+      : presence
+        ? env.OPENAI_INTELLIGENCE_MODEL || 'gpt-5.6-terra'
+        : env.OPENAI_FAST_MODEL || 'gpt-5.6-luna');
+  const reasoningEffort = sovereign
+    ? explicitSovereign
+      ? 'xhigh'
+      : 'high'
+    : counsel
+      ? HIGH_REASONING_WORKLOADS.has(workload)
+        ? 'high'
+        : 'medium'
+      : presence
+        ? 'medium'
+        : 'low';
+  const reasoningMode = explicitSovereign && supportsGpt56ReasoningMode(model) ? 'pro' : 'standard';
   return {
-    route: sovereign ? 'sovereign' : counsel ? 'counsel' : 'quick',
-    model:
-      env.OPENAI_TEXT_MODEL ||
-      (sovereign
-        ? env.OPENAI_APEX_MODEL || 'gpt-5.6-sol'
-        : counsel
-          ? env.OPENAI_INTELLIGENCE_MODEL || 'gpt-5.6-terra'
-          : env.OPENAI_FAST_MODEL || 'gpt-5.6-luna'),
-    reasoningEffort: sovereign ? 'high' : counsel ? 'medium' : 'low',
+    route,
+    model,
+    reasoningEffort,
+    reasoningMode,
     workload,
     maxOutputTokens: sovereign
       ? Math.max(WORKLOAD_OUTPUT_BUDGETS[workload] ?? 0, 6_000)
@@ -1432,6 +1461,10 @@ Rules:
 - Treat supplied locale and timezone as silent operating context. Speak in the Hunter's local date and time without saying "New York time," "Eastern time," an IANA timezone, or "your local timezone" unless travel, daylight-saving ambiguity, or another timezone makes the label materially useful.
 - Do not narrate obvious inference. Prefer "Sunday at seven is open" over "According to the calendar context, Sunday at 7:00 PM New York time is available." Prefer "That sounds like Mira territory" over a formal specialist-routing explanation.
 - Use recent conversation history for natural continuity. The newest message may be a short answer to a companion's question, so resolve pronouns and missing details from the immediately preceding turns before asking the Hunter to repeat them. Do not repeat advice already given, claim memory outside the supplied history or approved Bond Memory, or say the Hunter previously shared something that is not present in either source.
+- Treat the supplied app state as a living operating environment, not a list to paraphrase. Before answering, silently identify the Hunter's real intent, the companion who owns it, the authoritative supplied records, the strongest supported conclusion, and the most useful safe next state. Do not expose this internal checklist or narrate your reasoning process.
+- Infer ordinary intent confidently from the active room and recent conversation. Ask one concise question only when a missing fact would materially change the answer or make a proposed mutation dishonest. Never ask the Hunter to repeat a fact already present in the current transmission.
+- Use stronger intelligence to make sharper judgments, calculations, comparisons, and plans—not longer speeches. State the conclusion, show the essential evidence or arithmetic when it matters, name uncertainty precisely, and stop when the job is done.
+- In shared rooms, companions must think together rather than echo one another. Let later speakers refine, challenge, combine, or redirect earlier contributions while preserving each specialist's factual authority and Family Bible relationship.
 - Approved Bond Memory may appear in progressContext.bondMemory.approved. Treat those entries as user-approved durable context, use only the naturally relevant ones, and never mention the ledger unless the Hunter asks. The newest Hunter message always outranks an older memory if they conflict.
 - The hard-coded Family Bible is the sole personality and relationship authority. Apply its active companion directives and scene relationships visibly without quoting, naming, or explaining the Bible. Factual grounding, safety, consent, specialist authority, protected confirmations, and the Hunter's ownership of private canon remain higher-order boundaries.
 - If Bond Memory is enabled, return zero to two memoryCandidates only when the Hunter explicitly states a durable preference, goal, boundary, background fact, or commitment that would genuinely improve a future conversation. Write each candidate as a concise third-person fact about the Hunter. Never infer a diagnosis, emotion, identity, relationship motive, financial amount, sexual detail, authentication secret, or information about another person. Do not suggest temporary moods, one-off tasks, facts already present in approved memory, or anything merely mentioned by a companion.
@@ -3406,10 +3439,7 @@ async function handleBodyDiagnostic(request, env, url) {
     })),
   );
   const model =
-    env.OPENAI_VISION_MODEL ||
-    env.OPENAI_TEXT_MODEL ||
-    env.OPENAI_INTELLIGENCE_MODEL ||
-    'gpt-5.6-terra';
+    env.OPENAI_VISION_MODEL || env.OPENAI_TEXT_MODEL || env.OPENAI_APEX_MODEL || 'gpt-5.6-sol';
   const inputText = JSON.stringify({
     hunterGoal: goal,
     hunterContext,
@@ -3436,7 +3466,9 @@ async function handleBodyDiagnostic(request, env, url) {
           },
         ],
         max_output_tokens: 3_200,
-        reasoning: { effort: 'medium' },
+        reasoning: { effort: 'high' },
+        prompt_cache_key: `${COMPANION_INTELLIGENCE_VERSION}:body-diagnostic`,
+        safety_identifier: 'the-system-private-owner',
         text: {
           verbosity: 'medium',
           format: {
@@ -3596,7 +3628,7 @@ async function handleAiChat(request, env, url) {
   }
 
   const intelligence = selectIntelligenceRoute(payload, env);
-  const { model, route, reasoningEffort, workload, maxOutputTokens } = intelligence;
+  const { model, route, reasoningEffort, reasoningMode, workload, maxOutputTokens } = intelligence;
   const enabledCompanionIds = Array.isArray(payload.context?.party?.enabledCompanionIds)
     ? payload.context.party.enabledCompanionIds.filter((id) => companionIds.includes(id))
     : companionIds;
@@ -3695,7 +3727,12 @@ async function handleAiChat(request, env, url) {
             { role: 'user', content: conversationInput },
           ],
           max_output_tokens: attemptBudget,
-          reasoning: { effort: reasoningEffort },
+          reasoning:
+            reasoningMode === 'pro'
+              ? { effort: reasoningEffort, mode: 'pro' }
+              : { effort: reasoningEffort },
+          prompt_cache_key: `${COMPANION_INTELLIGENCE_VERSION}:${payload.audience}:${workload}`,
+          safety_identifier: 'the-system-private-owner',
           text: {
             verbosity:
               workload === 'campaign-forge' ||
@@ -4493,6 +4530,7 @@ async function handleAiChat(request, env, url) {
       model,
       route,
       reasoningEffort,
+      reasoningMode,
       workload,
       title: result.title.slice(0, 80),
       replies: result.replies.slice(0, payload.audience === 'party' ? 4 : 1),
@@ -5215,8 +5253,8 @@ export default {
         visionModel:
           env.OPENAI_VISION_MODEL ||
           env.OPENAI_TEXT_MODEL ||
-          env.OPENAI_INTELLIGENCE_MODEL ||
-          'gpt-5.6-terra',
+          env.OPENAI_APEX_MODEL ||
+          'gpt-5.6-sol',
         speechModel: env.OPENAI_TTS_MODEL || 'gpt-4o-mini-tts',
         cartesiaConfigured: Boolean(env.CARTESIA_API_KEY),
         cartesiaModel: env.CARTESIA_TTS_MODEL || 'sonic-3.5',

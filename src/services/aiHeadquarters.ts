@@ -452,8 +452,9 @@ export interface AiLinkStatus {
 
 export interface AiHeadquartersReply {
   model: string;
-  route?: 'quick' | 'counsel' | 'sovereign';
-  reasoningEffort?: 'low' | 'medium' | 'high';
+  route?: 'quick' | 'presence' | 'counsel' | 'sovereign';
+  reasoningEffort?: 'low' | 'medium' | 'high' | 'xhigh';
+  reasoningMode?: 'standard' | 'pro';
   workload?:
     | 'conversation'
     | 'system-command'
@@ -821,13 +822,18 @@ async function parseAiHeadquartersReply(response: Response): Promise<AiHeadquart
         ? 'sovereign'
         : payload.route === 'counsel'
           ? 'counsel'
-          : 'quick',
+          : payload.route === 'presence'
+            ? 'presence'
+            : 'quick',
     reasoningEffort:
-      payload.reasoningEffort === 'high'
-        ? 'high'
-        : payload.reasoningEffort === 'medium'
-          ? 'medium'
-          : 'low',
+      payload.reasoningEffort === 'xhigh'
+        ? 'xhigh'
+        : payload.reasoningEffort === 'high'
+          ? 'high'
+          : payload.reasoningEffort === 'medium'
+            ? 'medium'
+            : 'low',
+    reasoningMode: payload.reasoningMode === 'pro' ? 'pro' : 'standard',
     memoryCandidates: Array.isArray(payload.memoryCandidates)
       ? (payload.memoryCandidates as AiHeadquartersReply['memoryCandidates'])
       : [],

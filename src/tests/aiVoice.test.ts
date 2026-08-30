@@ -233,5 +233,7 @@ describe('Voice Link local profiles and usage', () => {
     expect(summary.byModel['gpt-5.6-luna'].calls).toBe(1);
     expect(estimateTextCostUsd('gpt-5.6-luna', 1_000, 500)).toBeCloseTo(0.0008, 8);
     expect(estimateTextCostUsd('gpt-5.6-luna', 1_000, 500, 500)).toBeCloseTo(0.00071, 8);
+    expect(estimateTextCostUsd('gpt-5.6-sol', 1_000, 500)).toBeCloseTo(0.014, 8);
+    expect(estimateTextCostUsd('gpt-5.6-sol', 1_000, 500, 500)).toBeCloseTo(0.0122, 8);
   });
 });

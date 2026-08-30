@@ -220,8 +220,8 @@ export async function getAiUsageSummary(sessionId: string, now = new Date()) {
 const TEXT_PRICES: Record<string, { input: number; cachedInput: number; output: number }> = {
   'gpt-5.6-luna': { input: 0.2, cachedInput: 0.02, output: 1.2 },
   'gpt-5.6-terra': { input: 2, cachedInput: 0.2, output: 12 },
-  'gpt-5.6-sol': { input: 5, cachedInput: 0.5, output: 30 },
-  'gpt-5.6': { input: 5, cachedInput: 0.5, output: 30 },
+  'gpt-5.6-sol': { input: 4, cachedInput: 0.4, output: 20 },
+  'gpt-5.6': { input: 4, cachedInput: 0.4, output: 20 },
 };
 
 export function estimateTextCostUsd(
