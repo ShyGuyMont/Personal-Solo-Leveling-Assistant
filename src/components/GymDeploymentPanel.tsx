@@ -1,5 +1,6 @@
 import {
   ArrowLeft,
+  ArrowRightLeft,
   Check,
   CheckCircle2,
   ChevronRight,
@@ -7,6 +8,7 @@ import {
   Dumbbell,
   Flame,
   RotateCcw,
+  Save,
   ShieldCheck,
   TimerReset,
   Trophy,
@@ -17,12 +19,20 @@ import { getCompanion, getCompanionImage } from '@/config/companions';
 import {
   assignGymWorkout,
   completeGymTraining,
+  completePartialGymTraining,
   isGymWorkoutComplete,
   resetGymWorkoutSelection,
   saveGymProgress,
   type GymWorkoutAvailability,
 } from '@/game/training';
-import type { GymExerciseSetLog, GymWorkoutId, TrainingSession } from '@/types/game';
+import type {
+  GymExerciseSetLog,
+  GymExerciseSubstitution,
+  GymPartialReason,
+  GymSubstitutionReason,
+  GymWorkoutId,
+  TrainingSession,
+} from '@/types/game';
 
 interface GymDeploymentPanelProps {
   session: TrainingSession;
@@ -31,6 +41,7 @@ interface GymDeploymentPanelProps {
   onWorkingChange: (working: boolean) => void;
   onSessionChange: (session: TrainingSession) => void;
   onComplete: (session: TrainingSession) => Promise<void>;
+  onPartial: (session: TrainingSession) => Promise<void>;
   onBack: () => Promise<void>;
   onError: (message: string) => void;
 }
@@ -46,6 +57,7 @@ export function GymDeploymentPanel({
   onWorkingChange,
   onSessionChange,
   onComplete,
+  onPartial,
   onBack,
   onError,
 }: GymDeploymentPanelProps) {
@@ -53,22 +65,33 @@ export function GymDeploymentPanel({
     session.gymExerciseLogs ?? {},
   );
   const [choices, setChoices] = useState<Record<string, string>>(session.gymExerciseChoices ?? {});
+  const [substitutions, setSubstitutions] = useState<Record<string, GymExerciseSubstitution>>(
+    session.gymExerciseSubstitutions ?? {},
+  );
+  const [substitutionOpen, setSubstitutionOpen] = useState<string>();
+  const [substitutionReasons, setSubstitutionReasons] = useState<
+    Record<string, GymSubstitutionReason>
+  >({});
   const [finisherCompleted, setFinisherCompleted] = useState(session.gymFinisherCompleted ?? false);
   const [duration, setDuration] = useState(session.loggedDurationMinutes ?? 65);
   const [difficulty, setDifficulty] = useState(session.difficulty ?? 3);
   const [note, setNote] = useState(session.note ?? '');
   const [restRemaining, setRestRemaining] = useState(0);
   const [changePrompt, setChangePrompt] = useState<'workout' | 'path'>();
+  const [partialPrompt, setPartialPrompt] = useState(false);
+  const [partialReason, setPartialReason] = useState<GymPartialReason>('equipment-unavailable');
   const [interactionHint, setInteractionHint] = useState('');
 
   useEffect(() => {
     setLogs(session.gymExerciseLogs ?? {});
     setChoices(session.gymExerciseChoices ?? {});
+    setSubstitutions(session.gymExerciseSubstitutions ?? {});
     setFinisherCompleted(session.gymFinisherCompleted ?? false);
   }, [
     session.id,
     session.gymExerciseChoices,
     session.gymExerciseLogs,
+    session.gymExerciseSubstitutions,
     session.gymFinisherCompleted,
   ]);
 
@@ -117,6 +140,7 @@ export function GymDeploymentPanel({
     if (next) {
       setLogs(next.gymExerciseLogs ?? {});
       setChoices(next.gymExerciseChoices ?? {});
+      setSubstitutions(next.gymExerciseSubstitutions ?? {});
       setFinisherCompleted(false);
       setChangePrompt(undefined);
       setInteractionHint('');
@@ -127,16 +151,46 @@ export function GymDeploymentPanel({
     nextLogs = logs,
     nextChoices = choices,
     nextFinisher = finisherCompleted,
+    nextSubstitutions = substitutions,
   ) => {
     try {
       await saveGymProgress(session.id, {
         logs: nextLogs,
         choices: nextChoices,
+        substitutions: nextSubstitutions,
         finisherCompleted: nextFinisher,
       });
     } catch (caught) {
       onError(caught instanceof Error ? caught.message : 'Gym progress could not be saved.');
     }
+  };
+
+  const chooseExercise = (
+    exerciseId: string,
+    originalExercise: string,
+    selectedExercise: string,
+  ) => {
+    const nextChoices = { ...choices, [exerciseId]: selectedExercise };
+    const nextSubstitutions = { ...substitutions };
+    if (selectedExercise === originalExercise) {
+      delete nextSubstitutions[exerciseId];
+    } else {
+      nextSubstitutions[exerciseId] = {
+        originalExercise,
+        selectedExercise,
+        reason: substitutionReasons[exerciseId] ?? 'equipment-busy',
+        recordedAt: new Date().toISOString(),
+      };
+    }
+    setChoices(nextChoices);
+    setSubstitutions(nextSubstitutions);
+    setSubstitutionOpen(undefined);
+    setInteractionHint(
+      selectedExercise === originalExercise
+        ? `${originalExercise} restored.`
+        : `${selectedExercise} will be logged as the substitute for ${originalExercise}.`,
+    );
+    void persist(logs, nextChoices, finisherCompleted, nextSubstitutions);
   };
 
   const updateSet = (exerciseId: string, index: number, patch: Partial<GymExerciseSetLog>) => {
@@ -203,6 +257,7 @@ export function GymDeploymentPanel({
         difficulty,
         logs,
         choices,
+        substitutions,
         finisherCompleted,
         note,
       });
@@ -211,6 +266,35 @@ export function GymDeploymentPanel({
     } catch (caught) {
       onError(
         caught instanceof Error ? caught.message : 'The Gym Deployment could not be completed.',
+      );
+    } finally {
+      onWorkingChange(false);
+    }
+  };
+
+  const finishPartial = async () => {
+    onWorkingChange(true);
+    onError('');
+    try {
+      const next = await completePartialGymTraining({
+        sessionId: session.id,
+        duration,
+        difficulty,
+        logs,
+        choices,
+        substitutions,
+        finisherCompleted,
+        reason: partialReason,
+        note,
+      });
+      onSessionChange(next);
+      setPartialPrompt(false);
+      await onPartial(next);
+    } catch (caught) {
+      onError(
+        caught instanceof Error
+          ? caught.message
+          : 'The partial Gym Deployment could not be logged.',
       );
     } finally {
       onWorkingChange(false);
@@ -407,25 +491,18 @@ export function GymDeploymentPanel({
               exerciseSets.every(
                 (set) => set.completed && Number.isFinite(set.reps) && (set.reps ?? 0) >= 1,
               );
-            const options = [exercise.name, ...exercise.alternatives];
+            const selectedExercise = choices[exercise.id] ?? exercise.name;
+            const isSubstituted = selectedExercise !== exercise.name;
             return (
-              <article key={exercise.id} className={exerciseComplete ? 'is-complete' : ''}>
+              <article
+                key={exercise.id}
+                className={`${exerciseComplete ? 'is-complete' : ''} ${isSubstituted ? 'is-substituted' : ''}`}
+              >
                 <header>
                   <span>{String(exerciseIndex + 1).padStart(2, '0')}</span>
-                  <div>
-                    <select
-                      aria-label={`Exercise choice for ${exercise.name}`}
-                      value={choices[exercise.id] ?? exercise.name}
-                      onChange={(event) => {
-                        const nextChoices = { ...choices, [exercise.id]: event.target.value };
-                        setChoices(nextChoices);
-                        void persist(logs, nextChoices, finisherCompleted);
-                      }}
-                    >
-                      {options.map((option) => (
-                        <option key={option}>{option}</option>
-                      ))}
-                    </select>
+                  <div className="gym-exercise-identity">
+                    <strong>{selectedExercise}</strong>
+                    {isSubstituted && <small>SUBSTITUTE FOR {exercise.name.toUpperCase()}</small>}
                     <b>
                       {exercise.sets} sets · {exercise.repMin}–{exercise.repMax} {exercise.unit}
                     </b>
@@ -433,6 +510,54 @@ export function GymDeploymentPanel({
                   {exerciseComplete ? <CheckCircle2 size={21} /> : <Circle size={21} />}
                 </header>
                 <p>{exercise.cue}</p>
+                <button
+                  type="button"
+                  className="gym-substitution-trigger"
+                  onClick={() =>
+                    setSubstitutionOpen((current) =>
+                      current === exercise.id ? undefined : exercise.id,
+                    )
+                  }
+                >
+                  <ArrowRightLeft size={15} />
+                  {isSubstituted ? 'Change substitution' : 'Equipment occupied? Swap movement'}
+                </button>
+                {substitutionOpen === exercise.id && (
+                  <div className="gym-substitution-panel">
+                    <label>
+                      <span>Why are you switching?</span>
+                      <select
+                        value={substitutionReasons[exercise.id] ?? 'equipment-busy'}
+                        onChange={(event) =>
+                          setSubstitutionReasons((current) => ({
+                            ...current,
+                            [exercise.id]: event.target.value as GymSubstitutionReason,
+                          }))
+                        }
+                      >
+                        <option value="equipment-busy">Equipment occupied / unavailable</option>
+                        <option value="comfort">Comfortable movement variation</option>
+                        <option value="other">Other practical reason</option>
+                      </select>
+                    </label>
+                    <div>
+                      {[exercise.name, ...exercise.alternatives].map((option) => (
+                        <button
+                          type="button"
+                          key={option}
+                          className={option === selectedExercise ? 'is-selected' : ''}
+                          onClick={() => chooseExercise(exercise.id, exercise.name, option)}
+                        >
+                          {option === exercise.name ? 'Original · ' : ''}
+                          {option}
+                        </button>
+                      ))}
+                    </div>
+                    <small>
+                      Sets, reps, and load stay attached to the movement you actually performed.
+                    </small>
+                  </div>
+                )}
                 <div className="gym-set-grid">
                   {exerciseSets.map((set, setIndex) => (
                     <div key={setIndex} className={set.completed ? 'is-complete' : ''}>
@@ -560,6 +685,58 @@ export function GymDeploymentPanel({
             <small>
               Complete all {totalSetCount} prescribed working sets to clear this deployment.
             </small>
+          )}
+          {!complete && hasLoggedProgress && (
+            <button
+              className="button button--secondary"
+              disabled={working || duration < 1}
+              onClick={() => setPartialPrompt(true)}
+            >
+              <Save size={17} /> End session and log completed work
+            </button>
+          )}
+          {partialPrompt && (
+            <aside className="gym-partial-confirmation" role="alert">
+              <div>
+                <span>HONEST EFFORT LOG</span>
+                <strong>
+                  Secure {completedSetCount} of {totalSetCount} working sets?
+                </strong>
+                <p>
+                  Completed sets, substitutions, load, reps, time, and notes will stay in your Hall
+                  record. XP scales to the work completed. The Daily Workout and multi-path clear
+                  remain open because this was not a full deployment.
+                </p>
+              </div>
+              <label>
+                <span>Why did the session end?</span>
+                <select
+                  value={partialReason}
+                  onChange={(event) => setPartialReason(event.target.value as GymPartialReason)}
+                >
+                  <option value="equipment-unavailable">Equipment / bench unavailable</option>
+                  <option value="time-expired">Ran out of time</option>
+                  <option value="recovery-limit">Reached today’s safe recovery limit</option>
+                  <option value="other">Other</option>
+                </select>
+              </label>
+              <div>
+                <button
+                  className="button button--primary"
+                  disabled={working}
+                  onClick={() => void finishPartial()}
+                >
+                  Log honest effort
+                </button>
+                <button
+                  className="button button--ghost"
+                  disabled={working}
+                  onClick={() => setPartialPrompt(false)}
+                >
+                  Continue workout
+                </button>
+              </div>
+            </aside>
           )}
           <button
             className="button button--ghost"

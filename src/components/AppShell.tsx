@@ -12,7 +12,15 @@ import {
   WalletCards,
   Video,
 } from 'lucide-react';
-import { lazy, Suspense, useEffect, useRef, useState, type ReactNode } from 'react';
+import {
+  lazy,
+  Suspense,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from 'react';
 import { CompanionPresence, RealmTransition, SystemHud } from '@/components/LivingSystemLayer';
 import { SystemMark } from '@/components/SystemMark';
 import { SystemParticleField } from '@/components/SystemParticleField';
@@ -163,7 +171,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <SystemMark small />
           <span>
             <span className="brand__name">THE SYSTEM</span>
-            <span className="brand__tag">V{APP_VERSION} · LEAN COMMAND DECK</span>
+            <span className="brand__tag">V{APP_VERSION} · ADAPTIVE OPERATIONS</span>
           </span>
         </NavLink>
         <div className="app-header__actions">
@@ -216,7 +224,12 @@ export function AppShell({ children }: { children: ReactNode }) {
       </header>
       <SystemHud realm={realm} state={systemState} />
       <main className="page-container">{children}</main>
-      <nav className="bottom-nav" aria-label="Primary">
+      <nav
+        className="bottom-nav"
+        aria-label="Primary"
+        data-item-count={NAV.length}
+        style={{ '--bottom-nav-count': NAV.length } as CSSProperties}
+      >
         {NAV.map(({ to, label, icon: Icon }) => (
           <NavLink
             key={to}

@@ -733,7 +733,7 @@ export function ArchivePage() {
             </header>
             <div className="archive-list">
               {trainingSessions
-                .filter((entry) => entry.status === 'completed')
+                .filter((entry) => ['completed', 'partial'].includes(entry.status))
                 .slice(0, 60)
                 .map((entry) => (
                   <div key={`training:${entry.id}`} className="archive-row">
@@ -751,9 +751,14 @@ export function ArchivePage() {
                       <small>
                         {formatLongDate(entry.date)} · {entry.location} ·{' '}
                         {entry.loggedDurationMinutes ?? entry.durationMinutes ?? 0} minutes
+                        {entry.status === 'partial'
+                          ? ` · ${entry.completedSetCount ?? 0}/${entry.prescribedSetCount ?? 0} sets logged`
+                          : ''}
                       </small>
                     </div>
-                    <span className="status-chip">training</span>
+                    <span className="status-chip">
+                      {entry.status === 'partial' ? 'partial' : 'training'}
+                    </span>
                   </div>
                 ))}
               {kitchenSessions
@@ -774,7 +779,7 @@ export function ArchivePage() {
                     <span className="status-chip">kitchen</span>
                   </div>
                 ))}
-              {!trainingSessions.some((entry) => entry.status === 'completed') &&
+              {!trainingSessions.some((entry) => ['completed', 'partial'].includes(entry.status)) &&
                 !kitchenSessions.some((entry) => entry.status !== 'assigned') && (
                   <div className="empty-state">
                     Completed Training Hall and Kitchen records will be preserved here.

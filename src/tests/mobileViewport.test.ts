@@ -50,6 +50,14 @@ describe('mobile keyboard viewport safety', () => {
     expect(appShell).not.toContain("{ to: '/status', label: 'Status'");
   });
 
+  it('sizes the bottom command bar from its live route count without a retired-library gap', () => {
+    expect(appShell).toContain('data-item-count={NAV.length}');
+    expect(appShell).toContain("'--bottom-nav-count': NAV.length");
+    expect(styles).toContain(
+      'grid-template-columns: repeat(var(--bottom-nav-count, 8), minmax(0, 1fr));',
+    );
+  });
+
   it('mounts the voice sheet above the sticky header with its own touch scrolling', () => {
     expect(quickLink).toContain('createPortal(');
     expect(quickLink).toContain('Listening now. Tap the square when you finish speaking.');

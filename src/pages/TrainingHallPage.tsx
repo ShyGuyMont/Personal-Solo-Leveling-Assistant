@@ -13,6 +13,7 @@ import {
   Play,
   Plus,
   RotateCcw,
+  Save,
   ShieldCheck,
   Sparkles,
   Square,
@@ -369,6 +370,12 @@ export function TrainingHallPage() {
     }
   };
 
+  const finishPartialGym = async (partialSession: TrainingSession) => {
+    setSession(partialSession);
+    await reload();
+    await refresh();
+  };
+
   const chooseDifferentPath = async () => {
     if (!session || ['active', 'paused'].includes(session.status)) {
       setError('End the active circuit before changing deployment paths.');
@@ -456,6 +463,9 @@ export function TrainingHallPage() {
               <small>
                 {entry.date} · {formatMinutes(trainingMinutes(entry))}
                 {entry.roundsCompleted !== undefined ? ` · ${entry.roundsCompleted} rounds` : ''}
+                {entry.status === 'partial'
+                  ? ` · ${entry.completedSetCount ?? 0}/${entry.prescribedSetCount ?? 0} sets · partial`
+                  : ''}
               </small>
             </div>
             <span>{entry.difficulty ?? 3}/5</span>
@@ -523,7 +533,8 @@ export function TrainingHallPage() {
     );
   }
 
-  if (session?.status === 'completed') {
+  if (session?.status === 'completed' || session?.status === 'partial') {
+    const partialDeployment = session.status === 'partial';
     return (
       <div className="page training-hall-page training-hall-page--complete">
         <nav className="section-command-bar" aria-label="Training Hall navigation">
@@ -537,7 +548,11 @@ export function TrainingHallPage() {
         <section className={`training-result-hero is-${circuit?.accent ?? session.location}`}>
           <div className="training-result-hero__rays" />
           <Trophy size={35} />
-          <p className="eyebrow">TRAINING COMPLETE · PARTY RECOVERY</p>
+          <p className="eyebrow">
+            {partialDeployment
+              ? 'PARTIAL DEPLOYMENT · HONEST EFFORT SECURED'
+              : 'TRAINING COMPLETE · PARTY RECOVERY'}
+          </p>
           <h1>{trainingLabel(session)}</h1>
           <div className="training-result-metrics">
             <span>
@@ -552,8 +567,16 @@ export function TrainingHallPage() {
             <span>
               <strong>{session.difficulty ?? 3}/5</strong> effort
             </span>
+            {partialDeployment && (
+              <span>
+                <strong>
+                  {session.completedSetCount ?? 0}/{session.prescribedSetCount ?? 0}
+                </strong>{' '}
+                sets
+              </span>
+            )}
           </div>
-          {!workoutCompleted && workoutRecord?.status === 'pending' && (
+          {!partialDeployment && !workoutCompleted && workoutRecord?.status === 'pending' && (
             <button
               className="button button--primary"
               disabled={working}
@@ -563,6 +586,27 @@ export function TrainingHallPage() {
             </button>
           )}
         </section>
+
+        {partialDeployment && (
+          <section className="panel gym-partial-result">
+            <Save size={24} />
+            <div>
+              <p className="eyebrow">ROOK · FIELD RECORD</p>
+              <h2>The work you actually did counts.</h2>
+              <p>
+                {session.partialRewardXp
+                  ? `+${session.partialRewardXp} proportional XP was awarded.`
+                  : "This session is preserved; today's one partial Gym XP award was already secured."}{' '}
+                This session is logged without pretending the complete deployment—or today’s Daily
+                Workout mission—was cleared.
+              </p>
+              <small>End reason: {(session.partialReason ?? 'other').replaceAll('-', ' ')}</small>
+            </div>
+            <button className="button button--primary" onClick={() => setSession(undefined)}>
+              Choose another training path
+            </button>
+          </section>
+        )}
 
         {renderDiagnostic()}
 
@@ -1058,6 +1102,7 @@ export function TrainingHallPage() {
           onWorkingChange={setWorking}
           onSessionChange={setSession}
           onComplete={finishStructuredGym}
+          onPartial={finishPartialGym}
           onBack={chooseDifferentPath}
           onError={setError}
         />

@@ -273,7 +273,8 @@ export type TrainingCircuitId =
   'iron-foundation' | 'vanguard-frame' | 'shadow-engine' | 'guardian-citadel';
 export type GymWorkoutId =
   'vanguard-frame-gym' | 'iron-citadel-gym' | 'shadow-hunter-gym' | 'heavenly-restriction-gym';
-export type TrainingSessionStatus = 'assigned' | 'active' | 'paused' | 'completed' | 'abandoned';
+export type TrainingSessionStatus =
+  'assigned' | 'active' | 'paused' | 'completed' | 'partial' | 'abandoned';
 export type MobilityDiscipline = 'mobility' | 'yoga' | 'pilates';
 export type MobilityMoodId = 'still-waters' | 'open-sky' | 'quiet-fire';
 export type MobilityMovementKind = 'breath' | 'mobility' | 'yoga' | 'pilates' | 'core';
@@ -293,6 +294,18 @@ export interface GymExerciseSetLog {
   reps?: number;
   completed: boolean;
 }
+
+export type GymSubstitutionReason = 'equipment-busy' | 'comfort' | 'other';
+
+export interface GymExerciseSubstitution {
+  originalExercise: string;
+  selectedExercise: string;
+  reason: GymSubstitutionReason;
+  recordedAt: string;
+}
+
+export type GymPartialReason =
+  'equipment-unavailable' | 'time-expired' | 'recovery-limit' | 'other';
 
 export interface GymFinisherAssignment {
   name: string;
@@ -325,10 +338,17 @@ export interface TrainingSession {
   gymWorkoutId?: GymWorkoutId;
   gymExerciseLogs?: Record<string, GymExerciseSetLog[]>;
   gymExerciseChoices?: Record<string, string>;
+  gymExerciseSubstitutions?: Record<string, GymExerciseSubstitution>;
   gymFinisher?: GymFinisherAssignment;
   gymFinisherCompleted?: boolean;
   gymProgressionPrompts?: string[];
   gymPersonalRecords?: string[];
+  completionKind?: 'full' | 'partial';
+  completedSetCount?: number;
+  prescribedSetCount?: number;
+  completionRatio?: number;
+  partialReason?: GymPartialReason;
+  partialRewardXp?: number;
   conditioningType?: 'walk' | 'run' | 'walk-run' | 'other';
   distance?: number;
   recoveryProtocol?: string;

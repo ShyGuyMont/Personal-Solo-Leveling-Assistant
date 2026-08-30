@@ -1,4 +1,4 @@
-export const APP_VERSION = '10.9.1';
+export const APP_VERSION = '10.10.0';
 export const DATABASE_SCHEMA_VERSION = 29;
 export const SAVE_FORMAT_VERSION = 29;
 
@@ -9,6 +9,20 @@ export interface ReleaseSection {
 }
 
 export const RELEASE_SECTIONS: ReleaseSection[] = [
+  {
+    title: 'Version 10.10.0 · Adaptive Field Operations',
+    detail:
+      'The System becomes more honest in the field and more useful behind the scenes: Training adapts to a real gym, partial work survives, and the family turns nightly observations into owned improvement work.',
+    points: [
+      'The eight-command bottom bar now derives its column count from the actual route roster, removing the empty ninth slot left behind by the retired Cipher Library.',
+      'Every structured Gym exercise exposes a clear equipment-occupied substitution control with curated equivalent movements, a recorded reason, and persistent set, rep, and load history for the movement actually performed.',
+      'An unfinished Gym Deployment can now be deliberately ended as an honest partial record instead of being discarded: completed sets, time, effort, substitutions, and private notes all remain in the Hall and Archive.',
+      'Partial Gym XP scales directly to the proportion of prescribed working sets completed, while the Daily Workout mission, mission streak, full path clear, and multi-path Ascension Surge remain unclaimed.',
+      'The Evolution Council now converts evidence into reviewable Family Improvement work orders with one owner, collaborators, a bounded action, a verification test, and proposed, queued, or dismissed status.',
+      'Companions may prepare one supported app-native preview when a clearly stated need makes the next step obvious, even without ritual command wording; every mutation still waits behind the Hunter’s visible confirmation.',
+      'Existing local data, completed deployments, missions, progression, voices, private AI configuration, and confirmation boundaries remain intact.',
+    ],
+  },
   {
     title: 'Version 10.9.1 · Lean Command Deck',
     detail:

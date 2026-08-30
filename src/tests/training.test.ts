@@ -12,6 +12,7 @@ import {
   completeGymTraining,
   completeHomeTraining,
   completeLoggedTraining,
+  completePartialGymTraining,
   getRemainingTrainingSeconds,
   getTrainingDebriefMessage,
   markTrainingTimerComplete,
@@ -147,6 +148,77 @@ describe('Training Hall', () => {
     const left = await abandonTrainingSession(changed.id);
     expect(left?.status).toBe('abandoned');
     expect((await db.progression.get('primary'))?.totalXp).toBe(0);
+
+    const home = await selectTrainingLocation(DATE, 'home');
+    expect(home.location).toBe('home');
+    expect(home.status).toBe('assigned');
+  });
+
+  it('records substitutions and proportional XP without falsely clearing a partial Gym Deployment', async () => {
+    const opened = await selectTrainingLocation(DATE, 'gym');
+    const assigned = await assignGymWorkout(opened.id, 'vanguard-frame-gym');
+    const exerciseId = 'bench-press';
+    const logs = {
+      ...assigned.gymExerciseLogs,
+      [exerciseId]: (assigned.gymExerciseLogs?.[exerciseId] ?? []).map((set, index) =>
+        index < 2 ? { ...set, weight: 45, reps: 8, completed: true } : set,
+      ),
+    };
+    const substitutions = {
+      [exerciseId]: {
+        originalExercise: 'Barbell Bench Press',
+        selectedExercise: 'Machine Chest Press',
+        reason: 'equipment-busy' as const,
+        recordedAt: '2026-08-03T18:00:00.000Z',
+      },
+    };
+
+    const partial = await completePartialGymTraining({
+      sessionId: assigned.id,
+      duration: 31,
+      difficulty: 4,
+      logs,
+      choices: { ...assigned.gymExerciseChoices, [exerciseId]: 'Machine Chest Press' },
+      substitutions,
+      finisherCompleted: false,
+      reason: 'equipment-unavailable',
+      note: 'Bench stayed full, so the honest work was closed here.',
+    });
+
+    expect(partial.status).toBe('partial');
+    expect(partial.completedSetCount).toBe(2);
+    expect(partial.prescribedSetCount).toBeGreaterThan(2);
+    expect(partial.completionRatio).toBeCloseTo(2 / (partial.prescribedSetCount ?? 1));
+    expect(partial.partialRewardXp).toBeGreaterThan(0);
+    expect(partial.gymExerciseSubstitutions?.[exerciseId]).toMatchObject({
+      selectedExercise: 'Machine Chest Press',
+      reason: 'equipment-busy',
+    });
+    expect((await awardMultiPathRewards(DATE)).completedPathCount).toBe(0);
+    expect((await db.progression.get('primary'))?.lifetimeMissionCompletions).toBe(0);
+
+    const xpAfterFirstPartial = (await db.progression.get('primary'))?.totalXp;
+    const reopened = await selectTrainingLocation(DATE, 'gym');
+    const reassigned = await assignGymWorkout(reopened.id, 'iron-citadel-gym');
+    const secondExerciseId = Object.keys(reassigned.gymExerciseLogs ?? {})[0];
+    const secondLogs = {
+      ...reassigned.gymExerciseLogs,
+      [secondExerciseId]: (reassigned.gymExerciseLogs?.[secondExerciseId] ?? []).map(
+        (set, index) => (index === 0 ? { ...set, weight: 25, reps: 10, completed: true } : set),
+      ),
+    };
+    const secondPartial = await completePartialGymTraining({
+      sessionId: reassigned.id,
+      duration: 12,
+      difficulty: 3,
+      logs: secondLogs,
+      choices: reassigned.gymExerciseChoices ?? {},
+      finisherCompleted: false,
+      reason: 'time-expired',
+    });
+    expect(secondPartial.status).toBe('partial');
+    expect(secondPartial.partialRewardXp).toBe(0);
+    expect((await db.progression.get('primary'))?.totalXp).toBe(xpAfterFirstPartial);
 
     const home = await selectTrainingLocation(DATE, 'home');
     expect(home.location).toBe('home');

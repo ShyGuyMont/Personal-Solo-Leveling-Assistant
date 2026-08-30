@@ -14,12 +14,15 @@ import {
 } from '@/config/mobility';
 import { db } from '@/db/database';
 import { putLevelHistory } from '@/game/engine';
+import { missionAccountXp, missionStatXp } from '@/game/rewards';
 import { applyStatChange } from '@/game/stats';
 import { applyAccountXp } from '@/game/xp';
 import { stableId } from '@/utils/id';
 import type {
   CompanionId,
+  GymExerciseSubstitution,
   GymExerciseSetLog,
+  GymPartialReason,
   GymWorkoutId,
   LocalDateKey,
   StatName,
@@ -48,6 +51,12 @@ export interface MultiPathRewardSummary {
   earnedTiers: MultiPathRewardTier[];
   newlyAwardedTiers: MultiPathRewardTier[];
   totalAccountXp: number;
+}
+
+export interface GymWorkoutProgress {
+  completedSetCount: number;
+  prescribedSetCount: number;
+  completionRatio: number;
 }
 
 const MULTI_PATH_TIERS = [2, 3, 4] as const;
@@ -238,7 +247,7 @@ export async function getTrainingHallData(date: LocalDateKey) {
     db.trainingSessions
       .orderBy('date')
       .reverse()
-      .filter((session) => session.status === 'completed')
+      .filter((session) => ['completed', 'partial'].includes(session.status))
       .limit(20)
       .toArray(),
     getGymWorkoutAvailability(date),
@@ -373,7 +382,7 @@ function finisherFor(workoutId: GymWorkoutId) {
 
 export async function assignGymWorkout(sessionId: string, workoutId: GymWorkoutId) {
   const session = await db.trainingSessions.get(sessionId);
-  if (!session || session.location !== 'gym' || session.status === 'completed') {
+  if (!session || session.location !== 'gym' || ['completed', 'partial'].includes(session.status)) {
     throw new Error('Open an active Gym Deployment before selecting the session.');
   }
   const workout = getGymWorkout(workoutId);
@@ -410,6 +419,7 @@ export async function assignGymWorkout(sessionId: string, workoutId: GymWorkoutI
     gymFocus: 'strength',
     gymExerciseLogs,
     gymExerciseChoices,
+    gymExerciseSubstitutions: {},
     gymFinisher: finisherFor(workoutId),
     gymFinisherCompleted: false,
     gymProgressionPrompts: undefined,
@@ -422,7 +432,7 @@ export async function assignGymWorkout(sessionId: string, workoutId: GymWorkoutI
 
 export async function resetGymWorkoutSelection(sessionId: string) {
   const session = await db.trainingSessions.get(sessionId);
-  if (!session || session.location !== 'gym' || session.status === 'completed') {
+  if (!session || session.location !== 'gym' || ['completed', 'partial'].includes(session.status)) {
     throw new Error('Only an unfinished Gym Deployment can return to workout selection.');
   }
   const next: TrainingSession = {
@@ -431,6 +441,7 @@ export async function resetGymWorkoutSelection(sessionId: string) {
     gymFocus: undefined,
     gymExerciseLogs: undefined,
     gymExerciseChoices: undefined,
+    gymExerciseSubstitutions: undefined,
     gymFinisher: undefined,
     gymFinisherCompleted: undefined,
     gymProgressionPrompts: undefined,
@@ -463,24 +474,54 @@ function sanitizeGymLogs(logs: Record<string, GymExerciseSetLog[]>) {
   );
 }
 
+function sanitizeGymChoices(choices: Record<string, string>) {
+  return Object.fromEntries(
+    Object.entries(choices)
+      .filter(([, value]) => typeof value === 'string' && value.trim())
+      .map(([key, value]) => [key, value.trim().slice(0, 120)]),
+  );
+}
+
+function sanitizeGymSubstitutions(substitutions: Record<string, GymExerciseSubstitution> = {}) {
+  const validReasons = new Set(['equipment-busy', 'comfort', 'other']);
+  return Object.fromEntries(
+    Object.entries(substitutions)
+      .filter(
+        ([, value]) =>
+          value &&
+          typeof value.originalExercise === 'string' &&
+          typeof value.selectedExercise === 'string' &&
+          validReasons.has(value.reason),
+      )
+      .map(([key, value]) => [
+        key,
+        {
+          originalExercise: value.originalExercise.trim().slice(0, 120),
+          selectedExercise: value.selectedExercise.trim().slice(0, 120),
+          reason: value.reason,
+          recordedAt: value.recordedAt || new Date().toISOString(),
+        },
+      ]),
+  );
+}
+
 export async function saveGymProgress(
   sessionId: string,
   input: {
     logs: Record<string, GymExerciseSetLog[]>;
     choices: Record<string, string>;
+    substitutions?: Record<string, GymExerciseSubstitution>;
     finisherCompleted: boolean;
   },
 ) {
   const session = await db.trainingSessions.get(sessionId);
-  if (!session || session.location !== 'gym' || session.status === 'completed') return session;
-  const choices = Object.fromEntries(
-    Object.entries(input.choices)
-      .filter(([, value]) => typeof value === 'string' && value.trim())
-      .map(([key, value]) => [key, value.trim().slice(0, 120)]),
-  );
+  if (!session || session.location !== 'gym' || ['completed', 'partial'].includes(session.status)) {
+    return session;
+  }
   await db.trainingSessions.update(sessionId, {
     gymExerciseLogs: sanitizeGymLogs(input.logs),
-    gymExerciseChoices: choices,
+    gymExerciseChoices: sanitizeGymChoices(input.choices),
+    gymExerciseSubstitutions: sanitizeGymSubstitutions(input.substitutions),
     gymFinisherCompleted: Boolean(input.finisherCompleted),
     updatedAt: new Date().toISOString(),
   });
@@ -499,6 +540,30 @@ export function isGymWorkoutComplete(session: TrainingSession) {
   });
 }
 
+export function getGymWorkoutProgress(session: TrainingSession): GymWorkoutProgress {
+  if (!session.gymWorkoutId) {
+    return { completedSetCount: 0, prescribedSetCount: 0, completionRatio: 0 };
+  }
+  const workout = getGymWorkout(session.gymWorkoutId);
+  const prescribedSetCount = workout.exercises.reduce(
+    (total, exercise) => total + exercise.sets,
+    0,
+  );
+  const completedSetCount = workout.exercises.reduce(
+    (total, exercise) =>
+      total +
+      (session.gymExerciseLogs?.[exercise.id] ?? []).filter(
+        (set) => set.completed && Number.isFinite(set.reps) && (set.reps ?? 0) >= 1,
+      ).length,
+    0,
+  );
+  return {
+    completedSetCount,
+    prescribedSetCount,
+    completionRatio: prescribedSetCount ? Math.min(1, completedSetCount / prescribedSetCount) : 0,
+  };
+}
+
 function exerciseVolume(sets: GymExerciseSetLog[] | undefined) {
   return (sets ?? []).reduce(
     (total, set) => total + (set.completed ? Math.max(1, set.weight ?? 1) * (set.reps ?? 0) : 0),
@@ -512,6 +577,7 @@ export async function completeGymTraining(input: {
   difficulty: number;
   logs: Record<string, GymExerciseSetLog[]>;
   choices: Record<string, string>;
+  substitutions?: Record<string, GymExerciseSubstitution>;
   finisherCompleted: boolean;
   note?: string;
 }) {
@@ -520,6 +586,9 @@ export async function completeGymTraining(input: {
     throw new Error('Choose a structured Gym Deployment before recording it.');
   }
   if (session.status === 'completed') return session;
+  if (session.status === 'partial') {
+    throw new Error('This partial Gym Deployment is already secured in the Hall record.');
+  }
   const gymExerciseLogs = sanitizeGymLogs(input.logs);
   const prepared: TrainingSession = { ...session, gymExerciseLogs };
   if (!isGymWorkoutComplete(prepared)) {
@@ -554,6 +623,7 @@ export async function completeGymTraining(input: {
         .map((exercise) => input.choices[exercise.id] ?? exercise.name)
     : ['First structured baseline secured'];
   const now = new Date().toISOString();
+  const progress = getGymWorkoutProgress(prepared);
   const next: TrainingSession = {
     ...session,
     status: 'completed',
@@ -562,17 +632,158 @@ export async function completeGymTraining(input: {
     loggedDurationMinutes: Math.max(1, Math.min(360, Math.round(input.duration))),
     difficulty: Math.max(1, Math.min(5, Math.floor(input.difficulty))),
     gymExerciseLogs,
-    gymExerciseChoices: Object.fromEntries(
-      Object.entries(input.choices).map(([key, value]) => [key, value.trim().slice(0, 120)]),
-    ),
+    gymExerciseChoices: sanitizeGymChoices(input.choices),
+    gymExerciseSubstitutions: sanitizeGymSubstitutions(input.substitutions),
     gymFinisherCompleted: Boolean(input.finisherCompleted),
     gymProgressionPrompts,
     gymPersonalRecords,
+    completionKind: 'full',
+    completedSetCount: progress.completedSetCount,
+    prescribedSetCount: progress.prescribedSetCount,
+    completionRatio: 1,
+    partialReason: undefined,
+    partialRewardXp: undefined,
     note: input.note?.trim() || undefined,
     updatedAt: now,
   };
   await db.trainingSessions.put(next);
   await awardMultiPathRewards(session.date);
+  return next;
+}
+
+export async function completePartialGymTraining(input: {
+  sessionId: string;
+  duration: number;
+  difficulty: number;
+  logs: Record<string, GymExerciseSetLog[]>;
+  choices: Record<string, string>;
+  substitutions?: Record<string, GymExerciseSubstitution>;
+  finisherCompleted: boolean;
+  reason: GymPartialReason;
+  note?: string;
+}) {
+  const session = await db.trainingSessions.get(input.sessionId);
+  if (!session || session.location !== 'gym' || !session.gymWorkoutId) {
+    throw new Error('Choose a structured Gym Deployment before recording it.');
+  }
+  if (session.status === 'partial' || session.status === 'completed') return session;
+  const gymExerciseLogs = sanitizeGymLogs(input.logs);
+  const progress = getGymWorkoutProgress({ ...session, gymExerciseLogs });
+  if (!progress.completedSetCount) {
+    throw new Error('Check off at least one completed working set before logging partial work.');
+  }
+  if (progress.completionRatio >= 1) {
+    throw new Error('Every working set is complete. Clear the full Gym Deployment instead.');
+  }
+
+  // A partial Gym record may be followed by a second deployment later in the day.
+  // Preserve every record, but award proportional "showed up" XP only once per date
+  // so repeatedly ending small sessions cannot become an XP farm.
+  const rewardId = stableId('training', session.date, 'gym-partial-effort');
+  const now = new Date().toISOString();
+  let partialRewardXp = 0;
+  let next: TrainingSession | undefined;
+  await db.transaction(
+    'rw',
+    [
+      db.trainingSessions,
+      db.missions,
+      db.progression,
+      db.stats,
+      db.xpTransactions,
+      db.statTransactions,
+      db.levelHistory,
+      db.progressionEvents,
+    ],
+    async () => {
+      const saved = await db.trainingSessions.get(session.id);
+      if (!saved || saved.status === 'partial' || saved.status === 'completed') {
+        next = saved;
+        return;
+      }
+      const progression = await db.progression.get('primary');
+      const workoutMission = await db.missions.get('workout');
+      if (!progression || !workoutMission) {
+        throw new Error('Training rewards are unavailable. The set log was not closed.');
+      }
+      const existingReward = await db.xpTransactions.get(rewardId);
+      partialRewardXp = existingReward
+        ? 0
+        : Math.max(
+            1,
+            Math.round(
+              missionAccountXp(workoutMission) *
+                progression.xpMultiplier *
+                progress.completionRatio,
+            ),
+          );
+      let updatedProgression = progression;
+      if (!existingReward) {
+        const applied = applyAccountXp(progression.totalXp, partialRewardXp);
+        updatedProgression = {
+          ...progression,
+          ...applied,
+          lastLevelUpAt: applied.levelsGained ? now : progression.lastLevelUpAt,
+          recentLevelUp: progression.recentLevelUp || applied.levelsGained > 0,
+        };
+        await db.progression.put(updatedProgression);
+        await db.xpTransactions.put({
+          id: rewardId,
+          kind: 'training',
+          amount: partialRewardXp,
+          date: session.date,
+          timestamp: now,
+          sourceId: session.id,
+          note: `Partial Gym Deployment · ${progress.completedSetCount}/${progress.prescribedSetCount} working sets`,
+        });
+        await putLevelHistory(updatedProgression, progression.level, session.date, rewardId, now);
+        for (const reward of workoutMission.statRewards) {
+          const amount = Math.max(
+            1,
+            Math.round(missionStatXp(reward.xp) * progress.completionRatio),
+          );
+          const stat = await db.stats.get(reward.stat);
+          if (!stat) continue;
+          await db.stats.put(applyStatChange(stat, amount, 0, now));
+          await db.statTransactions.put({
+            id: stableId(rewardId, reward.stat),
+            stat: reward.stat,
+            kind: 'training',
+            amount,
+            momentumDelta: 0,
+            date: session.date,
+            timestamp: now,
+            sourceId: session.id,
+            note: 'Partial Gym Deployment effort',
+          });
+        }
+      }
+      next = {
+        ...saved,
+        status: 'partial',
+        completedAt: now,
+        remainingSeconds: 0,
+        loggedDurationMinutes: Math.max(1, Math.min(360, Math.round(input.duration))),
+        difficulty: Math.max(1, Math.min(5, Math.floor(input.difficulty))),
+        gymExerciseLogs,
+        gymExerciseChoices: sanitizeGymChoices(input.choices),
+        gymExerciseSubstitutions: sanitizeGymSubstitutions(input.substitutions),
+        gymFinisherCompleted: Boolean(input.finisherCompleted),
+        gymProgressionPrompts: undefined,
+        gymPersonalRecords: undefined,
+        completionKind: 'partial',
+        completedSetCount: progress.completedSetCount,
+        prescribedSetCount: progress.prescribedSetCount,
+        completionRatio: progress.completionRatio,
+        partialReason: input.reason,
+        partialRewardXp,
+        note: input.note?.trim() || undefined,
+        updatedAt: now,
+      };
+      await db.trainingSessions.put(next);
+    },
+  );
+  if (!next) throw new Error('The partial Gym Deployment could not be secured.');
   return next;
 }
 
@@ -914,7 +1125,7 @@ export async function awardDoubleDeploymentReward(
 
 export async function abandonTrainingSession(sessionId: string) {
   const session = await db.trainingSessions.get(sessionId);
-  if (!session || session.status === 'completed') return session;
+  if (!session || ['completed', 'partial'].includes(session.status)) return session;
   const now = new Date().toISOString();
   const next: TrainingSession = {
     ...session,

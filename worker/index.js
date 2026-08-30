@@ -6,7 +6,7 @@ const jsonHeaders = {
 
 export const APP_PERMISSIONS_POLICY = 'camera=(), microphone=(self)';
 export const APP_LEGACY_FEATURE_POLICY = "camera 'none'; microphone 'self'";
-export const APP_RELEASE_VERSION = '10.9.1';
+export const APP_RELEASE_VERSION = '10.10.0';
 
 export function sealAppMediaPermissions(response, requestUrl = '') {
   const headers = new Headers(response.headers);
@@ -1630,7 +1630,9 @@ export function buildCommandInstruction(commandMode, workload = 'conversation') 
   return `Command Mode is active. The only actions you may prepare are listed in progressContext.commands.allowedActions.
 - If another enabled specialist clearly owns the requested work, use handoff instead of pretending the addressed companion can perform it. Set all handoff strings and handoff.participantIds empty when no relay is needed. A handoff is read-only and never replaces the confirmation required by the specialist's eventual proposal.
 - Outside the focused Creator Board Update and A.R.C. Story Room workrooms, return creatorUpdate and arcNote strings empty and their arrays empty.
-- Propose an action only when the Hunter clearly asks to perform that exact change now. Questions, hypotheticals, planning, reports, and vague wishes are not action requests.
+- A preview may be prepared when the Hunter directly asks for a change OR when their stated need, obstacle, or commitment makes one supported app-native action the obvious useful next step and every material detail is already known. Do not demand ritual command wording. A proactive preview is still only a visible suggestion: the Hunter must confirm it before any local write.
+- Questions, hypotheticals, brainstorming, reports, and vague wishes without enough settled intent are not action requests. Answer those fully, then name the missing decision or offer the correct specialist handoff instead of manufacturing a mutation.
+- Use the family as an operating team. The active specialist may recognize the need, carry context to the correct owner, and prepare one reviewable next state; do not make the Hunter manually restate information that is already present in the supplied conversation and records.
 - Copy one actionId exactly from the allowed list. Never invent, combine, infer, or alter an action ID. If no listed action exactly matches the request, leave the command strings empty and explain the limitation naturally in the reply.
 - Distinguish complete, skipped, failed, reopened, and restored precisely. Do not turn "I might skip" into a command. Do not choose failure merely because completion is unavailable.
 - Prepare only one action per transmission. The reply must say it is ready for confirmation, not completed.

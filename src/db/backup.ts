@@ -1218,7 +1218,14 @@ function validateData(data: Record<string, unknown[]>) {
     }
   }
   const trainingLocations = new Set(['home', 'gym', 'conditioning', 'recovery']);
-  const trainingStatuses = new Set(['assigned', 'active', 'paused', 'completed', 'abandoned']);
+  const trainingStatuses = new Set([
+    'assigned',
+    'active',
+    'paused',
+    'completed',
+    'partial',
+    'abandoned',
+  ]);
   const trainingCircuits = new Set([
     'iron-foundation',
     'vanguard-frame',
@@ -1332,6 +1339,44 @@ function validateData(data: Record<string, unknown[]>) {
           throw new Error('A Training Hall set log contains an impossible value.');
         }
       }
+    }
+    if (row.gymExerciseSubstitutions !== undefined) {
+      if (!isObject(row.gymExerciseSubstitutions)) {
+        throw new Error('A Gym substitution record contains an impossible value.');
+      }
+      for (const substitution of Object.values(row.gymExerciseSubstitutions)) {
+        if (
+          !isObject(substitution) ||
+          typeof substitution.originalExercise !== 'string' ||
+          substitution.originalExercise.length > 120 ||
+          typeof substitution.selectedExercise !== 'string' ||
+          substitution.selectedExercise.length > 120 ||
+          !['equipment-busy', 'comfort', 'other'].includes(String(substitution.reason)) ||
+          typeof substitution.recordedAt !== 'string'
+        ) {
+          throw new Error('A Gym substitution record contains an impossible value.');
+        }
+      }
+    }
+    if (
+      (row.completionKind !== undefined &&
+        !['full', 'partial'].includes(String(row.completionKind))) ||
+      (row.completedSetCount !== undefined &&
+        (!Number.isInteger(row.completedSetCount) || Number(row.completedSetCount) < 0)) ||
+      (row.prescribedSetCount !== undefined &&
+        (!Number.isInteger(row.prescribedSetCount) || Number(row.prescribedSetCount) < 0)) ||
+      (row.completionRatio !== undefined &&
+        (!Number.isFinite(row.completionRatio) ||
+          Number(row.completionRatio) < 0 ||
+          Number(row.completionRatio) > 1)) ||
+      (row.partialReason !== undefined &&
+        !['equipment-unavailable', 'time-expired', 'recovery-limit', 'other'].includes(
+          String(row.partialReason),
+        )) ||
+      (row.partialRewardXp !== undefined &&
+        (!Number.isInteger(row.partialRewardXp) || Number(row.partialRewardXp) < 0))
+    ) {
+      throw new Error('A partial Gym record contains an impossible value.');
     }
   }
 

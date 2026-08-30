@@ -68,6 +68,11 @@ describe('Daily System Debrief', () => {
     });
     const markdown = systemDebriefToMarkdown(report);
     expect(report.status).toBe('local-scan');
+    expect(report.actions).toHaveLength(1);
+    expect(report.actions[0]).toMatchObject({
+      ownerId: 'cipher',
+      status: 'proposed',
+    });
     expect(report.snowPriority).toContain('Training Directive');
     expect(markdown).toContain('## Things the family wishes it could do better');
     expect(markdown).toContain('Codex development brief');

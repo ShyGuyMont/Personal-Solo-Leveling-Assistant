@@ -1,11 +1,18 @@
 import { db } from '@/db/database';
 import type { AiHeadquartersReply } from '@/services/aiHeadquarters';
-import type { CompanionId, DailyMissionRecord, LocalDateKey, MissionDefinition } from '@/types/game';
+import type {
+  CompanionId,
+  DailyMissionRecord,
+  LocalDateKey,
+  MissionDefinition,
+} from '@/types/game';
 
 export const SYSTEM_DEBRIEF_TIME = '20:30';
 
 export type SystemDebriefStatus = 'local-scan' | 'council-complete' | 'failed' | 'skipped';
 export type SystemDebriefSeverity = 'watch' | 'important' | 'critical';
+export type SystemDebriefActionStatus = 'proposed' | 'queued' | 'dismissed';
+export type SystemDebriefExecution = 'app-native' | 'requires-build';
 
 export interface SystemExperienceSignal {
   id: string;
@@ -24,6 +31,18 @@ export interface SystemDebriefIssue {
   recommendation: string;
 }
 
+export interface SystemDebriefAction {
+  id: string;
+  ownerId: CompanionId;
+  collaboratorIds: CompanionId[];
+  title: string;
+  rationale: string;
+  proposedAction: string;
+  verification: string;
+  execution: SystemDebriefExecution;
+  status: SystemDebriefActionStatus;
+}
+
 export interface SystemDebriefReport {
   id: string;
   date: LocalDateKey;
@@ -33,6 +52,7 @@ export interface SystemDebriefReport {
   participants: CompanionId[];
   wins: string[];
   issues: SystemDebriefIssue[];
+  actions: SystemDebriefAction[];
   councilReplies: Array<{ companionId: CompanionId; message: string }>;
   companionWishes: string[];
   snowPriority: string;
@@ -46,9 +66,10 @@ const REPORT_PREFIX = 'system-debrief:';
 const SIGNAL_PREFIX = 'system-signal:';
 
 function safeId(prefix: string) {
-  const suffix = typeof crypto?.randomUUID === 'function'
-    ? crypto.randomUUID()
-    : `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  const suffix =
+    typeof crypto?.randomUUID === 'function'
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
   return `${prefix}${suffix}`;
 }
 
@@ -113,7 +134,9 @@ export async function recordSystemExperienceSignal(input: {
 }
 
 export async function getRecentSystemSignals(limit = 24): Promise<SystemExperienceSignal[]> {
-  const records = await db.appMetadata.filter((item) => item.id.startsWith(SIGNAL_PREFIX)).toArray();
+  const records = await db.appMetadata
+    .filter((item) => item.id.startsWith(SIGNAL_PREFIX))
+    .toArray();
   return records
     .map((item) => asRecord(item.value))
     .filter((item): item is Record<string, unknown> => Boolean(item))
@@ -130,7 +153,9 @@ export async function getSystemDebrief(date: LocalDateKey) {
 }
 
 export async function getSystemDebriefHistory(limit = 30) {
-  const records = await db.appMetadata.filter((item) => item.id.startsWith(REPORT_PREFIX)).toArray();
+  const records = await db.appMetadata
+    .filter((item) => item.id.startsWith(REPORT_PREFIX))
+    .toArray();
   return records
     .map((item) => asRecord(item.value))
     .filter((item): item is Record<string, unknown> => Boolean(item))
@@ -149,11 +174,30 @@ export async function saveSystemDebrief(report: SystemDebriefReport) {
   return report;
 }
 
+export async function setSystemDebriefActionStatus(
+  date: LocalDateKey,
+  actionId: string,
+  status: SystemDebriefActionStatus,
+) {
+  const report = await getSystemDebrief(date);
+  if (!report) throw new Error('Open the Evolution Council report before reviewing its actions.');
+  const actions = (report.actions ?? []).map((action) =>
+    action.id === actionId ? { ...action, status } : action,
+  );
+  if (!actions.some((action) => action.id === actionId)) {
+    throw new Error('That improvement request is no longer in this report.');
+  }
+  return saveSystemDebrief({ ...report, actions, updatedAt: new Date().toISOString() });
+}
+
 export function chooseDebriefParticipants(
   signals: SystemExperienceSignal[] = [],
   date: LocalDateKey = '1970-01-01',
 ): CompanionId[] {
-  const text = signals.map((signal) => `${signal.surface} ${signal.summary}`).join(' ').toLowerCase();
+  const text = signals
+    .map((signal) => `${signal.surface} ${signal.summary}`)
+    .join(' ')
+    .toLowerCase();
   const scored: Array<[CompanionId, RegExp]> = [
     ['kairo', /calendar|schedule|time|event/],
     ['haven', /creator|youtube|video|content/],
@@ -165,13 +209,22 @@ export function chooseDebriefParticipants(
   ];
   const specialists = scored.filter(([, pattern]) => pattern.test(text)).map(([id]) => id);
   const rotation: CompanionId[] = [
-    'rook', 'selah', 'haven', 'ember', 'mira', 'amara', 'cassian', 'saffron', 'quill', 'kairo',
+    'rook',
+    'selah',
+    'haven',
+    'ember',
+    'mira',
+    'amara',
+    'cassian',
+    'saffron',
+    'quill',
+    'kairo',
   ];
   const start = Number(date.slice(-2)) % rotation.length;
   const rotatingSeats = [rotation[start], rotation[(start + 3) % rotation.length]];
-  return ['snow', 'cipher', ...specialists, ...rotatingSeats].filter(
-    (id, index, all): id is CompanionId => all.indexOf(id) === index,
-  ).slice(0, 5);
+  return ['snow', 'cipher', ...specialists, ...rotatingSeats]
+    .filter((id, index, all): id is CompanionId => all.indexOf(id) === index)
+    .slice(0, 5);
 }
 
 export function buildLocalSystemDebrief(input: {
@@ -194,7 +247,8 @@ export function buildLocalSystemDebrief(input: {
           : `Signal from ${signal.surface}`,
     severity: signal.kind === 'interface-error' ? 'important' : 'watch',
     evidence: signal.summary,
-    recommendation: 'Reproduce once, isolate the responsible surface, and protect it with a regression test.',
+    recommendation:
+      'Reproduce once, isolate the responsible surface, and protect it with a regression test.',
   }));
   if (!issues.length) {
     issues.push({
@@ -202,13 +256,27 @@ export function buildLocalSystemDebrief(input: {
       title: 'No captured technical faults tonight',
       severity: 'watch',
       evidence: 'The private error ledger contains no recent sanitized failures.',
-      recommendation: 'Keep observing real use; absence of a captured fault is not proof that every flow is flawless.',
+      recommendation:
+        'Keep observing real use; absence of a captured fault is not proof that every flow is flawless.',
     });
   }
   const pendingNames = pending
     .map((record) => missionMap.get(record.missionId)?.name)
     .filter((name): name is string => Boolean(name));
   const participants = chooseDebriefParticipants(input.signals, input.date);
+  const actions: SystemDebriefAction[] = issues.map((issue, index) => ({
+    id: `debrief-action:${input.date}:${index + 1}`,
+    ownerId: 'cipher',
+    collaboratorIds: ['snow'],
+    title: issue.title,
+    rationale: issue.evidence,
+    proposedAction: issue.recommendation,
+    verification: issue.id.startsWith('observation-')
+      ? 'Keep the observation ledger active and require new evidence before changing behavior.'
+      : 'Reproduce the reported flow, verify the intended result, and add regression coverage before release.',
+    execution: 'requires-build',
+    status: 'proposed',
+  }));
   const report: SystemDebriefReport = {
     id: `${REPORT_PREFIX}${input.date}`,
     date: input.date,
@@ -224,6 +292,7 @@ export function buildLocalSystemDebrief(input: {
       'Tonight’s scan excluded photos, voice recordings, API secrets, and private document contents.',
     ],
     issues,
+    actions,
     councilReplies: [],
     companionWishes: [
       'Snow wants fewer moments where the Hunter has to know the exact command wording.',
@@ -250,12 +319,31 @@ export function mergeCouncilIntoDebrief(
   }));
   const snow = councilReplies.find((item) => item.companionId === 'snow');
   const wishes = councilReplies.map((item) => `${item.companionId}: ${item.message}`);
+  const existingActions = report.actions ?? [];
+  const councilActions: SystemDebriefAction[] = councilReplies
+    .filter((item) => item.companionId !== 'snow' && item.companionId !== 'cipher')
+    .slice(0, 3)
+    .map((item, index) => ({
+      id: `council-action:${report.date}:${item.companionId}:${index + 1}`,
+      ownerId: item.companionId,
+      collaboratorIds: ['snow', 'cipher'],
+      title: `${item.companionId}'s capability request`,
+      rationale: item.message.slice(0, 700),
+      proposedAction: `Translate ${item.companionId}'s council finding into one bounded System capability or flow improvement without weakening confirmation boundaries.`,
+      verification: `Test the improvement in ${item.companionId}'s direct channel, Quick Link, and any affected specialist workroom.`,
+      execution: 'requires-build',
+      status: 'proposed',
+    }));
+  const actions = Array.from(
+    new Map([...existingActions, ...councilActions].map((action) => [action.id, action])).values(),
+  ).slice(0, 8);
   return {
     ...report,
     status: 'council-complete',
     title: reply.title || report.title,
     summary: councilReplies[0]?.message.slice(0, 700) || report.summary,
     councilReplies,
+    actions,
     companionWishes: wishes,
     snowPriority: snow?.message.slice(0, 900) || report.snowPriority,
     codexBrief: [
@@ -289,6 +377,12 @@ export function systemDebriefToMarkdown(report: SystemDebriefReport) {
       `Recommended: ${issue.recommendation}`,
       '',
     ]),
+    '## Reviewable improvement queue',
+    ...(report.actions ?? []).map(
+      (action) =>
+        `- **${action.status.toUpperCase()} · ${action.ownerId}: ${action.title}** — ${action.proposedAction} Verification: ${action.verification}`,
+    ),
+    '',
     '## Companion council',
     ...(report.councilReplies.length
       ? report.councilReplies.map((item) => `- **${item.companionId}:** ${item.message}`)
